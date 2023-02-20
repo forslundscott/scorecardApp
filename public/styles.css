@@ -1,0 +1,275 @@
+:root {
+  --primeColor: #009688;
+  --scrollWidth: 15px
+}
+html {
+  /* width: calc(100% - var(--scrollWidth)); */
+  /* width: 100%; */
+  margin: 0%;
+  height: 100%;
+}
+body {
+    margin: 0%;
+    /* width: 100%; */
+    /* width: calc(100% - var(--scrollWidth)); */
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  .navbar {
+    overflow: hidden;
+    background-color: var(--primeColor);
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  
+  .navbar a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    /* padding: 14px 16px; */
+    text-decoration: none;
+    font-size: 17px;
+  }
+  
+  .navbar a:hover {
+    background: #f1f1f1;
+    color: black;
+  }
+  
+  .navbar a.active {
+    background-color: #53aa9e;
+    color: white;
+  }
+  
+  .main {
+    /* padding: 16px; */
+    /* margin-bottom: 30px; */
+  }
+  .headerText {
+    /* padding: 8px 16px; */
+    /* float: left; */
+    font-size: 5vh;
+    font-weight: bold;
+    width: auto;
+    border: none;
+    /* display: inline-block; */
+    outline: 0;
+    text-align: center;
+  }
+  .header {
+    color: #fff !important;
+    background-color: var(--primeColor) !important;
+    top: 0;
+    /* padding: 1vh 1vw; */
+    /* position: fixed; */
+    /* width: calc(100% - 1vw); */
+    width: 100%;
+    z-index: 1;
+    overflow: hidden;
+    display: block;
+  }
+  #innerBody {
+    /* padding-left: 1vw; */
+    /* padding-right: 1vw; */
+    height: 100%;
+    width: 100%;
+    /* overflow: hidden; */
+  }
+  .dayHeader {
+    background-color: #62b4a8;
+    color: white;
+    border-radius: 2vh;
+    height: 8vh;
+    border: black;
+    border-width: thin;
+    border-style: solid;
+  }
+  
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Popup form start */
+/* {box-sizing: border-box;} */
+
+/* Button used to open the contact form - fixed at the bottom of the page */
+.open-button {
+  background-color: #555;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.8;
+  position: fixed;
+  bottom: 23px;
+  right: 28px;
+  width: 280px;
+}
+
+/* The popup form - hidden by default */
+.form-popup {
+  display: none;
+  position: fixed;
+  /* top: 0vh; */
+  /* left: 39vw; */
+  /* border: 3px solid #f1f1f1; */
+  z-index: 9;
+  width: inherit;
+  height: inherit;
+  overflow:hidden
+}
+
+/* Add styles to the form container */
+.form-container {
+  /* max-width: 22vw; */
+  height: inherit;
+  width: inherit;
+  /* padding: 10px; */
+  background-color: white;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+/* Full-width input fields */
+.form-container input[type],
+.form-container select {
+  /* width: 90%; */
+  max-width: 22vw;
+  padding: 1vw;
+  margin: 0 0 .5vw 0;
+  border: none;
+  background: #f1f1f1;
+  font-size: 1vw;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type]:focus,
+.form-container select:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/login button */
+.form-container .btn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 1vw 2vw;
+  border: none;
+  cursor: pointer;
+  /* width: 100%; */
+  margin-bottom:1vw;
+  opacity: 0.8;
+  max-width: 22vw;
+}
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+  opacity: 1;
+}
+
+.smartphone {
+  position: relative;
+  width: 360px;
+  height: 640px;
+  margin: auto;
+  border: 16px black solid;
+  border-top-width: 60px;
+  border-bottom-width: 60px;
+  border-radius: 36px;
+}
+
+/* The horizontal line on the top of the device */
+.smartphone:before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 5px;
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #333;
+  border-radius: 10px;
+}
+
+/* The circle on the bottom of the device */
+.smartphone:after {
+  content: '';
+  display: block;
+  width: 35px;
+  height: 35px;
+  position: absolute;
+  left: 50%;
+  bottom: -65px;
+  transform: translate(-50%, -50%);
+  background: #333;
+  border-radius: 50%;
+}
+
+/* The screen (or content) of the device */
+.smartphone .content {
+  width: 360px;
+  height: 640px;
+  background: white;
+}
+
+.roundcorners {
+  border-radius: 10px;
+}
+
+
+
+#left {
+  float: left;
+  width: 50%;
+}
+
+#right {
+  float: left;
+  width: 50%;
+}
+
+.statButton{
+  float: left;
+  border-radius: 50%;
+  background-color: #04AA6D;
+  font-size: 100%;
+  height: 70%;
+  width: 25%;
+}
+.statContainer{
+  display : flex;
+  align-items : center;
+  height: 100%;
+}
+.playerTag{
+  height: 100%;
+  width: 25%;
+  float: left;
+}
+.playerName{
+  height: 30%;
+  margin: auto;
+  display: table;
+  font-size: 90%;
+}
+.playerImage{
+  width: auto;
+  height: 70%;
+  margin: auto;
+  display: table;
+}
+/* .playerTagBody{
+  width: 100%;
+  height: auto;
+  
+} */

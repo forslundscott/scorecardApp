@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <%- include('list_item',{name: data.keeper}); %>
+    <% for(var i=0; i< data.players.length; i++) {%>
+        <%= console.log(data.players[i]) %>
+        <%- include('list_item',{name: data.players[i]}); %>
+    <% } %>
+</body>
+</html>
