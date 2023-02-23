@@ -3,9 +3,11 @@
 <head>
 </head>
 <body>
-    <%- include('list_item',{name: data.keeper}); %>
-    <% for(var i=0; i< data.players.length; i++) {%>
-        <%- include('list_item',{name: data.players[i]}); %>
-    <% } %>
+    <%- include('list_item',{name: data.keeper, type: 'keeper', team: team}); %>
+    <div class="fielderColumn">
+        <% for(var i=0; i< data.players.length; i++) {%>
+            <%- include('list_item',{name: data.players[i], type: 'fielder', team: team}); %>
+        <% } %>
+    </div>
 </body>
 </html>

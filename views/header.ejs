@@ -4,7 +4,24 @@
 </head>
 <body>
   <header class="header">
-    <div id="pageName" class="headerText"> HON vs BSG </div>
+    <div id="pageName" class="headerText">
+      <div style="float: left; width: 30%; height: 100%;">
+        <div style="float: left; width: 83%;">HON</div>
+        <div style="float: left; width: 17%;" id="leftScore">0</div>
+      </div>
+      
+      <div style="float: left; width: 40%; height: 100%;">
+        <div id="gameTimer" style="font-size: 70%;">15:00</div>
+        <div style="font-size: 33%;">Period 1 of 3</div>
+        <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">Start Period 1</button>
+      </div>
+      
+       <!-- HON vs BSG  -->
+      <div style="float: left; width: 30%; height: 100%;">
+        <div style="float: right; width: 83%;">BSG</div>
+        <div style="float: right; width: 17%;" id="rightScore">0</div>
+      </div>
+      </div>
     <!-- <button onclick="location.href = '/forms/form'" style="float: right;">Add User</button> -->
   </header>
 </html>

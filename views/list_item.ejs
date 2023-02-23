@@ -10,8 +10,12 @@
                 <div class="playerName"><%= name %></div>
             </div>
             <div class="statContainer">
-                <button class="statButton">G</button>
+                <% if(type == 'keeper'){ %>
+                    <button class="statButton">Sv</button>
+                <%} %>
+                <button class="statButton" onclick="statHandler('goal', '<%= team %>')">G</button>
                 <button class="statButton">A</button>
+                <button class="statButton">OG</button>
             </div>
             <%# data[i][listTitle] %>                    
         </div>

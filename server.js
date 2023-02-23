@@ -43,7 +43,12 @@ var team2 = {
         'Mehdi',
         'Stephani',
         'Dan',
-        'Sammy'
+        'Sammy',
+        'Patrick',
+        'Dan',
+        'Elias',
+        'Joaquin',
+        'Samuel'
     ]
 }
 

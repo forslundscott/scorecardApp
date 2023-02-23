@@ -66,7 +66,7 @@ body {
     /* padding: 1vh 1vw; */
     /* position: fixed; */
     /* width: calc(100% - 1vw); */
-    height: 6%;
+    height: 10%;
     width: 100%;
     z-index: 1;
     overflow: hidden;
@@ -75,7 +75,7 @@ body {
   #innerBody {
     /* padding-left: 1vw; */
     /* padding-right: 1vw; */
-    height: 94%;
+    height: 90%;
     width: 100%;
     /* overflow: hidden; */
   }
@@ -228,9 +228,19 @@ body {
   border-radius: 10px;
 }
 
+.teamColumn {
+  float: left;
+  width: 50%;
+  height: 100%;
+  /* overflow: hidden; */
+}
+.fielderColumn {
+  width: 100%;
+  height: calc(100% - 8vh - 2px);
+  overflow: hidden;
+}
 
-
-#left {
+/* #left {
   float: left;
   width: 50%;
   height: 100%;
@@ -240,7 +250,9 @@ body {
 #right {
   float: left;
   width: 50%;
-}
+  height: 100%;
+  overflow: hidden;
+} */
 
 .statButton{
   float: left;
@@ -279,4 +291,7 @@ body {
 } */
 #content{
   height: 100%;
+}
+#timerButton{
+  
 }
