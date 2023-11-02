@@ -5,9 +5,12 @@
 <body>
   <header class="header">
     <div id="pageName" class="headerText">
+      <% if (page == 'games') { %>
+       Games
+      <% }else if (page == 'activeGame') {%>
       <div style="float: left; width: 30%; height: 100%;">
-        <div style="float: left; width: 83%;">HON</div>
-        <div style="float: left; width: 17%;" id="leftScore">0</div>
+        <div style="float: left; width: 83%;"><%= teams[0].id %></div>
+        <div style="float: left; width: 17%;" id="<%= teams[0].id + "Score" %>">0</div>
       </div>
       
       <div style="float: left; width: 40%; height: 100%;">
@@ -18,10 +21,11 @@
       
        <!-- HON vs BSG  -->
       <div style="float: left; width: 30%; height: 100%;">
-        <div style="float: right; width: 83%;">BSG</div>
-        <div style="float: right; width: 17%;" id="rightScore">0</div>
+        <div style="float: right; width: 83%;"><%= teams[1].id %></div>
+        <div style="float: right; width: 17%;" id="<%= teams[1].id + "Score" %>">0</div>
       </div>
       </div>
+      <% } %>
     <!-- <button onclick="location.href = '/forms/form'" style="float: right;">Add User</button> -->
   </header>
 </html>

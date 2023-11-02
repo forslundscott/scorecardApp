@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
+    <form id="eventForm" class="eventForm" action="eventLog" method="post">
+        <input type="hidden" name="playerId" value="">
+        <input type="hidden" name="teamName" value="BEER">
+        <input type="hidden" name="realTime" value="">
+        <input type="hidden" name="periodTime" value="">
+        <input type="hidden" name="period" value="">
+        <input type="hidden" name="value" value="">
+        <div class="playerTag itemFormat">
+            <div class="playerName">
+                Scott Forslund
+            </div>
+        </div>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="goal" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Goal</button>                    
+        </div>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="assist" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Assist</button>
+        </div>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="save" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Save</button>
+        </div>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="owngoal" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Own Goal</button>
+        </div>
+    </form>
+</body>
+</html>

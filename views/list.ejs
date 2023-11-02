@@ -3,10 +3,10 @@
 <head>
 </head>
 <body>
-    <%- include('list_item',{name: data.keeper, type: 'keeper', team: team}); %>
-    <div class="fielderColumn">
+    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
+    <div class="fielderColumn" onscroll="" ontouchmove="console.log('testscroll')">
         <% for(var i=0; i< data.players.length; i++) {%>
-            <%- include('list_item',{name: data.players[i], type: 'fielder', team: team}); %>
+            <%- include('player_item',{player: data.players[i], team: data.id}); %>
         <% } %>
     </div>
 </body>

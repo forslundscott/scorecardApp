@@ -9,19 +9,15 @@
     <title>Scorecard</title>
 </head>
 <body>      
-        <%- include('header'); %>
+        <%- include('header', {teams: teams, page: page}); %>
+        <% console.log('test') %>
         <div id="innerBody">
             <div id="content">
-                <div id="left" class="teamColumn">
-                    <%- include('list', {data: teams[0], team: 'left'}); %>
-                </div>
-                <div id="right" class="teamColumn">
-                    <%- include('list', {data: teams[1], team: 'right'}); %>
-                </div>
-              </div>
-            <%# include('list_item'); %>
+                <%- include('bodyColumns',{teams: teams, page: page}); %>
+            </div>
         </div>
-        <%# include('navbar'); %>
+        <%- include('footer'); %>
+        <!-- <%- include('eventForm'); %>    -->
         <script src="main.js"></script>
 </body>
 </html>

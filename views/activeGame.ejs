@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <div id="<%= teams[0].id %>" class="doubleColumn">
+        <%- include('list', {data: teams[0], team: teams[0].id}); %>
+    </div>
+    <div id="<%= teams[1].id %>" class="doubleColumn">
+        <%- include('list', {data: teams[1], team: teams[1].id}); %>
+    </div>
+</body>
+</html>
