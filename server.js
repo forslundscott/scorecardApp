@@ -203,9 +203,9 @@ app.get(['/games'], async (req,res)=>{
     // res.render('index.ejs')
     const sql = require('mssql');
     const config = {
-        server: 'PUSLMA0E',
+        server: 'scott-HP-Z420-Workstation',
         database: 'scorecard',
-        user: 'sForslund',
+        user: 'SRF',
         password: 'Planbsk8!!8ksbnalP',
         trustServerCertificate: true,
     };
@@ -213,7 +213,7 @@ app.get(['/games'], async (req,res)=>{
     sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[games$]`)
+            .query(`SELECT * FROM [scorecard].[dbo].[games]`)
     }).then(result => {
         games = result.recordset
         // console.log(games)
@@ -236,9 +236,9 @@ app.get(['/activeGame'], async (req,res)=>{
     // res.render('index.ejs')
     const sql = require('mssql');
     const config = {
-        server: 'PUSLMA0E',
+        server: 'scott-HP-Z420-Workstation',
         database: 'scorecard',
-        user: 'sForslund',
+        user: 'SRF',
         password: 'Planbsk8!!8ksbnalP',
         trustServerCertificate: true,
     };
@@ -246,7 +246,7 @@ app.get(['/activeGame'], async (req,res)=>{
     sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[players$] Where Team='BEER'`)
+            .query(`SELECT * FROM [scorecard].[dbo].[players] Where Team='BEER'`)
     }).then(result => {
         games = result.recordset
         // console.log(games)
@@ -269,9 +269,9 @@ app.get(['/display'], async (req,res)=>{
     // res.render('index.ejs')
     const sql = require('mssql');
     const config = {
-        server: 'PUSLMA0E',
+        server: 'scott-HP-Z420-Workstation',
         database: 'scorecard',
-        user: 'sForslund',
+        user: 'SRF',
         password: 'Planbsk8!!8ksbnalP',
         trustServerCertificate: true,
     };
@@ -279,7 +279,7 @@ app.get(['/display'], async (req,res)=>{
     sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[players$] Where Team='BEER'`)
+            .query(`SELECT * FROM [scorecard].[dbo].[players] Where Team='BEER'`)
     }).then(result => {
         games = result.recordset
         // console.log(games)
@@ -312,9 +312,9 @@ app.post(['/eventLog'], async (req,res)=>{
 app.get(['/schedule'], async (req,res)=>{
     const sql = require('mssql');
     const config = {
-        server: 'PUSLMA0E',
+        server: 'scott-HP-Z420-Workstation',
         database: 'scorecard',
-        user: 'sForslund',
+        user: 'SRF',
         password: 'Planbsk8!!8ksbnalP',
         trustServerCertificate: true,
     };
