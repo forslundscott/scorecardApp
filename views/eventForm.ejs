@@ -4,29 +4,30 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="eventForm" class="eventForm" action="eventLog" method="post">
+    <form id="eventForm" class="eventForm" action="eventLog" method="post" style="display: none;">
         <input type="hidden" name="playerId" value="">
-        <input type="hidden" name="teamName" value="BEER">
+        <input type="hidden" name="teamName" value="">
         <input type="hidden" name="realTime" value="">
         <input type="hidden" name="periodTime" value="">
         <input type="hidden" name="period" value="">
         <input type="hidden" name="value" value="">
+        <input type="hidden" name="Event_ID" value="">
         <div class="playerTag itemFormat">
             <div class="playerName">
                 Scott Forslund
             </div>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="goal" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Goal</button>                    
+            <button class="itemFormat" name="type" value="goal" onclick="statHandler(this.value, this.form)" >Goal</button>                    
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="assist" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Assist</button>
+            <button class="itemFormat" name="type" value="assist" onclick="statHandler(this.value, this.form)">Assist</button>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="save" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Save</button>
+            <button class="itemFormat" name="type" value="save" onclick="statHandler(this.value, this.form)">Save</button>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="owngoal" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event,statHandler, this)" >Own Goal</button>
+            <button class="itemFormat" name="type" value="owngoal" onclick="statHandler(this.value, this.form)">Own Goal</button>
         </div>
     </form>
 </body>

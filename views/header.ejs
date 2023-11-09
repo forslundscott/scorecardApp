@@ -8,24 +8,29 @@
       <% if (page == 'games') { %>
        Games
       <% }else if (page == 'activeGame') {%>
-      <div style="float: left; width: 30%; height: 100%;">
-        <div style="float: left; width: 83%;"><%= teams[0].id %></div>
-        <div style="float: left; width: 17%;" id="<%= teams[0].id + "Score" %>">0</div>
-      </div>
-      
-      <div style="float: left; width: 40%; height: 100%;">
-        <div id="gameTimer" style="font-size: 70%;">15:00</div>
-        <div style="font-size: 33%;">Period 1 of 3</div>
-        <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">Start Period 1</button>
-      </div>
-      
-       <!-- HON vs BSG  -->
-      <div style="float: left; width: 30%; height: 100%;">
-        <div style="float: right; width: 83%;"><%= teams[1].id %></div>
-        <div style="float: right; width: 17%;" id="<%= teams[1].id + "Score" %>">0</div>
-      </div>
-      </div>
+        <form action="javascript:void(0);">
+          <input type="hidden" name="team" value="<%= teams[0].id %>">
+          <div style="float: left; width: 30%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+            <div style="float: left; width: 83%;"><%= teams[0].id %></div>
+            <div style="float: left; width: 17%;" id="<%= teams[0].id + "Score" %>"><%= teams[0].score %></div>
+          </div>
+        </form>
+        <div style="float: left; width: 40%; height: 100%;">
+          <div id="gameTimer" style="font-size: 70%;">15:00</div>
+          <div style="font-size: 33%;" id="period">Period 1 of 3</div>
+          <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">Start</button>
+        </div>
+        
+        <!-- HON vs BSG  -->
+        <form action="javascript:void(0);">
+          <input type="hidden" name="team" value="<%= teams[1].id %>">
+          <div style="float: left; width: 30%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+            <div style="float: right; width: 83%;"><%= teams[1].id %></div>
+            <div style="float: right; width: 17%;" id="<%= teams[1].id + "Score" %>"><%= teams[1].score %></div>
+          </div>
+        </form>
       <% } %>
+    </div>
     <!-- <button onclick="location.href = '/forms/form'" style="float: right;">Add User</button> -->
   </header>
 </html>

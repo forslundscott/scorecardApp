@@ -5,8 +5,15 @@
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
     <div class="fielderColumn" onscroll="" ontouchmove="console.log('testscroll')">
-        <% for(var i=0; i< data.players.length; i++) {%>
-            <%- include('player_item',{player: data.players[i], team: data.id}); %>
+        <% if (page == 'games') { %>
+            <% for(var i=0; i< games.length; i++) {%>
+                <%- include('game_item',{game: games[i]}); %>
+            <% } %>
+        <% } else if (page == 'activeGame') { %>
+            
+            <% for(var i=0; i< data.players.length; i++) {%>
+                <%- include('player_item',{player: data.players[i], team: data.id, Event_ID: Event_ID}); %>
+            <% } %>
         <% } %>
     </div>
 </body>

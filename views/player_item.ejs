@@ -3,14 +3,16 @@
 <head>
 </head>
 <body>
-        <form class="eventForm" action="eventLog" method="post">
-            <input type="hidden" name="playerId" value="<%= player.id %>">
+        <form class="eventForm" action="javascript:void(0);">
+            <input type="hidden" name="playerId" value="<%= player.Id %>">
             <input type="hidden" name="teamName" value="<%= team %>">
             <input type="hidden" name="realTime" value="">
             <input type="hidden" name="periodTime" value="">
             <input type="hidden" name="period" value="">
             <input type="hidden" name="value" value="">
-            <button class="playerButton" name="type" value="goal" onclick="statHandler(this.value, '<%= team %>','<%= player.id %>', this.parentElement)">
+            <input type="hidden" name="playerName" value="<%= player.firstName %> <%= player.lastName %>">
+            <input type="hidden" name="Event_ID" value="<%= Event_ID %>">
+            <button class="playerButton" name="type" value="goal" onclick="toggleEventForm(this.form)">
         <div class="itemFormat">
             <div class="playerTag">
                 <div class="playerName">

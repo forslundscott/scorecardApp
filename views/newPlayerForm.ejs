@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
+    <form id="newPlayerForm" class="playerTag itemFormat" action="addPlayer" method="post" style="height: auto; display: none;">
+        <!-- <div class="playerTag itemFormat"> -->
+            <div class="playerName">
+                Add New Player
+            </div>
+            First Name<input type="text" name="firstName" value="" required>
+            <br>
+            Last Name<input type="text" name="lastName" value="" required>
+            <br>
+            Team ID<input type="text" name="team" value="Test2" required>
+            <br>
+            <button type="submit">Add Player</button>
+            <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button>
+        <!-- </div> -->
+    </form>
+</body>
+</html>

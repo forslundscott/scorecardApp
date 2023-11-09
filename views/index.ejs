@@ -7,17 +7,24 @@
     <link rel="stylesheet" href="/styles.css">
     <!-- <link rel="icon" href="/favicon.png"> -->
     <title>Scorecard</title>
+    
 </head>
 <body>      
-        <%- include('header', {teams: teams, page: page}); %>
-        <% console.log('test') %>
+        <%- include('header', {data: teams, page: page}); %>
+        
         <div id="innerBody">
             <div id="content">
-                <%- include('bodyColumns',{teams: teams, page: page}); %>
+                <% if (page == 'games') { %>
+                    <%- include('bodyColumns',{data: teams, page: page}); %>
+                <% } else if (page == 'activeGame') { %>
+                 
+                    <%- include('bodyColumns',{data: teams, page: page, Event_ID: Event_ID}); %>
+                <% } %>
             </div>
         </div>
         <%- include('footer'); %>
-        <!-- <%- include('eventForm'); %>    -->
+        <%- include('newPlayerForm'); %>
+        <%- include('eventForm'); %>   
         <script src="main.js"></script>
 </body>
 </html>

@@ -7,16 +7,23 @@ function sendGameData(){
 }
 if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || sessionStorage.gameInfo == null) {
     var gameInfo = {
-        name: '',
-        homeTeam: '',
-        awayTeam: '',
         period: 1,
-        time: ''
+        time: '15:00',
+        timerButtonState: 'Start'
     }
+    document.getElementById('gameTimer').innerHTML = gameInfo.time
+    document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
+    document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
 }else {
     gameInfo = JSON.parse(sessionStorage.gameInfo)
+    document.getElementById('gameTimer').innerHTML = gameInfo.time
+    document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
+    document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
 }
+
 window.addEventListener('beforeunload', (event) => {
+    gameInfo.time = document.getElementById('gameTimer').innerHTML
+    gameInfo.timerButtonState = document.getElementById('timerButton').innerHTML
     sessionStorage.setItem('gameInfo',JSON.stringify(gameInfo))
   });
 class Game {
@@ -116,9 +123,9 @@ function setDragScroll(ele){
     ele.addEventListener('mousedown', mouseDownHandler);
     ele.addEventListener('ontouchstart', mouseDownHandler);
 }
-var distance = 15 * 60 * 1000;
+var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
 var x = setInterval(function() {
-
+    ;
     // Get today's date and time
     // var now = new Date().getTime();
       
@@ -135,9 +142,14 @@ var x = setInterval(function() {
         
         // If the count down is over, write some text 
         if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("gameTimer").innerHTML = "00:00";
-        document.getElementById('timerButton').innerText = 'Start Period 2'
+            clearInterval(x);
+            gameInfo.period = gameInfo.period + 1
+            // gameInfo.time = '15:00'
+            
+        document.getElementById("gameTimer").innerHTML = "15:00";
+        document.getElementById('timerButton').innerHTML = 'Start'
+        location.reload()
+        // document.getElementById('timerButton').innerText = 'Start'
         }
     }
   }, 1000);
@@ -155,7 +167,7 @@ var x = setInterval(function() {
   }
 
 
-  function statHandler(statType, team, player, form){
+  function statHandler(statType, form){
     console.log(form)
     form.querySelector('[name="realTime"]').value = Date.now()
     // console.log(form.querySelector('[name="realTime"]').value)
@@ -168,9 +180,7 @@ var x = setInterval(function() {
     form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
     switch(statType){
         case 'goal':
-            console.log(team)
-            console.log(team + 'Score')
-            document.getElementById(team + 'Score').innerText = Number(document.getElementById(team + 'Score').innerText) + 1
+            // document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText = Number(document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText) + 1
             break
     }
   }
@@ -214,7 +224,24 @@ function longPress() {
   // throw custom event or call code for long press
 }
 
+function toggleAddPlayer(xform){
+    if(document.getElementById('newPlayerForm').style.display == 'none'){
+        document.getElementById('newPlayerForm').style.display = ''
+        document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
+    }else{
+        document.getElementById('newPlayerForm').style.display = 'none'
+    }
+}
 
-
-
+function toggleEventForm(xform){
+    if(document.getElementById('eventForm').style.display == 'none'){
+        document.getElementById('eventForm').style.display = ''
+        document.getElementById('eventForm').querySelector('[name="playerId"]').value = xform.querySelector('[name="playerId"]').value
+        document.getElementById('eventForm').querySelector('[name="teamName"]').value = xform.querySelector('[name="teamName"]').value
+        document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = xform.querySelector('[name="Event_ID"]').value
+        document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
+    }else{
+        document.getElementById('eventForm').style.display = 'none'
+    }
+}
   

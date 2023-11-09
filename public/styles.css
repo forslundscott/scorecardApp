@@ -1,5 +1,6 @@
 :root {
-  --primeColor: #009688;
+  /* --primeColor: #009688; */
+  --primeColor: #000000;
   --scrollWidth: 15px
 }
 html {
@@ -70,6 +71,19 @@ body {
     /* position: fixed; */
     /* width: calc(100% - 1vw); */
     height: 13%;
+    width: 100%;
+    z-index: 1;
+    overflow: hidden;
+    display: block;
+  }
+  .footer {
+    color: #fff !important;
+    background-color: var(--primeColor) !important;
+    top: 0;
+    /* padding: 1vh 1vw; */
+    /* position: fixed; */
+    /* width: calc(100% - 1vw); */
+    height: 10%;
     width: 100%;
     z-index: 1;
     overflow: hidden;
@@ -313,6 +327,13 @@ body {
   width: calc(100%/2);
   text-align: center;
 }
+.gameInfo{
+  float: left;
+  font-size: 100%;
+  height: 100%;
+  width: calc(100%/3);
+  text-align: center;
+}
 .statLabel{
   float: left;
   background-color: #04AA6D;
@@ -501,7 +522,14 @@ body {
     width: 100%;
     height: 10vh;
 }
-
+#newPlayerForm{
+  position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 10vh;
+}
 
 
 
