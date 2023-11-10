@@ -14,7 +14,6 @@
         <input type="hidden" name="Event_ID" value="">
         <div class="playerTag itemFormat">
             <div class="playerName">
-                Scott Forslund
             </div>
         </div>
         <div class="statButton">
@@ -28,6 +27,20 @@
         </div>
         <div class="statButton">
             <button class="itemFormat" name="type" value="owngoal" onclick="statHandler(this.value, this.form)">Own Goal</button>
+        </div>
+        <br>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="yellowCard" onclick="statHandler(this.value, this.form)" >Yellow Card</button>                    
+        </div>
+        <br>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="redCard" onclick="statHandler(this.value, this.form)" >Red Card</button>                    
+        </div>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="keeperChange" onclick="statHandler(this.value, this.form)" >Make Keeper</button>                    
+        </div>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="tradeTeam" onclick="statHandler(this.value, this.form)" >Switch Team</button>                    
         </div>
     </form>
 </body>
