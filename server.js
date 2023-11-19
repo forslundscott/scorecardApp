@@ -133,7 +133,7 @@ app.get(['/activeGame'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[players] Where Team='${req.query.Team1_ID}'`)
+            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}'`)
     }).then(result => {
         team1.id = req.query.Team1_ID
         team1.players = result.recordset
@@ -144,7 +144,7 @@ app.get(['/activeGame'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[players] Where Team='${req.query.Team2_ID}'`)
+            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}'`)
     }).then(result => {
         team2.id = req.query.Team2_ID
         team2.players = result.recordset
