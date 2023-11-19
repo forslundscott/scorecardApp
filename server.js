@@ -56,40 +56,54 @@ app.get(['/'], async (req,res)=>{
 app.get(['/timer'], async (req,res)=>{
     var game
     var newStartTime
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
-    }).then(result => {
-            game = result.recordset[0]
-            if(req.query.timerState == 0){
-                if(game.timerStartTime == 'NULL'){
-                    game.timerTime = game.timePerPeriod
+    if(req.query.timerState == 2){
+        await sql.connect(config).then(pool => {
+            // Query
+            return pool.request()
+                .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
+        }).then(result => {
+            // games = result.recordset
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        });  
+        res.redirect('/games')
+    } else {
+        await sql.connect(config).then(pool => {
+            // Query
+            return pool.request()
+                .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
+        }).then(result => {
+                game = result.recordset[0]
+                if(req.query.timerState == 0){
+                    if(game.timerStartTime == 'NULL'){
+                        game.timerTime = game.timePerPeriod
+                    }else{
+                        game.timerTime = game.timerTime - (Date.now() - game.timerStartTime)
+                    }
                 }else{
-                    game.timerTime = game.timerTime - (Date.now() - game.timerStartTime)
+                    game.timerStartTime = Date.now()
                 }
-            }else{
-                game.timerStartTime = Date.now()
-            }
-            game.timerState = req.query.timerState
+                game.timerState = req.query.timerState
 
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        });  
 
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
-    }).then(result => {
-        // games = result.recordset
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
-    res.sendStatus(204)
+        await sql.connect(config).then(pool => {
+            // Query
+            return pool.request()
+                .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+        }).then(result => {
+            // games = result.recordset
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        });  
+        console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
+        res.sendStatus(204)
+    }
 })
 app.get(['/games'], async (req,res)=>{
     // res.render('index.ejs')
@@ -185,9 +199,22 @@ app.get(['/activeGame'], async (req,res)=>{
     if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
         if(game.period<game.maxPeriods){
             game.period=game.period +1
+            game.timerState =0
+            game.timerTime = game.timePerPeriod
+        } else{
+            game.timerState = 2
+            game.timerTime = 0
         }
-        game.timerState =0
-        game.timerTime = game.timePerPeriod
+        await sql.connect(config).then(pool => {
+            // Query
+            return pool.request()
+                .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+        }).then(result => {
+            // games = result.recordset
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        });  
     }
     var data = {
         teams: [

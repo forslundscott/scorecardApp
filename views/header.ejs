@@ -22,8 +22,10 @@
           <input type="hidden" name="timerTime" value="
           <% if (data.game.timerState == 0) { %>
             <%- data.game.timerTime %>
-          <% } else {%>
+          <% } else if (data.game.timerState == 1){%>
             <%- data.game.timerTime - (Date.now() - data.game.timerStartTime) %>
+          <% } else if (data.game.timerState == 2){%>
+              0
           <% } %>
           
           ">
@@ -31,17 +33,21 @@
             <div id="gameTimer" style="font-size: 70%;">
               <% if (data.game.timerState == 0) { %>
                 <%- new Date(data.game.timerTime).toISOString().slice(14, -5) %>
-              <% } else {%>
+              <% } else if (data.game.timerState == 1){%>
                 <%- new Date(data.game.timerTime - (Date.now() - data.game.timerStartTime)).toISOString().slice(14, -5) %>
+              <% } else if (data.game.timerState == 2){%>
+                Full Time
               <% } %>
             </div>
             <div style="font-size: 33%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
             <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">
               <% if (data.game.timerState == 0) { %>
                Start
-              <% } else { %>
+              <% } else if (data.game.timerState == 1){%>
                 Stop
-               <% } %>
+              <% } else if (data.game.timerState == 2){%>
+                Complete
+              <% } %>
             </button>
           </div>
         </form>
