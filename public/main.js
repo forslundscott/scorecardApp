@@ -11,14 +11,14 @@ if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || se
         time: '15:00',
         timerButtonState: 'Start'
     }
-    document.getElementById('gameTimer').innerHTML = gameInfo.time
-    document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
-    document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
+    // document.getElementById('gameTimer').innerHTML = gameInfo.time
+    // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
+    // document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
 }else {
     gameInfo = JSON.parse(sessionStorage.gameInfo)
-    document.getElementById('gameTimer').innerHTML = gameInfo.time
-    document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
-    document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
+    // document.getElementById('gameTimer').innerHTML = gameInfo.time
+    // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
+    // document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
 }
 
 window.addEventListener('beforeunload', (event) => {
@@ -123,7 +123,8 @@ function setDragScroll(ele){
     ele.addEventListener('mousedown', mouseDownHandler);
     ele.addEventListener('ontouchstart', mouseDownHandler);
 }
-var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
+// var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
+var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
 var x = setInterval(function() {
     ;
     // Get today's date and time
@@ -143,13 +144,7 @@ var x = setInterval(function() {
         // If the count down is over, write some text 
         if (distance < 0) {
             clearInterval(x);
-            gameInfo.period = gameInfo.period + 1
-            // gameInfo.time = '15:00'
-            
-        document.getElementById("gameTimer").innerHTML = "15:00";
-        document.getElementById('timerButton').innerHTML = 'Start'
-        location.reload()
-        // document.getElementById('timerButton').innerText = 'Start'
+            location.reload()
         }
     }
   }, 1000);
@@ -157,9 +152,11 @@ var x = setInterval(function() {
   function timerStartStop(ele){
     switch(true){
         case ele.innerText.includes('Start') :
+            ele.form.querySelector('[name="timerState"]').value= 1
             ele.innerText = 'Stop'
             break
         case ele.innerText.includes('Stop'):
+            ele.form.querySelector('[name="timerState"]').value= 0
             ele.innerText = 'Start'
             break
     }

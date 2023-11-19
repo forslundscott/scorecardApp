@@ -53,6 +53,44 @@ app.get(['/'], async (req,res)=>{
     res.redirect('/games')
     // res.render('smartphone.ejs') 
 })
+app.get(['/timer'], async (req,res)=>{
+    var game
+    var newStartTime
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
+            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
+    }).then(result => {
+            game = result.recordset[0]
+            if(req.query.timerState == 0){
+                if(game.timerStartTime == 'NULL'){
+                    game.timerTime = game.timePerPeriod
+                }else{
+                    game.timerTime = game.timerTime - (Date.now() - game.timerStartTime)
+                }
+            }else{
+                game.timerStartTime = Date.now()
+            }
+            game.timerState = req.query.timerState
+
+    }).catch(err => {
+        console.log(err)
+    // ... error checks
+    });  
+
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
+            .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+    }).then(result => {
+        // games = result.recordset
+    }).catch(err => {
+        console.log(err)
+    // ... error checks
+    });  
+    console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
+    res.sendStatus(204)
+})
 app.get(['/games'], async (req,res)=>{
     // res.render('index.ejs')
     await sql.connect(config).then(pool => {
@@ -74,10 +112,10 @@ app.get(['/games'], async (req,res)=>{
         games: games,
         page: req.route.path[0].replace('/','')
     }
-    res.render('index.ejs',data) 
+    res.render('index.ejs',{data: data}) 
 })
 app.get(['/activeGame'], async (req,res)=>{
-
+    var game
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
@@ -131,15 +169,36 @@ app.get(['/activeGame'], async (req,res)=>{
         console.log(err)
     // ... error checks
     });  
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
+            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
+    }).then(result => {
+        
+            game = result.recordset[0]
+
+        // team2.score = result.recordset[0].score
+    }).catch(err => {
+        console.log(err)
+    // ... error checks
+    });  
+    if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
+        if(game.period<game.maxPeriods){
+            game.period=game.period +1
+        }
+        game.timerState =0
+        game.timerTime = game.timePerPeriod
+    }
     var data = {
         teams: [
             team1,
             team2
         ],
+        game: game,
         page: req.route.path[0].replace('/',''),
         Event_ID: req.query.Event_ID
     }
-    res.render('index.ejs',data) 
+    res.render('index.ejs',{data: data}) 
 })
 
 app.post(['/'], async (req,res)=>{

@@ -10,15 +10,16 @@
     
 </head>
 <body>      
-        <%- include('header', {data: teams, page: page}); %>
+        <%- include('header', {data: data}); %>
         
         <div id="innerBody">
             <div id="content">
-                <% if (page == 'games') { %>
-                    <%- include('bodyColumns',{data: teams, page: page}); %>
-                <% } else if (page == 'activeGame') { %>
+                <% if (data.page == 'games') { %>
+                    
+                    <%- include('bodyColumns',{data: data}); %>
+                <% } else if (data.page == 'activeGame') { %>
                  
-                    <%- include('bodyColumns',{data: teams, page: page, Event_ID: Event_ID}); %>
+                    <%- include('bodyColumns',{data: data}); %>
                 <% } %>
             </div>
         </div>

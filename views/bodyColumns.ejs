@@ -3,19 +3,19 @@
 <head>
 </head>
 <body>
-    <% if (page == 'games') { %>
+    <% if (data.page == 'games') { %>
      
     
-    <div id="<%= teams[0].id %>" class="singleColumn">
-        <%- include('list', {data: data, page: page}); %>
+    <div id="<%= %>" class="singleColumn">
+        <%- include('list', {data: data}); %>
     </div>
-    <% }else if (page == 'activeGame') {%>
+    <% }else if (data.page == 'activeGame') {%>
         
-        <div id="<%= teams[0].id %>" class="doubleColumn">
-            <%- include('list', {data: data[0], page: page, Event_ID: Event_ID}); %>
+        <div id="<%= data.teams[0].id %>" class="doubleColumn">
+            <%- include('list', {data: data, team: data.teams[0]}); %>
         </div>
-        <div id="<%= teams[1].id %>" class="doubleColumn">
-            <%- include('list', {data: data[1], page: page, Event_ID: Event_ID}); %>
+        <div id="<%= data.teams[1].id %>" class="doubleColumn">
+            <%- include('list', {data: data, team: data.teams[1]}); %>
         </div>
     <% } %>
 </body>
