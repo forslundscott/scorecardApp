@@ -24,8 +24,12 @@
             </div>
         </div>
         <%- include('footer'); %>
-        <%- include('newPlayerForm'); %>
-        <%- include('eventForm'); %>   
+
+        <div id="formBackground" style="display: none;" onclick="closeForm()"></div>
+
+            <%- include('newPlayerForm'); %>
+            <%- include('eventForm'); %>   
+        
         <script src="main.js"></script>
 </body>
 </html>

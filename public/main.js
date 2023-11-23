@@ -22,8 +22,8 @@ if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || se
 }
 
 window.addEventListener('beforeunload', (event) => {
-    gameInfo.time = document.getElementById('gameTimer').innerHTML
-    gameInfo.timerButtonState = document.getElementById('timerButton').innerHTML
+    // gameInfo.time = document.getElementById('gameTimer').innerHTML
+    // gameInfo.timerButtonState = document.getElementById('timerButton').innerHTML
     sessionStorage.setItem('gameInfo',JSON.stringify(gameInfo))
   });
 class Game {
@@ -165,7 +165,7 @@ var x = setInterval(function() {
 
 
   function statHandler(statType, form){
-    console.log(form)
+    console.log('testonclick')
     form.querySelector('[name="realTime"]').value = Date.now()
     // console.log(form.querySelector('[name="realTime"]').value)
     if(statType.includes('minus')){
@@ -197,7 +197,7 @@ function handleMouseDown() {
   longTID = setTimeout(longPress, 1000); // create a new timer for this click
 };
 
-function handleMouseUp(e,callback, button) {
+function handleMouseUp(e) {
   if (isDown && isLong) {                           // if a long press, cancel
     isDown = false;                                 // clear in any case
     e.preventDefault();                             // and ignore this event
@@ -208,7 +208,6 @@ function handleMouseUp(e,callback, button) {
       clearTimeout(longTID);                        // clear timer to avoid false longpress
       isDown = false;
       console.log('Normal up')
-      callback.apply(this,[button.value,button.form.teamName.value,button.form.playerId.value,button.form])
     //   target.innerHTML = "Normal up";               // for clicked element
       target = null;
   }
@@ -220,6 +219,12 @@ function longPress() {
 //   this.innerHTML = "Long press";
   // throw custom event or call code for long press
 }
+function handleLongPress(e){
+    if(isLong){
+        e.preventDefault()
+        return false
+    }
+}
 
 function toggleAddPlayer(xform){
     if(document.getElementById('newPlayerForm').style.display == 'none'){
@@ -227,6 +232,11 @@ function toggleAddPlayer(xform){
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
+    }
+    if(document.getElementById('formBackground').style.display == 'none'){
+        document.getElementById('formBackground').style.display = ''
+    }else{
+        document.getElementById('formBackground').style.display = 'none'
     }
 }
 
@@ -240,5 +250,17 @@ function toggleEventForm(xform){
     }else{
         document.getElementById('eventForm').style.display = 'none'
     }
+    if(document.getElementById('formBackground').style.display == 'none'){
+        document.getElementById('formBackground').style.display = ''
+    }else{
+        document.getElementById('formBackground').style.display = 'none'
+    }
+}
+function closeForm(){
+    var forms = document.getElementsByClassName('popupForm')
+    for(i=0;i<forms.length;i++){
+        forms[i].style.display = 'none'
+    }
+    document.getElementById('formBackground').style.display = 'none'
 }
   

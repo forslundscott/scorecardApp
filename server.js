@@ -133,7 +133,7 @@ app.get(['/activeGame'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}'`)
+            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'`)
     }).then(result => {
         team1.id = req.query.Team1_ID
         team1.players = result.recordset
@@ -144,7 +144,7 @@ app.get(['/activeGame'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}'`)
+            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'`)
     }).then(result => {
         team2.id = req.query.Team2_ID
         team2.players = result.recordset
@@ -234,14 +234,7 @@ app.post(['/'], async (req,res)=>{
 })
 app.post(['/eventLog'], async (req,res)=>{
     eventLog.push(req.body)
-    // const sql = require('mssql');
-    // const config = {
-    //     server: 'scott-HP-Z420-Workstation',
-    //     database: 'scorecard',
-    //     user: 'SRF',
-    //     password: 'Planbsk8!!8ksbnalP',
-    //     trustServerCertificate: true,
-    // };
+    console.log(req.body)
     
     await sql.connect(config).then(pool => {
         // Query

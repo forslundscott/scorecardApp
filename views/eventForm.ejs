@@ -4,7 +4,7 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="eventForm" class="eventForm" action="eventLog" method="post" style="display: none;">
+    <form id="eventForm" class="popupForm" action="eventLog" method="post" style="display: none;">
         <input type="hidden" name="playerId" value="">
         <input type="hidden" name="teamName" value="">
         <input type="hidden" name="realTime" value="">
@@ -17,30 +17,30 @@
             </div>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="goal" onclick="statHandler(this.value, this.form)" >Goal</button>                    
+            <button class="itemFormat" name="type" value="goal" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Goal</button>                    
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="assist" onclick="statHandler(this.value, this.form)">Assist</button>
+            <button class="itemFormat" name="type" value="assist" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Assist</button>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="save" onclick="statHandler(this.value, this.form)">Save</button>
+            <button class="itemFormat" name="type" value="save" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Save</button>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="owngoal" onclick="statHandler(this.value, this.form)">Own Goal</button>
-        </div>
-        <br>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="yellowCard" onclick="statHandler(this.value, this.form)" >Yellow Card</button>                    
+            <button class="itemFormat" name="type" value="owngoal" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Own Goal</button>
         </div>
         <br>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="redCard" onclick="statHandler(this.value, this.form)" >Red Card</button>                    
+            <button class="itemFormat" name="type" value="yellowCard" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Yellow Card</button>                    
+        </div>
+        <br>
+        <div class="statButton">
+            <button class="itemFormat" name="type" value="redCard" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Red Card</button>                    
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="keeperChange" onclick="statHandler(this.value, this.form)" >Make Keeper</button>                    
+            <button class="itemFormat" name="type" value="keeperChange" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Make Keeper</button>                    
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="tradeTeam" onclick="statHandler(this.value, this.form)" >Switch Team</button>                    
+            <button class="itemFormat" name="type" value="tradeTeam" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Switch Team</button>                    
         </div>
     </form>
 </body>

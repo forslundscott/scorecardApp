@@ -1,8 +1,15 @@
 :root {
   /* --primeColor: #009688; */
   --primeColor: #000000;
-  --secondaryColor: #616060;
-  --scrollWidth: 15px
+  --primaryFontColor: #cccccc;
+  --secondaryColor: #cccccc;
+  --secondaryFontColor: #000000;
+  --shinySilver: linear-gradient(135deg, #919191 10%, white 50%, #919191 90%);
+  --scrollWidth: 15px;
+  --buttonHieght: 11vh
+}
+* {
+  box-sizing: border-box;
 }
 html {
   margin: 0%;
@@ -22,7 +29,7 @@ body {
     text-align: center;
   }
   .header {
-    color: #fff !important;
+    color: var(--primaryFontColor) !important;
     background-color: var(--primeColor) !important;
     top: 0;
     height: 13%;
@@ -32,7 +39,7 @@ body {
     display: block;
   }
   .footer {
-    color: #fff !important;
+    color: var(--primaryFontColor) !important;
     background-color: var(--primeColor) !important;
     top: 0;
     height: 10%;
@@ -44,17 +51,19 @@ body {
   #innerBody {
     height: 77%;
     width: 100%;
+    /* background: var(--shinySilver); */
+    background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);;
   }
   .itemFormat {
     background-color: var(--secondaryColor);
-    color: white;
+    background-image: var(--shinySilver);
+    color: var(--secondaryFontColor);
     border-radius: 2vh;
     height: 11vh;
     width: 100%;
-    border: black;
+    border: var(--primeColor);
     border-width: thin;
     border-style: solid;
-    margin-bottom: .5vh;
     box-sizing: border-box;
   }
   a {
@@ -95,17 +104,18 @@ body {
   display: none;
 }
 .statButton{
+  all: unset;
   float: left;
   border-radius: 50%;
   font-size: 100%;
-  height: 100%;
+  /* height: 100%; */
   width: 25%;
   text-align: center;
 }
 .playerButton{
   all: unset;
   width: 100%;
-
+  padding-bottom: .5vh;
 }
 .statItem{
   float: left;
@@ -176,18 +186,41 @@ body {
  }
 }
 #eventForm{
-  position: absolute;
+  /* position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
     height: 10vh;
+    z-index: 6; */
 }
 #newPlayerForm{
-  position: absolute;
+  /* position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
     height: 10vh;
+    z-index: 6; */
+    /* height: auto; */
+}
+.popupForm{
+  position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 23vh;
+    z-index: 6;
+}
+#formBackground{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:5;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
 }
