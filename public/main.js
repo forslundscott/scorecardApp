@@ -70,12 +70,33 @@ class GameEvent {
 
 document.addEventListener('DOMContentLoaded', function () {
     const eles = document.getElementsByClassName('fielderColumn')
+    
     for(var i=0;i<eles.length;i++){
         const ele = eles[i]
         setDragScroll(ele)
     }
 });
-
+document.addEventListener('mouseup', function () {
+    var eles = document.getElementsByClassName('floatingActionButtons block')
+    
+    if(eles.length > 0){
+        for(i=eles.length-1;i>-1;i--){
+            // console.log(eles)
+            eles[i].classList.replace('block', 'hidden')
+        }
+    }
+    var eles = document.getElementsByClassName('floating')
+    
+    if(eles.length > 0){
+        for(i=eles.length-1;i>-1;i--){
+            // console.log(eles)
+            eles[i].classList.remove('floating')
+        }
+    }
+    if(!document.getElementById('floatingBackground').classList.contains('hidden')){
+        document.getElementById('floatingBackground').classList.add('hidden')
+    }
+})
 function setDragScroll(ele){
     ele.style.cursor = 'grab';
 
@@ -164,22 +185,26 @@ var x = setInterval(function() {
   }
 
 
-  function statHandler(statType, form){
+  function statHandler(ele,val = 1){
     console.log('testonclick')
-    form.querySelector('[name="realTime"]').value = Date.now()
-    // console.log(form.querySelector('[name="realTime"]').value)
-    if(statType.includes('minus')){
-        form.querySelector('[name="value"]').value = '-1'
-    }else {
-        form.querySelector('[name="value"]').value = '1'
-    }
-    form.querySelector('[name="period"]').value = gameInfo.period
-    form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
-    switch(statType){
-        case 'goal':
-            // document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText = Number(document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText) + 1
-            break
-    }
+    var form = ele.form
+    var statType = ele.value
+    
+        form.querySelector('[name="realTime"]').value = Date.now()
+        // console.log(form.querySelector('[name="realTime"]').value)
+        form.querySelector('[name="value"]').value = val
+        // if(statType.includes('minus')){
+        //     form.querySelector('[name="value"]').value = '-1'
+        // }else {
+        //     form.querySelector('[name="value"]').value = '1'
+        // }
+        form.querySelector('[name="period"]').value = gameInfo.period
+        form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
+        switch(statType){
+            case 'goal':
+                // document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText = Number(document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText) + 1
+                break
+        }
   }
   // mouseup need to be monitored on a "global" element or we might miss it if
 // we move outside the original element.
@@ -187,17 +212,19 @@ var isDown = false,
 isLong = false,
 target,                                         // which element was clicked
 longTID;
-function handleMouseDown() {
+function handleMouseDown(ele, e) {
     console.log('mouse down')
 //   this.innerHTML = "Mouse down...";
   isDown = true;                                    // button status (any button here)
   isLong = false;                                   // longpress status reset
   target = this;                                    // store this as target element
-  clearTimeout(longTID);                            // clear any running timers
-  longTID = setTimeout(longPress, 1000); // create a new timer for this click
+//   clearTimeout(longTID);                            // clear any running timers
+  longTID = setTimeout(longPress, 500, ele, e); // create a new timer for this click
+  return
 };
 
 function handleMouseUp(e) {
+    // console.log(ele1.form)
   if (isDown && isLong) {                           // if a long press, cancel
     isDown = false;                                 // clear in any case
     e.preventDefault();                             // and ignore this event
@@ -213,15 +240,23 @@ function handleMouseUp(e) {
   }
 };
 
-function longPress() {
+function longPress(ele,e) {
+    var eles = ele.parentElement.getElementsByClassName('floatingActionButtons')
+    ele.parentElement.classList.add('floating')
+    eles[0].classList.replace('hidden','block')
+    eles[1].classList.replace('hidden','block')
+    // ele.attributes.removeNamedItem('ontouchstart')
+    document.getElementById('floatingBackground').classList.remove('hidden')
   isLong = true;
   console.log('Long Press')
+//   e.preventDefault()
+  return
 //   this.innerHTML = "Long press";
   // throw custom event or call code for long press
 }
 function handleLongPress(e){
     if(isLong){
-        e.preventDefault()
+        // e.preventDefault()
         return false
     }
 }
@@ -255,6 +290,12 @@ function toggleEventForm(xform){
     }else{
         document.getElementById('formBackground').style.display = 'none'
     }
+}
+function touchMoveHandler(e,ele){
+    var rect = ele.getBoundingClientRect()
+if((rect.left>=e.clientX<=rect.right)&&(rect.top>=e.clientY<=rect.bottom)){
+    ele.style.background = 'red'
+}
 }
 function closeForm(){
     var forms = document.getElementsByClassName('popupForm')

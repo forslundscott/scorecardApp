@@ -4,7 +4,7 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="eventForm" class="popupForm" action="eventLog" method="post" style="display: none;">
+    <form id="eventForm" class="popupForm" action="eventLog" method="post" style="display: none; touch-action: none;">
         <input type="hidden" name="playerId" value="">
         <input type="hidden" name="teamName" value="">
         <input type="hidden" name="realTime" value="">
@@ -12,36 +12,30 @@
         <input type="hidden" name="period" value="">
         <input type="hidden" name="value" value="">
         <input type="hidden" name="Event_ID" value="">
-        <div class="playerTag itemFormat">
+        <div class="itemFormat secondaryStyle">
             <div class="playerName">
             </div>
         </div>
+        <% var options = ['Goal','Assist','Save','Own Goal','Yellow Card','Red Card'] %>
+        <% for(var i=0; i< options.length; i++) {%>
+            <div class="statButton">
+                <button class="floatingActionButtons floatAbove hidden itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="statHandler(this)">+1</button>
+                <button class="itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="if(!isLong){statHandler(this)}" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)"><%= options[i] %></button>                    
+                <button class="floatingActionButtons floatBelow hidden itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="statHandler(this,-1)">-1</button>
+            </div>
+        <% } %>
+        
         <div class="statButton">
-            <button class="itemFormat" name="type" value="goal" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Goal</button>                    
+            <button class="floatingActionButtons floatAbove hidden">+1</button>
+            <button class="itemFormat secondaryStyle" name="type" value="makekeeper" onclick="statHandler(this)" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)">Make Keeper</button>                    
+            <button class="floatingActionButtons floatBelow hidden">-1</button>
         </div>
         <div class="statButton">
-            <button class="itemFormat" name="type" value="assist" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Assist</button>
+            <button class="floatingActionButtons floatAbove hidden">+1</button>
+            <button class="itemFormat secondaryStyle" name="type" value="switchteam" onclick="statHandler(this)" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)">Switch Team</button>                    
+            <button class="floatingActionButtons floatBelow hidden">-1</button>
         </div>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="save" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Save</button>
-        </div>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="owngoal" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Own Goal</button>
-        </div>
-        <br>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="yellowCard" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Yellow Card</button>                    
-        </div>
-        <br>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="redCard" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Red Card</button>                    
-        </div>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="keeperChange" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Make Keeper</button>                    
-        </div>
-        <div class="statButton">
-            <button class="itemFormat" name="type" value="tradeTeam" onclick="if(handleLongPress(event)!== false){statHandler(this.value, this.form)}" onmousedown="handleMouseDown()" onmouseup="handleMouseUp(event)">Switch Team</button>                    
-        </div>
+        <div id="floatingBackground" class="hidden"></div>
     </form>
 </body>
 </html>

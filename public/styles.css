@@ -20,6 +20,13 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     height: 100%;
   }
+button {
+  -webkit-touch-callout: none; /* Safari */
+        -webkit-user-select: none; /* Chrome */     
+           -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none; 
+}
   .headerText {
     font-size: 5vh;
     font-weight: bold;
@@ -55,12 +62,24 @@ body {
     background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);;
   }
   .itemFormat {
+    /* background-color: var(--secondaryColor);
+    background-image: var(--shinySilver);
+    color: var(--secondaryFontColor);
+    border-radius: 2vh; */
+    height: 11vh;
+    width: 100%;
+    /* border: var(--primeColor);
+    border-width: thin;
+    border-style: solid;
+    box-sizing: border-box; */
+  }
+  .secondaryStyle{
     background-color: var(--secondaryColor);
     background-image: var(--shinySilver);
     color: var(--secondaryFontColor);
     border-radius: 2vh;
-    height: 11vh;
-    width: 100%;
+    /* height: 11vh;
+    width: 100%; */
     border: var(--primeColor);
     border-width: thin;
     border-style: solid;
@@ -103,6 +122,17 @@ body {
 .fielderColumn::-webkit-scrollbar {
   display: none;
 }
+/* Chrome, Safari, Edge, Opera */
+/* input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+} */
+
+/* Firefox */
+/* input[type=number] {
+  -moz-appearance: textfield;
+} */
 .statButton{
   all: unset;
   float: left;
@@ -111,6 +141,7 @@ body {
   /* height: 100%; */
   width: 25%;
   text-align: center;
+  position: relative;
 }
 .playerButton{
   all: unset;
@@ -145,6 +176,40 @@ body {
   font-size: 100%;
   height: calc(100%/3);
   width: 100%;
+}
+.floatingActionButtons{
+  position: absolute; 
+  z-index: 5; 
+  left: 50%; 
+  translate: -50%; 
+  /* display: block; */
+}
+.floating{
+  z-index: 5;
+}
+/* .floatingActionButtons:hover, .floatingActionButtons:active{
+  
+} */
+/* .floatingActionButtons:hover, .floatingActionButtons:active{
+  background-image: linear-gradient(135deg, red 10%, rgb(255, 140, 159) 50%, red 90%);
+} */
+.floatAbove{
+  translate: -50% -100%;
+}
+.floatAbove:hover, .floatAbove:active{
+  background-image: linear-gradient(135deg, green 10%, rgb(159, 255, 159) 50%, green 90%);
+}
+.floatBelow{
+  translate: -50% ;
+}
+.floatBelow:hover, .floatBelow:active{
+  background-image: linear-gradient(135deg, red 10%, rgb(255, 140, 159) 50%, red 90%);
+}
+.hidden{
+  display: none;
+}
+.block{
+  display: block;
 }
 .plusMinusLabel{
   background-color: var(--secondaryColor);
@@ -185,33 +250,14 @@ body {
     pointer-events: auto;
  }
 }
-#eventForm{
-  /* position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 10vh;
-    z-index: 6; */
-}
-#newPlayerForm{
-  /* position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 10vh;
-    z-index: 6; */
-    /* height: auto; */
-}
 .popupForm{
   position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
-    height: 23vh;
-    z-index: 6;
+    /* height: 23vh; */
+    z-index: 3;
 }
 #formBackground{
   width:100%;
@@ -219,7 +265,18 @@ body {
   left:0;/*IE*/
   top:0;
   text-align:center;
-  z-index:5;
+  z-index:2;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
+}
+#floatingBackground{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:4;
   position:fixed;
   background-color:#000000;
   opacity: 60%;
