@@ -76,27 +76,27 @@ document.addEventListener('DOMContentLoaded', function () {
         setDragScroll(ele)
     }
 });
-document.addEventListener('mouseup', function () {
-    var eles = document.getElementsByClassName('floatingActionButtons block')
+// document.addEventListener('mouseup', function () {
+//     var eles = document.getElementsByClassName('floatingActionButtons block')
     
-    if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
-            // console.log(eles)
-            eles[i].classList.replace('block', 'hidden')
-        }
-    }
-    var eles = document.getElementsByClassName('floating')
+//     if(eles.length > 0){
+//         for(i=eles.length-1;i>-1;i--){
+//             // console.log(eles)
+//             eles[i].classList.replace('block', 'hidden')
+//         }
+//     }
+//     var eles = document.getElementsByClassName('floating')
     
-    if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
-            // console.log(eles)
-            eles[i].classList.remove('floating')
-        }
-    }
-    if(!document.getElementById('floatingBackground').classList.contains('hidden')){
-        document.getElementById('floatingBackground').classList.add('hidden')
-    }
-})
+//     if(eles.length > 0){
+//         for(i=eles.length-1;i>-1;i--){
+//             // console.log(eles)
+//             eles[i].classList.remove('floating')
+//         }
+//     }
+//     if(!document.getElementById('floatingBackground').classList.contains('hidden')){
+//         document.getElementById('floatingBackground').classList.add('hidden')
+//     }
+// })
 function setDragScroll(ele){
     ele.style.cursor = 'grab';
 

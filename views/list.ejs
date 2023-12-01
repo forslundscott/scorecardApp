@@ -4,7 +4,7 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <div class="fielderColumn" onscroll="" ontouchmove="console.log('testscroll')">
+    <div class="fielderColumn" >
         <% if (data.page == 'games') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>

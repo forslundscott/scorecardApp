@@ -102,7 +102,7 @@ app.get(['/timer'], async (req,res)=>{
         // ... error checks
         });  
         console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
-        res.sendStatus(204)
+        res.redirect('back')
     }
 })
 app.get(['/games'], async (req,res)=>{
