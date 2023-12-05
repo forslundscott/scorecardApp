@@ -12,7 +12,7 @@
 <body>      
         <%- include('header', {data: data}); %>
         
-        <div id="innerBody">
+        <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, " + data.teams[0].color + " 48%, silver 50%, " +  data.teams[1].color + " 52%)": ""%>">
             <div id="content">
                 <% if (data.page == 'games') { %>
                     
@@ -26,9 +26,14 @@
         <%- include('footer'); %>
         <!-- <div id="floatingBackground" class="hidden"></div> -->
         <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>
-
+        <% if (data.page == 'games') { %>
+                    
+            
+        <% } else if (data.page == 'activeGame') { %>
             <%- include('newPlayerForm'); %>
-            <%- include('eventForm'); %>   
+            <%- include('eventForm'); %> 
+        <% } %>
+              
         
         <script src="main.js"></script>
 </body>

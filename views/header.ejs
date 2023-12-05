@@ -3,11 +3,19 @@
 <head>
 </head>
 <body>
-  <header class="header">
+  <!-- style="background-image: linear-gradient(135deg, <%=data.teams[0].color %> 10%, <%=data.teams[1].color %> 90%);" -->
+  <header class="header" >
+    
     <div id="pageName" class="headerText">
       <% if (data.page == 'games') { %>
        Games
       <% }else if (data.page == 'activeGame') {%>
+        <% var currentPeriod = data.game.period %>
+        <script>
+         var currentPeriod = '<%= data.game.period  %>'
+
+        </script>
+        
         <form action="javascript:void(0);">
           <input type="hidden" name="team" value="<%= data.teams[0].id %>">
           <div style="float: left; width: 30%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">

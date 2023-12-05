@@ -5,20 +5,22 @@
 <body>
         <form class="eventForm" action="javascript:void(0);">
             <input type="hidden" name="playerId" value="<%= player.Id %>">
-            <input type="hidden" name="teamName" value="<%= team %>">
+            <input type="hidden" name="teamName" value="<%= team.id %>">
             <input type="hidden" name="realTime" value="">
             <input type="hidden" name="periodTime" value="">
             <input type="hidden" name="period" value="">
             <input type="hidden" name="value" value="">
             <input type="hidden" name="playerName" value="<%= player.firstName %> <%= player.lastName %>">
             <input type="hidden" name="Event_ID" value="<%= Event_ID %>">
-            <button class="playerButton" name="type" value="goal" onclick="toggleEventForm(this.form)">
-        <div class="itemFormat secondaryStyle">
+            <button class="playerButton" name="type" value="goal" onclick="toggleEventForm(this)">
+                <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
+        <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=team.color %>  <%=team.color =='White' ? '40%, #ddd 50%, ' + team.color + ' 60%'  : '.5%, White 50%, ' + team.color + ' 99.5%'%>);">
             <div class="playerTag">
                 <div class="playerName">
                     <%= player.firstName %>
                     <%= player.lastName %>
                 </div>
+                <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
             </div>
             <div class="statContainer">  
                 <div class="gameInfo">G: <%= player.goals %></div>

@@ -110,7 +110,8 @@ app.get(['/games'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
+            // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
+            .query(`SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where [Status]=0`)
     }).then(result => {
         games = result.recordset
     }).catch(err => {
@@ -133,9 +134,31 @@ app.get(['/activeGame'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
+            .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'`)
+    }).then(result => {
+        // console.log(result.recordset[0])
+        team1 = result.recordset[0]
+    }).catch(err => {
+        console.log(err)
+    // ... error checks
+    });  
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
+            .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'`)
+    }).then(result => {
+        // console.log(result.recordset[0])
+        team2 = result.recordset[0]
+    }).catch(err => {
+        console.log(err)
+    // ... error checks
+    });  
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
             .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'`)
     }).then(result => {
-        team1.id = req.query.Team1_ID
+        // team1.id = req.query.Team1_ID
         team1.players = result.recordset
     }).catch(err => {
         console.log(err)
@@ -146,7 +169,7 @@ app.get(['/activeGame'], async (req,res)=>{
         return pool.request()
             .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'`)
     }).then(result => {
-        team2.id = req.query.Team2_ID
+        // team2.id = req.query.Team2_ID
         team2.players = result.recordset
     }).catch(err => {
         console.log(err)
@@ -225,6 +248,7 @@ app.get(['/activeGame'], async (req,res)=>{
         page: req.route.path[0].replace('/',''),
         Event_ID: req.query.Event_ID
     }
+    // console.log(data.teams[0].players)
     res.render('index.ejs',{data: data}) 
 })
 
@@ -235,18 +259,31 @@ app.post(['/'], async (req,res)=>{
 app.post(['/eventLog'], async (req,res)=>{
     eventLog.push(req.body)
     console.log(req.body)
+    if(req.body.type == 'makekeeper'){
+        await sql.connect(config).then(pool => {
+            // Query
     
-    await sql.connect(config).then(pool => {
-        // Query
+            return pool.request().query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)
+        }).then(result => {
+            
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        });  
+        // res.redirect('back')
+        
+    }else{
+        await sql.connect(config).then(pool => {
+            // Query
 
-        return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}')`)
-    }).then(result => {
-        team1.id = req.query.Team1_ID
-        team1.players = result.recordset
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
+            return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}')`)
+        }).then(result => {
+            
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        }); 
+    }
     res.redirect('back')
     // res.sendStatus(204)
 })

@@ -3,8 +3,11 @@
 <head>
 </head>
 <body>
-    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <div class="fielderColumn" >
+    <% if (data.page == 'activeGame') { %>
+        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID}); %>
+    <% } %>
+    
+    <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 11.5vh)"  : "" %>">
         <% if (data.page == 'games') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
@@ -12,7 +15,9 @@
         <% } else if (data.page == 'activeGame') { %>
             
             <% for(var i=0; i< team.players.length; i++) {%>
-                <%- include('player_item',{player: team.players[i], team: team.id, Event_ID: data.Event_ID}); %>
+                <% if (team.players[i].Id !== team.keeper) { %>
+                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID}); %>
+                <% } %>
             <% } %>
         <% } %>
     </div>

@@ -9,7 +9,8 @@ if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || se
     var gameInfo = {
         period: 1,
         time: '15:00',
-        timerButtonState: 'Start'
+        timerButtonState: 'Start',
+        touchTime: Date.now()
     }
     // document.getElementById('gameTimer').innerHTML = gameInfo.time
     // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
@@ -76,26 +77,8 @@ document.addEventListener('DOMContentLoaded', function () {
         setDragScroll(ele)
     }
 });
-// document.addEventListener('mouseup', function () {
-//     var eles = document.getElementsByClassName('floatingActionButtons block')
-    
-//     if(eles.length > 0){
-//         for(i=eles.length-1;i>-1;i--){
-//             // console.log(eles)
-//             eles[i].classList.replace('block', 'hidden')
-//         }
-//     }
-//     var eles = document.getElementsByClassName('floating')
-    
-//     if(eles.length > 0){
-//         for(i=eles.length-1;i>-1;i--){
-//             // console.log(eles)
-//             eles[i].classList.remove('floating')
-//         }
-//     }
-//     if(!document.getElementById('floatingBackground').classList.contains('hidden')){
-//         document.getElementById('floatingBackground').classList.add('hidden')
-//     }
+// document.addEventListener('touchstart', function () {
+//     gameInfo.touchTime = Date.now()
 // })
 function setDragScroll(ele){
     ele.style.cursor = 'grab';
@@ -152,6 +135,9 @@ var x = setInterval(function() {
     // var now = new Date().getTime();
       
     // Find the distance between now and the count down date
+    // if(Date.now()-gameInfo.touchTime>30000){
+    //     location.reload()
+    // }
     if(document.getElementById('timerButton').innerText == 'Stop'){
         distance = distance - 1000;
         
@@ -185,7 +171,7 @@ var x = setInterval(function() {
   }
 
 
-  function statHandler(ele,val = 1){
+  function statHandler(ele,xperiod,val = 1){
     console.log('testonclick')
     var form = ele.form
     var statType = ele.value
@@ -198,7 +184,7 @@ var x = setInterval(function() {
         // }else {
         //     form.querySelector('[name="value"]').value = '1'
         // }
-        form.querySelector('[name="period"]').value = gameInfo.period
+        form.querySelector('[name="period"]').value = xperiod
         form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
         switch(statType){
             case 'goal':
@@ -275,13 +261,15 @@ function toggleAddPlayer(xform){
     }
 }
 
-function toggleEventForm(xform){
+function toggleEventForm(ele){
+    var xform = ele.form
     if(document.getElementById('eventForm').style.display == 'none'){
         document.getElementById('eventForm').style.display = ''
         document.getElementById('eventForm').querySelector('[name="playerId"]').value = xform.querySelector('[name="playerId"]').value
         document.getElementById('eventForm').querySelector('[name="teamName"]').value = xform.querySelector('[name="teamName"]').value
         document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = xform.querySelector('[name="Event_ID"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
+        document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('itemFormat secondaryStyle')[0].style.backgroundImage
     }else{
         document.getElementById('eventForm').style.display = 'none'
     }
@@ -303,5 +291,27 @@ function closeForm(){
         forms[i].style.display = 'none'
     }
     document.getElementById('formBackground').style.display = 'none'
+    closeFloating()
+}
+function closeFloating(){
+    var eles = document.getElementsByClassName('floatingActionButtons block')
+    
+    if(eles.length > 0){
+        for(i=eles.length-1;i>-1;i--){
+            // console.log(eles)
+            eles[i].classList.replace('block', 'hidden')
+        }
+    }
+    var eles = document.getElementsByClassName('floating')
+    
+    if(eles.length > 0){
+        for(i=eles.length-1;i>-1;i--){
+            // console.log(eles)
+            eles[i].classList.remove('floating')
+        }
+    }
+    if(!document.getElementById('floatingBackground').classList.contains('hidden')){
+        document.getElementById('floatingBackground').classList.add('hidden')
+    }
 }
   
