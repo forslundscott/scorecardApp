@@ -77,6 +77,12 @@ document.addEventListener('DOMContentLoaded', function () {
         setDragScroll(ele)
     }
 });
+
+// document.addEventListener('visibilitychange', async () => {
+//     if (screenLock !== null && document.visibilityState === 'visible') {
+//       screenLock = await navigator.wakeLock.request('screen');
+//     }
+//   });
 // document.addEventListener('touchstart', function () {
 //     gameInfo.touchTime = Date.now()
 // })

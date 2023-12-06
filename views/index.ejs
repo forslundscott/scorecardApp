@@ -9,7 +9,25 @@
     <title>Scorecard</title>
     
 </head>
-<body>      
+<body>
+    <script src="../dist/NoSleep.min.js"></script>    
+    <script>
+        // import NoSleep from 'nosleep.js';
+        var noSleep = new NoSleep();
+
+        // document.addEventListener('touchend', function enableNoSleep() {
+            
+        //     // document.removeEventListener('touchend', enableNoSleep, false);
+        //     noSleep.enable();
+        //     alert(noSleep.enabled)
+        // }, false);
+        document.addEventListener('click', function enableNoSleep() {
+            // alert('mousedown')
+            document.removeEventListener('click', enableNoSleep, false);
+            noSleep.enable();
+            console.log(noSleep)
+        }, false);
+    </script>  
         <%- include('header', {data: data}); %>
         
         <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, " + data.teams[0].color + " 48%, silver 50%, " +  data.teams[1].color + " 52%)": ""%>">
