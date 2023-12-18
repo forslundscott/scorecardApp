@@ -137,27 +137,25 @@ function setDragScroll(ele){
 var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
 var x = setInterval(function() {
     ;
-    // Get today's date and time
-    // var now = new Date().getTime();
-      
-    // Find the distance between now and the count down date
-    // if(Date.now()-gameInfo.touchTime>30000){
-    //     location.reload()
-    // }
+    
     if(document.getElementById('timerButton').innerText == 'Stop'){
         distance = distance - 1000;
-        
-        // Time calculations for days, hours, minutes and seconds
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-        
-        // Output the result in an element with id="demo"
-        document.getElementById("gameTimer").innerHTML = minutes + ":" + seconds;
-        
-        // If the count down is over, write some text 
+
         if (distance < 0) {
+            
+            // if(navigator.platform !== 'IPhone'){
+            //     navigator.vibrate([200, 200])
+            // }
+            // // setTimeout(function(){document.getElementById("myAudio").play()}, 950)
+            // document.getElementById("myAudio").muted = false
+            // document.getElementById("myAudio").play()
             clearInterval(x);
             location.reload()
+            
+        } else{
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            document.getElementById("gameTimer").innerHTML = minutes + ":" + seconds;
         }
     }
   }, 1000);
@@ -165,6 +163,11 @@ var x = setInterval(function() {
   function timerStartStop(ele){
     switch(true){
         case ele.innerText.includes('Start') :
+            // // document.getElementById("myAudio").play()
+            // document.getElementById("myAudio").play().then(() => { // pause directly
+            //     audio.pause();
+            //     audio.currentTime = 0;
+            //   });
             ele.form.querySelector('[name="timerState"]').value= 1
             ele.innerText = 'Stop'
             break
@@ -255,8 +258,10 @@ function handleLongPress(e){
 
 function toggleAddPlayer(xform){
     if(document.getElementById('newPlayerForm').style.display == 'none'){
+        var color = xform.querySelector('[name="color"]').value
         document.getElementById('newPlayerForm').style.display = ''
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
+        document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
     }

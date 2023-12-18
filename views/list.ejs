@@ -8,7 +8,7 @@
     <% } %>
     
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 11.5vh)"  : "" %>">
-        <% if (data.page == 'games') { %>
+        <% if (data.page == 'games' || data.page == 'readyForUpload') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>

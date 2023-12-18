@@ -9,15 +9,15 @@
             <div class="playerName">
                 Add New Player
             </div>
-            First Name<input type="text" name="firstName" value="" required>
+            <input type="text" name="firstName" value="" placeholder="First Name" required>
             <br>
-            Last Name<input type="text" name="lastName" value="" required>
+            <input type="text" name="lastName" value="" placeholder="Last Name" required>
             <br>
-            Team ID<input type="text" name="team" value="Test2" required>
+            <input type="text" name="team" value="Test2" hidden>
+            
+            Rostered <input type="radio" name="playerType" value="Rostered"> Sub <input type="radio" name="playerType" value="Sub" checked>
             <br>
-            Rostered <input type="radio" name="playerType"> Sub <input type="radio" name="playerType">
-            <br>
-            <label for="waiver">Signed Waiver</label><input type="checkbox" id="waiver">
+            <label for="waiver">Signed Waiver</label><input type="checkbox" id="waiver" oninvalid="this.setCustomValidity('Player must sign waiver to play')" required>
             <br>
             <button type="submit">Add Player</button>
             <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button>

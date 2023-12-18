@@ -1,5 +1,8 @@
 const express = require("express")
 const app = express()
+const bcrypt = require('bcrypt')
+const puppeteer = require('puppeteer')
+// const open = require('open')
 const port = 3000
 let options = {}
 
@@ -52,6 +55,25 @@ app.get(['/'], async (req,res)=>{
     // res.render('index.ejs')
     res.redirect('/games')
     // res.render('smartphone.ejs') 
+})
+app.get(['/login'], async (req,res)=>{
+    res.render('login.ejs')
+})
+app.post(['/login'], async (req,res)=>{
+    console.log(req.body);
+    try {
+        
+        const hashedpassword = await bcrypt.hash(req.body.password, 10)
+        console.log(hashedpassword)
+        res.redirect('/games')
+    }catch{
+        res.status(500).send()
+    }
+    
+    // 
+})
+app.get(['/register'], async (req,res)=>{
+    res.render('register.ejs')
 })
 app.get(['/timer'], async (req,res)=>{
     var game
@@ -111,7 +133,33 @@ app.get(['/games'], async (req,res)=>{
         // Query
         return pool.request()
             // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
-            .query(`SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where [Status]=0`)
+            // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
+            .query(`SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0`)
+    }).then(result => {
+        games = result.recordset
+    }).catch(err => {
+        console.log(err)
+    // ... error checks
+    });  
+
+    var data = {
+        teams: [
+            team1,
+            team2
+        ],
+        games: games,
+        page: req.route.path[0].replace('/','')
+    }
+    res.render('index.ejs',{data: data}) 
+})
+app.get(['/readyForUpload'], async (req,res)=>{
+    // res.render('index.ejs')
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
+            // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
+            // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
+            .query(`SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=1`)
     }).then(result => {
         games = result.recordset
     }).catch(err => {
@@ -340,6 +388,57 @@ app.post(['/addPlayer'], async (req,res)=>{
 //     }
 //   }, 1000);
 
+app.post(['/uploadGames'], async (req,res)=>{
+    // for upload
+    // open glos site
+    window.location.href = 'https://www.glosoccer.com/'
+    document.getElementsByClassName('theme-nav-dropdown dropdown-align-left')[0].getElementsByTagName('a')[0].click() 
+    document.getElementById('tool-game-schedule').getElementsByTagName('a')[0].click()
+    document.getElementById('slider_day_2023_12_17').getElementsByTagName('a')[0].click()
+    // game list headers
+    // document.getElementsByTagName('thead')[0]
+    // header items
+    // document.getElementsByTagName('thead')[0].getElementsByTagName('th')
+    // loop through header items to find status column
+    for(var i=0;i<document.getElementsByTagName('thead')[0].getElementsByTagName('th').length;i++){
+        if(document.getElementsByTagName('thead')[0].getElementsByTagName('th')[i].innerText == 'Status'){
+            // collection of game list rows 
+            var pageList = []
+            for(var j=0;j<document.getElementsByTagName('tbody')[0].getElementsByTagName('tr').length;j++){
+                pageList.push(document.getElementsByTagName('tbody')[0].getElementsByTagName('tr')[0].getElementsByTagName('td')[i].getElementsByTagName('a')[0].href)
+            }
+            break
+        }
+    }
+    await open(pageList[0])
+})
+
+// from mass
+// document.getElementsByClassName('js-league leagueSelect')[0]
+
+
+// // game list body
+// document.getElementsByTagName('tbody')[0]
+// // checks current league selected
+// document.getElementsByClassName('js-league leagueSelect')[0].querySelectorAll(`option[value='${document.getElementsByClassName('js-league leagueSelect')[0].value}']`)[0].text 
+app.get(['/test'], async (req,res)=>{
+    (async () => {
+        const browser = await puppeteer.launch({headless: false})
+        const page = await browser.newPage()
+        await page.goto('https://www.glosoccer.com')
+        // nb-sign-in-link
+        await page.goto(
+            await page.evaluate(() => {
+                return document.getElementById('nb-sign-in-link').href
+            })
+        )
+        const continuebutton = await page.evaluate(() => {
+            return document.getElementById('user_login')
+        })
+        continuebutton.click()
+    })()
+    res.status(204).send()
+})
 app.listen(port, function(err){
     // if (err) console.log(err);
  })
