@@ -12,10 +12,10 @@
     <% }else if (data.page == 'activeGame') {%>
         
         <div id="<%= data.teams[0].id %>" class="doubleColumn">
-            <%- include('list', {data: data, team: data.teams[0]}); %>
+            <%- include('list', {data: data, team: data.teams[0], opponent: data.teams[1]}); %>
         </div>
         <div id="<%= data.teams[1].id %>" class="doubleColumn">
-            <%- include('list', {data: data, team: data.teams[1]}); %>
+            <%- include('list', {data: data, team: data.teams[1], opponent: data.teams[0]}); %>
         </div>
     <% } %>
 </body>

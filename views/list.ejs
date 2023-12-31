@@ -4,7 +4,7 @@
 </head>
 <body>
     <% if (data.page == 'activeGame') { %>
-        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID}); %>
+        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent}); %>
     <% } %>
     
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 11.5vh)"  : "" %>">
@@ -16,7 +16,7 @@
             
             <% for(var i=0; i< team.players.length; i++) {%>
                 <% if (team.players[i].Id !== team.keeper) { %>
-                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID}); %>
+                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent}); %>
                 <% } %>
             <% } %>
         <% } %>

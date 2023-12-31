@@ -78,7 +78,9 @@ app.get(['/register'], async (req,res)=>{
 app.get(['/timer'], async (req,res)=>{
     var game
     var newStartTime
-    if(req.query.timerState == 2){
+    if(req.query.gameStatus == 1){
+        res.redirect('/readyforupload')
+    }else if(req.query.timerState == 2){
         await sql.connect(config).then(pool => {
             // Query
             return pool.request()
@@ -159,14 +161,29 @@ app.get(['/readyForUpload'], async (req,res)=>{
         return pool.request()
             // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
             // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
-            .query(`SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=1`)
+            .query(`SELECT * from dbo.gamesreadytoupload() select * from dbo.statsreadytoupload()`)
     }).then(result => {
-        games = result.recordset
+        console.log(result.recordsets.length)
+        games = result.recordsets[0]
+        for(var i=0;i<result.recordsets[0].length;i++){
+            var currentGameItem = result.recordsets[0][i]
+            currentGameItem.players = []
+            for(var j = result.recordsets[1].length -1;j>=0;j--){
+                var currentPlayerItem = result.recordsets[1][j]
+                if(currentPlayerItem.event_ID == currentGameItem.Event_ID){
+                    currentGameItem.players.push(currentPlayerItem)
+                    result.recordsets[1].splice(j,1)
+                    // console.log(result.recordsets[1].length)
+                }
+            }
+            // console.log(currentGameItem.players)
+        }
+        
     }).catch(err => {
         console.log(err)
     // ... error checks
     });  
-
+// console.log(games)
     var data = {
         teams: [
             team1,
@@ -182,91 +199,35 @@ app.get(['/activeGame'], async (req,res)=>{
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
-            .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'`)
+            .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
+            Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
+            EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
+            EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'
+            SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id
+            SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id
+            SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
     }).then(result => {
         // console.log(result.recordset[0])
-        team1 = result.recordset[0]
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'`)
-    }).then(result => {
-        // console.log(result.recordset[0])
-        team2 = result.recordset[0]
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'`)
-    }).then(result => {
-        // team1.id = req.query.Team1_ID
-        team1.players = result.recordset
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'`)
-    }).then(result => {
-        // team2.id = req.query.Team2_ID
-        team2.players = result.recordset
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id`)
-    }).then(result => {
-        if(result.recordset.length == 0){
+        team1 = result.recordsets[0][0]
+        team2 = result.recordsets[1][0]
+        team1.players = result.recordsets[2]
+        team2.players = result.recordsets[3]
+        if(result.recordsets[4].length == 0){
             team1.score = 0
         }else{
-            team1.score = result.recordset[0].score
+            team1.score = result.recordsets[4][0].score
         }
-        // console.log(result.recordset.length)
-        
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id`)
-    }).then(result => {
-        if(result.recordset.length == 0){
+        if(result.recordsets[5].length == 0){
             team2.score = 0
         }else{
-            team2.score = result.recordset[0].score
+            team2.score = result.recordsets[5][0].score
         }
-        // team2.score = result.recordset[0].score
+        game = result.recordsets[6][0]
     }).catch(err => {
         console.log(err)
     // ... error checks
     });  
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
-    }).then(result => {
-        
-            game = result.recordset[0]
-
-        // team2.score = result.recordset[0].score
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
+    
     if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
         if(game.period<game.maxPeriods){
             game.period=game.period +1
@@ -324,7 +285,7 @@ app.post(['/eventLog'], async (req,res)=>{
         await sql.connect(config).then(pool => {
             // Query
 
-            return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}')`)
+            return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}')`)
         }).then(result => {
             
         }).catch(err => {
@@ -336,21 +297,15 @@ app.post(['/eventLog'], async (req,res)=>{
     // res.sendStatus(204)
 })
 app.post(['/addPlayer'], async (req,res)=>{
-    // const sql = require('mssql');
-    // const config = {
-    //     server: 'scott-HP-Z420-Workstation',
-    //     database: 'scorecard',
-    //     user: 'SRF',
-    //     password: 'Planbsk8!!8ksbnalP',
-    //     trustServerCertificate: true,
-    // };
-    'insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName) VALUES()'
+    
+    // 'insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName) VALUES()'
+    console.log(req.body)
     await sql.connect(config).then(pool => {
         // Query
-        return pool.request().query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}')`)
+        return pool.request().query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
     }).then(result => {
-        team1.id = req.query.Team1_ID
-        team1.players = result.recordset
+        // team1.id = req.query.Team1_ID
+        // team1.players = result.recordset
     }).catch(err => {
         console.log(err)
     // ... error checks
@@ -358,35 +313,6 @@ app.post(['/addPlayer'], async (req,res)=>{
     res.redirect('back')
 })
 
-// var x = setInterval(function() {
-//     ;
-//     // Get today's date and time
-//     // var now = new Date().getTime();
-      
-//     // Find the distance between now and the count down date
-//     if(document.getElementById('timerButton').innerText == 'Stop'){
-//         distance = distance - 1000;
-        
-//         // Time calculations for days, hours, minutes and seconds
-//         var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-//         var seconds = Math.floor((distance % (1000 * 60)) / 1000).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-        
-//         // Output the result in an element with id="demo"
-//         document.getElementById("gameTimer").innerHTML = minutes + ":" + seconds;
-        
-//         // If the count down is over, write some text 
-//         if (distance < 0) {
-//             clearInterval(x);
-//             gameInfo.period = gameInfo.period + 1
-//             // gameInfo.time = '15:00'
-            
-//         document.getElementById("gameTimer").innerHTML = "15:00";
-//         document.getElementById('timerButton').innerHTML = 'Start'
-//         location.reload()
-//         // document.getElementById('timerButton').innerText = 'Start'
-//         }
-//     }
-//   }, 1000);
 
 app.post(['/uploadGames'], async (req,res)=>{
     // for upload
@@ -432,13 +358,79 @@ app.get(['/test'], async (req,res)=>{
                 return document.getElementById('nb-sign-in-link').href
             })
         )
-        const continuebutton = await page.evaluate(() => {
-            return document.getElementById('user_login')
+        await page.evaluate(() => {
+            
+            document.getElementById('user_login').value = 'forslund.scott@gmail.com'
+            document.getElementById('user_login').form.submit()
+            return true
         })
-        continuebutton.click()
+        await page.waitForNavigation()
+        await page.evaluate(() => {
+            
+            document.getElementById('user_password').value = 'Planbsk8!'
+            document.getElementById('user_password').form.submit()
+            return true
+        })
+        // continuebutton.value = 'forslund.scott@gmail.com'
+        // continuebutton.form.submit
     })()
     res.status(204).send()
 })
+// // // selected league text
+// document.getElementsByClassName('js-league leagueSelect')[0].selectedOptions[0].text 
+// // // selected season text
+// document.getElementsByClassName('js-season seasonSelect')[0].selectedOptions[0].text 
+// // // set to all teams
+// document.getElementsByClassName('js-team teamSelect')[0].value = ''
+// // // refresh button
+// document.getElementsByClassName('js-refreshTool saveChanges')[0]
+// // mass page
+// // game list
+// var gameList = document.getElementsByClassName('MssEdItem Game clr')
+// for(var igame=0;igame<gameList.length;igame++){
+
+
+// // game item
+// var gameList = document.getElementsByClassName('MssEdItem Game clr')
+// for(var igame=0;igame<gameList.length;igame++){
+
+
+// // game item
+//     var gameItem = gameList[igame]
+//     if(gameItem.getElementsByClassName('js-gameStatus')[0].value !== 'completed'){
+//         var dateTimeBox = gameItem.getElementsByClassName('date_time')[0]
+//         var startDate = dateTimeBox.getElementsByClassName('dateTimeDate')[0].value
+//         var startTime = dateTimeBox.getElementsByClassName('dateTimeTime')[0].value 
+//         var t1 = gameItem.getElementsByClassName('teams')[0].getElementsByClassName('team1')[0].innerText 
+//         var t2 = gameItem.getElementsByClassName('teams')[0].getElementsByClassName('team2')[0].innerText 
+//         // Edit Stats button
+//         var statButton = gameItem.getElementsByClassName('game_stats')[0]
+//         // check stats is selected
+//         if(!statButton.classList.contains('selected')){
+//             statButton.click()
+//         }
+//         // game stats section
+//         var gameStatsSection = gameItem.getElementsByClassName('js-gameStats')[0]
+//         // team tabs
+//         var teamTabs = gameStatsSection.getElementsByClassName('js-tabs')[0].children
+//         for(var i=0;i<teamTabs.length;i++){
+//             var currentTeam = teamTabs[i]
+//             if(currentTeam.innerText !== 'Scoring'){
+				
+//                     currentTeam.click()
+// 					setTimeout(function() { }, 3600)
+// 					console.log(gameStatsSection.getElementsByClassName('js-tabContent tabContent')[0].children[i].innerHTML)
+//                     var playerTypeTabs = gameStatsSection.getElementsByClassName('js-tabContent tabContent')[0].children[i].getElementsByClassName('js-team uiTabs subTabs')[0].getElementsByTagName('li')
+//                     for(var j=1;j<playerTypeTabs.length;j++){
+//                         var currentPlayerType = playerTypeTabs[j]
+//                             currentPlayerType.click()
+//             //                 console.log(currentPlayerType.getElementsByTagName('caption')[0].innerText)
+//                     }
+                
+//             }
+//         }
+//     }
+// }                                                       
 app.listen(port, function(err){
     // if (err) console.log(err);
  })

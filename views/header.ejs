@@ -30,6 +30,7 @@
           <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
           <input type="hidden" name="period" value="<%- data.game.period %>">
           <input type="hidden" name="timerState" value="<%- data.game.timerState %>">
+          <input type="hidden" name="gameStatus" value="<%- data.game.Status %>">
           <input type="hidden" name="timerTime" value="
           <% if (data.game.timerState == 0) { %>
             <%- data.game.timerTime %>
@@ -52,7 +53,9 @@
             </div>
             <div style="font-size: 33%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
             <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">
-              <% if (data.game.timerState == 0) { %>
+              <% if (data.game.Status == 1) { %>
+               Upload Game to SE
+              <%} else if (data.game.timerState == 0) { %>
                Start
               <% } else if (data.game.timerState == 1){%>
                 Stop
