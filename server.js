@@ -1,7 +1,46 @@
+if(process.env.NODE_ENV !== 'production'){
+    require('dotenv').config()
+}
+
 const express = require("express")
 const app = express()
+const sql = require('mssql');
 const bcrypt = require('bcrypt')
 const puppeteer = require('puppeteer')
+const passport = require('passport')
+const flash = require('express-flash')
+const session = require('express-session')
+const methodOverride = require('method-override')
+const initializePassport = require('./passport-config')
+initializePassport(
+    passport, 
+    email => users.find(user => user.email === email),
+    id => users.find(user=> user.id === id),
+    async email => {
+        const pool = await sql.connect(config)
+        const result = await pool.request()
+        .query(`select firstName, id, email, [password] 
+        from users as t1
+        LEFT JOIN emails as t2
+        on t1.ID=t2.userID
+        LEFT JOIN credentials as t3 
+        on t1.ID=t3.userID
+        where email = '${email}'`)
+        return result
+        },
+    async id => {
+        const pool = await sql.connect(config)
+        const result = await pool.request()
+        .query(`select firstName, id, email, [password] 
+        from users as t1
+        LEFT JOIN emails as t2
+        on t1.ID=t2.userID
+        LEFT JOIN credentials as t3 
+        on t1.ID=t3.userID
+        where id = '${id}'`)
+        return result
+        }
+    )
 // const open = require('open')
 const port = 3000
 let options = {}
@@ -9,16 +48,27 @@ let options = {}
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public',options))
 app.set('view-engine','ejs')
+app.use(flash())
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}))
+app.use(passport.initialize())
+app.use(passport.session())
+app.use(methodOverride('_method'))
 var eventLog = [
 
 ]
+const users = []
 // Helpers and Routes
 const functions = require('./helpers/functions')
 // const forms = require('./routes/forms')
 // app.use('/forms',forms)
 app.locals.functions = functions
 
-const sql = require('mssql');
+
+// const flash = require("express-flash")
     const config = {
         server: 'scott-HP-Z420-Workstation',
         database: 'scorecard',
@@ -51,29 +101,68 @@ var team2 = {
 }
 var games = []
 
-app.get(['/'], async (req,res)=>{
+
+app.get(['/'], checkAuthenticated, async (req,res)=>{
     // res.render('index.ejs')
     res.redirect('/games')
     // res.render('smartphone.ejs') 
 })
-app.get(['/login'], async (req,res)=>{
+app.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     res.render('login.ejs')
 })
-app.post(['/login'], async (req,res)=>{
-    console.log(req.body);
-    try {
-        
-        const hashedpassword = await bcrypt.hash(req.body.password, 10)
-        console.log(hashedpassword)
-        res.redirect('/games')
-    }catch{
-        res.status(500).send()
-    }
-    
-    // 
-})
+app.post(['/login'], passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+}))
 app.get(['/register'], async (req,res)=>{
     res.render('register.ejs')
+})
+app.post(['/register'], async (req,res)=>{
+    // console.log(req.body);
+    try {
+        const hashedpassword = await bcrypt.hash(req.body.password, 10)
+        await sql.connect(config).then(pool => {
+            // Query
+
+            return pool.request().query(`
+            DECLARE @tempTable table (
+                id int
+            )
+            
+            insert into users (firstName, lastName)
+            OUTPUT inserted.id
+            into @tempTable
+            values ('${req.body.firstName}', '${req.body.lastName}')
+            
+            insert into emails (userID,email)
+            select id, '${req.body.email}' from @tempTable
+            
+            insert into credentials (userID,[password])
+            select id, '${hashedpassword}' from @tempTable`)
+        }).then(result => {
+            
+        }).catch(err => {
+            console.log(err)
+        // ... error checks
+        }); 
+        // users.push({
+        //     id: Date.now().toString(),
+        //     firstName: req.body.firstName,
+        //     lastName: req.body.lastName,
+        //     email: req.body.email,
+        //     password: hashedpassword
+            
+
+        // })
+        
+        console.log(hashedpassword)
+        res.redirect('/login')
+    }catch{
+        res.redirect('/register')
+    }
+    
+    console.log(users)
 })
 app.get(['/timer'], async (req,res)=>{
     var game
@@ -431,6 +520,31 @@ app.get(['/test'], async (req,res)=>{
 //         }
 //     }
 // }                                                       
+
+app.delete('/logout', (req,res) => {
+    req.logOut((err)=> {
+        if(err){return next(err)}
+        res.redirect('/login')
+    })
+    
+})
+
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next()
+    }
+
+    res.redirect('/login')
+}
+
+function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return res.redirect('/')
+    }
+
+    next()
+}
+
 app.listen(port, function(err){
     // if (err) console.log(err);
  })
