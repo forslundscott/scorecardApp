@@ -31,12 +31,10 @@ initializePassport(
     async id => {
         const pool = await sql.connect(config)
         const result = await pool.request()
-        .query(`select firstName, id, email, [password] 
+        .query(`select firstName, id, email
         from users as t1
         LEFT JOIN emails as t2
         on t1.ID=t2.userID
-        LEFT JOIN credentials as t3 
-        on t1.ID=t3.userID
         where id = '${id}'`)
         return result
         }
@@ -62,7 +60,8 @@ var eventLog = [
 ]
 const users = []
 // Helpers and Routes
-const functions = require('./helpers/functions')
+const functions = require('./helpers/functions');
+// const { next } = require('cheerio/lib/api/traversing');
 // const forms = require('./routes/forms')
 // app.use('/forms',forms)
 app.locals.functions = functions
@@ -164,7 +163,7 @@ app.post(['/register'], async (req,res)=>{
     
     console.log(users)
 })
-app.get(['/timer'], async (req,res)=>{
+app.get(['/timer'], async (req,res,next)=>{
     var game
     var newStartTime
     if(req.query.gameStatus == 1){
@@ -175,9 +174,9 @@ app.get(['/timer'], async (req,res)=>{
             return pool.request()
                 .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
         }).then(result => {
-            // games = result.recordset
+            // games = result.recordset 
         }).catch(err => {
-            console.log(err)
+            next(err)
         // ... error checks
         });  
         res.redirect('/games')
@@ -200,7 +199,7 @@ app.get(['/timer'], async (req,res)=>{
                 game.timerState = req.query.timerState
 
         }).catch(err => {
-            console.log(err)
+            next(err)
         // ... error checks
         });  
 
@@ -211,15 +210,18 @@ app.get(['/timer'], async (req,res)=>{
         }).then(result => {
             // games = result.recordset
         }).catch(err => {
-            console.log(err)
+            next(err)
         // ... error checks
         });  
         console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
         res.redirect('back')
     }
 })
-app.get(['/games'], async (req,res)=>{
+app.get(['/games'], async (req,res,next)=>{
     // res.render('index.ejs')
+    if (req.isAuthenticated()) {
+        console.log(req.user)
+    }
     await sql.connect(config).then(pool => {
         // Query
         return pool.request()
@@ -229,7 +231,7 @@ app.get(['/games'], async (req,res)=>{
     }).then(result => {
         games = result.recordset
     }).catch(err => {
-        console.log(err)
+        next(err)
     // ... error checks
     });  
 
@@ -243,7 +245,7 @@ app.get(['/games'], async (req,res)=>{
     }
     res.render('index.ejs',{data: data}) 
 })
-app.get(['/readyForUpload'], async (req,res)=>{
+app.get(['/readyForUpload'], async (req,res, next)=>{
     // res.render('index.ejs')
     await sql.connect(config).then(pool => {
         // Query
@@ -269,7 +271,7 @@ app.get(['/readyForUpload'], async (req,res)=>{
         }
         
     }).catch(err => {
-        console.log(err)
+        next(err)
     // ... error checks
     });  
 // console.log(games)
@@ -283,81 +285,99 @@ app.get(['/readyForUpload'], async (req,res)=>{
     }
     res.render('index.ejs',{data: data}) 
 })
-app.get(['/activeGame'], async (req,res)=>{
-    var game
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
-            Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
-            EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
-            EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'
-            SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id
-            SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id
-            SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
-    }).then(result => {
-        // console.log(result.recordset[0])
-        team1 = result.recordsets[0][0]
-        team2 = result.recordsets[1][0]
-        team1.players = result.recordsets[2]
-        team2.players = result.recordsets[3]
-        if(result.recordsets[4].length == 0){
-            team1.score = 0
-        }else{
-            team1.score = result.recordsets[4][0].score
-        }
-        if(result.recordsets[5].length == 0){
-            team2.score = 0
-        }else{
-            team2.score = result.recordsets[5][0].score
-        }
-        game = result.recordsets[6][0]
-    }).catch(err => {
-        console.log(err)
-    // ... error checks
-    });  
-    
-    if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
-        if(game.period<game.maxPeriods){
-            game.period=game.period +1
-            game.timerState =0
-            game.timerTime = game.timePerPeriod
-        } else{
-            game.timerState = 2
-            game.timerTime = 0
-        }
+app.get(['/activeGame'], async (req,res,next)=>{
+    try {
+        var game
         await sql.connect(config).then(pool => {
             // Query
             return pool.request()
-                .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+                .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
+                Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
+                EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
+                EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'
+                SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id
+                SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id
+                SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
         }).then(result => {
-            // games = result.recordset
+            // console.log(result.recordset[0])
+            team1 = result.recordsets[0][0]
+            team2 = result.recordsets[1][0]
+            team1.players = result.recordsets[2]
+            team2.players = result.recordsets[3]
+            if(result.recordsets[4].length == 0){
+                team1.score = 0
+            }else{
+                team1.score = result.recordsets[4][0].score
+            }
+            if(result.recordsets[5].length == 0){
+                team2.score = 0
+            }else{
+                team2.score = result.recordsets[5][0].score
+            }
+            game = result.recordsets[6][0]
         }).catch(err => {
+            next(err)
             console.log(err)
         // ... error checks
         });  
+        
+        if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
+            if(game.period<game.maxPeriods){
+                game.period=game.period +1
+                game.timerState =0
+                game.timerTime = game.timePerPeriod
+            } else{
+                game.timerState = 2
+                game.timerTime = 0
+            }
+            await sql.connect(config).then(pool => {
+                // Query
+                return pool.request()
+                    .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+            }).then(result => {
+                // games = result.recordset
+            }).catch(err => {
+                next(err)
+                console.log(err)
+            // ... error checks
+            });  
+        }
+        var data = {
+            teams: [
+                team1,
+                team2
+            ],
+            game: game,
+            page: req.route.path[0].replace('/',''),
+            Event_ID: req.query.Event_ID
+        }
+        // console.log(data.teams[0].players)
+        res.render('index.ejs',{data: data}) 
+    } catch(err){
+        next(err)
     }
-    var data = {
-        teams: [
-            team1,
-            team2
-        ],
-        game: game,
-        page: req.route.path[0].replace('/',''),
-        Event_ID: req.query.Event_ID
-    }
-    // console.log(data.teams[0].players)
-    res.render('index.ejs',{data: data}) 
 })
 
 app.post(['/'], async (req,res)=>{
     // res.render('index.ejs')
     res.render('smartphone.ejs') 
 })
-app.post(['/eventLog'], async (req,res)=>{
+app.post(['/eventLog'], async (req,res,next)=>{
     eventLog.push(req.body)
     console.log(req.body)
-    if(req.body.type == 'makekeeper'){
+    if(req.body.type == 'makecaptain'){
+        await sql.connect(config).then(pool => {
+            // Query
+    
+            return pool.request().query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
+        }).then(result => {
+            
+        }).catch(err => {
+            next(err)
+        // ... error checks
+        });  
+        // res.redirect('back')
+    }else if(req.body.type == 'makekeeper'){
         await sql.connect(config).then(pool => {
             // Query
     
@@ -365,7 +385,7 @@ app.post(['/eventLog'], async (req,res)=>{
         }).then(result => {
             
         }).catch(err => {
-            console.log(err)
+            next(err)
         // ... error checks
         });  
         // res.redirect('back')
@@ -378,14 +398,14 @@ app.post(['/eventLog'], async (req,res)=>{
         }).then(result => {
             
         }).catch(err => {
-            console.log(err)
+            next(err)
         // ... error checks
         }); 
     }
     res.redirect('back')
     // res.sendStatus(204)
 })
-app.post(['/addPlayer'], async (req,res)=>{
+app.post(['/addPlayer'], async (req,res,next)=>{
     
     // 'insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName) VALUES()'
     console.log(req.body)
@@ -396,7 +416,7 @@ app.post(['/addPlayer'], async (req,res)=>{
         // team1.id = req.query.Team1_ID
         // team1.players = result.recordset
     }).catch(err => {
-        console.log(err)
+        next(err)
     // ... error checks
     });  
     res.redirect('back')
@@ -544,7 +564,13 @@ function checkNotAuthenticated(req, res, next) {
 
     next()
 }
+app.use((err, req, res, next) => {
+    console.error(err);
+    // console.log(req)
 
+    // Respond with an appropriate error message
+    res.status(500).send('Internal Server Error');
+});
 app.listen(port, function(err){
     // if (err) console.log(err);
  })
