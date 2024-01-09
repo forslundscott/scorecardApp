@@ -12,7 +12,7 @@
             <input type="hidden" name="period" value="">
             <input type="hidden" name="value" value="">
             <button class="playerButton" name="type" value="game" onclick="">
-        <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=game.Team1Color %> .5%, white 50%, <%=game.Team2Color %> 99.5%);">
+        <div class="itemFormat secondaryStyle" style="border-width: thick; border-color: <%-game.LeagueColor%>; background-image: linear-gradient(135deg, <%=game.Team1Color %> .5%, white 50%, <%=game.Team2Color %> 99.5%);">
             <div class="playerTag">
                 <div class="playerName">
                     <%= game.Team1_ID %>

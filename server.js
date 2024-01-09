@@ -169,12 +169,26 @@ app.get(['/timer'], async (req,res,next)=>{
     if(req.query.gameStatus == 1){
         res.redirect('/readyforupload')
     }else if(req.query.timerState == 2){
-        await sql.connect(config).then(pool => {
+        await sql.connect(config).then(async pool => {
             // Query
             return pool.request()
-                .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
-        }).then(result => {
-            // games = result.recordset 
+                .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID} select * from winningTeam(${req.query.Event_ID})`)
+        // }).then(async result => {
+        //     if(result.recordset[0].length=1){
+        //         var pool = await sql.connect(config)
+        //         return pool.request()
+        //         .query(`select * from winningTeamContact(${result.recordset[0].teamName})`)
+        //     }
+        }).then(async result => {
+            
+            console.log(result.recordset[0].teamName)
+            if(result.recordset[0].length=1){
+                var pool = await sql.connect(config)
+                return pool.request()
+                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone)
+                select top 1 * from winningTeamContact('${result.recordset[0].teamName}')`)
+            }  
+            
         }).catch(err => {
             next(err)
         // ... error checks
@@ -227,7 +241,7 @@ app.get(['/games'], async (req,res,next)=>{
         return pool.request()
             // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
             // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
-            .query(`SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0`)
+            .query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')`)
     }).then(result => {
         games = result.recordset
     }).catch(err => {

@@ -326,4 +326,16 @@ function closeFloating(){
         document.getElementById('floatingBackground').classList.add('hidden')
     }
 }
+function convertUnixTimeToMMDD(unixTime) {
+    // Multiply by 1000 to convert seconds to milliseconds
+    const date = new Date(unixTime);
   
+    // Get month and day components
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+  
+    // Concatenate month and day in "mm/dd" format
+    const mmddFormat = `${month}/${day}`;
+  
+    return mmddFormat;
+  }  
