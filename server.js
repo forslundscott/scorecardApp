@@ -12,6 +12,15 @@ const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
 const initializePassport = require('./passport-config')
+
+const config = {
+        server: process.env.DB_SERVER,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        trustServerCertificate: true,
+    };
+
 initializePassport(
     passport, 
     email => users.find(user => user.email === email),
@@ -55,10 +64,8 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-var eventLog = [
 
-]
-const users = []
+
 // Helpers and Routes
 const functions = require('./helpers/functions');
 // const { next } = require('cheerio/lib/api/traversing');
@@ -66,22 +73,7 @@ const functions = require('./helpers/functions');
 // app.use('/forms',forms)
 app.locals.functions = functions
 
-
-// const flash = require("express-flash")
-    const config = {
-        server: 'scott-HP-Z420-Workstation',
-        database: 'scorecard',
-        user: 'SRF',
-        password: 'Planbsk8!!8ksbnalP',
-        trustServerCertificate: true,
-    };
-
 // var connection = functions.getAccess()
-var gameInfo = {
-    period: 1,
-    time: '',
-    clockState: 'Start'
-}
 
 var team1 = {
     id: "",
@@ -145,17 +137,7 @@ app.post(['/register'], async (req,res)=>{
             console.log(err)
         // ... error checks
         }); 
-        // users.push({
-        //     id: Date.now().toString(),
-        //     firstName: req.body.firstName,
-        //     lastName: req.body.lastName,
-        //     email: req.body.email,
-        //     password: hashedpassword
-            
-
-        // })
         
-        console.log(hashedpassword)
         res.redirect('/login')
     }catch{
         res.redirect('/register')
@@ -173,12 +155,6 @@ app.get(['/timer'], async (req,res,next)=>{
             // Query
             return pool.request()
                 .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID} select * from winningTeam(${req.query.Event_ID})`)
-        // }).then(async result => {
-        //     if(result.recordset[0].length=1){
-        //         var pool = await sql.connect(config)
-        //         return pool.request()
-        //         .query(`select * from winningTeamContact(${result.recordset[0].teamName})`)
-        //     }
         }).then(async result => {
             
             console.log(result.recordset[0].teamName)
@@ -305,6 +281,40 @@ app.get(['/activeGame'], async (req,res,next)=>{
         await sql.connect(config).then(pool => {
             // Query
             return pool.request()
+                .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
+                Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')`)
+        }).then(async result => {
+            // console.log(result.recordset[0])
+            console.log(result.recordsets[0][0])
+            console.log(result.recordsets[1][0])
+            if(result.recordsets[0].length == 0){
+                var pool = await sql.connect(config)
+                pool.request()
+                .query(`
+                update teams
+                set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
+                where id = '${req.query.Team1_ID}'
+                `)
+            }
+            if(result.recordsets[1].length == 0){
+                var pool = await sql.connect(config)
+                pool.request()
+                .query(`
+                update teams
+                set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')
+                where id = '${req.query.Team2_ID}'
+                `)
+            }
+            // console.log(result.recordsets[2])
+            // console.log(result.recordsets[3])
+        }).catch(err => {
+            next(err)
+            console.log(err)
+        // ... error checks
+        });  
+        await sql.connect(config).then(pool => {
+            // Query
+            return pool.request()
                 .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
                 Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
                 EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
@@ -377,7 +387,7 @@ app.post(['/'], async (req,res)=>{
     res.render('smartphone.ejs') 
 })
 app.post(['/eventLog'], async (req,res,next)=>{
-    eventLog.push(req.body)
+    
     console.log(req.body)
     if(req.body.type == 'makecaptain'){
         await sql.connect(config).then(pool => {
