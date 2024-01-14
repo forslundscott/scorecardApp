@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <%
+        var emailSubject = encodeURIComponent('Subject of the email');
+        var emailBody = encodeURIComponent('Body of the email');
+        var bccAddress = encodeURIComponent('bcc@example.com'); 
+     %>
+        <!-- <form class="eventForm" action="" method="get"> -->
+            <!-- <a class="playerButton" href="mailto:<%=encodeURIComponent(winner.email)%>?bcc=<%=encodeURIComponent(winner.email)%>&subject=<%=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%=encodeURIComponent('This is a reminder to send gift card payments.')%>">     -->
+            <!-- <button class="playerButton" name="type" value="game" onclick=""> -->
+        
+        <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=winner.color %> .5%, white 50%, <%=winner.color %> 99.5%);">
+            <div class="playerTag">
+                <div class="playerName">
+                    <%= winner.player %>
+                    
+                </div>
+            </div>
+            <div class="statContainer">  
+                <div class="gameInfo"><%= winner.TeamId %></div>
+                 <div class="gameInfo"><%= winner.email %></div>
+                
+            </div>                    
+        </div>
+        <!-- </a> -->
+        <!-- </button> -->
+    <!-- </form> -->
+</body>
+</html>

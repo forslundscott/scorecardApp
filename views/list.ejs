@@ -12,6 +12,10 @@
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>
+        <% } else if (data.page == 'winners') { %>
+            <% for(var i=0; i< data.winners.length; i++) {%>
+                <%- include('winner_item',{winner: data.winners[i]}); %>
+            <% } %>
         <% } else if (data.page == 'activeGame') { %>
             
             <% for(var i=0; i< team.players.length; i++) {%>

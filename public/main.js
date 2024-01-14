@@ -282,6 +282,8 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('itemFormat secondaryStyle')[0].style.backgroundImage
         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
+        document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
     }else{
         document.getElementById('eventForm').style.display = 'none'
     }

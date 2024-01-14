@@ -7,6 +7,8 @@
             <input type="hidden" name="Team1_ID" value="<%= game.Team1_ID %>">
             <input type="hidden" name="Team2_ID" value="<%= game.Team2_ID %>">
             <input type="hidden" name="Event_ID" value="<%= game.Event_ID %>">
+            <input type="hidden" name="season" value="<%= game.season %>">
+            <input type="hidden" name="subseason" value="<%= game.subseason %>">
             <input type="hidden" name="realTime" value="">
             <input type="hidden" name="periodTime" value="">
             <input type="hidden" name="period" value="">
@@ -23,7 +25,7 @@
             <div class="statContainer">  
                 <div class="gameInfo"><%= game.Location %></div>
                 <div class="gameInfo"><%= game.Start_Time %></div>
-                <div class="gameInfo"><%= new Date(game.Start_Date).toLocaleDateString('en-us', {day: '2-digit', month: '2-digit'}) %></div>
+                <div class="gameInfo"><%= new Date(game.Start_Date).toLocaleDateString('en-us', {day: '2-digit', month: '2-digit', timeZone: 'UTC'}) %></div>
             </div>                    
         </div>
         </button>

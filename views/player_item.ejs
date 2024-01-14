@@ -13,6 +13,8 @@
             <input type="hidden" name="playerName" value="<%= player.firstName %> <%= player.lastName %>">
             <input type="hidden" name="Event_ID" value="<%= Event_ID %>">
             <input type="hidden" name="opponentKeeper" value="<%= opponent.keeper %>">
+            <input type="hidden" name="season" value="<%= data.game.season %>">
+            <input type="hidden" name="subseason" value="<%= data.game.subseason %>">
             <button class="playerButton" name="type" value="goal" onclick="toggleEventForm(this)">
                 <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
         <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=team.color %>  <%=team.color =='White' ? '40%, #ddd 50%, ' + team.color + ' 60%'  : '.5%, White 50%, ' + team.color + ' 99.5%'%>);">

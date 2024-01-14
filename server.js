@@ -154,16 +154,22 @@ app.get(['/timer'], async (req,res,next)=>{
         await sql.connect(config).then(async pool => {
             // Query
             return pool.request()
-                .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID} select * from winningTeam(${req.query.Event_ID})`)
+                .query(`select * from winningTeam(${req.query.Event_ID})`)
         }).then(async result => {
-            
-            console.log(result.recordset[0].teamName)
+            // console.log(result.rowsAffected)
             if(result.recordset[0].length=1){
                 var pool = await sql.connect(config)
                 return pool.request()
-                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone)
-                select top 1 * from winningTeamContact('${result.recordset[0].teamName}')`)
+                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone, Event_ID)
+                select top 1 *, ${req.query.Event_ID} as Event_ID 
+                from winningTeamContact('${result.recordset[0].teamName}')
+                where not 'MOI' in (Select league from teams
+                    where id = '${result.recordset[0].teamName}')`)
             }  
+        }).then(async result => {
+                var pool = await sql.connect(config)
+                return pool.request()
+                .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
             
         }).catch(err => {
             next(err)
@@ -217,7 +223,8 @@ app.get(['/games'], async (req,res,next)=>{
         return pool.request()
             // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
             // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
-            .query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')`)
+            // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
+            .query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-14-2024')`)
     }).then(result => {
         games = result.recordset
     }).catch(err => {
@@ -273,6 +280,30 @@ app.get(['/readyForUpload'], async (req,res, next)=>{
         games: games,
         page: req.route.path[0].replace('/','')
     }
+    res.render('index.ejs',{data: data}) 
+})
+app.get(['/winners'], async (req,res, next)=>{
+    // res.render('index.ejs')
+    var data = {
+        page: req.route.path[0].replace('/','')
+    }
+    await sql.connect(config).then(pool => {
+        // Query
+        return pool.request()
+            // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
+            // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
+            .query(`SELECT * from dbo.winners`)
+    }).then(result => {
+        // console.log(result.recordsets.length)
+        data.winners = result.recordsets[0]
+        
+        
+    }).catch(err => {
+        next(err)
+    // ... error checks
+    });  
+// console.log(games)
+    
     res.render('index.ejs',{data: data}) 
 })
 app.get(['/activeGame'], async (req,res,next)=>{
@@ -418,7 +449,7 @@ app.post(['/eventLog'], async (req,res,next)=>{
         await sql.connect(config).then(pool => {
             // Query
 
-            return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}')`)
+            return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
         }).then(result => {
             
         }).catch(err => {
