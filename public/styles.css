@@ -25,7 +25,11 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     height: 100%;
   }
+a{
+  /* all: unset; */
+}
 button {
+  /* all:unset; */
   -webkit-touch-callout: none; /* Safari */
         -webkit-user-select: none; /* Chrome */     
            -moz-user-select: none; /* Firefox */
@@ -285,6 +289,13 @@ input::-webkit-inner-spin-button {
   position:fixed;
   background-color:#000000;
   opacity: 60%;
+}
+#pageName{
+  height: 100%;
+}
+.headerButton{
+  all: unset;
+  height: 100%;
 }
 /* #timerButton{
   height: auto;

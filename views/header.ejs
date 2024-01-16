@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-  <!-- style="background-image: linear-gradient(135deg, <%=data.teams[0].color %> 10%, <%=data.teams[1].color %> 90%);" -->
+  
   <header class="header" >
     
     <div id="pageName" class="headerText">
@@ -11,13 +11,20 @@
        Games
       <% } else if (data.page == 'readyForUpload') { %>
         Ready For Upload to SE
+      <% } else if (data.page == 'winners') { %>
+        <div>Winners</div>
+        <div style="height: 40%; width: 100%;">
+          <!-- <a href="mailto:?bcc=<%=encodeURIComponent('test@test')%>&subject=<%=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%=encodeURIComponent('This is a reminder to send gift card payments.')%>" style="height: 100%; width: 100%;"> -->
+            <button id="emailAllButton" type="button" class="secondaryStyle" style="height: 80%" >Send Reminder to All</button>
+          <!-- </a>  -->
+        </div>
       <% }else if (data.page == 'activeGame') {%>
         <% var currentPeriod = data.game.period %>
         <script>
          var currentPeriod = '<%= data.game.period  %>'
 
         </script>
-        
+        <!-- onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'" -->
         <form action="javascript:void(0);">
           <input type="hidden" name="team" value="<%= data.teams[0].id %>">
           <input type="hidden" name="color" value="<%= data.teams[0].color %>">
@@ -30,6 +37,7 @@
           <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
           <input type="hidden" name="period" value="<%- data.game.period %>">
           <input type="hidden" name="timerState" value="<%- data.game.timerState %>">
+          <input type="hidden" name="gameStatus" value="<%- data.game.Status %>">
           <input type="hidden" name="timerTime" value="
           <% if (data.game.timerState == 0) { %>
             <%- data.game.timerTime %>
@@ -52,7 +60,9 @@
             </div>
             <div style="font-size: 33%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
             <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">
-              <% if (data.game.timerState == 0) { %>
+              <% if (data.game.Status == 1) { %>
+               Upload Game to SE
+              <%} else if (data.game.timerState == 0) { %>
                Start
               <% } else if (data.game.timerState == 1){%>
                 Stop

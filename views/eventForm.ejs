@@ -12,6 +12,9 @@
         <input type="hidden" name="period" value="">
         <input type="hidden" name="value" value="">
         <input type="hidden" name="Event_ID" value="">
+        <input type="hidden" name="opponentKeeper" value="">
+        <input type="hidden" name="season" value="">
+        <input type="hidden" name="subseason" value="">
         <div class="itemFormat secondaryStyle">
             <div class="playerName" style="font-size: 175%;">
             </div>
@@ -28,6 +31,11 @@
         <div class="statButton">
             <button class="floatingActionButtons floatAbove hidden">+1</button>
             <button style="font-size: 100%;" class="itemFormat secondaryStyle" name="type" value="makekeeper" onclick="statHandler(this, currentPeriod)" >Make Keeper</button>                    
+            <button class="floatingActionButtons floatBelow hidden">-1</button>
+        </div>
+        <div class="statButton">
+            <button class="floatingActionButtons floatAbove hidden">+1</button>
+            <button style="font-size: 100%;" class="itemFormat secondaryStyle" name="type" value="makecaptain" onclick="statHandler(this, currentPeriod)" >Make Captain</button>                    
             <button class="floatingActionButtons floatBelow hidden">-1</button>
         </div>
         <!-- <div class="statButton">

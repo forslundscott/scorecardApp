@@ -4,7 +4,7 @@
 </head>
 <body>
     <% if (data.page == 'activeGame') { %>
-        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID}); %>
+        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent}); %>
     <% } %>
     
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 11.5vh)"  : "" %>">
@@ -12,11 +12,34 @@
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>
+        <% } else if (data.page == 'winners') { %>
+            <% var url = ''; %>
+            <% for(var i=0; i< data.winners.length; i++) {%>
+                <% var url = url + data.winners[i].email %>
+                <% if (i < data.winners.length - 1) { %>
+                    <% var url = url + ',' %>
+                <% } %>
+                
+                <% console.log(url) %>
+                <%- include('winner_item',{winner: data.winners[i]}); %>
+            <% } %>
+            <script>
+                function openMailtoLink() {
+                    // Replace 'email@example.com' with the desired email address
+                    window.location.href = 'mailto:email@example.com';
+                }
+                var testvar = document.getElementById('emailAllButton')
+                console.log(testvar);
+                testvar.onclick = openMailtoLink
+                // document.getElementById('emailAllButton').onclick = function(){
+                //     window.location.href = url
+                // }
+            </script>
         <% } else if (data.page == 'activeGame') { %>
             
             <% for(var i=0; i< team.players.length; i++) {%>
                 <% if (team.players[i].Id !== team.keeper) { %>
-                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID}); %>
+                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent}); %>
                 <% } %>
             <% } %>
         <% } %>

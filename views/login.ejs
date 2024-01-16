@@ -1,10 +1,15 @@
 <meta name="viewport" content="maximum-scale=1">
 <link rel="stylesheet" href="/styles.css">
 <div id="formBackground" style="touch-action: '';"></div>
+
 <form id="newPlayerForm" class="popupForm secondaryStyle" action="login" method="post" style="text-align: center; ">
         <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
             Login
         </div>
+        <br>
+        <% if (messages.error) { %>
+            <%= messages.error %>
+           <% } %>
         <br>
         <input type="text" name="email" value="" placeholder="Email" style="margin-bottom: .75vh; font-size: 250%;" required>
         <br>

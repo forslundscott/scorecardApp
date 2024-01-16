@@ -149,7 +149,9 @@ var x = setInterval(function() {
             // // setTimeout(function(){document.getElementById("myAudio").play()}, 950)
             // document.getElementById("myAudio").muted = false
             // document.getElementById("myAudio").play()
+            
             clearInterval(x);
+            playSoundAndWait('doubleBell.mp3')
             location.reload()
             
         } else{
@@ -159,7 +161,20 @@ var x = setInterval(function() {
         }
     }
   }, 1000);
+  async function playSoundAndWait(soundFilePath) {
+    const audio = new Audio(soundFilePath);
+    
+    // Set up an event listener for the 'ended' event
+    audio.addEventListener('ended', function() {
+        // This function will be called when the sound has finished playing
+        // You can proceed with the next steps here
+        // For now, let's log a message to the console
+        console.log("Sound has finished playing!");
+    });
 
+    // Play the audio
+    await audio.play();
+}
   function timerStartStop(ele){
     switch(true){
         case ele.innerText.includes('Start') :
@@ -281,6 +296,9 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = xform.querySelector('[name="Event_ID"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('itemFormat secondaryStyle')[0].style.backgroundImage
+        document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
+        document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
     }else{
         document.getElementById('eventForm').style.display = 'none'
     }
@@ -325,4 +343,16 @@ function closeFloating(){
         document.getElementById('floatingBackground').classList.add('hidden')
     }
 }
+function convertUnixTimeToMMDD(unixTime) {
+    // Multiply by 1000 to convert seconds to milliseconds
+    const date = new Date(unixTime);
   
+    // Get month and day components
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+  
+    // Concatenate month and day in "mm/dd" format
+    const mmddFormat = `${month}/${day}`;
+  
+    return mmddFormat;
+  }  
