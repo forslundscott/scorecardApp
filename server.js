@@ -224,7 +224,7 @@ app.get(['/games'], async (req,res,next)=>{
             // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
             // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
             // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
-            .query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-14-2024')`)
+            .query(`Select * from gamesList()`)
     }).then(result => {
         games = result.recordset
     }).catch(err => {

@@ -15,7 +15,7 @@
         <div>Winners</div>
         <div style="height: 40%; width: 100%;">
           <!-- <a href="mailto:?bcc=<%=encodeURIComponent('test@test')%>&subject=<%=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%=encodeURIComponent('This is a reminder to send gift card payments.')%>" style="height: 100%; width: 100%;"> -->
-            <button id="emailAllButton" type="button" class="secondaryStyle" style="height: 80%" onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'">Send Reminder to All</button>
+            <button id="emailAllButton" type="button" class="secondaryStyle" style="height: 80%" >Send Reminder to All</button>
           <!-- </a>  -->
         </div>
       <% }else if (data.page == 'activeGame') {%>
@@ -24,7 +24,7 @@
          var currentPeriod = '<%= data.game.period  %>'
 
         </script>
-        
+        <!-- onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'" -->
         <form action="javascript:void(0);">
           <input type="hidden" name="team" value="<%= data.teams[0].id %>">
           <input type="hidden" name="color" value="<%= data.teams[0].color %>">

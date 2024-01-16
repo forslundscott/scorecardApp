@@ -149,7 +149,9 @@ var x = setInterval(function() {
             // // setTimeout(function(){document.getElementById("myAudio").play()}, 950)
             // document.getElementById("myAudio").muted = false
             // document.getElementById("myAudio").play()
+            
             clearInterval(x);
+            playSoundAndWait('doubleBell.mp3')
             location.reload()
             
         } else{
@@ -159,7 +161,20 @@ var x = setInterval(function() {
         }
     }
   }, 1000);
+  async function playSoundAndWait(soundFilePath) {
+    const audio = new Audio(soundFilePath);
+    
+    // Set up an event listener for the 'ended' event
+    audio.addEventListener('ended', function() {
+        // This function will be called when the sound has finished playing
+        // You can proceed with the next steps here
+        // For now, let's log a message to the console
+        console.log("Sound has finished playing!");
+    });
 
+    // Play the audio
+    await audio.play();
+}
   function timerStartStop(ele){
     switch(true){
         case ele.innerText.includes('Start') :
