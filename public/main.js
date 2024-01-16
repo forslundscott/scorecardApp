@@ -1,4 +1,4 @@
-
+const audio = new Audio()
 var eventLog = [
 
 ]
@@ -78,6 +78,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+document.addEventListener('click', function enableAudio() {
+    // alert(navigator.platform)
+    document.removeEventListener('click', enableAudio, false);
+    audio.autoplay= true;
+    // audio.muted = false
+    // console.log(navigator)
+    // if(navigator.platform !== 'IPhone'){
+    //     navigator.vibrate(200)
+    // }
+    
+}, false);
+
 // document.addEventListener('visibilitychange', async () => {
 //     if (screenLock !== null && document.visibilityState === 'visible') {
 //       screenLock = await navigator.wakeLock.request('screen');
@@ -151,8 +163,36 @@ var x = setInterval(function() {
             // document.getElementById("myAudio").play()
             
             clearInterval(x);
-            playSoundAndWait('doubleBell.mp3')
-            location.reload()
+        //    alert(navigator.getAutoplayPolicy("mediaelement"))
+            // if(navigator.platform !== 'iPhone'){
+                // alert(navigator.platform);
+                playSoundAndWait('doubleBell.mp3')
+                function playSoundAndWait(soundFilePath) {
+                    // var audio = new Audio(soundFilePath);
+                    console.log(audio)
+                    if(audio.autoplay == true){
+                        audio.src = soundFilePath
+                        // Set up an event listener for the 'ended' event
+                        audio.addEventListener('ended', function() {
+                            location.reload()
+                        });
+                    
+                        // Play the audio
+                        audio.play();
+                    }else{
+                        location.reload()
+                    }
+                }
+            // }else{
+            //     // var audio = new Audio()
+            //     // alert(audio.autoplay)
+            //     // audio.autoplay = true
+            //     audio.src = 'doubleBell.mp3'
+            //     audio.addEventListener('ended', function() {
+            //         location.reload()
+            //     });
+            // }
+            // location.reload()
             
         } else{
             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
@@ -161,20 +201,7 @@ var x = setInterval(function() {
         }
     }
   }, 1000);
-  async function playSoundAndWait(soundFilePath) {
-    const audio = new Audio(soundFilePath);
-    
-    // Set up an event listener for the 'ended' event
-    audio.addEventListener('ended', function() {
-        // This function will be called when the sound has finished playing
-        // You can proceed with the next steps here
-        // For now, let's log a message to the console
-        console.log("Sound has finished playing!");
-    });
-
-    // Play the audio
-    await audio.play();
-}
+  
   function timerStartStop(ele){
     switch(true){
         case ele.innerText.includes('Start') :
