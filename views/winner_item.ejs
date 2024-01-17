@@ -4,12 +4,16 @@
 </head>
 <body>
     <%
-        var emailSubject = encodeURIComponent('Subject of the email');
-        var emailBody = encodeURIComponent('Body of the email');
-        var bccAddress = encodeURIComponent('bcc@example.com'); 
+        var emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
+        var emailBody = encodeURIComponent(`Hi ${winner.player}, 
+
+This is a reminder to send your gift card fees to Dean. His Venmo and Cashapp are Dean Jong. Please respond to this email with a screenshot of the payment when you are done.  
+
+Thank you and have a nice day!`);
+        var bccAddress = encodeURIComponent(`${winner.email}`); 
      %>
         <!-- <form class="eventForm" action="" method="get"> -->
-            <!-- <a class="playerButton" href="mailto:<%=encodeURIComponent(winner.email)%>?bcc=<%=encodeURIComponent(winner.email)%>&subject=<%=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%=encodeURIComponent('This is a reminder to send gift card payments.')%>">     -->
+            <a class="playerButton" href="mailto:?bcc=<%=bccAddress%>&subject=<%=emailSubject%>&body=<%=emailBody%>">    
             <!-- <button class="playerButton" name="type" value="game" onclick=""> -->
         
         <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=winner.color %> .5%, white 50%, <%=winner.color %> 99.5%);">
@@ -25,7 +29,7 @@
                 
             </div>                    
         </div>
-        <!-- </a> -->
+        </a>
         <!-- </button> -->
     <!-- </form> -->
 </body>

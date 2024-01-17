@@ -24,13 +24,27 @@
                 <%- include('winner_item',{winner: data.winners[i]}); %>
             <% } %>
             <script>
+                var emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
+                var emailBody = encodeURIComponent(`Hi All, 
+
+
+This is a reminder to send your gift card fees to Dean. His Venmo and Cashapp are Dean Jong. Please respond to this email with a screenshot of the payment when you are done. 
+
+Also if you missed the payment for the prior week they are due by the next game. 
+
+
+Thank you and have a nice day!`
+                );
+                var bccAddress = encodeURIComponent(`<%= url %>`);
                 function openMailtoLink() {
                     // Replace 'email@example.com' with the desired email address
-                    window.location.href = 'mailto:email@example.com';
+                    // window.location.href = 'test.com'
+                    window.location.href = `mailto:?bcc=${bccAddress}&subject=${emailSubject}&body=${emailBody}`;
                 }
                 var testvar = document.getElementById('emailAllButton')
                 console.log(testvar);
                 testvar.onclick = openMailtoLink
+                console.log(testvar);
                 // document.getElementById('emailAllButton').onclick = function(){
                 //     window.location.href = url
                 // }
