@@ -4,6 +4,7 @@ if(process.env.NODE_ENV !== 'production'){
 
 const express = require("express")
 const app = express()
+// const bodyParser = require('body-parser')
 const sql = require('mssql');
 const bcrypt = require('bcrypt')
 const puppeteer = require('puppeteer')
@@ -312,6 +313,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
         await sql.connect(config).then(pool => {
             // Query
             return pool.request()
+                // .query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${req.query.Event_ID}'`)
                 .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
                 Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')`)
         }).then(async result => {
@@ -346,13 +348,14 @@ app.get(['/activeGame'], async (req,res,next)=>{
         await sql.connect(config).then(pool => {
             // Query
             return pool.request()
-                .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
-                Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
-                EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
-                EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'
-                SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id
-                SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id
-                SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
+                .query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${req.query.Event_ID}'`)
+                // .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
+                // Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
+                // EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
+                // EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'
+                // SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id
+                // SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id
+                // SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
         }).then(result => {
             // console.log(result.recordset[0])
             team1 = result.recordsets[0][0]
@@ -502,7 +505,23 @@ app.post(['/uploadGames'], async (req,res)=>{
     }
     await open(pageList[0])
 })
+app.post('/switchSides', async (req, res, next) => {
+    // Process form data here
+    const formData = req.body;
+    console.log(formData)
+    await sql.connect(config).then(pool => {
+        // Query
 
+        return pool.request().query(`EXEC [scorecard].[dbo].[switchSides] @eventId ='${req.body.Event_ID}'`)
+    }).then(result => {
+        
+    }).catch(err => {
+        next(err)
+    // ... error checks
+    });  
+    // Send a response back to the client
+    res.json({ message: 'Form submitted successfully!', data: formData });
+  });
 // from mass
 // document.getElementsByClassName('js-league leagueSelect')[0]
 

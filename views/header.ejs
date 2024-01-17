@@ -33,21 +33,17 @@
             <div style="float: left; width: 17%;" id="<%= data.teams[0].id + "Score" %>"><%= data.teams[0].score %></div>
           </div>
         </form>
-        <form id="timerForm" action="timer">
+        <form id="timerForm" action="timer" enctype="application/x-www-form-urlencoded">
           <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
           <input type="hidden" name="period" value="<%- data.game.period %>">
           <input type="hidden" name="timerState" value="<%- data.game.timerState %>">
           <input type="hidden" name="gameStatus" value="<%- data.game.Status %>">
-          <input type="hidden" name="timerTime" value="
-          <% if (data.game.timerState == 0) { %>
-            <%- data.game.timerTime %>
-          <% } else if (data.game.timerState == 1){%>
-            <%- data.game.timerTime - (Date.now() - data.game.timerStartTime) %>
-          <% } else if (data.game.timerState == 2){%>
-              0
-          <% } %>
-          
-          ">
+          <input type="hidden" name="timerTime" value="<% 
+          if (data.game.timerState == 0) { %><%- 
+            data.game.timerTime %><% 
+          } else if (data.game.timerState == 1){%><%- 
+            data.game.timerTime - (Date.now() - data.game.timerStartTime) %><% 
+          } else if (data.game.timerState == 2){%>0<% } %>">
           <div style="float: left; width: 40%; height: 100%;">
             <div id="gameTimer" style="font-size: 70%;">
               <% if (data.game.timerState == 0) { %>
@@ -70,6 +66,8 @@
                 Complete
               <% } %>
             </button>
+            <br>
+            <button type="button" style="vertical-align: super;" onclick="switchSides(this)"><></button>
           </div>
         </form>
         
