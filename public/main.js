@@ -383,3 +383,29 @@ function convertUnixTimeToMMDD(unixTime) {
   
     return mmddFormat;
   }  
+  async function switchSides(ele){
+    var form = ele.form
+    
+    var formData = new FormData(form)
+    console.log(formData)
+    try{
+        const response = await fetch('/switchSides', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            const responseData = await response.json();
+            console.log(responseData.data);
+            location.reload()
+            // Handle successful response, update UI, etc.
+          } else {
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+  }

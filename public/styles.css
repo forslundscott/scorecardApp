@@ -48,7 +48,7 @@ button {
     color: var(--primaryFontColor) !important;
     background-color: var(--primeColor) !important;
     top: 0;
-    height: 13%;
+    height: 20%;
     width: 100%;
     z-index: 1;
     overflow: hidden;
@@ -65,7 +65,7 @@ button {
     display: block;
   }
   #innerBody {
-    height: 77%;
+    height: 70%;
     width: 100%;
     /* background: var(--shinySilver); */
     background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);;
