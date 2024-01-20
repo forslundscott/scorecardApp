@@ -4,17 +4,22 @@
 </head>
 <body>
   <footer class="footer">
-    <img src="GLOSLogo.png" alt="GLOS Logo" height="100%" style="float: right;">
-    <form action="logout?_method=DELETE" method="POST" style="float: right;">
-      <button type="submit" class="itemFormat secondaryStyle">Log Out</button>
-    </form>
-
-    <div class="statButton">
-      <form action="/games" method="get" >
-        <button type="submit" class="itemFormat secondaryStyle" >Games</button>
-      </form>
+    
+    <div class="triColumn">
+      <!-- <div class="statButton"> -->
+        <form action="/games" method="get" >
+          <button type="submit" class="itemFormat" >Games</button>
+        </form>
       
+      <!-- </div> -->
     </div>
+
+    <div class="triColumn"><img src="GLOSLogo.png" alt="GLOS Logo" height="100%" ></div>
+    <div class="triColumn">
+          <form action="logout?_method=DELETE" method="POST">
+            <button type="submit" class="itemFormat">Log Out</button>
+          </form>
+      </div>
     
   </footer>
 </html>

@@ -29,7 +29,7 @@ a{
   /* all: unset; */
 }
 button {
-  /* all:unset; */
+  all:unset;
   -webkit-touch-callout: none; /* Safari */
         -webkit-user-select: none; /* Chrome */     
            -moz-user-select: none; /* Firefox */
@@ -48,7 +48,7 @@ button {
     color: var(--primaryFontColor) !important;
     background-color: var(--primeColor) !important;
     top: 0;
-    height: 20%;
+    height: 25%;
     width: 100%;
     z-index: 1;
     overflow: hidden;
@@ -65,7 +65,7 @@ button {
     display: block;
   }
   #innerBody {
-    height: 70%;
+    height: 65%;
     width: 100%;
     /* background: var(--shinySilver); */
     background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);;
@@ -186,6 +186,13 @@ input::-webkit-inner-spin-button {
   height: calc(100%/3);
   width: 100%;
 }
+.triColumn{
+  float: left;
+  font-size: 110%;
+  height: 100%;
+  width: calc(100%/3);
+  text-align: center;
+}
 .floatingActionButtons{
   position: absolute; 
   z-index: 5; 
@@ -297,7 +304,9 @@ input::-webkit-inner-spin-button {
   all: unset;
   height: 100%;
 }
-/* #timerButton{
-  height: auto;
-  width: 5%;
-} */
+.listItem{
+  height: 11.5vh;
+}
+#timerForm{
+  height: 100%;
+}
