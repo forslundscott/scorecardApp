@@ -150,7 +150,7 @@ var distance = Number(document.getElementById('timerForm').querySelector('[name=
 var x = setInterval(function() {
     ;
     
-    if(document.getElementById('timerButton').innerText == 'Stop'){
+    if(document.getElementById('timerForm').querySelector('[name="timerState"]').value == 1){
         distance = distance - 1000;
 
         if (distance < 0) {
@@ -203,45 +203,59 @@ var x = setInterval(function() {
   }, 1000);
   
   function timerStartStop(ele){
+    var form = ele.form
     switch(true){
-        case ele.innerText.includes('Start') :
+        case ele.form.querySelector('[name="timerState"]').value == 0 :
             // // document.getElementById("myAudio").play()
             // document.getElementById("myAudio").play().then(() => { // pause directly
             //     audio.pause();
             //     audio.currentTime = 0;
             //   });
             ele.form.querySelector('[name="timerState"]').value= 1
-            ele.innerText = 'Stop'
+            // ele.innerText = 'Stop'
             break
-        case ele.innerText.includes('Stop'):
+        case ele.form.querySelector('[name="timerState"]').value == 1 :
             ele.form.querySelector('[name="timerState"]').value= 0
-            ele.innerText = 'Start'
+            // ele.innerText = 'Start'
             break
     }
     
   }
 
 
-  function statHandler(ele,xperiod,val = 1){
+  async function statHandler(ele,xperiod,val = 1){
     console.log('testonclick')
     var form = ele.form
-    var statType = ele.value
+    // var statType = ele.value
     
         form.querySelector('[name="realTime"]').value = Date.now()
         // console.log(form.querySelector('[name="realTime"]').value)
         form.querySelector('[name="value"]').value = val
-        // if(statType.includes('minus')){
-        //     form.querySelector('[name="value"]').value = '-1'
-        // }else {
-        //     form.querySelector('[name="value"]').value = '1'
-        // }
+        
         form.querySelector('[name="period"]').value = xperiod
         form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
-        switch(statType){
-            case 'goal':
-                // document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText = Number(document.getElementById(form.querySelector('[name="teamName"]').value + 'Score').innerText) + 1
-                break
-        }
+        // var formData = new FormData(form)
+        // console.log(formData)
+        // try{
+        //     const response = await fetch('/testEventLog', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/x-www-form-urlencoded',
+        //         },
+        //         body: new URLSearchParams(formData).toString(),
+        //     });
+        //     if (response.ok) {
+        //         const responseData = await response.json();
+        //         console.log(responseData.data);
+        //         // location.reload()
+        //         // Handle successful response, update UI, etc.
+        //     } else {
+        //         console.error('Form submission failed');
+        //         // Handle error response
+        //     }
+        // }catch(error){
+        //     console.error('Error:', error);
+        // }
   }
   // mouseup need to be monitored on a "global" element or we might miss it if
 // we move outside the original element.

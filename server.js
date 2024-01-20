@@ -522,6 +522,23 @@ app.post('/switchSides', async (req, res, next) => {
     // Send a response back to the client
     res.json({ message: 'Form submitted successfully!', data: formData });
   });
+  app.post('/testEventLog', async (req, res, next) => {
+    // Process form data here
+    const formData = req.body;
+    console.log(formData)
+    // await sql.connect(config).then(pool => {
+    //     // Query
+
+    //     return pool.request().query(`EXEC [scorecard].[dbo].[switchSides] @eventId ='${req.body.Event_ID}'`)
+    // }).then(result => {
+        
+    // }).catch(err => {
+    //     next(err)
+    // // ... error checks
+    // });  
+    // Send a response back to the client
+    res.json({ message: 'Form submitted successfully!', data: formData });
+  });
 // from mass
 // document.getElementsByClassName('js-league leagueSelect')[0]
 

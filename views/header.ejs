@@ -25,63 +25,60 @@
 
         </script>
         <!-- onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'" -->
-        <form action="javascript:void(0);">
-          <input type="hidden" name="team" value="<%= data.teams[0].id %>">
-          <input type="hidden" name="color" value="<%= data.teams[0].color %>">
-          <div style="float: left; width: 30%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
-            <div style="float: left; width: 83%;"><%= data.teams[0].id %></div>
-            <div style="float: left; width: 17%;" id="<%= data.teams[0].id + "Score" %>"><%= data.teams[0].score %></div>
-          </div>
-        </form>
-        <form id="timerForm" action="timer" enctype="application/x-www-form-urlencoded">
-          <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
-          <input type="hidden" name="period" value="<%- data.game.period %>">
-          <input type="hidden" name="timerState" value="<%- data.game.timerState %>">
-          <input type="hidden" name="gameStatus" value="<%- data.game.Status %>">
-          <input type="hidden" name="timerTime" value="<% 
-          if (data.game.timerState == 0) { %><%- 
-            data.game.timerTime %><% 
-          } else if (data.game.timerState == 1){%><%- 
-            data.game.timerTime - (Date.now() - data.game.timerStartTime) %><% 
-          } else if (data.game.timerState == 2){%>0<% } %>">
-          <div style="float: left; width: 40%; height: 100%;">
-            <div id="gameTimer" style="font-size: 70%;">
-              <% if (data.game.timerState == 0) { %>
-                <%- new Date(data.game.timerTime).toISOString().slice(14, -5) %>
-              <% } else if (data.game.timerState == 1){%>
-                <%- new Date(data.game.timerTime - (Date.now() - data.game.timerStartTime)).toISOString().slice(14, -5) %>
-              <% } else if (data.game.timerState == 2){%>
-                Full Time
-              <% } %>
+        <div class="triColumn">
+          <form action="javascript:void(0);">
+            <input type="hidden" name="team" value="<%= data.teams[0].id %>">
+            <input type="hidden" name="color" value="<%= data.teams[0].color %>">
+            <div style="float: left; width: 100%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+              <div style="float: left; width: 83%;"><%= data.teams[0].id %></div>
+              <div style="float: left; width: 17%;" id="<%= data.teams[0].id + "Score" %>"><%= data.teams[0].score %></div>
             </div>
-            <div style="font-size: 33%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
-            <button style="vertical-align: super;" onclick="timerStartStop(this)" id="timerButton">
-              <% if (data.game.Status == 1) { %>
-               Upload Game to SE
-              <%} else if (data.game.timerState == 0) { %>
-               Start
-              <% } else if (data.game.timerState == 1){%>
-                Stop
-              <% } else if (data.game.timerState == 2){%>
-                Complete
-              <% } %>
-            </button>
-            <br>
-            <button type="button" style="vertical-align: super;" onclick="switchSides(this)"><></button>
-          </div>
-        </form>
-        
-        <!-- HON vs BSG  -->
-        <form action="javascript:void(0);">
-          <input type="hidden" name="team" value="<%= data.teams[1].id %>">
-          <input type="hidden" name="color" value="<%= data.teams[1].color %>">
-          <div style="float: left; width: 30%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
-            <div style="float: right; width: 83%;"><%= data.teams[1].id %></div>
-            <div style="float: right; width: 17%;" id="<%= data.teams[1].id + "Score" %>"><%= data.teams[1].score %></div>
-          </div>
-        </form>
+          </form>
+        </div>
+        <div class="triColumn">
+          
+          <form id="timerForm" action="timer" enctype="application/x-www-form-urlencoded">
+            <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
+            <input type="hidden" name="period" value="<%- data.game.period %>">
+            <input type="hidden" name="timerState" value="<%- data.game.timerState %>">
+            <input type="hidden" name="gameStatus" value="<%- data.game.Status %>">
+            <input type="hidden" name="timerTime" value="<% 
+            if (data.game.timerState == 0) { %><%- 
+              data.game.timerTime %><% 
+            } else if (data.game.timerState == 1){%><%- 
+              data.game.timerTime - (Date.now() - data.game.timerStartTime) %><% 
+            } else if (data.game.timerState == 2){%>0<% } %>">
+            <div style="float: left; width: 100%; height: 100%;">
+              <button onclick="timerStartStop(this)" id="timerButton" style="height: 50%; vertical-align: top;">
+                <div id="gameTimer" style="font-size: 70%;">
+                  <% if (data.game.timerState == 0) { %>
+                    <%- new Date(data.game.timerTime).toISOString().slice(14, -5) %>
+                  <% } else if (data.game.timerState == 1){%>
+                    <%- new Date(data.game.timerTime - (Date.now() - data.game.timerStartTime)).toISOString().slice(14, -5) %>
+                  <% } else if (data.game.timerState == 2){%>
+                    Full Time
+                  <% } %>
+                </div>
+                <div style="font-size: 33%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
+              </button>
+              
+              
+              <br>
+              <button type="button" onclick="switchSides(this)" style="height: 50%;"><img src="swapIcon.png" alt="Switch Sides" height="50vh" ></button>
+            </div>
+          </form>
+        </div>
+        <div class="triColumn">
+          <form action="javascript:void(0);">
+            <input type="hidden" name="team" value="<%= data.teams[1].id %>">
+            <input type="hidden" name="color" value="<%= data.teams[1].color %>">
+            <div style="float: left; width: 100%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+              <div style="float: right; width: 83%;"><%= data.teams[1].id %></div>
+              <div style="float: right; width: 17%;" id="<%= data.teams[1].id + "Score" %>"><%= data.teams[1].score %></div>
+            </div>
+          </form>
+        </div>
       <% } %>
     </div>
-    <!-- <button onclick="location.href = '/forms/form'" style="float: right;">Add User</button> -->
   </header>
 </html>
