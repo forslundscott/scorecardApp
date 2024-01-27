@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-        <form class="listItem" action="javascript:void(0);">
+        <form class="listItem" action="javascript:void(0);" id="<%= player.Id + team.id %>">
             <input type="hidden" name="playerId" value="<%= player.Id %>">
             <input type="hidden" name="teamName" value="<%= team.id %>">
             <input type="hidden" name="realTime" value="">
@@ -15,23 +15,23 @@
             <input type="hidden" name="opponentKeeper" value="<%= opponent.keeper %>">
             <input type="hidden" name="season" value="<%= data.game.season %>">
             <input type="hidden" name="subseason" value="<%= data.game.subseason %>">
-            <button class="playerButton" name="type" value="goal" onclick="toggleEventForm(this)">
+            <button class="playerButton" type="button" onclick="toggleEventForm(this)">
                 <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
-        <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=team.color %>  <%=team.color =='White' ? '40%, #ddd 50%, ' + team.color + ' 60%'  : '.5%, White 50%, ' + team.color + ' 99.5%'%>);">
-            <div class="playerTag">
-                <div class="playerName">
-                    <%= player.firstName %>
-                    <%= player.lastName %>
+                <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=team.color %>  <%=team.color =='White' ? '40%, #ddd 50%, ' + team.color + ' 60%'  : '.5%, White 50%, ' + team.color + ' 99.5%'%>);">
+                    <div class="playerTag">
+                        <div class="playerName">
+                            <%= player.firstName %>
+                            <%= player.lastName %>
+                        </div>
+                        <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
+                    </div>
+                    <div class="statContainer">  
+                        <div class="gameInfo goals">G: <%= player.goals %></div>
+                        <div class="gameInfo assists">A: <%= player.assists %></div>
+                        <div class="gameInfo saves">Sv: <%= player.saves %></div>
+                    </div>                    
                 </div>
-                <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
-            </div>
-            <div class="statContainer">  
-                <div class="gameInfo">G: <%= player.goals %></div>
-                <div class="gameInfo">A: <%= player.assists %></div>
-                <div class="gameInfo">Sv: <%= player.saves %></div>
-            </div>                    
-        </div>
-        </button>
+            </button>
     </form>
 </body>
 </html>

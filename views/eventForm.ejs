@@ -4,7 +4,7 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="eventForm" class="popupForm" action="eventLog" method="post" style="display: none; touch-action: none;">
+    <form id="eventForm" class="popupForm" action="javascript:void(0);" style="display: none; touch-action: none;">
         <input type="hidden" name="playerId" value="">
         <input type="hidden" name="teamName" value="">
         <input type="hidden" name="realTime" value="">
@@ -15,6 +15,7 @@
         <input type="hidden" name="opponentKeeper" value="">
         <input type="hidden" name="season" value="">
         <input type="hidden" name="subseason" value="">
+        <input type="hidden" name="type" value="">
         <div class="itemFormat secondaryStyle">
             <div class="playerName" style="font-size: 175%;">
             </div>

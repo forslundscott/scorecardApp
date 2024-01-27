@@ -234,28 +234,38 @@ var x = setInterval(function() {
         
         form.querySelector('[name="period"]').value = xperiod
         form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
-        // var formData = new FormData(form)
+        form.querySelector('[name="type"]').value = ele.value
+        var formData = new FormData(form)
         // console.log(formData)
-        // try{
-        //     const response = await fetch('/testEventLog', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/x-www-form-urlencoded',
-        //         },
-        //         body: new URLSearchParams(formData).toString(),
-        //     });
-        //     if (response.ok) {
-        //         const responseData = await response.json();
-        //         console.log(responseData.data);
-        //         // location.reload()
-        //         // Handle successful response, update UI, etc.
-        //     } else {
-        //         console.error('Form submission failed');
-        //         // Handle error response
-        //     }
-        // }catch(error){
-        //     console.error('Error:', error);
-        // }
+        try{
+            const response = await fetch('/eventLog', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString(),
+            });
+            if (response.ok) {
+                const responseData = await response.json();
+                // console.log(responseData.data);
+                // console.log(responseData.data.player)
+                // console.log(document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('goals')[0].innerHTML)
+                // console.log(responseData.data.player.goals)
+                document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('goals')[0].innerHTML = 'G: ' + responseData.data.player.goals
+                document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('assists')[0].innerHTML = 'A: ' + responseData.data.player.assists
+                document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('saves')[0].innerHTML = 'Sv: ' + responseData.data.player.saves
+                document.getElementById(responseData.data.team1.team + 'Score').innerHTML = responseData.data.team1.score
+                document.getElementById(responseData.data.team2.team + 'Score').innerHTML = responseData.data.team2.score
+                closeForm()
+                // location.reload()
+                // Handle successful response, update UI, etc.
+            } else {
+                console.error('Form submission failed');
+                // Handle error response
+            }
+        }catch(error){
+            console.error('Error:', error);
+        }
   }
   // mouseup need to be monitored on a "global" element or we might miss it if
 // we move outside the original element.

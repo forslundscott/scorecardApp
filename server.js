@@ -144,7 +144,7 @@ app.post(['/register'], async (req,res)=>{
         res.redirect('/register')
     }
     
-    console.log(users)
+    // console.log(users)
 })
 app.get(['/timer'], async (req,res,next)=>{
     var game
@@ -210,14 +210,14 @@ app.get(['/timer'], async (req,res,next)=>{
             next(err)
         // ... error checks
         });  
-        console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
+        // console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
         res.redirect('back')
     }
 })
 app.get(['/games'], async (req,res,next)=>{
     // res.render('index.ejs')
     if (req.isAuthenticated()) {
-        console.log(req.user)
+        // console.log(req.user)
     }
     await sql.connect(config).then(pool => {
         // Query
@@ -252,7 +252,7 @@ app.get(['/readyForUpload'], async (req,res, next)=>{
             // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
             .query(`SELECT * from dbo.gamesreadytoupload() select * from dbo.statsreadytoupload()`)
     }).then(result => {
-        console.log(result.recordsets.length)
+        // console.log(result.recordsets.length)
         games = result.recordsets[0]
         for(var i=0;i<result.recordsets[0].length;i++){
             var currentGameItem = result.recordsets[0][i]
@@ -318,8 +318,8 @@ app.get(['/activeGame'], async (req,res,next)=>{
                 Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')`)
         }).then(async result => {
             // console.log(result.recordset[0])
-            console.log(result.recordsets[0][0])
-            console.log(result.recordsets[1][0])
+            // console.log(result.recordsets[0][0])
+            // console.log(result.recordsets[1][0])
             if(result.recordsets[0].length == 0){
                 var pool = await sql.connect(config)
                 pool.request()
@@ -422,51 +422,111 @@ app.post(['/'], async (req,res)=>{
 })
 app.post(['/eventLog'], async (req,res,next)=>{
     
-    console.log(req.body)
-    if(req.body.type == 'makecaptain'){
-        await sql.connect(config).then(pool => {
-            // Query
-    
-            return pool.request().query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
-        }).then(result => {
-            
-        }).catch(err => {
-            next(err)
-        // ... error checks
-        });  
-        // res.redirect('back')
-    }else if(req.body.type == 'makekeeper'){
-        await sql.connect(config).then(pool => {
-            // Query
-    
-            return pool.request().query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)
-        }).then(result => {
-            
-        }).catch(err => {
-            next(err)
-        // ... error checks
-        });  
-        // res.redirect('back')
-        
-    }else{
-        await sql.connect(config).then(pool => {
-            // Query
-
-            return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
-        }).then(result => {
-            
-        }).catch(err => {
-            next(err)
-        // ... error checks
-        }); 
+    // console.log(req.body)
+    const formData = req.body;
+    var data = {
+        page: req.route.path[0].replace('/',''),
+        team1: {
+            score: 0
+        },
+        team2: {
+            score: 0
+        }
     }
-    res.redirect('back')
+    
+    try{
+        console.log(req.body)
+        if(req.body.type == 'makecaptain'){
+            console.log('cap')
+            await sql.connect(config).then(pool => {
+                // Query
+        
+                return pool.request().query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
+            }).then(result => {
+                
+            }).catch(err => {
+                next(err)
+            // ... error checks
+            });  
+            // res.redirect('back')
+        }else if(req.body.type == 'makekeeper'){
+            console.log('keep')
+            await sql.connect(config).then(pool => {
+                // Query
+        
+                return pool.request().query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)
+            }).then(result => {
+                
+            }).catch(err => {
+                next(err)
+            // ... error checks
+            });  
+            // res.redirect('back')
+            
+        }else{
+            console.log(req.body.type)
+            await sql.connect(config).then(pool => {
+                // Query
+
+                return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
+            }).then(result => {
+                
+            }).catch(err => {
+                next(err)
+            // ... error checks
+            }); 
+            await sql.connect(config).then(pool => {
+                // Query
+
+                return pool.request().query(`
+                DECLARE @Team1_ID VARCHAR(255);
+                DECLARE @Team2_ID VARCHAR(255)
+
+                SELECT @Team1_ID = Team1_ID, 
+                @Team2_ID = Team2_ID
+                FROM games
+                WHERE Event_ID = '${req.body.Event_ID}';
+
+                Select * 
+                from scorecard.dbo.rosterGameStats(
+                    '${req.body.teamName}',
+                    ${req.body.Event_ID}
+                    ) 
+                where Id = '${req.body.playerId}'
+
+                SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,${req.body.Event_ID},@Team2_ID)
+                SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,${req.body.Event_ID},@Team1_ID)
+                `)
+            }).then(result => {
+                data.player = result.recordsets[0][0]
+                data.team1.team = result.recordsets[1][0].teamName
+                data.team2.team = result.recordsets[2][0].teamName
+                if(result.recordsets[1].length == 0){
+                    data.team1.score = 0
+                }else{
+                    data.team1.score = result.recordsets[1][0].score
+                }
+                if(result.recordsets[2].length == 0){
+                    data.team2.score = 0
+                }else{
+                    data.team2.score = result.recordsets[2][0].score
+                }
+            }).catch(err => {
+                next(err)
+            // ... error checks
+            }); 
+        }
+    }catch(err){
+        next(err)
+    }
+    res.json({ message: 'Form submitted successfully!', data: data })
+    // res.redirect('back')
     // res.sendStatus(204)
 })
 app.post(['/addPlayer'], async (req,res,next)=>{
     
     // 'insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName) VALUES()'
-    console.log(req.body)
+    // console.log(req.body)
     await sql.connect(config).then(pool => {
         // Query
         return pool.request().query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
@@ -508,7 +568,7 @@ app.post(['/uploadGames'], async (req,res)=>{
 app.post('/switchSides', async (req, res, next) => {
     // Process form data here
     const formData = req.body;
-    console.log(formData)
+    // console.log(formData)
     await sql.connect(config).then(pool => {
         // Query
 
@@ -525,7 +585,7 @@ app.post('/switchSides', async (req, res, next) => {
   app.post('/testEventLog', async (req, res, next) => {
     // Process form data here
     const formData = req.body;
-    console.log(formData)
+    // console.log(formData)
     // await sql.connect(config).then(pool => {
     //     // Query
 
