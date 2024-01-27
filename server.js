@@ -519,6 +519,7 @@ app.post(['/eventLog'], async (req,res,next)=>{
     }catch(err){
         next(err)
     }
+    data.type = req.body.type
     res.json({ message: 'Form submitted successfully!', data: data })
     // res.redirect('back')
     // res.sendStatus(204)
