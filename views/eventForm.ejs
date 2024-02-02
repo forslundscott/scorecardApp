@@ -24,7 +24,7 @@
         <% for(var i=0; i< options.length; i++) {%>
             <div class="statButton">
                 <button class="floatingActionButtons floatAbove hidden itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="statHandler(this, currentPeriod )">+1</button>
-                <button style="font-size: 100%;" class="itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="if(!isLong){statHandler(this, currentPeriod)}" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)"><%= options[i] %></button>                    
+                <button style="font-size: 100%;" class="itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="if(!isLong){statHandler(this, currentPeriod)}" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)" ontouchend="handleMouseUp(event)"><%= options[i] %></button>                    
                 <button class="floatingActionButtons floatBelow hidden itemFormat secondaryStyle" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="statHandler(this, currentPeriod, -1 )">-1</button>
             </div>
         <% } %>

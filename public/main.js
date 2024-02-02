@@ -293,7 +293,8 @@ function handleMouseDown(ele, e) {
 function handleMouseUp(e) {
     // console.log(ele1.form)
   if (isDown && isLong) {                           // if a long press, cancel
-    isDown = false;                                 // clear in any case
+    isDown = false;
+    isLong = false;                                 // clear in any case
     e.preventDefault();                             // and ignore this event
     return
   }
@@ -372,6 +373,7 @@ if((rect.left>=e.clientX<=rect.right)&&(rect.top>=e.clientY<=rect.bottom)){
 }
 }
 function closeForm(){
+    
     var forms = document.getElementsByClassName('popupForm')
     for(i=0;i<forms.length;i++){
         forms[i].style.display = 'none'

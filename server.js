@@ -20,15 +20,32 @@ const config = {
         user: process.env.DB_USER,
         password: process.env.DB_PASSWORD,
         trustServerCertificate: true,
+        options: {
+            encrypt: true,
+            connectionTimeout: 30000,
+            pool: {
+              max: 10,
+              min: 0,
+              idleTimeoutMillis: 30000,
+            },
+          },
     };
-
+    const pool = new sql.ConnectionPool(config)
+    pool.connect().then(() => {
+        console.log('Connected to MSSQL with global connection pool');
+      })
+      .catch((err) => {
+        console.error('Error connecting to MSSQL:', err);
+      });
 initializePassport(
     passport, 
     email => users.find(user => user.email === email),
     id => users.find(user=> user.id === id),
     async email => {
-        const pool = await sql.connect(config)
-        const result = await pool.request()
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request
         .query(`select firstName, id, email, [password] 
         from users as t1
         LEFT JOIN emails as t2
@@ -39,8 +56,10 @@ initializePassport(
         return result
         },
     async id => {
-        const pool = await sql.connect(config)
-        const result = await pool.request()
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request
         .query(`select firstName, id, email
         from users as t1
         LEFT JOIN emails as t2
@@ -50,7 +69,7 @@ initializePassport(
         }
     )
 // const open = require('open')
-const port = 3000
+const port = process.env.APP_PORT
 let options = {}
 
 app.use(express.urlencoded({ extended: true }))
@@ -77,9 +96,9 @@ app.locals.functions = functions
 // var connection = functions.getAccess()
 
 var team1 = {
-    id: "",
+    id: '',
     score: 0,
-    name: "",
+    name: '',
     keeper: '',
     players: []
 }
@@ -114,10 +133,11 @@ app.post(['/register'], async (req,res)=>{
     // console.log(req.body);
     try {
         const hashedpassword = await bcrypt.hash(req.body.password, 10)
-        await sql.connect(config).then(pool => {
-            // Query
-
-            return pool.request().query(`
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request
+        .query(`
             DECLARE @tempTable table (
                 id int
             )
@@ -131,234 +151,148 @@ app.post(['/register'], async (req,res)=>{
             select id, '${req.body.email}' from @tempTable
             
             insert into credentials (userID,[password])
-            select id, '${hashedpassword}' from @tempTable`)
-        }).then(result => {
-            
-        }).catch(err => {
-            console.log(err)
-        // ... error checks
-        }); 
-        
+            select id, '${hashedpassword}' from @tempTable`)        
         res.redirect('/login')
-    }catch{
+    }catch(err){
+        console.log(err)
         res.redirect('/register')
     }
     
     // console.log(users)
 })
 app.get(['/timer'], async (req,res,next)=>{
-    var game
-    var newStartTime
-    if(req.query.gameStatus == 1){
-        res.redirect('/readyforupload')
-    }else if(req.query.timerState == 2){
-        await sql.connect(config).then(async pool => {
-            // Query
-            return pool.request()
-                .query(`select * from winningTeam(${req.query.Event_ID})`)
-        }).then(async result => {
-            // console.log(result.rowsAffected)
+    try{
+        var game
+        var newStartTime
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        if(req.query.gameStatus == 1){
+            res.redirect('/readyforupload')
+        }else if(req.query.timerState == 2){
+            // const pool = new sql.ConnectionPool(config)
+            // await pool.connect();
+            const request = pool.request()
+            const result = await request
+            .query(`select * from winningTeam(${req.query.Event_ID})`)
             if(result.recordset[0].length=1){
-                var pool = await sql.connect(config)
-                return pool.request()
+                await request
                 .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone, Event_ID)
                 select top 1 *, ${req.query.Event_ID} as Event_ID 
                 from winningTeamContact('${result.recordset[0].teamName}')
                 where not 'MOI' in (Select league from teams
                     where id = '${result.recordset[0].teamName}')`)
             }  
-        }).then(async result => {
-                var pool = await sql.connect(config)
-                return pool.request()
-                .query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
-            
-        }).catch(err => {
-            next(err)
-        // ... error checks
-        });  
-        res.redirect('/games')
-    } else {
-        await sql.connect(config).then(pool => {
-            // Query
-            return pool.request()
-                .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
-        }).then(result => {
-                game = result.recordset[0]
-                if(req.query.timerState == 0){
-                    if(game.timerStartTime == 'NULL'){
-                        game.timerTime = game.timePerPeriod
-                    }else{
-                        game.timerTime = game.timerTime - (Date.now() - game.timerStartTime)
-                    }
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
+            res.redirect('/games')
+        } else {
+            // const pool = new sql.ConnectionPool(config)
+            // await pool.connect();
+            const request = pool.request()
+            const result = await request
+            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
+            game = result.recordset[0]
+            if(req.query.timerState == 0){
+                if(game.timerStartTime == 'NULL'){
+                    game.timerTime = game.timePerPeriod
                 }else{
-                    game.timerStartTime = Date.now()
+                    game.timerTime = game.timerTime - (Date.now() - game.timerStartTime)
                 }
-                game.timerState = req.query.timerState
+            }else{
+                game.timerStartTime = Date.now()
+            }
+            game.timerState = req.query.timerState
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+            res.redirect('back')
+        }
+    }catch(err){
 
-        }).catch(err => {
-            next(err)
-        // ... error checks
-        });  
-
-        await sql.connect(config).then(pool => {
-            // Query
-            return pool.request()
-                .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
-        }).then(result => {
-            // games = result.recordset
-        }).catch(err => {
-            next(err)
-        // ... error checks
-        });  
-        // console.log((Number("15:00".split(':')[0])*60+Number("15:00".split(':')[1]))*1000)
         res.redirect('back')
     }
 })
 app.get(['/games'], async (req,res,next)=>{
-    // res.render('index.ejs')
-    if (req.isAuthenticated()) {
-        // console.log(req.user)
-    }
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
-            // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
-            // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
-            .query(`Select * from gamesList()`)
-    }).then(result => {
-        games = result.recordset
-    }).catch(err => {
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        var data = {
+            teams: [
+                team1,
+                team2
+            ],
+            page: req.route.path[0].replace('/','')
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request.query(`Select * from gamesList()`)
+        data.games = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
         next(err)
-    // ... error checks
-    });  
-
-    var data = {
-        teams: [
-            team1,
-            team2
-        ],
-        games: games,
-        page: req.route.path[0].replace('/','')
     }
-    res.render('index.ejs',{data: data}) 
 })
 app.get(['/readyForUpload'], async (req,res, next)=>{
-    // res.render('index.ejs')
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
-            // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
-            .query(`SELECT * from dbo.gamesreadytoupload() select * from dbo.statsreadytoupload()`)
-    }).then(result => {
-        // console.log(result.recordsets.length)
-        games = result.recordsets[0]
-        for(var i=0;i<result.recordsets[0].length;i++){
-            var currentGameItem = result.recordsets[0][i]
-            currentGameItem.players = []
-            for(var j = result.recordsets[1].length -1;j>=0;j--){
-                var currentPlayerItem = result.recordsets[1][j]
-                if(currentPlayerItem.event_ID == currentGameItem.Event_ID){
-                    currentGameItem.players.push(currentPlayerItem)
-                    result.recordsets[1].splice(j,1)
-                    // console.log(result.recordsets[1].length)
-                }
-            }
-            // console.log(currentGameItem.players)
+    try{
+        var data = {
+            teams: [
+                team1,
+                team2
+            ],
+            page: req.route.path[0].replace('/','')
         }
-        
-    }).catch(err => {
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request.query(`SELECT * from dbo.gamesreadytoupload() select * from dbo.statsreadytoupload()`)
+        data.games = result.recordsets[0]
+        res.render('index.ejs',{data: data})
+    }catch(err){
         next(err)
-    // ... error checks
-    });  
-// console.log(games)
-    var data = {
-        teams: [
-            team1,
-            team2
-        ],
-        games: games,
-        page: req.route.path[0].replace('/','')
     }
-    res.render('index.ejs',{data: data}) 
 })
 app.get(['/winners'], async (req,res, next)=>{
-    // res.render('index.ejs')
-    var data = {
-        page: req.route.path[0].replace('/','')
-    }
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request()
-            // .query(`SELECT * FROM [scorecard].[dbo].[games] where [Status]=0`)
-            // `SELECT t1.*, t2.color as Team1Color, t3.color as Team2Color FROM [scorecard].[dbo].[games] t1 left join teams as t2 on t1.Team1_ID=t2.id left join teams as t3 on t1.Team2_ID=t3.id where t1.[Status]=0 and convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'12-10-2023')`
-            .query(`SELECT * from dbo.winners`)
-    }).then(result => {
-        // console.log(result.recordsets.length)
-        data.winners = result.recordsets[0]
-        
-        
-    }).catch(err => {
+    try{
+        var data = {
+            page: req.route.path[0].replace('/','')
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request.query(`SELECT * from dbo.winners`)
+        data.winners = result.recordsets[0]  
+        res.render('index.ejs',{data: data})
+    }catch(err){
         next(err)
-    // ... error checks
-    });  
-// console.log(games)
-    
-    res.render('index.ejs',{data: data}) 
+    }
 })
 app.get(['/activeGame'], async (req,res,next)=>{
     try {
         var game
-        await sql.connect(config).then(pool => {
-            // Query
-            return pool.request()
-                // .query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${req.query.Event_ID}'`)
-                .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
-                Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')`)
-        }).then(async result => {
-            // console.log(result.recordset[0])
-            // console.log(result.recordsets[0][0])
-            // console.log(result.recordsets[1][0])
-            if(result.recordsets[0].length == 0){
-                var pool = await sql.connect(config)
-                pool.request()
-                .query(`
-                update teams
-                set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
-                where id = '${req.query.Team1_ID}'
-                `)
-            }
-            if(result.recordsets[1].length == 0){
-                var pool = await sql.connect(config)
-                pool.request()
-                .query(`
-                update teams
-                set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')
-                where id = '${req.query.Team2_ID}'
-                `)
-            }
-            // console.log(result.recordsets[2])
-            // console.log(result.recordsets[3])
-        }).catch(err => {
-            next(err)
-            console.log(err)
-        // ... error checks
-        });  
-        await sql.connect(config).then(pool => {
-            // Query
-            return pool.request()
-                .query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${req.query.Event_ID}'`)
-                // .query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}'
-                // Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}'
-                // EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team1_ID}', @eventId ='${req.query.Event_ID}'
-                // EXEC [scorecard].[dbo].[rosterGameStats] @teamName ='${req.query.Team2_ID}', @eventId ='${req.query.Event_ID}'
-                // SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team2_ID}' and type = 'owngoal') or (teamName = '${req.query.Team1_ID}' and type = 'goal')) GROUP BY event_id
-                // SELECT SUM(value) as score FROM [scorecard].[dbo].[eventLog] WHERE event_Id = ${req.query.Event_ID} and ((teamName = '${req.query.Team1_ID}' and type = 'owngoal') or (teamName = '${req.query.Team2_ID}' and type = 'goal')) GROUP BY event_id
-                // SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
-        }).then(result => {
-            // console.log(result.recordset[0])
-            team1 = result.recordsets[0][0]
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        let result = await request.query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
+        Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')`)
+        if(result.recordsets[0].length == 0){
+            // var pool = await sql.connect(config)
+            // pool.request()
+            await request.query(`
+            update teams
+            set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
+            where id = '${req.query.Team1_ID}'
+            `)
+        }
+        if(result.recordsets[1].length == 0){
+            // var pool = await sql.connect(config)
+            // pool.request()
+            await request.query(`
+            update teams
+            set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')
+            where id = '${req.query.Team2_ID}'
+            `)
+        }
+        result = await request.query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${req.query.Event_ID}'`)
+        team1 = result.recordsets[0][0]
             team2 = result.recordsets[1][0]
             team1.players = result.recordsets[2]
             team2.players = result.recordsets[3]
@@ -373,11 +307,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
                 team2.score = result.recordsets[5][0].score
             }
             game = result.recordsets[6][0]
-        }).catch(err => {
-            next(err)
-            console.log(err)
-        // ... error checks
-        });  
+        
         
         if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
             if(game.period<game.maxPeriods){
@@ -388,17 +318,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
                 game.timerState = 2
                 game.timerTime = 0
             }
-            await sql.connect(config).then(pool => {
-                // Query
-                return pool.request()
-                    .query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
-            }).then(result => {
-                // games = result.recordset
-            }).catch(err => {
-                next(err)
-                console.log(err)
-            // ... error checks
-            });  
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
         }
         var data = {
             teams: [
@@ -409,7 +329,6 @@ app.get(['/activeGame'], async (req,res,next)=>{
             page: req.route.path[0].replace('/',''),
             Event_ID: req.query.Event_ID
         }
-        // console.log(data.teams[0].players)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)
@@ -421,83 +340,48 @@ app.post(['/'], async (req,res)=>{
     res.render('smartphone.ejs') 
 })
 app.post(['/eventLog'], async (req,res,next)=>{
-    
-    // console.log(req.body)
-    const formData = req.body;
-    var data = {
-        page: req.route.path[0].replace('/',''),
-        team1: {
-            score: 0
-        },
-        team2: {
-            score: 0
+   try{ 
+        var data = {
+            page: req.route.path[0].replace('/',''),
+            team1: {
+                score: 0
+            },
+            team2: {
+                score: 0
+            }
         }
-    }
-    
-    try{
-        console.log(req.body)
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        let result
         if(req.body.type == 'makecaptain'){
             console.log('cap')
-            await sql.connect(config).then(pool => {
-                // Query
-        
-                return pool.request().query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
-            }).then(result => {
-                
-            }).catch(err => {
-                next(err)
-            // ... error checks
-            });  
-            // res.redirect('back')
+            result = await request.query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
         }else if(req.body.type == 'makekeeper'){
             console.log('keep')
-            await sql.connect(config).then(pool => {
-                // Query
-        
-                return pool.request().query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)
-            }).then(result => {
-                
-            }).catch(err => {
-                next(err)
-            // ... error checks
-            });  
-            // res.redirect('back')
-            
+            result = await request.query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)            
         }else{
-            console.log(req.body.type)
-            await sql.connect(config).then(pool => {
-                // Query
+            result = await request.query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
+            result = await request.query(`
+            DECLARE @Team1_ID VARCHAR(255);
+            DECLARE @Team2_ID VARCHAR(255)
 
-                return pool.request().query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
-            }).then(result => {
-                
-            }).catch(err => {
-                next(err)
-            // ... error checks
-            }); 
-            await sql.connect(config).then(pool => {
-                // Query
+            SELECT @Team1_ID = Team1_ID, 
+            @Team2_ID = Team2_ID
+            FROM games
+            WHERE Event_ID = '${req.body.Event_ID}';
 
-                return pool.request().query(`
-                DECLARE @Team1_ID VARCHAR(255);
-                DECLARE @Team2_ID VARCHAR(255)
+            Select * 
+            from scorecard.dbo.rosterGameStats(
+                '${req.body.teamName}',
+                ${req.body.Event_ID}
+                ) 
+            where Id = '${req.body.playerId}'
 
-                SELECT @Team1_ID = Team1_ID, 
-                @Team2_ID = Team2_ID
-                FROM games
-                WHERE Event_ID = '${req.body.Event_ID}';
-
-                Select * 
-                from scorecard.dbo.rosterGameStats(
-                    '${req.body.teamName}',
-                    ${req.body.Event_ID}
-                    ) 
-                where Id = '${req.body.playerId}'
-
-                SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,${req.body.Event_ID},@Team2_ID)
-                SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,${req.body.Event_ID},@Team1_ID)
-                `)
-            }).then(result => {
+            SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,${req.body.Event_ID},@Team2_ID)
+            SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,${req.body.Event_ID},@Team1_ID)
+            `)
+            try{
                 data.player = result.recordsets[0][0]
                 data.team1.team = result.recordsets[1][0].teamName
                 data.team2.team = result.recordsets[2][0].teamName
@@ -511,36 +395,44 @@ app.post(['/eventLog'], async (req,res,next)=>{
                 }else{
                     data.team2.score = result.recordsets[2][0].score
                 }
-            }).catch(err => {
-                next(err)
-            // ... error checks
-            }); 
+                data.type = req.body.type
+                res.json({ message: 'Form submitted successfully!', data: data })
+            }catch(err){
+                console.log(err)
+                console.log(req.get('User-Agent'));
+                console.log(req.user.email)
+                console.log(req.body)
+                res.redirect('back')
+            }
         }
     }catch(err){
         next(err)
     }
-    data.type = req.body.type
-    res.json({ message: 'Form submitted successfully!', data: data })
-    // res.redirect('back')
-    // res.sendStatus(204)
 })
 app.post(['/addPlayer'], async (req,res,next)=>{
-    
-    // 'insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName) VALUES()'
-    // console.log(req.body)
-    await sql.connect(config).then(pool => {
-        // Query
-        return pool.request().query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
-    }).then(result => {
-        // team1.id = req.query.Team1_ID
-        // team1.players = result.recordset
-    }).catch(err => {
+    try{
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        await request.query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
+        res.redirect('back')
+    }catch(err){
         next(err)
-    // ... error checks
-    });  
-    res.redirect('back')
+    }
 })
-
+app.post('/switchSides', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        await request.query(`EXEC [scorecard].[dbo].[switchSides] @eventId ='${req.body.Event_ID}'`)
+        res.json({ message: 'Form submitted successfully!', data: formData });
+    }catch(err){
+        next(err)
+    }
+  });
 
 app.post(['/uploadGames'], async (req,res)=>{
     // for upload
@@ -566,23 +458,7 @@ app.post(['/uploadGames'], async (req,res)=>{
     }
     await open(pageList[0])
 })
-app.post('/switchSides', async (req, res, next) => {
-    // Process form data here
-    const formData = req.body;
-    // console.log(formData)
-    await sql.connect(config).then(pool => {
-        // Query
 
-        return pool.request().query(`EXEC [scorecard].[dbo].[switchSides] @eventId ='${req.body.Event_ID}'`)
-    }).then(result => {
-        
-    }).catch(err => {
-        next(err)
-    // ... error checks
-    });  
-    // Send a response back to the client
-    res.json({ message: 'Form submitted successfully!', data: formData });
-  });
   app.post('/testEventLog', async (req, res, next) => {
     // Process form data here
     const formData = req.body;
