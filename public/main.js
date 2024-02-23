@@ -247,15 +247,11 @@ var x = setInterval(function() {
             });
             if (response.ok) {
                 const responseData = await response.json();
-                switch(responseData.data.type){
-                    case 'makekeeper':
-                    case 'makecaptain':
+                switch(responseData.message){
+                    case 'Reload':
                         location.reload()
                         break
                     default:
-                        
-                        // console.log(responseData.data);
-
                         document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('goals')[0].innerHTML = 'G: ' + responseData.data.player.goals
                         document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('assists')[0].innerHTML = 'A: ' + responseData.data.player.assists
                         document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('saves')[0].innerHTML = 'Sv: ' + responseData.data.player.saves
@@ -263,8 +259,6 @@ var x = setInterval(function() {
                         document.getElementById(responseData.data.team2.team + 'Score').innerHTML = responseData.data.team2.score
                         closeForm()
                 }
-                // location.reload()
-                // Handle successful response, update UI, etc.
             } else {
                 console.error('Form submission failed');
                 // Handle error response
@@ -293,8 +287,7 @@ function handleMouseDown(ele, e) {
 function handleMouseUp(e) {
     // console.log(ele1.form)
   if (isDown && isLong) {                           // if a long press, cancel
-    isDown = false;
-    isLong = false;                                 // clear in any case
+    isDown = false;                                 // clear in any case
     e.preventDefault();                             // and ignore this event
     return
   }
@@ -334,7 +327,7 @@ function toggleAddPlayer(xform){
         var color = xform.querySelector('[name="color"]').value
         document.getElementById('newPlayerForm').style.display = ''
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
     }
@@ -353,7 +346,7 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').querySelector('[name="teamName"]').value = xform.querySelector('[name="teamName"]').value
         document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = xform.querySelector('[name="Event_ID"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
-        document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('itemFormat secondaryStyle')[0].style.backgroundImage
+        document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('playerItem')[0].style.backgroundImage
         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
         document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
@@ -361,8 +354,10 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').style.display = 'none'
     }
     if(document.getElementById('formBackground').style.display == 'none'){
+        console.log('visible');
         document.getElementById('formBackground').style.display = ''
     }else{
+        console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
 }
@@ -373,7 +368,6 @@ if((rect.left>=e.clientX<=rect.right)&&(rect.top>=e.clientY<=rect.bottom)){
 }
 }
 function closeForm(){
-    
     var forms = document.getElementsByClassName('popupForm')
     for(i=0;i<forms.length;i++){
         forms[i].style.display = 'none'

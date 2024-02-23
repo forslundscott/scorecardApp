@@ -1,12 +1,12 @@
 :root {
-  /* --primeColor: #009688; */
-  --primeColor: #000000;
+  /* --primaryColor: #009688; */
+  --primaryColor: #000000;
   --primaryFontColor: #cccccc;
   --secondaryColor: #cccccc;
   --secondaryFontColor: #000000;
   --shinySilver: linear-gradient(135deg, #919191 10%, white 50%, #919191 90%);
   --scrollWidth: 15px;
-  --buttonHieght: 11vh
+  --buttonHieght: 10vh
 }
 * {
   box-sizing: border-box;
@@ -24,6 +24,7 @@ body {
     margin: 0%;
     font-family: Arial, Helvetica, sans-serif;
     height: 100%;
+    text-transform: uppercase;
   }
 a{
   /* all: unset; */
@@ -37,7 +38,7 @@ button {
                 user-select: none; 
 }
   .headerText {
-    font-size: 5vh;
+    font-size: 3vh;
     font-weight: bold;
     width: auto;
     border: none;
@@ -46,7 +47,7 @@ button {
   }
   .header {
     color: var(--primaryFontColor) !important;
-    background-color: var(--primeColor) !important;
+    background-color: var(--primaryColor) !important;
     top: 0;
     height: 25%;
     width: 100%;
@@ -56,7 +57,7 @@ button {
   }
   .footer {
     color: var(--primaryFontColor) !important;
-    background-color: var(--primeColor) !important;
+    background-color: var(--primaryColor) !important;
     top: 0;
     height: 10%;
     width: 100%;
@@ -75,12 +76,31 @@ button {
     background-image: var(--shinySilver);
     color: var(--secondaryFontColor);
     border-radius: 2vh; */
-    height: 11vh;
+    /* height: 90%; */
     width: 100%;
-    /* border: var(--primeColor);
+    /* border: var(--primaryColor); */
+    /* border-width: thin; */
+    /* border-style: solid; */
+    box-sizing: border-box;
+  }
+  .primaryStyle{
+    background-color: var(--primaryColor);
+    /* background-image: var(--shinySilver); */
+    color: var(--primaryFontColor);
+    /* border-radius: 2vh; */
+    /* height: 11vh;
+    width: 100%; */
+    /* border: var(--primaryFontColor);
     border-width: thin;
     border-style: solid;
     box-sizing: border-box; */
+  }
+  .primaryBorder{
+    border-radius: 2vh;
+    border: var(--primaryFontColor);
+    border-width: thin;
+    border-style: solid;
+    box-sizing: border-box;
   }
   .secondaryStyle{
     background-color: var(--secondaryColor);
@@ -89,7 +109,7 @@ button {
     border-radius: 2vh;
     /* height: 11vh;
     width: 100%; */
-    border: var(--primeColor);
+    border: var(--primaryColor);
     border-width: thin;
     border-style: solid;
     box-sizing: border-box;
@@ -147,15 +167,22 @@ input::-webkit-inner-spin-button {
   float: left;
   border-radius: 50%;
   font-size: 100%;
-  /* height: 100%; */
+  height: 7vh;
   width: 25%;
   text-align: center;
   position: relative;
+}
+.statButton button{
+  height: 90%;
 }
 .playerButton{
   all: unset;
   width: 100%;
   padding-bottom: .5vh;
+}
+.navButton{
+  height: 100%;
+  width: 100%;
 }
 .statItem{
   float: left;
@@ -188,11 +215,15 @@ input::-webkit-inner-spin-button {
 }
 .triColumn{
   float: left;
-  font-size: 110%;
+  /* font-size: 110%; */
   height: 100%;
   width: calc(100%/3);
+  
+}
+.textCenter{
   text-align: center;
 }
+
 .floatingActionButtons{
   position: absolute; 
   z-index: 5; 
@@ -242,12 +273,12 @@ input::-webkit-inner-spin-button {
   height: 70%;
   width: 100%;
   vertical-align: top;
-  text-align: center;
+  /* text-align: center; */
 }
 .playerName{
   margin:0% auto 0% auto;
-  display: table;
-  font-size: 150%;
+  /* display: table; */
+  /* font-size: 150%; */
   vertical-align: middle;
 }
 .playerImage{
@@ -305,7 +336,7 @@ input::-webkit-inner-spin-button {
   height: 100%;
 }
 .listItem{
-  height: 11.5vh;
+  height: var(--buttonHieght);
 }
 #timerForm{
   height: 100%;

@@ -357,9 +357,13 @@ app.post(['/eventLog'], async (req,res,next)=>{
         if(req.body.type == 'makecaptain'){
             console.log('cap')
             result = await request.query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
+            // res.redirect('back')
+            res.json({ message: 'Reload', data: data })
         }else if(req.body.type == 'makekeeper'){
             console.log('keep')
             result = await request.query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)            
+            // res.redirect('back')
+            res.json({ message: 'Reload', data: data })
         }else{
             result = await request.query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
             result = await request.query(`
@@ -396,13 +400,14 @@ app.post(['/eventLog'], async (req,res,next)=>{
                     data.team2.score = result.recordsets[2][0].score
                 }
                 data.type = req.body.type
-                res.json({ message: 'Form submitted successfully!', data: data })
+                res.json({ message: 'Success', data: data })
             }catch(err){
                 console.log(err)
                 console.log(req.get('User-Agent'));
                 console.log(req.user.email)
                 console.log(req.body)
-                res.redirect('back')
+                // res.redirect('back')
+                res.json({ message: 'Reload', data: data })
             }
         }
     }catch(err){

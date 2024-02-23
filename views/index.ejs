@@ -39,7 +39,7 @@
     </audio autoPlay muted>
         <%- include('header', {data: data}); %>
         
-        <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, " + data.teams[0].color + " 48%, silver 50%, " +  data.teams[1].color + " 52%)": ""%>">
+        <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
             <div id="content">
                 <%- include('bodyColumns',{data: data}); %>
             </div>

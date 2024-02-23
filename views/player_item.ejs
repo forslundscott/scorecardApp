@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-        <form class="listItem" action="javascript:void(0);" id="<%= player.Id + team.id %>">
+        <form class="listItem" action="javascript:void(0);" id="<%= player.Id + team.id %>" style="width: 96%;float: <%=side %>;">
             <input type="hidden" name="playerId" value="<%= player.Id %>">
             <input type="hidden" name="teamName" value="<%= team.id %>">
             <input type="hidden" name="realTime" value="">
@@ -15,20 +15,20 @@
             <input type="hidden" name="opponentKeeper" value="<%= opponent.keeper %>">
             <input type="hidden" name="season" value="<%= data.game.season %>">
             <input type="hidden" name="subseason" value="<%= data.game.subseason %>">
-            <button class="playerButton" type="button" onclick="toggleEventForm(this)">
+            <button class="itemFormat primaryStyle" style="border-style: solid ;border-image: linear-gradient(to <%= side == 'left' ? 'right' : 'left' %>, silver 5%,black 25%) 1; background-image: linear-gradient(90deg, <%=side == 'left' ? team.color + ' 5%, black 25%' : 'black 75%, ' + team.color + ' 95%' %> );" type="button" onclick="toggleEventForm(this)">
                 <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
-                <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=team.color %>  <%=team.color =='White' ? '40%, #ddd 50%, ' + team.color + ' 60%'  : '.5%, White 50%, ' + team.color + ' 99.5%'%>);">
+                <div class="playerItem" style="<%= side == 'left' ? 'margin: 0% 0% 0% 25%; text-align: left;' : 'margin: 0% 25% 0% 0%; text-align: right;' %>">
                     <div class="playerTag">
-                        <div class="playerName">
+                        <div class="playerName" style="margin: 0% 0% 0% 0%;">
                             <%= player.firstName %>
-                            <%= player.lastName %>
+                            <%= player.lastName[0] + "." %>
                         </div>
                         <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
                     </div>
                     <div class="statContainer">  
-                        <div class="gameInfo goals">G: <%= player.goals %></div>
-                        <div class="gameInfo assists">A: <%= player.assists %></div>
-                        <div class="gameInfo saves">Sv: <%= player.saves %></div>
+                        <div class="triColumn goals">G: <%= player.goals %></div>
+                        <div class="triColumn assists">A: <%= player.assists %></div>
+                        <div class="triColumn saves">S: <%= player.saves %></div>
                     </div>                    
                 </div>
             </button>

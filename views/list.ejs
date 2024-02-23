@@ -4,10 +4,10 @@
 </head>
 <body>
     <% if (data.page == 'activeGame') { %>
-        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent}); %>
+        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
     <% } %>
     
-    <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 11.5vh)"  : "" %>">
+    <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
         <% if (data.page == 'games' || data.page == 'readyForUpload') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
@@ -53,7 +53,7 @@ Thank you and have a nice day!`
             
             <% for(var i=0; i< team.players.length; i++) {%>
                 <% if (team.players[i].Id !== team.keeper) { %>
-                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent}); %>
+                    <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
                 <% } %>
             <% } %>
         <% } %>
