@@ -327,6 +327,8 @@ function toggleAddPlayer(xform){
         var color = xform.querySelector('[name="color"]').value
         document.getElementById('newPlayerForm').style.display = ''
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
+        document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
+        
         // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
@@ -434,4 +436,34 @@ function convertUnixTimeToMMDD(unixTime) {
     }catch(error){
         console.error('Error:', error);
     }
+  }
+  async function fetchHandler(event){
+    event.preventDefault()
+    var form = event.target.form
+    
+    var formData = new FormData(form)
+    
+    try{
+        const response = await fetch(`${form.action}`, {
+            method: `${form.method}`,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            // const responseData = await response.json();
+            console.log(response);
+            // location.reload()
+            // Handle successful response, update UI, etc.
+          } else {
+            console.log(response)
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+    
+    console.log(event.target.form)
   }

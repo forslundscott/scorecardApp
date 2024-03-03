@@ -9,6 +9,8 @@
   --buttonHieght: 10vh
 }
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
   -webkit-touch-callout: none; /* Safari */
         -webkit-user-select: none; /* Chrome */     
@@ -69,7 +71,8 @@ button {
     height: 65%;
     width: 100%;
     /* background: var(--shinySilver); */
-    background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);;
+    /* background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);; */
+    background-color: #000000;
   }
   .itemFormat {
     /* background-color: var(--secondaryColor);
@@ -96,9 +99,9 @@ button {
     box-sizing: border-box; */
   }
   .primaryBorder{
-    border-radius: 2vh;
+    /* border-radius: 2vh; */
     border: var(--primaryFontColor);
-    border-width: thin;
+    border-width: thick;
     border-style: solid;
     box-sizing: border-box;
   }
@@ -117,6 +120,7 @@ button {
   a {
     text-decoration: none;
     color: inherit;
+    display: inline-block;
   }
 
 .roundcorners {
@@ -165,7 +169,7 @@ input::-webkit-inner-spin-button {
 .statButton{
   all: unset;
   float: left;
-  border-radius: 50%;
+  /* border-radius: 50%; */
   font-size: 100%;
   height: 7vh;
   width: 25%;
@@ -298,13 +302,16 @@ input::-webkit-inner-spin-button {
  }
 }
 .popupForm{
-  position: absolute;
+    position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
     /* height: 23vh; */
     z-index: 3;
+    /* display: flex;
+    flex-direction: column;
+    align-items: center; */
 }
 #formBackground{
   width:100%;
@@ -340,4 +347,39 @@ input::-webkit-inner-spin-button {
 }
 #timerForm{
   height: 100%;
+}
+#mainLogo{
+  height: 90%;
+  position: relative;
+  top: 10%;
+}
+#newPlayerLogo{
+  height: 90%;
+  position: relative;
+  top: 10%;
+}
+
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px; /* Adjust as needed */
+  width: 20px; /* Adjust as needed */
+  background-color: #eee;
+  border: 1px solid #ccc;
+}
+
+#waiver:checked + .checkmark:after {
+  content: 'Your custom message here';
+  position: absolute;
+  left: 25px; /* Adjust as needed */
+  top: 0;
+  color: #333; /* Adjust text color as needed */
+}
+
+.checkmark:after {
+  content: '';
+  position: absolute;
+  display: none;
 }

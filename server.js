@@ -11,7 +11,11 @@ const puppeteer = require('puppeteer')
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
+const Sequelize = require('sequelize');
+const SessionStore = require('express-session-sequelize')(session.Store)
 const methodOverride = require('method-override')
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const initializePassport = require('./passport-config')
 
 const config = {
@@ -30,6 +34,17 @@ const config = {
             },
           },
     };
+const sequelize = new Sequelize({
+    dialect: 'mssql',
+    host: process.env.DB_SERVER,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    logging: false,
+    define: {
+        timestamps: false,
+    },
+});
     const pool = new sql.ConnectionPool(config)
     pool.connect().then(() => {
         console.log('Connected to MSSQL with global connection pool');
@@ -37,38 +52,62 @@ const config = {
       .catch((err) => {
         console.error('Error connecting to MSSQL:', err);
       });
+
+const Session = sequelize.define('Session', {
+    sid: {
+    type: Sequelize.STRING,
+    primaryKey: true,
+    },
+    data: Sequelize.STRING,
+    expires: Sequelize.DATE,
+});
+const sessionStore = new SessionStore({
+    db: sequelize,
+    table: 'Session',
+});
 initializePassport(
     passport, 
     email => users.find(user => user.email === email),
     id => users.find(user=> user.id === id),
     async email => {
-        // const pool = new sql.ConnectionPool(config)
-        // await pool.connect();
-        const request = pool.request()
-        const result = await request
-        .query(`select firstName, id, email, [password] 
-        from users as t1
-        LEFT JOIN emails as t2
-        on t1.ID=t2.userID
-        LEFT JOIN credentials as t3 
-        on t1.ID=t3.userID
-        where email = '${email}'`)
-        return result
+        // try{
+            // const pool = new sql.ConnectionPool(config)
+            // await pool.connect();
+            const request = pool.request()
+            const result = await request
+            .query(`select firstName, id, email, [password] 
+            from users as t1
+            LEFT JOIN emails as t2
+            on t1.ID=t2.userID
+            LEFT JOIN credentials as t3 
+            on t1.ID=t3.userID
+            where email = '${email}'`)
+            return result
+        // }catch(err){
+        //     console.error('Error:', err)
+        //     return err
+        // }  
         },
     async id => {
-        // const pool = new sql.ConnectionPool(config)
-        // await pool.connect();
-        const request = pool.request()
-        const result = await request
-        .query(`select firstName, id, email
-        from users as t1
-        LEFT JOIN emails as t2
-        on t1.ID=t2.userID
-        where id = '${id}'`)
-        return result
+        // try{
+            // const pool = new sql.ConnectionPool(config)
+            // await pool.connect();
+            const request = pool.request()
+            const result = await request
+            .query(`select firstName, id, email
+            from users as t1
+            LEFT JOIN emails as t2
+            on t1.ID=t2.userID
+            where id = '${id}'`)
+            return result
+        // }catch(err){
+        //     console.error('Error:', err)
+        //     return err
+        // }  
         }
     )
 // const open = require('open')
+
 const port = process.env.APP_PORT
 let options = {}
 
@@ -79,7 +118,8 @@ app.use(flash())
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: sessionStore,
 }))
 app.use(passport.initialize())
 app.use(passport.session())
@@ -115,11 +155,20 @@ var games = []
 
 app.get(['/'], checkAuthenticated, async (req,res)=>{
     // res.render('index.ejs')
-    res.redirect('/games')
+    try{
+        // console.log(req.user)
+        res.redirect('/games')
+    }catch(err){
+        console.error('Error:', err)
+    }    
     // res.render('smartphone.ejs') 
 })
 app.get(['/login'], checkNotAuthenticated, async (req,res)=>{
-    res.render('login.ejs')
+    try{
+        res.render('login.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }    
 })
 app.post(['/login'], passport.authenticate('local', {
     successRedirect: '/',
@@ -127,8 +176,13 @@ app.post(['/login'], passport.authenticate('local', {
     failureFlash: true
 }))
 app.get(['/register'], async (req,res)=>{
-    res.render('register.ejs')
+    try{
+        res.render('register.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }    
 })
+
 app.post(['/register'], async (req,res)=>{
     // console.log(req.body);
     try {
@@ -160,6 +214,175 @@ app.post(['/register'], async (req,res)=>{
     
     // console.log(users)
 })
+app.get(['/forgotPassword'], async (req,res)=>{
+    try{
+        res.render('forgotPassword.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
+app.post(['/forgotPassword'], async (req,res)=>{
+    const { email } = req.body;
+    const request = pool.request();
+  const userQuery = `select firstName, id, email, [password] 
+                        from users as t1
+                        LEFT JOIN emails as t2
+                        on t1.ID=t2.userID
+                        LEFT JOIN credentials as t3 
+                        on t1.ID=t3.userID
+                        where email = '${email}'`;
+
+  try {
+    const result = await request.query(userQuery);
+    const user = result.recordset[0];
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate and save reset token
+    const token = crypto.randomBytes(32).toString('hex');
+    const resetTokenQuery = `
+      INSERT INTO ResetTokens (userId, token) VALUES (${user.id}, '${token}')
+    `;
+
+    await request.query(resetTokenQuery);
+
+    // Send reset email
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        service: 'gmail',
+        secure: false,
+        auth: {
+           user: process.env.ORG_EMAIL,
+           pass: process.env.ORG_EMAIL_PASSWORD
+        },
+        debug: false,
+        logger: true
+    });
+
+    const resetLink = `https://glad-pika-totally.ngrok-free.app/reset/${token}`;
+    const mailOptions = {
+      from: process.env.ORG_EMAIL,
+      to: user.email,
+      subject: 'Password Reset',
+      text: `Click the following link to reset your password: ${resetLink}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.error('Error sending reset email:', error);
+      }
+      console.log('Reset email sent:', info.response);
+      return res.redirect('/')
+    //   return res.render('login.ejs', { messages: {message: 'Reset email sent Successfully'}})
+    //   res.json({ message: 'Reset email sent' });
+    });
+  } catch (error) {
+    console.error('Error finding user:', error);
+  } 
+})
+app.get('/pswdreset', async (req, res, next) => {
+    try{
+        res.render('resetPassword.ejs') 
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
+app.post('/pswdreset', async (req, res, next) => {
+    try{
+        const { password, confirmPassword } = req.body;
+        if (password !== confirmPassword) {
+            return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
+            // return res.status(404).json({ message: 'Passwords do not match' });
+        } 
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
+app.get('/reset/:token', async (req, res, next) => {
+    try{
+        res.render('resetPassword.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post('/reset/:token', async (req, res, next) => {
+    try {
+        const { token } = req.params;
+        const { password, confirmPassword } = req.body;
+
+        if (password !== confirmPassword) {
+            return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
+        }
+        // Use MSSQL to find reset token in the database
+        // const pool = await mssql.connect(config);
+        const request = pool.request();
+        const resetTokenQuery = `SELECT * FROM ResetTokens WHERE token = '${token}'`;
+  
+    
+        const result = await request.query(resetTokenQuery);
+        const resetToken = result.recordset[0];
+    
+        if (!resetToken) {
+            return res.status(404).json({ message: 'Invalid token' });
+        }
+    
+        // Update user password and remove reset token
+        const userQuery = `SELECT * FROM Users WHERE id = ${resetToken.userId}`;
+        const userResult = await request.query(userQuery);
+        const user = userResult.recordset[0];
+    
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const hashedpassword = await bcrypt.hash(password, 10)
+        const updateUserQuery = `
+            UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}
+        `;
+    
+        await request.query(updateUserQuery);
+        const removeResetTokenQuery = `DELETE FROM ResetTokens WHERE token = '${token}'`;
+        await request.query(removeResetTokenQuery);
+        res.redirect('/')
+        //   res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Error resetting password:', error);
+    }
+  });
+app.post(['/paidChanges'], async (req,res,next)=>{
+    // res.status(500);
+
+    // Send a JSON response with the error message
+    // res.json({ error: 'An error occurred while processing your request.' });
+    try{
+        const request = pool.request()
+        if(Object.keys(req.body).length >0){
+                    const result = await request
+                    .query(`Update winners
+                    Set paid =
+                    Case 
+                    when Event_ID in (${Object.keys(req.body).map(item => `'${item}'`).join(', ')}) then 'true'
+                    else 'false'
+                    End`)
+        }else{
+            const result = await request
+                    .query(`Update winners
+                    Set paid = 'false'`)
+        }
+        // if(req.body[0].length !== 0){
+        //     console.log(req.body[0].keys())
+        // }
+        // res.status(500);
+
+    // Send a JSON response with the error message
+        // res.json({ error: 'An error occurred while processing your request.' });
+        res.redirect('back')
+    }catch(err){
+        // return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
+    }
+})
 app.get(['/timer'], async (req,res,next)=>{
     try{
         var game
@@ -173,23 +396,23 @@ app.get(['/timer'], async (req,res,next)=>{
             // await pool.connect();
             const request = pool.request()
             const result = await request
-            .query(`select * from winningTeam(${req.query.Event_ID})`)
+            .query(`select * from winningTeam('${req.query.Event_ID}')`)
             if(result.recordset[0].length=1){
                 await request
-                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone, Event_ID)
-                select top 1 *, ${req.query.Event_ID} as Event_ID 
+                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone, Event_ID, paid)
+                select top 1 *, '${req.query.Event_ID}', 'false' as Event_ID 
                 from winningTeamContact('${result.recordset[0].teamName}')
                 where not 'MOI' in (Select league from teams
                     where id = '${result.recordset[0].teamName}')`)
             }  
-            await request.query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = ${req.query.Event_ID}`)
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = '${req.query.Event_ID}'`)
             res.redirect('/games')
         } else {
             // const pool = new sql.ConnectionPool(config)
             // await pool.connect();
             const request = pool.request()
             const result = await request
-            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = ${req.query.Event_ID}`)
+            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = '${req.query.Event_ID}'`)
             game = result.recordset[0]
             if(req.query.timerState == 0){
                 if(game.timerStartTime == 'NULL'){
@@ -201,7 +424,7 @@ app.get(['/timer'], async (req,res,next)=>{
                 game.timerStartTime = Date.now()
             }
             game.timerState = req.query.timerState
-            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [timerStartTime] = ${game.timerStartTime}, [timerState] = ${game.timerState} WHERE event_Id = '${req.query.Event_ID}'`)
             res.redirect('back')
         }
     }catch(err){
@@ -209,7 +432,7 @@ app.get(['/timer'], async (req,res,next)=>{
         res.redirect('back')
     }
 })
-app.get(['/games'], async (req,res,next)=>{
+app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
     try{
         if (req.isAuthenticated()) {
             // console.log(req.user)
@@ -224,7 +447,8 @@ app.get(['/games'], async (req,res,next)=>{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        const result = await request.query(`Select * from gamesList()`)
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
+        const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) in (CONVERT(date,'03-03-2024'),CONVERT(date,'03-04-2024')) order by startUnixTime`)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){
@@ -265,7 +489,22 @@ app.get(['/winners'], async (req,res, next)=>{
         next(err)
     }
 })
-app.get(['/activeGame'], async (req,res,next)=>{
+app.get(['/users'], async (req,res, next)=>{
+    try{
+        var data = {
+            page: req.route.path[0].replace('/','')
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        const result = await request.query(`SELECT * from dbo.users`)
+        data.users = result.recordsets[0]  
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        next(err)
+    }
+})
+app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
     try {
         var game
         // const pool = new sql.ConnectionPool(config)
@@ -318,7 +557,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
                 game.timerState = 2
                 game.timerTime = 0
             }
-            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = ${req.query.Event_ID}`)
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = '${req.query.Event_ID}'`)
         }
         var data = {
             teams: [
@@ -335,10 +574,10 @@ app.get(['/activeGame'], async (req,res,next)=>{
     }
 })
 
-app.post(['/'], async (req,res)=>{
-    // res.render('index.ejs')
-    res.render('smartphone.ejs') 
-})
+// app.post(['/'], async (req,res)=>{
+//     // res.render('index.ejs')
+//     res.render('smartphone.ejs') 
+// })
 app.post(['/eventLog'], async (req,res,next)=>{
    try{ 
         var data = {
@@ -378,12 +617,12 @@ app.post(['/eventLog'], async (req,res,next)=>{
             Select * 
             from scorecard.dbo.rosterGameStats(
                 '${req.body.teamName}',
-                ${req.body.Event_ID}
+                '${req.body.Event_ID}'
                 ) 
             where Id = '${req.body.playerId}'
 
-            SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,${req.body.Event_ID},@Team2_ID)
-            SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,${req.body.Event_ID},@Team1_ID)
+            SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,'${req.body.Event_ID}',@Team2_ID)
+            SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,'${req.body.Event_ID}',@Team1_ID)
             `)
             try{
                 data.player = result.recordsets[0][0]
@@ -575,27 +814,36 @@ app.get(['/test'], async (req,res)=>{
 // }                                                       
 
 app.delete('/logout', (req,res) => {
-    req.logOut((err)=> {
-        if(err){return next(err)}
-        res.redirect('/login')
-    })
-    
+    try{
+        req.logOut((err)=> {
+            if(err){return next(err)}
+            res.redirect('/login')
+        })
+    }catch(err){
+        console.error('Error:', err)
+    }    
 })
 
 function checkAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next()
-    }
-
-    res.redirect('/login')
+    try{
+        if (req.isAuthenticated()) {
+            return next()
+        }
+        res.redirect('/login')
+    }catch(err){
+        console.error('Error:', err)
+    }    
 }
 
 function checkNotAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return res.redirect('/')
-    }
-
-    next()
+    try{
+        if (req.isAuthenticated()) {
+            return res.redirect('/')
+        }
+        next()
+    }catch(err){
+        console.error('Error:', err)
+    }    
 }
 app.use((err, req, res, next) => {
     console.error(err);

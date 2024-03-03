@@ -14,15 +14,16 @@
             <% } %>
         <% } else if (data.page == 'winners') { %>
             <% var url = ''; %>
-            <% for(var i=0; i< data.winners.length; i++) {%>
-                <% var url = url + data.winners[i].email %>
-                <% if (i < data.winners.length - 1) { %>
-                    <% var url = url + ',' %>
+            <form action="/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
+                <% for(var i=0; i< data.winners.length; i++) {%>
+                    <% var url = url + data.winners[i].email %>
+                    <% if (i < data.winners.length - 1) { %>
+                        <% var url = url + ',' %>
+                    <% } %>                    
+                        <%- include('winner_item',{winner: data.winners[i]}); %>
+                    
                 <% } %>
-                
-                <% console.log(url) %>
-                <%- include('winner_item',{winner: data.winners[i]}); %>
-            <% } %>
+            </form>
             <script>
                 var emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
                 var emailBody = encodeURIComponent(`Hi All, 
@@ -55,6 +56,11 @@ Thank you and have a nice day!`
                 <% if (team.players[i].Id !== team.keeper) { %>
                     <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
                 <% } %>
+            <% } %>
+        <% } else if (data.page == 'users') { %>
+        
+            <% for(var i=0; i< data.users.length; i++) {%>
+                    <%- include('user_item',{user: data.users[i]}); %>
             <% } %>
         <% } %>
     </div>

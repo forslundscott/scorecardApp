@@ -3,20 +3,21 @@
 <head>
 </head>
 <body>
-    <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'winners') { %>
-     
-    
-    <div id="<%= %>" class="singleColumn">
-        <%- include('list', {data: data}); %>
-    </div>
-    <% }else if (data.page == 'activeGame') {%>
-        
+    <% if (data.page == 'activeGame') { %>
         <div id="" class="doubleColumn">
             <%- include('list', {data: data, team: data.teams[0], opponent: data.teams[1], side: 'left'}); %>
         </div>
         <div id="" class="doubleColumn">
             <%- include('list', {data: data, team: data.teams[1], opponent: data.teams[0], side: 'right'}); %>
         </div>
+    
+        
+    <% }else {%>
+        <div id="<%= %>" class="singleColumn">
+            <%- include('list', {data: data}); %>
+        </div>
+        
+        
     <% } %>
 </body>
 </html>
