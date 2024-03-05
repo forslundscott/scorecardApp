@@ -4,23 +4,29 @@ const bcrypt = require('bcrypt')
 
 function initialize(passport, getUserByEmail2, getUserById2, getUserByEmail, getUserById){
     const authenticateUser = async (email, password, done) => {
-        const result = await getUserByEmail(email)
-        if(result.recordset.length == 0){
-            return done(null, false, {message: 'No user with that email'})
-        }
-        const user = result.recordset[0]
-        // console.log(user)
-        // if(user == null){
-        //     return done(null, false, {message: 'No user with that email'})
-        // }
-        try {
-            if(await bcrypt.compare(password, user.password)){
-                return done(null, user)
-            } else {
-                return done(null, false, {message: 'Password incorrect'})
+        try{
+            email = email.replace(/'/g, '')
+            const result = await getUserByEmail(email)
+            if(result.recordset.length == 0){
+                return done(null, false, {message: 'No user with that email'})
             }
-        } catch (e) {
-            return done(e)
+            const user = result.recordset[0]
+            // console.log(user)
+            // if(user == null){
+            //     return done(null, false, {message: 'No user with that email'})
+            // }
+            try {
+                if(await bcrypt.compare(password, user.password)){
+                    return done(null, user)
+                } else {
+                    return done(null, false, {message: 'Password incorrect'})
+                }
+            } catch (e) {
+                return done(e)
+            }
+        }catch(err){
+            console.log(err)
+            return done(null, false, {message: err.message})
         }
     }
     passport.use(new LocalStrategy({usernameField: 'email'},

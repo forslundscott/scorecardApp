@@ -16,6 +16,8 @@
         <div style="height: 40%; width: 100%;">
           <!-- <a href="mailto:?bcc=<%=encodeURIComponent('test@test')%>&subject=<%=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%=encodeURIComponent('This is a reminder to send gift card payments.')%>" style="height: 100%; width: 100%;"> -->
             <button id="emailAllButton" type="button" class="secondaryStyle" style="height: 80%" >Send Reminder to All</button>
+            <br>
+            <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button>
           <!-- </a>  -->
         </div>
       <% }else if (data.page == 'activeGame') {%>
@@ -25,17 +27,18 @@
 
         </script>
         <!-- onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'" -->
-        <div class="triColumn">
-          <form action="javascript:void(0);">
+        <div class="triColumn textCenter">
+          <form action="javascript:void(0);" style="height: 100%;">
             <input type="hidden" name="team" value="<%= data.teams[0].id %>">
             <input type="hidden" name="color" value="<%= data.teams[0].color %>">
             <div style="float: left; width: 100%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+              <img src="images/<%=data.teams[0].id%>.png" alt="<%=data.teams[0].id%> Logo" class="headerTopRow">
               <div style="float: left; width: 83%;"><%= data.teams[0].id %></div>
               <div style="float: left; width: 17%;" id="<%= data.teams[0].id + "Score" %>"><%= data.teams[0].score %></div>
             </div>
           </form>
         </div>
-        <div class="triColumn">
+        <div class="triColumn textCenter">
           
           <form id="timerForm" action="timer" enctype="application/x-www-form-urlencoded">
             <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
@@ -49,8 +52,8 @@
               data.game.timerTime - (Date.now() - data.game.timerStartTime) %><% 
             } else if (data.game.timerState == 2){%>0<% } %>">
             <div style="float: left; width: 100%; height: 100%;">
-              <button onclick="timerStartStop(this)" id="timerButton" style="height: 50%; vertical-align: top;">
-                <div id="gameTimer" style="font-size: 70%;">
+              <button onclick="timerStartStop(this)" id="timerButton" style="height: 60%;">
+                <div id="gameTimer">
                   <% if (data.game.timerState == 0) { %>
                     <%- new Date(data.game.timerTime).toISOString().slice(14, -5) %>
                   <% } else if (data.game.timerState == 1){%>
@@ -59,20 +62,22 @@
                     Full Time
                   <% } %>
                 </div>
-                <div style="font-size: 33%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
+                <div style="font-size: 50%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
+                <div style="font-size: 50%;" id="court"><%- data.game.Location %></div>
               </button>
               
               
               <br>
-              <button type="button" onclick="switchSides(this)" style="height: 50%;"><img src="swapIcon.png" alt="Switch Sides" height="50vh" ></button>
+              <button type="button" onclick="switchSides(this)" style="height: 30%;"><img src="swapIcon.png" alt="Switch Sides" style="height: 100%;" ></button>
             </div>
           </form>
         </div>
-        <div class="triColumn">
-          <form action="javascript:void(0);">
+        <div class="triColumn textCenter">
+          <form action="javascript:void(0);" style="height: 100%;">
             <input type="hidden" name="team" value="<%= data.teams[1].id %>">
             <input type="hidden" name="color" value="<%= data.teams[1].color %>">
-            <div style="float: left; width: 100%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+            <div style="float: right; width: 100%; height: 100%;" onclick="toggleAddPlayer(this.parentElement)">
+              <img src="images/<%=data.teams[1].id%>.png" alt="<%=data.teams[1].id%> Logo" class="headerTopRow">
               <div style="float: right; width: 83%;"><%= data.teams[1].id %></div>
               <div style="float: right; width: 17%;" id="<%= data.teams[1].id + "Score" %>"><%= data.teams[1].score %></div>
             </div>

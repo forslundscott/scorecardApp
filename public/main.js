@@ -234,28 +234,38 @@ var x = setInterval(function() {
         
         form.querySelector('[name="period"]').value = xperiod
         form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
-        // var formData = new FormData(form)
+        form.querySelector('[name="type"]').value = ele.value
+        var formData = new FormData(form)
         // console.log(formData)
-        // try{
-        //     const response = await fetch('/testEventLog', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/x-www-form-urlencoded',
-        //         },
-        //         body: new URLSearchParams(formData).toString(),
-        //     });
-        //     if (response.ok) {
-        //         const responseData = await response.json();
-        //         console.log(responseData.data);
-        //         // location.reload()
-        //         // Handle successful response, update UI, etc.
-        //     } else {
-        //         console.error('Form submission failed');
-        //         // Handle error response
-        //     }
-        // }catch(error){
-        //     console.error('Error:', error);
-        // }
+        try{
+            const response = await fetch('/eventLog', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString(),
+            });
+            if (response.ok) {
+                const responseData = await response.json();
+                switch(responseData.message){
+                    case 'Reload':
+                        location.reload()
+                        break
+                    default:
+                        document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('goals')[0].innerHTML = 'G: ' + responseData.data.player.goals
+                        document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('assists')[0].innerHTML = 'A: ' + responseData.data.player.assists
+                        document.getElementById(responseData.data.player.Id + responseData.data.player.Team).getElementsByClassName('saves')[0].innerHTML = 'Sv: ' + responseData.data.player.saves
+                        document.getElementById(responseData.data.team1.team + 'Score').innerHTML = responseData.data.team1.score
+                        document.getElementById(responseData.data.team2.team + 'Score').innerHTML = responseData.data.team2.score
+                        closeForm()
+                }
+            } else {
+                console.error('Form submission failed');
+                // Handle error response
+            }
+        }catch(error){
+            console.error('Error:', error);
+        }
   }
   // mouseup need to be monitored on a "global" element or we might miss it if
 // we move outside the original element.
@@ -317,7 +327,9 @@ function toggleAddPlayer(xform){
         var color = xform.querySelector('[name="color"]').value
         document.getElementById('newPlayerForm').style.display = ''
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+        document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
+        
+        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
     }
@@ -336,7 +348,7 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').querySelector('[name="teamName"]').value = xform.querySelector('[name="teamName"]').value
         document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = xform.querySelector('[name="Event_ID"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
-        document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('itemFormat secondaryStyle')[0].style.backgroundImage
+        document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('playerItem')[0].style.backgroundImage
         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
         document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
@@ -344,8 +356,10 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').style.display = 'none'
     }
     if(document.getElementById('formBackground').style.display == 'none'){
+        console.log('visible');
         document.getElementById('formBackground').style.display = ''
     }else{
+        console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
 }
@@ -422,4 +436,34 @@ function convertUnixTimeToMMDD(unixTime) {
     }catch(error){
         console.error('Error:', error);
     }
+  }
+  async function fetchHandler(event){
+    event.preventDefault()
+    var form = event.target.form
+    
+    var formData = new FormData(form)
+    
+    try{
+        const response = await fetch(`${form.action}`, {
+            method: `${form.method}`,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            // const responseData = await response.json();
+            console.log(response);
+            // location.reload()
+            // Handle successful response, update UI, etc.
+          } else {
+            console.log(response)
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+    
+    console.log(event.target.form)
   }

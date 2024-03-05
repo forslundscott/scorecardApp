@@ -14,9 +14,9 @@
             <input type="hidden" name="period" value="">
             <input type="hidden" name="value" value="">
             <button class="playerButton" name="type" value="game" onclick="">
-        <div class="itemFormat secondaryStyle" style="border-width: thick; border-color: <%-game.LeagueColor%>; background-image: linear-gradient(135deg, <%=game.Team1Color %> .5%, white 50%, <%=game.Team2Color %> 99.5%);">
+        <div class="itemFormat primaryStyle" style="border-style:solid; border-width: thick; border-color: <%-game.LeagueColor%>; background-image: linear-gradient(90deg, <%=game.Team1Color %> 2.5%, black 12.5%, black 87.5%, <%=game.Team2Color %> 97.5%);">
             <div class="playerTag">
-                <div class="playerName">
+                <div class="playerName" style="text-align: center;">
                     <%= game.Team1_ID %>
                     vs
                     <%= game.Team2_ID %>

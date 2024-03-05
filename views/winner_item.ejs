@@ -13,23 +13,36 @@ Thank you and have a nice day!`);
         var bccAddress = encodeURIComponent(`${winner.email}`); 
      %>
         <!-- <form class="listItem" action="" method="get"> -->
-            <a class="playerButton" href="mailto:?bcc=<%=bccAddress%>&subject=<%=emailSubject%>&body=<%=emailBody%>">    
+               
             <!-- <button class="playerButton" name="type" value="game" onclick=""> -->
         
-        <div class="itemFormat secondaryStyle" style="background-image: linear-gradient(135deg, <%=winner.color %> .5%, white 50%, <%=winner.color %> 99.5%);">
-            <div class="playerTag">
-                <div class="playerName">
-                    <%= winner.player %>
-                    
-                </div>
-            </div>
+        <div class="itemFormat primaryStyle primaryBorder" style="background-image: linear-gradient(to right, <%=winner.color %> .5%, black 25%);">
+            
             <div class="statContainer">  
-                <div class="gameInfo"><%= winner.TeamId %></div>
-                 <div class="gameInfo"><%= winner.email %></div>
+                <div class="gameInfo" style="text-align: center;"></div>
+                 
+                    <div class="gameInfo" style="text-align: center;">
+                        <a class="playerButton" href="mailto:?bcc=<%=bccAddress%>&subject=<%=emailSubject%>&body=<%=emailBody%>">
+                            <div class="playerTag">
+                                <div class="playerName" style="text-align: center;">
+                                    <%= winner.player %>
+                                </div>
+                            </div>
+                            <%= winner.TeamId %>
+                            <br>
+                            <%= new Date(winner.Start_Date).toLocaleDateString('en-us', {day: '2-digit', month: '2-digit', timeZone: 'UTC'}) %>
+                            <%= winner.Start_Time %>
+                            <%= winner.Location %>
+                        </a>    
+                    </div>
+                
+                <div class="gameInfo" style="text-align: center;">
+                    <label for="<%=winner.Event_ID%>">Paid</label><input type="checkbox" name="<%=winner.Event_ID%>" <%= winner.paid== 'true'? 'checked': ''%>>
+                </div>
                 
             </div>                    
         </div>
-        </a>
+        
         <!-- </button> -->
     <!-- </form> -->
 </body>
