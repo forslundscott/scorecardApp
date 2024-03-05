@@ -428,7 +428,7 @@ app.get(['/timer'], async (req,res,next)=>{
             res.redirect('back')
         }
     }catch(err){
-
+        console.log(err)
         res.redirect('back')
     }
 })
@@ -448,7 +448,7 @@ app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
         // await pool.connect();
         const request = pool.request()
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
-        const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) in (CONVERT(date,'03-03-2024'),CONVERT(date,'03-04-2024')) order by startUnixTime`)
+        const result = await request.query(`Select * from gamesList() order by startUnixTime`)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){
@@ -482,7 +482,8 @@ app.get(['/winners'], async (req,res, next)=>{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        const result = await request.query(`SELECT * from dbo.winners`)
+        const result = await request.query(`SELECT * from dbo.winners
+                                            LEFT join games on winners.Event_ID=games.Event_ID`)
         data.winners = result.recordsets[0]  
         res.render('index.ejs',{data: data})
     }catch(err){

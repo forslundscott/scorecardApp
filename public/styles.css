@@ -61,14 +61,14 @@ button {
     color: var(--primaryFontColor) !important;
     background-color: var(--primaryColor) !important;
     top: 0;
-    height: 10%;
+    height: 15%;
     width: 100%;
     z-index: 1;
     overflow: hidden;
     display: block;
   }
   #innerBody {
-    height: 65%;
+    height: 60%;
     width: 100%;
     /* background: var(--shinySilver); */
     /* background-image: linear-gradient(135deg, #919191 25%, white 50%, #919191 75%);; */
@@ -349,9 +349,9 @@ input::-webkit-inner-spin-button {
   height: 100%;
 }
 #mainLogo{
-  height: 90%;
+  height: 75%;
   position: relative;
-  top: 10%;
+  top: 12.5%;
 }
 #newPlayerLogo{
   height: 90%;
@@ -382,4 +382,7 @@ input::-webkit-inner-spin-button {
   content: '';
   position: absolute;
   display: none;
+}
+.headerTopRow{
+  height: 70%;
 }

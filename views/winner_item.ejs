@@ -29,6 +29,10 @@ Thank you and have a nice day!`);
                                 </div>
                             </div>
                             <%= winner.TeamId %>
+                            <br>
+                            <%= new Date(winner.Start_Date).toLocaleDateString('en-us', {day: '2-digit', month: '2-digit', timeZone: 'UTC'}) %>
+                            <%= winner.Start_Time %>
+                            <%= winner.Location %>
                         </a>    
                     </div>
                 

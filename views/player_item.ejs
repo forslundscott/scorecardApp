@@ -15,7 +15,7 @@
             <input type="hidden" name="opponentKeeper" value="<%= opponent.keeper %>">
             <input type="hidden" name="season" value="<%= data.game.season %>">
             <input type="hidden" name="subseason" value="<%= data.game.subseason %>">
-            <button class="itemFormat primaryStyle" style="border-style: solid ;border-image: linear-gradient(to <%= side == 'left' ? 'right' : 'left' %>, silver 5%,black 25%) 1; background-image: linear-gradient(90deg, <%=side == 'left' ? team.color + ' 5%, black 25%' : 'black 75%, ' + team.color + ' 95%' %> );" type="button" onclick="toggleEventForm(this)">
+            <button class="itemFormat primaryStyle" style="border-style: solid ;border-image: linear-gradient(to <%= side == 'left' ? 'right' : 'left' %>, <%= team.color.toLowerCase() == 'black' ? 'silver': 'black' %> 5%,black 25%) 1; background-image: linear-gradient(90deg, <%=side == 'left' ? team.color + ' 5%, black 25%' : 'black 75%, ' + team.color + ' 95%' %> );" type="button" onclick="toggleEventForm(this)">
                 <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
                 <div class="playerItem" style="<%= side == 'left' ? 'margin: 0% 0% 0% 25%; text-align: left;' : 'margin: 0% 25% 0% 0%; text-align: right;' %>">
                     <div class="playerTag">
