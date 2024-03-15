@@ -10,7 +10,7 @@
     
 </head>
 <body>
-    <script src="../dist/NoSleep.min.js"></script>    
+    <script src="https://glad-pika-totally.ngrok-free.app/dist/NoSleep.min.js"></script>    
     <script>
         // import NoSleep from 'nosleep.js';
         var noSleep = new NoSleep();
@@ -34,7 +34,7 @@
     </script>  
     <audio id="myAudio">
         <!-- <source src="horse.ogg" type="audio/ogg"> -->
-        <source src="doubleBell.mp3" type="audio/mpeg">
+        <source src="https://glad-pika-totally.ngrok-free.app/doubleBell.mp3" type="audio/mpeg">
         <!-- Your browser does not support the audio element. -->
     </audio autoPlay muted>
         <%- include('header', {data: data}); %>
@@ -50,11 +50,12 @@
         <% if (data.page == 'activeGame') { %>
             <%- include('newPlayerForm'); %>
             <%- include('eventForm'); %> 
-            <%- include('timerForm'); %> 
+            <%#- include('timerForm'); %> 
+            <%#- include('gameInfoForm'); %>
         <% } %>
               
         
-        <script src="main.js"></script>
+        <script src="https://glad-pika-totally.ngrok-free.app/main.js"></script>
         
 </body>
 </html>

@@ -351,14 +351,59 @@ app.post('/reset/:token', async (req, res, next) => {
         console.error('Error resetting password:', error);
     }
   });
+//   app.get('/standings/individual/:league', async (req, res, next) => {
+//     try{
+//         const request = pool.request()
+//             const result = await request
+//             .query(`DECLARE @league varchar(255)
+//             Set @league = '${req.params.league}'
+//             Execute leagueStandings @league
+//             `)
+//         var data = {
+//             league: req.params.league,
+//             page: req.originalUrl.split('/')[1],
+//             list: result.recordsets[0]
+//         }
+        
+//         res.render('index.ejs',{data: data})
+//     }catch(err){
+//         console.error('Error:', err)
+//     }
+// })
+  app.get('/standings/:type/:league', async (req, res, next) => {
+    try{
+        console.log(`DECLARE @league varchar(255)
+        Set @league = '${req.params.league}'
+        Execute ${req.params.type}Standings @league
+        `)
+        const request = pool.request()
+            const result = await request
+            .query(`DECLARE @league varchar(255)
+            Set @league = '${req.params.league}'
+            Execute ${req.params.type}Standings @league
+            `)
+        var data = {
+            league: req.params.league,
+            type: req.params.type,
+            page: `${req.originalUrl.split('/')[1]}`,
+            list: result.recordsets[0]
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 app.post(['/paidChanges'], async (req,res,next)=>{
     // res.status(500);
 
     // Send a JSON response with the error message
     // res.json({ error: 'An error occurred while processing your request.' });
     try{
+        
         const request = pool.request()
         if(Object.keys(req.body).length >0){
+            console.log(req.body);
                     const result = await request
                     .query(`Update winners
                     Set paid =
@@ -380,6 +425,7 @@ app.post(['/paidChanges'], async (req,res,next)=>{
         // res.json({ error: 'An error occurred while processing your request.' });
         res.redirect('back')
     }catch(err){
+        console.log(err)
         // return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
     }
 })
@@ -482,9 +528,20 @@ app.get(['/winners'], async (req,res, next)=>{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        const result = await request.query(`SELECT * from dbo.winners
-                                            LEFT join games on winners.Event_ID=games.Event_ID`)
-        data.winners = result.recordsets[0]  
+        const result = await request.query(`SELECT winners.*, 
+        games.Start_Date, 
+        games.Start_Time, 
+        games.[Location], 
+        games.Team1_ID, 
+        games.Team2_ID, 
+        games.season, 
+        games.subseason, 
+        games.league 
+        from dbo.winners
+        LEFT join games on winners.Event_ID=games.Event_ID
+        order by paid`)
+        data.winners = result.recordsets[0] 
+        // console.log(data.winners) 
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
@@ -605,7 +662,14 @@ app.post(['/eventLog'], async (req,res,next)=>{
             // res.redirect('back')
             res.json({ message: 'Reload', data: data })
         }else{
-            result = await request.query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
+            console.log(`${req.body.type == 'owngoal' ? 'myKeeper': req.body.type == 'goal' ? 'oppKeeper' : null}`)
+            result = await request.query(`insert into scorecard.dbo.eventLog (playerId, 
+                teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) 
+            VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}',
+            '${req.body.periodTime}','${req.body.period}','${req.body.value}',
+            '${req.body.type}','${req.body.Event_ID}',${req.body.type == 'owngoal' ? "'"+req.body.keeper+"'": req.body.type == 'goal' ? "'"+req.body.opponentKeeper+"'" : null},
+            '${req.body.season}','${req.body.subseason}')`)
+            
             result = await request.query(`
             DECLARE @Team1_ID VARCHAR(255);
             DECLARE @Team2_ID VARCHAR(255)

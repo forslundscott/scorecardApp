@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+        <form class="listItem" action="javascript:void(0);" method="get">
+            <button class="playerButton" name="type" value="game" onclick="">
+        <div class="itemFormat primaryStyle primaryBorder">
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    <%= item.shortName %>
+                </div>
+            </div>
+            <div class="statContainer">  
+                <div class="teamStandingsItem">
+                    PTS
+                    <br>
+                    <%= item.points %></div>
+                <div class="teamStandingsItem">
+                    W
+                    <br>
+                    <%= item.wins %></div>
+                <div class="teamStandingsItem">
+                    L
+                    <br>
+                    <%= item.losses %></div>
+                <div class="teamStandingsItem">
+                    D
+                    <br>
+                    <%= item.ties %></div>
+                <div class="teamStandingsItem">
+                    GF
+                    <br>
+                    <%= item.goalsFor %></div>
+                <div class="teamStandingsItem">
+                    GA
+                    <br>
+                    <%= item.goalsAgainst %></div>
+                <div class="teamStandingsItem">
+                    GD
+                    <br>
+                    <%= item.goalDifferential %></div>
+                <div class="teamStandingsItem">GP
+                    <br>
+                    <%= item.gamesPlayed %></div>
+            </div>                    
+        </div>
+        </button>
+    </form>
+</body>
+</html>

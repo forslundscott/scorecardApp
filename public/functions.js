@@ -1,7 +1,4 @@
-function titleCase(xstr){
-    return xstr.charAt(0).toUpperCase() + xstr.slice(1)
-}
-function getOrdinalNumber(number) {
+   function getOrdinalNumber(number) {
     // Convert the input to a number if it's a string
     const num = typeof number === 'string' ? parseInt(number, 10) : number;
 
@@ -31,5 +28,3 @@ function getOrdinalNumber(number) {
             return num + 'th';
     }
 }
-
-module.exports = {titleCase,getOrdinalNumber}

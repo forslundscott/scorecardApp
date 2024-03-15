@@ -202,6 +202,27 @@ input::-webkit-inner-spin-button {
   width: calc(100%/3);
   text-align: center;
 }
+.teamStandingsItem{
+  float: left;
+  font-size: 110%;
+  height: 100%;
+  width: calc(100%/8);
+  text-align: center;
+}
+.individualStandingsItem{
+  float: left;
+  font-size: 110%;
+  height: 100%;
+  width: calc(100%/5);
+  text-align: center;
+}
+.keeperStandingsItem{
+  float: left;
+  font-size: 110%;
+  height: 100%;
+  width: calc(100%/6);
+  text-align: center;
+}
 .statLabel{
   float: left;
   background-color: var(--secondaryColor);

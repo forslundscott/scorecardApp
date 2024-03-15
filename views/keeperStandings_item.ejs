@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+        <form class="listItem" action="javascript:void(0);" method="get">
+            <button class="playerButton" name="type" value="game" onclick="">
+        <div class="itemFormat primaryStyle primaryBorder">
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    <%= item.Player %> - <%= item.teamId %>
+                </div>
+            </div>
+            <div class="statContainer">  
+                <div class="keeperStandingsItem">
+                    GA
+                    <br>
+                    <%= item.goalsAgainst %></div>
+                <div class="keeperStandingsItem">
+                    S
+                    <br>
+                    <%= item.saves %></div>
+                <div class="keeperStandingsItem">
+                    S%
+                    <br>
+                    <%= (item.savePercentage * 100).toFixed(2) + '%' %></div>
+                <div class="keeperStandingsItem">
+                    GP
+                    <br>
+                    <%= item.gamesPlayed %></div>
+                <div class="keeperStandingsItem">
+                    WS
+                    <br>
+                    <%= item.weightedSaves.toFixed(2) %></div>
+                <div class="keeperStandingsItem">
+                    WS/GP
+                    <br>
+                    <%= item.weightedSavesPerGame.toFixed(2) %></div>
+            </div>                    
+        </div>
+        </button>
+    </form>
+</body>
+</html>

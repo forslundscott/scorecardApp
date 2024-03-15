@@ -350,6 +350,7 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('playerItem')[0].style.backgroundImage
         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
+        document.getElementById('eventForm').querySelector('[name="keeper"]').value = xform.querySelector('[name="keeper"]').value
         document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
     }else{
@@ -467,3 +468,63 @@ function convertUnixTimeToMMDD(unixTime) {
     
     console.log(event.target.form)
   }
+  async function gameFormSubmit(event){
+    event.preventDefault()
+    var form = event.target.form
+    
+    var formData = new FormData(form)
+    
+    try{
+        const response = await fetch(`${form.action}`, {
+            method: `${form.method}`,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            // const responseData = await response.json();
+            console.log(response);
+            // location.reload()
+            // Handle successful response, update UI, etc.
+          } else {
+            console.log(response)
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+    
+    console.log(event.target.form)
+  }
+  function getOrdinalNumber(number) {
+    // Convert the input to a number if it's a string
+    const num = typeof number === 'string' ? parseInt(number, 10) : number;
+
+    if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+        return 'Invalid input';
+    }
+
+    if (num === 0) {
+        return '0th';
+    }
+
+    const lastDigit = num % 10;
+    const secondLastDigit = Math.floor((num % 100) / 10);
+
+    if (secondLastDigit === 1) {
+        return num + 'th';
+    }
+
+    switch (lastDigit) {
+        case 1:
+            return num + 'st';
+        case 2:
+            return num + 'nd';
+        case 3:
+            return num + 'rd';
+        default:
+            return num + 'th';
+    }
+}
