@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
-<body>
+
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="addPlayer" method="post" style="display: ''; text-align: center;">
+    <form id="gameInfoForm" class="popupForm primaryStyle primaryBorder" action="javascript:void(0);" method="post" style="display: none; text-align: center;">
         <!-- <div class="playerTag itemFormat"> -->
-            
+            <input type="hidden" name="Event_ID" value="">
             <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
             <br>
             <div class="playerName">
@@ -14,23 +10,26 @@
             </div>
             <br>
             <!-- <label for="team1"></label> -->
-            <select  name="league">
+            <!-- <select  name="league">
                 <option value="MOI" selected>Men's Open</option>
                 <option value="OCI">Open Coed</option>
                 <option value="SCI" selected>Social Coed</option>
             </select>
-            <br>
-            <select  name="team1">
-            <option value="Test1" selected>Test1</option>
-            <option value="Test2">Test2</option>
+            <br> -->
+            <select name="Team1_ID">
+            <option value="TBD" selected>TBD</option>
             </select>
              vs 
-            <select  name="team2">
-                <option value="Test1">Test1</option>
-                <option value="Test2" selected>Test2</option>
+            <select  name="Team2_ID">
+                <option value="TBD" selected>TBD</option>
             </select>
             <br>
-            <label for="startDate">Date</label>
+            <label for="scoreKeeper_ID">Scorekeeper</label>
+            <select  name="scoreKeeper_ID">
+                <option value="TBD" selected>TBD</option>
+            </select>
+            <br>
+            <!-- <label for="startDate">Date</label>
             <input type="date" name="startDate" value="2024-03-03">
             <label for="startTime">Time:</label>
             <input type="time" name="startTime" value="17:30">
@@ -55,10 +54,9 @@
             <br>
             <label for="currentTime">Time Between Periods:</label>
             <input type="time" name="currentTime" pattern="[0-9]{2}:[0-9]{2}">
+            <br> -->
             <br>
-            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Apply Changes</button>
+            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="updateGameData(this)">Apply Changes</button>
             <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->
         <!-- </div> -->
     </form>
-</body>
-</html>

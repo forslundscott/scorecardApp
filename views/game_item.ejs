@@ -23,10 +23,25 @@
                 </div>
             </div>
             <div class="statContainer">  
+                <%const tempDate = new Date()
+                tempDate.setTime(game.startUnixTime) %>
                 <div class="gameInfo"><%= game.Location %></div>
-                <div class="gameInfo"><%= game.Start_Time %></div>
-                <div class="gameInfo"><%= new Date(game.Start_Date).toLocaleDateString('en-us', {day: '2-digit', month: '2-digit', timeZone: 'UTC'}) %></div>
-            </div>                    
+                <div class="gameInfo"><%= tempDate.toLocaleString('en-US', {
+                    timeZone: 'America/New_York', // Setting timezone to EST
+                    hour: 'numeric',
+                    minute: '2-digit'
+                  }) %></div>
+                <div class="gameInfo"><%= tempDate.toLocaleString('en-US', {
+                    timeZone: 'America/New_York', // Setting timezone to EST
+                    month: '2-digit',
+                    day: '2-digit'
+                  }) %></div>
+            </div> 
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    <%= game.scoreKeeper == null ? 'TBD' : game.scoreKeeper %>
+                </div>
+            </div>                   
         </div>
         </button>
     </form>

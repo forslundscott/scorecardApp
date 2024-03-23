@@ -66,7 +66,7 @@
                 </div>
                 
               </button>
-              <button style="height: 40%; width: 100%;">
+              <button type="button" onclick="toggleGameInfoForm(this.form)" style="height: 40%; width: 100%;">
                 <div style="font-size: 50%;" id="period"><%- functions.getOrdinalNumber(data.game.period) %> Period</div>
                 <div style="font-size: 50%;" id="court"><%- data.game.Location %></div>
               </button>

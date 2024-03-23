@@ -3,10 +3,14 @@
 <head>
 </head>
 <body>
-    <% if (data.page == 'activeGame') { %>
-        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
-    <% } %>
     
+     
+    
+    <% if (data.page == 'activeGame') { %>
+        <% if (team.id !== 'TBD') { %>
+            <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
+        <% } %>
+    <% } %>
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
         <% if (data.page == 'games' || data.page == 'readyForUpload') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
@@ -20,7 +24,7 @@
             <% var url = ''; %>
             <form action="/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
                 <% for(var i=0; i< data.winners.length; i++) {%>
-                    <% console.log(`${data.winners[i].Event_ID}-${data.winners[i].paid}`) %>
+                    <%# console.log(`${data.winners[i].Event_ID}-${data.winners[i].paid}`) %>
                     <% if (data.winners[i].paid == 'false') { %>
                         <% var url = url + data.winners[i].email %>
                         <% if (i < data.winners.length - 1) { %>

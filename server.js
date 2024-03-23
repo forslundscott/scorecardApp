@@ -17,7 +17,7 @@ const methodOverride = require('method-override')
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const initializePassport = require('./passport-config')
-
+const ROLES = {}
 const config = {
         server: process.env.DB_SERVER,
         database: process.env.DB_NAME,
@@ -46,8 +46,14 @@ const sequelize = new Sequelize({
     },
 });
     const pool = new sql.ConnectionPool(config)
-    pool.connect().then(() => {
+    pool.connect().then(async () => {
         console.log('Connected to MSSQL with global connection pool');
+        try{
+            await roleSetter()
+            console.log(ROLES.admin)
+        }catch(err){
+            console.error('Error:', err)
+        }
       })
       .catch((err) => {
         console.error('Error connecting to MSSQL:', err);
@@ -151,6 +157,22 @@ var team2 = {
     players: []
 }
 var games = []
+
+async function roleSetter() {
+    try{
+        const request = pool.request();
+        const result = await request.query(`
+        SELECT name, id
+        FROM roles
+        `);
+        result.recordset.forEach(row => {
+            ROLES[row.name] = row.id;
+        });
+    }catch(err){
+        console.error('Error:', err)
+    }  
+};
+
 
 
 app.get(['/'], checkAuthenticated, async (req,res)=>{
@@ -372,16 +394,12 @@ app.post('/reset/:token', async (req, res, next) => {
 // })
   app.get('/standings/:type/:league', async (req, res, next) => {
     try{
-        console.log(`DECLARE @league varchar(255)
+        const request = pool.request()
+        const result = await request
+        .query(`DECLARE @league varchar(255)
         Set @league = '${req.params.league}'
         Execute ${req.params.type}Standings @league
         `)
-        const request = pool.request()
-            const result = await request
-            .query(`DECLARE @league varchar(255)
-            Set @league = '${req.params.league}'
-            Execute ${req.params.type}Standings @league
-            `)
         var data = {
             league: req.params.league,
             type: req.params.type,
@@ -451,7 +469,14 @@ app.get(['/timer'], async (req,res,next)=>{
                 where not 'MOI' in (Select league from teams
                     where id = '${result.recordset[0].teamName}')`)
             }  
-            await request.query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = '${req.query.Event_ID}'`)
+            await request.query(`UPDATE [scorecard].[dbo].[games] 
+            set [Status] = 1 
+            WHERE event_Id = '${req.query.Event_ID}'`)
+            await request
+            .query(`DECLARE @eventId varchar(max)
+                    set @eventId = '${req.query.Event_ID}'
+                    EXEC recordTeamResults
+                    @eventId`)
             res.redirect('/games')
         } else {
             // const pool = new sql.ConnectionPool(config)
@@ -478,6 +503,10 @@ app.get(['/timer'], async (req,res,next)=>{
         res.redirect('back')
     }
 })
+app.get('/admin', checkAuthenticated, authRole('admin'), (req, res) => {
+    // Only accessible by users with admin role
+    res.send('Admin Page');
+});
 app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
     try{
         if (req.isAuthenticated()) {
@@ -493,8 +522,8 @@ app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
-        const result = await request.query(`Select * from gamesList() order by startUnixTime`)
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        const result = await request.query(`Select * from gamesList() order by startUnixTime, location`)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){
@@ -729,6 +758,61 @@ app.post(['/addPlayer'], async (req,res,next)=>{
         next(err)
     }
 })
+app.post('/gameInfo', async (req, res, next) => {
+    // Process form data here
+    try{
+        var data = {
+        }
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        // console.log(formData.Event_ID)
+        result = await request.query(`
+        select * 
+        from games 
+        where Event_ID = '${formData.Event_ID}'
+
+        SELECT id 
+        from teams
+        where league in (
+            select league 
+            from games
+            where Event_ID = '${formData.Event_ID}'
+            )
+        SELECT userId,roleId,firstName,lastName
+        FROM [user_role]
+        left join users on user_role.userId=users.ID
+        where roleId in (select id from roles where name in ('scorekeeper'))`)
+        data.game = result.recordsets[0][0]
+        data.teams = result.recordsets[1]
+        data.scoreKeepers = result.recordsets[2]
+        res.json({ message: 'Form submitted successfully!', data: data });
+    }catch(err){
+        next(err)
+    }
+  });
+app.post('/updateGameInfo', async (req, res, next) => {
+// Process form data here
+    try{
+        // var data = {
+        // }
+        const formData = req.body;
+
+        const request = pool.request()
+
+        result = await request.query(`
+        update games
+        set Team1_ID = '${formData.Team1_ID}',
+        Team2_ID = '${formData.Team2_ID}',
+        scoreKeeperId = ${formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID}
+        where Event_ID = '${formData.Event_ID}'
+        `)
+        res.json({ message: 'Data updated successfully!' });
+    }catch(err){
+        next(err)
+    }
+});
 app.post('/switchSides', async (req, res, next) => {
     // Process form data here
     try{
@@ -909,6 +993,35 @@ function checkNotAuthenticated(req, res, next) {
     }catch(err){
         console.error('Error:', err)
     }    
+}
+function authRole(roleName){
+    
+    // try{
+    
+    
+    return async (req,res,next)=>{
+        try{
+        const role = ROLES[roleName]
+        console.log(role)
+        const request = pool.request()
+        const result = await request
+        .query(`select roleId
+                from user_role
+                where userId = ${req.user.id}
+        `)
+        if(result.recordset.some(record=> record.roleId === role)){
+            console.log('match');
+            return next()
+        }
+        console.log('no');
+        return res.status(403).end()
+        }catch(err){
+            console.error('Error:', err)
+        }
+    }
+    // }catch(err){
+    //     console.error('Error:', err)
+    // }
 }
 app.use((err, req, res, next) => {
     console.error(err);

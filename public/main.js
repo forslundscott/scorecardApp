@@ -1,3 +1,5 @@
+// const { data } = require("cheerio/lib/api/attributes");
+
 const audio = new Audio()
 var eventLog = [
 
@@ -146,8 +148,9 @@ function setDragScroll(ele){
     ele.addEventListener('ontouchstart', mouseDownHandler);
 }
 // var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
-var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
-var x = setInterval(function() {
+if(document.getElementById('timerForm')){
+    var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
+    var x = setInterval(function() {
     ;
     
     if(document.getElementById('timerForm').querySelector('[name="timerState"]').value == 1){
@@ -201,6 +204,7 @@ var x = setInterval(function() {
         }
     }
   }, 1000);
+}
   
   function timerStartStop(ele){
     var form = ele.form
@@ -340,6 +344,148 @@ function toggleAddPlayer(xform){
     }
 }
 
+async function toggleGameInfoForm(xform){
+    
+    try{
+        var formData = new FormData(xform)
+        const response = await fetch('/gameInfo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            const responseData = await response.json();
+            console.log(responseData.data);
+            // location.reload()
+            // Handle successful response, update UI, etc.
+            if(document.getElementById('gameInfoForm').style.display == 'none'){
+                // team1Select.innerHTML = ''
+                // team2Select.innerHTML = ''
+                var team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
+                var team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
+                var scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
+                while (team1Select.options.length > 1) {
+                    team1Select.remove(1);
+                  }
+                while (team2Select.options.length > 1) {
+                    team2Select.remove(1);
+                }
+                while (scoreKeeperSelect.options.length > 1) {
+                    scoreKeeperSelect.remove(1);
+                }
+                responseData.data.teams.forEach(function(xoption) {
+                    var option = document.createElement("option");
+                    option.text = xoption.id;
+                    option.value = xoption.id;
+                    team1Select.add(option);
+                    option = document.createElement("option");
+                    option.text = xoption.id;
+                    option.value = xoption.id;
+                    team2Select.add(option);
+                  })
+                  responseData.data.scoreKeepers.forEach(function(xoption) {
+                    var option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName}`;
+                    option.value = xoption.userId;
+                    scoreKeeperSelect.add(option);
+                  })
+                  team1Select.value = responseData.data.game.Team1_ID
+                  team2Select.value = responseData.data.game.Team2_ID
+                  if(responseData.data.game.scoreKeeperId !== null){
+                    console.log(responseData.data.game.scoreKeeperId)
+                    scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
+                  }
+                
+                // var color = xform.querySelector('[name="color"]').value
+                document.getElementById('gameInfoForm').style.display = ''
+                document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
+                // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
+                
+                // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+            }else{
+                document.getElementById('gameInfoForm').style.display = 'none'
+            }
+            if(document.getElementById('formBackground').style.display == 'none'){
+                document.getElementById('formBackground').style.display = ''
+            }else{
+                document.getElementById('formBackground').style.display = 'none'
+            }
+          } else {
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+    
+}
+async function updateGameData(xele){
+    var xform = xele.form
+    var formData = new FormData(xform)
+    console.log(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value)
+    if(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value){
+      xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
+        xform.querySelector('[name="Team1_ID"]').reportValidity()
+        return
+    }
+    xform.querySelector('[name="Team1_ID"]').setCustomValidity('')
+    const response = await fetch('/updateGameInfo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        body: new URLSearchParams(formData).toString(),
+      });
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData.message);
+        location.reload()
+        // Handle successful response, update UI, etc.
+        // if(document.getElementById('gameInfoForm').style.display == 'none'){
+        //     // team1Select.innerHTML = ''
+        //     // team2Select.innerHTML = ''
+        //     while (team1Select.options.length > 1) {
+        //         team1Select.remove(1);
+        //       }
+        //     while (team2Select.options.length > 1) {
+        //     team2Select.remove(1);
+        //     }
+        //     responseData.data.teams.forEach(function(xoption) {
+        //         var option = document.createElement("option");
+        //         option.text = xoption.id;
+        //         option.value = xoption.id;
+        //         team1Select.add(option);
+        //         option = document.createElement("option");
+        //         option.text = xoption.id;
+        //         option.value = xoption.id;
+        //         team2Select.add(option);
+        //       })
+        //       team1Select.value = responseData.data.game.Team1_ID
+        //       team2Select.value = responseData.data.game.Team2_ID
+            
+        //     // var color = xform.querySelector('[name="color"]').value
+        //     document.getElementById('gameInfoForm').style.display = ''
+        //     document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
+        //     // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
+            
+        //     // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+        // }else{
+        //     document.getElementById('gameInfoForm').style.display = 'none'
+        // }
+        // if(document.getElementById('formBackground').style.display == 'none'){
+        //     document.getElementById('formBackground').style.display = ''
+        // }else{
+        //     document.getElementById('formBackground').style.display = 'none'
+        // }
+      } else {
+        console.error('Form submission failed');
+        // Handle error response
+      }
+    // return false
+    // alert('Team1 cannot match Team2')
+}
 function toggleEventForm(ele){
     var xform = ele.form
     if(document.getElementById('eventForm').style.display == 'none'){
@@ -528,3 +674,12 @@ function convertUnixTimeToMMDD(unixTime) {
             return num + 'th';
     }
 }
+function handleVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+        // Page is visible, refresh the page
+        window.location.reload(true);
+    }
+}
+
+// Event listener for visibility change
+document.addEventListener('visibilitychange', handleVisibilityChange);
