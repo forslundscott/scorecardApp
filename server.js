@@ -412,6 +412,30 @@ app.post('/reset/:token', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+app.post('/CSVExport', async (req, res, next) => {
+    try{
+        
+        const request = pool.request()
+        const result = await request
+        .query(req.body.queryString)
+        const csvData = await functions.exportToCSV(result);
+        console.log(csvData)
+        // Set response headers for CSV download
+        res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+        res.set('Content-Type', 'text/csv');
+        res.status(200).send(csvData);
+        // var data = {
+        //     league: req.params.league,
+        //     type: req.params.type,
+        //     page: `${req.originalUrl.split('/')[1]}`,
+        //     list: result.recordsets[0]
+        // }
+        
+        // res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 app.post(['/paidChanges'], async (req,res,next)=>{
     // res.status(500);
 

@@ -23,6 +23,7 @@
                         <div class="playerName" style="margin: 0% 0% 0% 0%;">
                             <%= player.firstName %>
                             <%= player.lastName[0] + "." %>
+                            <%= player.Id == team.keeper ? '(K)' : player.Id == team.captain ? '(C)' : '' %>
                         </div>
                         <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
                     </div>

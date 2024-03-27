@@ -442,43 +442,6 @@ async function updateGameData(xele){
         const responseData = await response.json();
         console.log(responseData.message);
         location.reload()
-        // Handle successful response, update UI, etc.
-        // if(document.getElementById('gameInfoForm').style.display == 'none'){
-        //     // team1Select.innerHTML = ''
-        //     // team2Select.innerHTML = ''
-        //     while (team1Select.options.length > 1) {
-        //         team1Select.remove(1);
-        //       }
-        //     while (team2Select.options.length > 1) {
-        //     team2Select.remove(1);
-        //     }
-        //     responseData.data.teams.forEach(function(xoption) {
-        //         var option = document.createElement("option");
-        //         option.text = xoption.id;
-        //         option.value = xoption.id;
-        //         team1Select.add(option);
-        //         option = document.createElement("option");
-        //         option.text = xoption.id;
-        //         option.value = xoption.id;
-        //         team2Select.add(option);
-        //       })
-        //       team1Select.value = responseData.data.game.Team1_ID
-        //       team2Select.value = responseData.data.game.Team2_ID
-            
-        //     // var color = xform.querySelector('[name="color"]').value
-        //     document.getElementById('gameInfoForm').style.display = ''
-        //     document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
-        //     // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
-            
-        //     // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
-        // }else{
-        //     document.getElementById('gameInfoForm').style.display = 'none'
-        // }
-        // if(document.getElementById('formBackground').style.display == 'none'){
-        //     document.getElementById('formBackground').style.display = ''
-        // }else{
-        //     document.getElementById('formBackground').style.display = 'none'
-        // }
       } else {
         console.error('Form submission failed');
         // Handle error response
@@ -509,6 +472,63 @@ function toggleEventForm(ele){
         console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
+}
+function toggleForm(formName){
+    var xform = document.getElementById(formName)
+    if(xform.style.display == 'none'){
+        xform.style.display = ''
+    }else{
+        xform.style.display = 'none'
+    }
+    if(document.getElementById('formBackground').style.display == 'none'){
+        console.log('visible');
+        document.getElementById('formBackground').style.display = ''
+    }else{
+        console.log('hidden');
+        document.getElementById('formBackground').style.display = 'none'
+    }
+}
+async function exportStandings(xtype,xleague){
+    var sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
+    console.log(sqlString)
+    const response = await fetch('/CSVExport', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        body: new URLSearchParams({queryString: sqlString}).toString(),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const filename = `${xtype}Standings${xleague}.csv`;
+        if (window.navigator.msSaveOrOpenBlob) {
+          // For IE and Edge
+          window.navigator.msSaveBlob(blob, filename);
+        } else {
+          // For other browsers
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = filename;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
+      } else {
+        console.error('CSV export failed');
+        // Handle error response
+      }
+
+
+    //   if (response.ok) {
+    //     const responseData = await response.json();
+    //     console.log(responseData.message);
+    //     // location.reload()
+    //   } else {
+    //     console.error('Form submission failed');
+    //     // Handle error response
+    //   }
 }
 function touchMoveHandler(e,ele){
     var rect = ele.getBoundingClientRect()
@@ -680,6 +700,50 @@ function handleVisibilityChange() {
         window.location.reload(true);
     }
 }
+function generateSchedule(teams, numberOfGamesPerTeam, simultaneousGames) {
+    const numTeams = teams.length;
+    const totalGames = numTeams * numberOfGamesPerTeam;
+    const schedule = [];
+
+    if (numTeams % 2 !== 0) {
+        teams.push('BYE');
+    }
+
+    for (let game = 0; game < totalGames; game += simultaneousGames) {
+        const roundSchedule = [];
+        for (let i = 0; i < simultaneousGames; i++) {
+            const currentGame = game + i;
+            if (currentGame < totalGames) {
+                const matchSchedule = [];
+                for (let match = 0; match < numTeams / 2; match++) {
+                    const home = (currentGame + match) % (numTeams - 1);
+                    const away = (numTeams - 1 - match + currentGame) % (numTeams - 1);
+
+                    if (match === 0) {
+                        awayTeam = numTeams - 1;
+                    }
+
+                    matchSchedule.push([teams[home], teams[away]]);
+                }
+                roundSchedule.push(matchSchedule);
+            }
+        }
+        schedule.push(roundSchedule);
+    }
+
+    return schedule;
+}
+
+// Example usage:
+const teams = ['Team 1', 'Team 2', 'Team 3', 'Team 4'];
+const numberOfGamesPerTeam = 3;
+const simultaneousGames = 2;
+
+const schedule = generateSchedule(teams, numberOfGamesPerTeam, simultaneousGames);
+
+console.log(schedule);
+
+
 
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

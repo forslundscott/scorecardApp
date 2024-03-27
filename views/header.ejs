@@ -11,6 +11,9 @@
        Games
       <% } else if (data.page == 'standings') { %>
         <%= data.league %> Standings
+        <br>
+        <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportStandings('<%= data.type%>', '<%=data.league%>')" >Export to CSV</button>
+        <!-- <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button> -->
       <% } else if (data.page == 'readyForUpload') { %>
         Ready For Upload to SE
       <% } else if (data.page == 'winners') { %>

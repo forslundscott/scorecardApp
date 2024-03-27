@@ -1,3 +1,4 @@
+const { Parser } = require('json2csv');
 function titleCase(xstr){
     return xstr.charAt(0).toUpperCase() + xstr.slice(1)
 }
@@ -31,5 +32,14 @@ function getOrdinalNumber(number) {
             return num + 'th';
     }
 }
-
-module.exports = {titleCase,getOrdinalNumber}
+async function exportToCSV(sqlResult) {
+    try {
+      // Convert query result to CSV format
+      const parser = new Parser();
+      const csv = parser.parse(sqlResult.recordset);
+      return csv;
+    } catch (error) {
+      throw error;
+    }
+  }
+module.exports = {titleCase,getOrdinalNumber,exportToCSV}
