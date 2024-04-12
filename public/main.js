@@ -169,7 +169,7 @@ if(document.getElementById('timerForm')){
         //    alert(navigator.getAutoplayPolicy("mediaelement"))
             // if(navigator.platform !== 'iPhone'){
                 // alert(navigator.platform);
-                playSoundAndWait('doubleBell.mp3')
+                playSoundAndWait('whistle.mp3')
                 function playSoundAndWait(soundFilePath) {
                     // var audio = new Audio(soundFilePath);
                     console.log(audio)
@@ -700,48 +700,6 @@ function handleVisibilityChange() {
         window.location.reload(true);
     }
 }
-function generateSchedule(teams, numberOfGamesPerTeam, simultaneousGames) {
-    const numTeams = teams.length;
-    const totalGames = numTeams * numberOfGamesPerTeam;
-    const schedule = [];
-
-    if (numTeams % 2 !== 0) {
-        teams.push('BYE');
-    }
-
-    for (let game = 0; game < totalGames; game += simultaneousGames) {
-        const roundSchedule = [];
-        for (let i = 0; i < simultaneousGames; i++) {
-            const currentGame = game + i;
-            if (currentGame < totalGames) {
-                const matchSchedule = [];
-                for (let match = 0; match < numTeams / 2; match++) {
-                    const home = (currentGame + match) % (numTeams - 1);
-                    const away = (numTeams - 1 - match + currentGame) % (numTeams - 1);
-
-                    if (match === 0) {
-                        awayTeam = numTeams - 1;
-                    }
-
-                    matchSchedule.push([teams[home], teams[away]]);
-                }
-                roundSchedule.push(matchSchedule);
-            }
-        }
-        schedule.push(roundSchedule);
-    }
-
-    return schedule;
-}
-
-// Example usage:
-const teams = ['Team 1', 'Team 2', 'Team 3', 'Team 4'];
-const numberOfGamesPerTeam = 3;
-const simultaneousGames = 2;
-
-const schedule = generateSchedule(teams, numberOfGamesPerTeam, simultaneousGames);
-
-console.log(schedule);
 
 
 

@@ -4,6 +4,10 @@ if(process.env.NODE_ENV !== 'production'){
 
 const express = require("express")
 const app = express()
+// const mailchimp = {
+//     marketing: require('@mailchimp/mailchimp_marketing'),
+//     transactional: require('@mailchimp/mailchimp_transactional')(process.env.MANDRILL_KEY)
+//     }
 // const bodyParser = require('body-parser')
 const sql = require('mssql');
 const bcrypt = require('bcrypt')
@@ -17,6 +21,12 @@ const methodOverride = require('method-override')
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const initializePassport = require('./passport-config')
+const mailchimp = require('./helpers/mailChimp')
+// mailchimp.marketing.setConfig({
+//     apiKey: process.env.MAILCHIMP_KEY,
+//     server: process.env.MAILCHIMP_SERVER, // e.g., us1
+// })
+
 const ROLES = {}
 const config = {
         server: process.env.DB_SERVER,
@@ -73,8 +83,6 @@ const sessionStore = new SessionStore({
 });
 initializePassport(
     passport, 
-    email => users.find(user => user.email === email),
-    id => users.find(user=> user.id === id),
     async email => {
         // try{
             // const pool = new sql.ConnectionPool(config)
@@ -130,10 +138,11 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-
+// sequelize.sync()
 
 // Helpers and Routes
 const functions = require('./helpers/functions');
+const { log } = require('console');
 // const { next } = require('cheerio/lib/api/traversing');
 // const forms = require('./routes/forms')
 // app.use('/forms',forms)
@@ -187,16 +196,39 @@ app.get(['/'], checkAuthenticated, async (req,res)=>{
 })
 app.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
+        console.log(req.session.cookie.returnTo)
+        if (req.query.returnTo != undefined) {
+            // console.log('query');
+            req.session.returnTo = req.query.returnTo;
+        }else{
+            // console.log('header');
+            req.session.returnTo = req.header('Referer')
+            // console.log(req.session.cookie.returnTo)
+            // console.log(req.session.returnTo)
+        }
+        await sequelize.sync({force: true})
         res.render('login.ejs')
     }catch(err){
         console.error('Error:', err)
     }    
 })
-app.post(['/login'], passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-}))
+app.post(['/login'], 
+function(req, res, next) { passport.authenticate('local', function(err, user, info, status) {
+    if (err) { return next(err) }
+    try{
+        console.log(info)
+        if (!user) { return res.render('login.ejs', {messages: info}) }
+        req.session.passport = {}
+        req.session.passport.user = user.id
+        const redirectUrl = req.session.returnTo || '/';
+        delete req.session.returnTo;
+        res.redirect(redirectUrl);
+    }catch(err){
+        console.error('Error:', err)
+    }
+})(req, res, next)
+})
+
 app.get(['/register'], async (req,res)=>{
     try{
         res.render('register.ejs')
@@ -330,6 +362,7 @@ app.get('/reset/:token', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+
 app.post('/reset/:token', async (req, res, next) => {
     try {
         const { token } = req.params;
@@ -404,7 +437,8 @@ app.post('/reset/:token', async (req, res, next) => {
             league: req.params.league,
             type: req.params.type,
             page: `${req.originalUrl.split('/')[1]}`,
-            list: result.recordsets[0]
+            list: result.recordsets[0],
+            user: req.user
         }
         
         res.render('index.ejs',{data: data})
@@ -541,7 +575,8 @@ app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
                 team1,
                 team2
             ],
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -561,7 +596,8 @@ app.get(['/readyForUpload'], async (req,res, next)=>{
                 team1,
                 team2
             ],
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -576,10 +612,12 @@ app.get(['/readyForUpload'], async (req,res, next)=>{
 app.get(['/winners'], async (req,res, next)=>{
     try{
         var data = {
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
+        // console.log(req.user)
         const request = pool.request()
         const result = await request.query(`SELECT winners.*, 
         games.Start_Date, 
@@ -603,7 +641,8 @@ app.get(['/winners'], async (req,res, next)=>{
 app.get(['/users'], async (req,res, next)=>{
     try{
         var data = {
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -677,7 +716,8 @@ app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
             ],
             game: game,
             page: req.route.path[0].replace('/',''),
-            Event_ID: req.query.Event_ID
+            Event_ID: req.query.Event_ID,
+            user: req.user
         }
         res.render('index.ejs',{data: data}) 
     } catch(err){
@@ -850,6 +890,46 @@ app.post('/switchSides', async (req, res, next) => {
         next(err)
     }
   });
+app.post('/send-email', async (req, res) => {
+    // const { recipientEmail, subject, message } = req.body;
+
+    try {
+        // const response = await mailchimp.transactional.messages.send({
+        //     message: {
+        //         subject: 'test',
+        //         text: 'testing',
+        //         to: [{
+        //             email: 'forslund.scott@gmail.com',
+        //         }],
+        //     },
+        // });
+        // const run = async () => {
+        //     // const response = await mailchimp.marketing.lists
+        //     // const response = await mailchimp.marketing.lists.getListMembersInfo("0e63a5b642")
+        //     const response = await mailchimp.marketing.lists.getAllLists();
+            
+        //     // const response = await mailchimp.marketing.lists.getList({
+        //     //     name: { match: 'Greater Lansing Open Soccer'}
+        //     // })
+        //     console.log(response.lists[0].name)
+        //     console.log(response.lists.find(obj => obj.name === 'Greater Lansing Open Soccer'));
+        //   };
+        //   run()
+
+        // console.log('Email sent:', response);
+        // console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
+        console.log(await mailchimp.getCampaigns())
+        // await mailchimp.sendMessage('forslund.scott@gmail.com','Testing Madrill Email', 'Testing Transactional email sending through MailChimp module Madrill.')
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.length)
+        // const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+        // console.log(await mailchimp.getMemberTags(listId,(await mailchimp.getListMembers(listId)).members[1].id))
+        // console.log(await mailchimp.getLists());
+        res.send('Email sent successfully');
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).send('Failed to send email');
+    }
+})
 
 app.post(['/uploadGames'], async (req,res)=>{
     // for upload
@@ -988,10 +1068,16 @@ app.get(['/test'], async (req,res)=>{
 
 app.delete('/logout', (req,res) => {
     try{
-        req.logOut((err)=> {
-            if(err){return next(err)}
-            res.redirect('/login')
-        })
+        if(req.session){
+            if(req.session.passport){
+                delete req.session.passport
+                res.redirect('back')
+            }
+        }
+        // req.logOut((err)=> {
+        //     if(err){return next(err)}
+        //     res.redirect('/login')
+        // })
     }catch(err){
         console.error('Error:', err)
     }    

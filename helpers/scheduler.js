@@ -144,21 +144,42 @@ function scheduleForUpload(gamesPerTeam){
 }
 function simpleCsvSchedule(gamesPerTeam){
     var teams = getTeams()
-    // var teams = getTeamsTesting(6)
+    var totalGames = (teams.length*gamesPerTeam)/2
     var matches = getMatches(teams)
     var weeks = []
-    for(var i=0;i<gamesPerTeam;i++){
-        var week = new round
-        matches.forEach(match=>{
-            if(!week.ids.includes(match.ids[0]) && !week.ids.includes(match.ids[1])){
-                week.ids = week.ids.concat(match.ids)
-                week.mathes.push(match)
-                matches = moveToEnd(matches,match)
+    var matchList = []
+    var teamList = []
+    for(var i=0;i<totalGames;i++){
+        // var week = new round
+        console.log('out')
+        for(let j = 0; j< matches.length;j++){
+            var match = matches[j]
+            if(((teamList.filter(iteam => iteam == match.teams[0].name).length + teamList.filter(iteam => iteam == match.teams[1].name).length)/2)<=teamList.length/teams.length){
+                // week.ids = week.ids.concat(match.ids)
+                // week.mathes.push(match)
+                if(teamList.filter(iteam => iteam == match.teams[0].name).length!= gamesPerTeam && teamList.filter(iteam => iteam == match.teams[1].name).length!= gamesPerTeam){
+                    console.log('in')
+                    console.log(`${match.teams[0].id }: ${(teamList.filter(iteam => iteam == match.teams[0].name).length)} : ${teamList.length/teams.length}: ${match.teams[0].id} vs ${match.teams[1].id}`)
+                    console.log(`${match.teams[1].id }: ${(teamList.filter(iteam => iteam == match.teams[1].name).length)} : ${teamList.length/teams.length}: ${match.teams[0].id} vs ${match.teams[1].id}`)
+                    teamList.push(match.teams[0].name)
+                    teamList.push(match.teams[1].name)
+                    matchList.push(`${match.teams[0].id} vs ${match.teams[1].id}`)
+                    
+                    matches = moveToEnd(matches,match)
+                    break
+                }
             }
-        })
-        weeks.push(week)
+        }
+        // weeks.push(week)
     }
-    console.log(weeks)
+    teams.forEach(item =>{
+        console.log(`${item.id }: ${teamList.filter(iteam => iteam == item.name).length}`)
+    })
+    console.log(matchList)
+    // for(var iteam in teams){
+        
+    // }
+    // console.log(weeks)
     // var csvStr = ''
     // for(var wk=0;wk<weeks.length;wk++){
     //     if(!csvStr==''){csvStr+='\n\n\n'}

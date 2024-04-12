@@ -2,7 +2,7 @@ const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcrypt')
 // const sql = require('mssql');
 
-function initialize(passport, getUserByEmail2, getUserById2, getUserByEmail, getUserById){
+function initialize(passport, getUserByEmail, getUserById){
     const authenticateUser = async (email, password, done) => {
         try{
             email = email.replace(/'/g, '')
@@ -29,7 +29,7 @@ function initialize(passport, getUserByEmail2, getUserById2, getUserByEmail, get
             return done(null, false, {message: err.message})
         }
     }
-    passport.use(new LocalStrategy({usernameField: 'email'},
+    passport.use(new LocalStrategy({usernameField: 'email', session: true},
     authenticateUser))
     passport.serializeUser((user, done) => done(null, user.id))
     passport.deserializeUser(async (id, done) => {
