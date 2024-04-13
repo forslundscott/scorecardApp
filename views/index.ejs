@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <link rel="stylesheet" href="/styles.css">
-    <!-- <link rel="icon" href="/favicon.png"> -->
+    <link rel="icon" href="https://glad-pika-totally.ngrok-free.app/GLOSLogo.png">
     <title>Scorecard</title>
     
 </head>
 <body>
-    <script src="../dist/NoSleep.min.js"></script>    
+    <script src="https://glad-pika-totally.ngrok-free.app/dist/NoSleep.min.js"></script>    
     <script>
         // import NoSleep from 'nosleep.js';
         var noSleep = new NoSleep();
@@ -32,11 +32,11 @@
             
         }, false);
     </script>  
-    <audio id="myAudio">
+    <!-- <audio id="myAudio"> -->
         <!-- <source src="horse.ogg" type="audio/ogg"> -->
-        <source src="doubleBell.mp3" type="audio/mpeg">
+        <!-- <source src="https://glad-pika-totally.ngrok-free.app/doubleBell.mp3" type="audio/mpeg"> -->
         <!-- Your browser does not support the audio element. -->
-    </audio autoPlay muted>
+    <!-- </audio autoPlay muted> -->
         <%- include('header', {data: data}); %>
         
         <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
@@ -44,17 +44,18 @@
                 <%- include('bodyColumns',{data: data}); %>
             </div>
         </div>
-        <%- include('footer'); %>
+        <%- include('footer', {data: data}); %>
         <!-- <div id="floatingBackground" class="hidden"></div> -->
         <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>
         <% if (data.page == 'activeGame') { %>
             <%- include('newPlayerForm'); %>
             <%- include('eventForm'); %> 
-            <%- include('timerForm'); %> 
+            <%#- include('timerForm'); %> 
+            <%- include('gameInfoForm'); %>
         <% } %>
-              
+        <%- include('managementForm'); %>
         
-        <script src="main.js"></script>
+        <script src="https://glad-pika-totally.ngrok-free.app/main.js"></script>
         
 </body>
 </html>

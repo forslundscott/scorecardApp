@@ -3,24 +3,36 @@
 <head>
 </head>
 <body>
-    <% if (data.page == 'activeGame') { %>
-        <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
-    <% } %>
     
+     
+    
+    <% if (data.page == 'activeGame') { %>
+        <% if (team.id !== 'TBD') { %>
+            <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
+        <% } %>
+    <% } %>
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
         <% if (data.page == 'games' || data.page == 'readyForUpload') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>
+        <% } else if (data.page == 'standings') { %>
+            <% for(var i=0; i< data.list.length; i++) {%>
+                <%- include(`${data.type}Standings_item`,{item: data.list[i]}); %>
+            <% } %>
         <% } else if (data.page == 'winners') { %>
             <% var url = ''; %>
             <form action="/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
                 <% for(var i=0; i< data.winners.length; i++) {%>
-                    <% var url = url + data.winners[i].email %>
-                    <% if (i < data.winners.length - 1) { %>
-                        <% var url = url + ',' %>
-                    <% } %>                    
-                        <%- include('winner_item',{winner: data.winners[i]}); %>
+                    <%# console.log(`${data.winners[i].Event_ID}-${data.winners[i].paid}`) %>
+                    <% if (data.winners[i].paid == 'false') { %>
+                        <% var url = url + data.winners[i].email %>
+                        <% if (i < data.winners.length - 1) { %>
+                            <% var url = url + ',' %>
+                        <% } %>      
+                    <% } %>
+                                      
+                    <%- include('winner_item',{winner: data.winners[i]}); %>
                     
                 <% } %>
             </form>

@@ -1,3 +1,5 @@
+// const { data } = require("cheerio/lib/api/attributes");
+
 const audio = new Audio()
 var eventLog = [
 
@@ -146,8 +148,9 @@ function setDragScroll(ele){
     ele.addEventListener('ontouchstart', mouseDownHandler);
 }
 // var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
-var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
-var x = setInterval(function() {
+if(document.getElementById('timerForm')){
+    var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
+    var x = setInterval(function() {
     ;
     
     if(document.getElementById('timerForm').querySelector('[name="timerState"]').value == 1){
@@ -166,7 +169,7 @@ var x = setInterval(function() {
         //    alert(navigator.getAutoplayPolicy("mediaelement"))
             // if(navigator.platform !== 'iPhone'){
                 // alert(navigator.platform);
-                playSoundAndWait('doubleBell.mp3')
+                playSoundAndWait('whistle.mp3')
                 function playSoundAndWait(soundFilePath) {
                     // var audio = new Audio(soundFilePath);
                     console.log(audio)
@@ -201,6 +204,7 @@ var x = setInterval(function() {
         }
     }
   }, 1000);
+}
   
   function timerStartStop(ele){
     var form = ele.form
@@ -340,6 +344,111 @@ function toggleAddPlayer(xform){
     }
 }
 
+async function toggleGameInfoForm(xform){
+    
+    try{
+        var formData = new FormData(xform)
+        const response = await fetch('/gameInfo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            const responseData = await response.json();
+            console.log(responseData.data);
+            // location.reload()
+            // Handle successful response, update UI, etc.
+            if(document.getElementById('gameInfoForm').style.display == 'none'){
+                // team1Select.innerHTML = ''
+                // team2Select.innerHTML = ''
+                var team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
+                var team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
+                var scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
+                while (team1Select.options.length > 1) {
+                    team1Select.remove(1);
+                  }
+                while (team2Select.options.length > 1) {
+                    team2Select.remove(1);
+                }
+                while (scoreKeeperSelect.options.length > 1) {
+                    scoreKeeperSelect.remove(1);
+                }
+                responseData.data.teams.forEach(function(xoption) {
+                    var option = document.createElement("option");
+                    option.text = xoption.id;
+                    option.value = xoption.id;
+                    team1Select.add(option);
+                    option = document.createElement("option");
+                    option.text = xoption.id;
+                    option.value = xoption.id;
+                    team2Select.add(option);
+                  })
+                  responseData.data.scoreKeepers.forEach(function(xoption) {
+                    var option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName}`;
+                    option.value = xoption.userId;
+                    scoreKeeperSelect.add(option);
+                  })
+                  team1Select.value = responseData.data.game.Team1_ID
+                  team2Select.value = responseData.data.game.Team2_ID
+                  if(responseData.data.game.scoreKeeperId !== null){
+                    console.log(responseData.data.game.scoreKeeperId)
+                    scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
+                  }
+                
+                // var color = xform.querySelector('[name="color"]').value
+                document.getElementById('gameInfoForm').style.display = ''
+                document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
+                // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
+                
+                // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+            }else{
+                document.getElementById('gameInfoForm').style.display = 'none'
+            }
+            if(document.getElementById('formBackground').style.display == 'none'){
+                document.getElementById('formBackground').style.display = ''
+            }else{
+                document.getElementById('formBackground').style.display = 'none'
+            }
+          } else {
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+    
+}
+async function updateGameData(xele){
+    var xform = xele.form
+    var formData = new FormData(xform)
+    console.log(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value)
+    if(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value){
+      xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
+        xform.querySelector('[name="Team1_ID"]').reportValidity()
+        return
+    }
+    xform.querySelector('[name="Team1_ID"]').setCustomValidity('')
+    const response = await fetch('/updateGameInfo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        body: new URLSearchParams(formData).toString(),
+      });
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData.message);
+        location.reload()
+      } else {
+        console.error('Form submission failed');
+        // Handle error response
+      }
+    // return false
+    // alert('Team1 cannot match Team2')
+}
 function toggleEventForm(ele){
     var xform = ele.form
     if(document.getElementById('eventForm').style.display == 'none'){
@@ -350,6 +459,7 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="playerName"]').value
         document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('playerItem')[0].style.backgroundImage
         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
+        document.getElementById('eventForm').querySelector('[name="keeper"]').value = xform.querySelector('[name="keeper"]').value
         document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
     }else{
@@ -362,6 +472,63 @@ function toggleEventForm(ele){
         console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
+}
+function toggleForm(formName){
+    var xform = document.getElementById(formName)
+    if(xform.style.display == 'none'){
+        xform.style.display = ''
+    }else{
+        xform.style.display = 'none'
+    }
+    if(document.getElementById('formBackground').style.display == 'none'){
+        console.log('visible');
+        document.getElementById('formBackground').style.display = ''
+    }else{
+        console.log('hidden');
+        document.getElementById('formBackground').style.display = 'none'
+    }
+}
+async function exportStandings(xtype,xleague){
+    var sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
+    console.log(sqlString)
+    const response = await fetch('/CSVExport', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        body: new URLSearchParams({queryString: sqlString}).toString(),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const filename = `${xtype}Standings${xleague}.csv`;
+        if (window.navigator.msSaveOrOpenBlob) {
+          // For IE and Edge
+          window.navigator.msSaveBlob(blob, filename);
+        } else {
+          // For other browsers
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = filename;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
+      } else {
+        console.error('CSV export failed');
+        // Handle error response
+      }
+
+
+    //   if (response.ok) {
+    //     const responseData = await response.json();
+    //     console.log(responseData.message);
+    //     // location.reload()
+    //   } else {
+    //     console.error('Form submission failed');
+    //     // Handle error response
+    //   }
 }
 function touchMoveHandler(e,ele){
     var rect = ele.getBoundingClientRect()
@@ -467,3 +634,74 @@ function convertUnixTimeToMMDD(unixTime) {
     
     console.log(event.target.form)
   }
+  async function gameFormSubmit(event){
+    event.preventDefault()
+    var form = event.target.form
+    
+    var formData = new FormData(form)
+    
+    try{
+        const response = await fetch(`${form.action}`, {
+            method: `${form.method}`,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+          if (response.ok) {
+            // const responseData = await response.json();
+            console.log(response);
+            // location.reload()
+            // Handle successful response, update UI, etc.
+          } else {
+            console.log(response)
+            console.error('Form submission failed');
+            // Handle error response
+          }
+    }catch(error){
+        console.error('Error:', error);
+    }
+    
+    console.log(event.target.form)
+  }
+  function getOrdinalNumber(number) {
+    // Convert the input to a number if it's a string
+    const num = typeof number === 'string' ? parseInt(number, 10) : number;
+
+    if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+        return 'Invalid input';
+    }
+
+    if (num === 0) {
+        return '0th';
+    }
+
+    const lastDigit = num % 10;
+    const secondLastDigit = Math.floor((num % 100) / 10);
+
+    if (secondLastDigit === 1) {
+        return num + 'th';
+    }
+
+    switch (lastDigit) {
+        case 1:
+            return num + 'st';
+        case 2:
+            return num + 'nd';
+        case 3:
+            return num + 'rd';
+        default:
+            return num + 'th';
+    }
+}
+function handleVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+        // Page is visible, refresh the page
+        window.location.reload(true);
+    }
+}
+
+
+
+// Event listener for visibility change
+document.addEventListener('visibilitychange', handleVisibilityChange);

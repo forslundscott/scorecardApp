@@ -4,23 +4,64 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="addPlayer" method="post" style="display: none; text-align: center;">
+    <form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="addPlayer" method="post" style="display: ''; text-align: center;">
         <!-- <div class="playerTag itemFormat"> -->
+            
+            <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
+            <br>
             <div class="playerName">
                 Game Info
             </div>
             <br>
-            <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
+            <!-- <label for="team1"></label> -->
+            <select  name="league">
+                <option value="MOI" selected>Men's Open</option>
+                <option value="OCI">Open Coed</option>
+                <option value="SCI" selected>Social Coed</option>
+            </select>
             <br>
-            <input type="text" name="firstName" value="" placeholder="First Name" required>
+            <select  name="team1">
+            <option value="Test1" selected>Test1</option>
+            <option value="Test2">Test2</option>
+            </select>
+             vs 
+            <select  name="team2">
+                <option value="Test1">Test1</option>
+                <option value="Test2" selected>Test2</option>
+            </select>
             <br>
-            <input type="text" name="lastName" value="" placeholder="Last Name" required>
+            <label for="startDate">Date</label>
+            <input type="date" name="startDate" value="2024-03-03">
+            <label for="startTime">Time:</label>
+            <input type="time" name="startTime" value="17:30">
             <br>
-            <input type="text" name="team" value="Test2" hidden>
-            
-            Rostered <input type="radio" name="playerType" value="Rostered"> Sub <input type="radio" name="playerType" value="Sub" checked>
+            <select  name="court">
+                <option value="DJF" selected>Don Johnson Fieldhouse</option>
+                <option value="FP">Frances Park</option>
+            </select>
+            <select  name="court">
+                <option value="court1" selected>Court 1</option>
+                <option value="court2">court 2</option>
+            </select>
             <br>
-            <label for="waiver">Signed Waiver</label><input type="checkbox" id="waiver" oninvalid="this.setCustomValidity('Player must sign waiver to play')" onchange="this.setCustomValidity('')" required>
+            <label for="currentTime">Required End Time:</label>
+            <input type="time" name="currentTime" pattern="[0-9]{2}:[0-9]{2}" value="18:30">
+            <br>
+            <label for="maxPeriods">Total Periods:</label>
+            <input type="number" name="maxPeriods" min="1" max="4" step="1" value="2">
+            <br>
+            <label for="currentTime">Time Per Period:</label>
+            <input type="time" name="currentTime" pattern="[0-9]{2}:[0-9]{2}">
+            <br>
+            <label for="currentTime">Time Between Periods:</label>
+            <input type="time" name="currentTime" pattern="[0-9]{2}:[0-9]{2}">
+            <br>
+            <br>
+            <label for="currentPeriod">Current Period:</label>
+            <input type="number" name="currentPeriod" min="1" max="4" step="1" value="1">
+            <br>
+            <label for="currentTime">Current Period Time:</label>
+            <input type="time" name="currentTime" pattern="[0-9]{2}:[0-9]{2}">
             <br>
             <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Apply Changes</button>
             <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->

@@ -9,6 +9,11 @@
     <div id="pageName" class="headerText">
       <% if (data.page == 'games') { %>
        Games
+      <% } else if (data.page == 'standings') { %>
+        <%= data.league %> Standings
+        <br>
+        <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportStandings('<%= data.type%>', '<%=data.league%>')" >Export to CSV</button>
+        <!-- <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button> -->
       <% } else if (data.page == 'readyForUpload') { %>
         Ready For Upload to SE
       <% } else if (data.page == 'winners') { %>
@@ -52,7 +57,7 @@
               data.game.timerTime - (Date.now() - data.game.timerStartTime) %><% 
             } else if (data.game.timerState == 2){%>0<% } %>">
             <div style="float: left; width: 100%; height: 100%;">
-              <button onclick="timerStartStop(this)" id="timerButton" style="height: 60%;">
+              <button onclick="timerStartStop(this)" id="timerButton" style="height: 30%;">
                 <div id="gameTimer">
                   <% if (data.game.timerState == 0) { %>
                     <%- new Date(data.game.timerTime).toISOString().slice(14, -5) %>
@@ -62,11 +67,12 @@
                     Full Time
                   <% } %>
                 </div>
-                <div style="font-size: 50%;" id="period">Period <%- data.game.period %> of <%- data.game.maxPeriods %></div>
+                
+              </button>
+              <button type="button" onclick="toggleGameInfoForm(this.form)" style="height: 40%; width: 100%;">
+                <div style="font-size: 50%;" id="period"><%- functions.getOrdinalNumber(data.game.period) %> Period</div>
                 <div style="font-size: 50%;" id="court"><%- data.game.Location %></div>
               </button>
-              
-              
               <br>
               <button type="button" onclick="switchSides(this)" style="height: 30%;"><img src="swapIcon.png" alt="Switch Sides" style="height: 100%;" ></button>
             </div>

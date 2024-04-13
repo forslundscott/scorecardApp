@@ -4,6 +4,10 @@ if(process.env.NODE_ENV !== 'production'){
 
 const express = require("express")
 const app = express()
+// const mailchimp = {
+//     marketing: require('@mailchimp/mailchimp_marketing'),
+//     transactional: require('@mailchimp/mailchimp_transactional')(process.env.MANDRILL_KEY)
+//     }
 // const bodyParser = require('body-parser')
 const sql = require('mssql');
 const bcrypt = require('bcrypt')
@@ -17,7 +21,13 @@ const methodOverride = require('method-override')
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const initializePassport = require('./passport-config')
+const mailchimp = require('./helpers/mailChimp')
+// mailchimp.marketing.setConfig({
+//     apiKey: process.env.MAILCHIMP_KEY,
+//     server: process.env.MAILCHIMP_SERVER, // e.g., us1
+// })
 
+const ROLES = {}
 const config = {
         server: process.env.DB_SERVER,
         database: process.env.DB_NAME,
@@ -46,8 +56,14 @@ const sequelize = new Sequelize({
     },
 });
     const pool = new sql.ConnectionPool(config)
-    pool.connect().then(() => {
+    pool.connect().then(async () => {
         console.log('Connected to MSSQL with global connection pool');
+        try{
+            await roleSetter()
+            console.log(ROLES.admin)
+        }catch(err){
+            console.error('Error:', err)
+        }
       })
       .catch((err) => {
         console.error('Error connecting to MSSQL:', err);
@@ -67,8 +83,6 @@ const sessionStore = new SessionStore({
 });
 initializePassport(
     passport, 
-    email => users.find(user => user.email === email),
-    id => users.find(user=> user.id === id),
     async email => {
         // try{
             // const pool = new sql.ConnectionPool(config)
@@ -124,10 +138,11 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-
+// sequelize.sync()
 
 // Helpers and Routes
 const functions = require('./helpers/functions');
+const { log } = require('console');
 // const { next } = require('cheerio/lib/api/traversing');
 // const forms = require('./routes/forms')
 // app.use('/forms',forms)
@@ -152,6 +167,22 @@ var team2 = {
 }
 var games = []
 
+async function roleSetter() {
+    try{
+        const request = pool.request();
+        const result = await request.query(`
+        SELECT name, id
+        FROM roles
+        `);
+        result.recordset.forEach(row => {
+            ROLES[row.name] = row.id;
+        });
+    }catch(err){
+        console.error('Error:', err)
+    }  
+};
+
+
 
 app.get(['/'], checkAuthenticated, async (req,res)=>{
     // res.render('index.ejs')
@@ -165,16 +196,39 @@ app.get(['/'], checkAuthenticated, async (req,res)=>{
 })
 app.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
+        console.log(req.session.cookie.returnTo)
+        if (req.query.returnTo != undefined) {
+            // console.log('query');
+            req.session.returnTo = req.query.returnTo;
+        }else{
+            // console.log('header');
+            req.session.returnTo = req.header('Referer')
+            // console.log(req.session.cookie.returnTo)
+            // console.log(req.session.returnTo)
+        }
+        await sequelize.sync({force: true})
         res.render('login.ejs')
     }catch(err){
         console.error('Error:', err)
     }    
 })
-app.post(['/login'], passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-}))
+app.post(['/login'], 
+function(req, res, next) { passport.authenticate('local', function(err, user, info, status) {
+    if (err) { return next(err) }
+    try{
+        console.log(info)
+        if (!user) { return res.render('login.ejs', {messages: info}) }
+        req.session.passport = {}
+        req.session.passport.user = user.id
+        const redirectUrl = req.session.returnTo || '/';
+        delete req.session.returnTo;
+        res.redirect(redirectUrl);
+    }catch(err){
+        console.error('Error:', err)
+    }
+})(req, res, next)
+})
+
 app.get(['/register'], async (req,res)=>{
     try{
         res.render('register.ejs')
@@ -308,6 +362,7 @@ app.get('/reset/:token', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+
 app.post('/reset/:token', async (req, res, next) => {
     try {
         const { token } = req.params;
@@ -351,14 +406,80 @@ app.post('/reset/:token', async (req, res, next) => {
         console.error('Error resetting password:', error);
     }
   });
+//   app.get('/standings/individual/:league', async (req, res, next) => {
+//     try{
+//         const request = pool.request()
+//             const result = await request
+//             .query(`DECLARE @league varchar(255)
+//             Set @league = '${req.params.league}'
+//             Execute leagueStandings @league
+//             `)
+//         var data = {
+//             league: req.params.league,
+//             page: req.originalUrl.split('/')[1],
+//             list: result.recordsets[0]
+//         }
+        
+//         res.render('index.ejs',{data: data})
+//     }catch(err){
+//         console.error('Error:', err)
+//     }
+// })
+  app.get('/standings/:type/:league', async (req, res, next) => {
+    try{
+        const request = pool.request()
+        const result = await request
+        .query(`DECLARE @league varchar(255)
+        Set @league = '${req.params.league}'
+        Execute ${req.params.type}Standings @league
+        `)
+        var data = {
+            league: req.params.league,
+            type: req.params.type,
+            page: `${req.originalUrl.split('/')[1]}`,
+            list: result.recordsets[0],
+            user: req.user
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post('/CSVExport', async (req, res, next) => {
+    try{
+        
+        const request = pool.request()
+        const result = await request
+        .query(req.body.queryString)
+        const csvData = await functions.exportToCSV(result);
+        console.log(csvData)
+        // Set response headers for CSV download
+        res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+        res.set('Content-Type', 'text/csv');
+        res.status(200).send(csvData);
+        // var data = {
+        //     league: req.params.league,
+        //     type: req.params.type,
+        //     page: `${req.originalUrl.split('/')[1]}`,
+        //     list: result.recordsets[0]
+        // }
+        
+        // res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 app.post(['/paidChanges'], async (req,res,next)=>{
     // res.status(500);
 
     // Send a JSON response with the error message
     // res.json({ error: 'An error occurred while processing your request.' });
     try{
+        
         const request = pool.request()
         if(Object.keys(req.body).length >0){
+            console.log(req.body);
                     const result = await request
                     .query(`Update winners
                     Set paid =
@@ -380,6 +501,7 @@ app.post(['/paidChanges'], async (req,res,next)=>{
         // res.json({ error: 'An error occurred while processing your request.' });
         res.redirect('back')
     }catch(err){
+        console.log(err)
         // return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
     }
 })
@@ -405,7 +527,14 @@ app.get(['/timer'], async (req,res,next)=>{
                 where not 'MOI' in (Select league from teams
                     where id = '${result.recordset[0].teamName}')`)
             }  
-            await request.query(`UPDATE [scorecard].[dbo].[games] set [Status] = 1 WHERE event_Id = '${req.query.Event_ID}'`)
+            await request.query(`UPDATE [scorecard].[dbo].[games] 
+            set [Status] = 1 
+            WHERE event_Id = '${req.query.Event_ID}'`)
+            await request
+            .query(`DECLARE @eventId varchar(max)
+                    set @eventId = '${req.query.Event_ID}'
+                    EXEC recordTeamResults
+                    @eventId`)
             res.redirect('/games')
         } else {
             // const pool = new sql.ConnectionPool(config)
@@ -432,6 +561,10 @@ app.get(['/timer'], async (req,res,next)=>{
         res.redirect('back')
     }
 })
+app.get('/admin', checkAuthenticated, authRole('admin'), (req, res) => {
+    // Only accessible by users with admin role
+    res.send('Admin Page');
+});
 app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
     try{
         if (req.isAuthenticated()) {
@@ -442,13 +575,14 @@ app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
                 team1,
                 team2
             ],
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01')) = CONVERT(date,'01-07-2024')
-        const result = await request.query(`Select * from gamesList() order by startUnixTime`)
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        const result = await request.query(`Select * from gamesList() order by startUnixTime, location`)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){
@@ -462,7 +596,8 @@ app.get(['/readyForUpload'], async (req,res, next)=>{
                 team1,
                 team2
             ],
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -477,14 +612,27 @@ app.get(['/readyForUpload'], async (req,res, next)=>{
 app.get(['/winners'], async (req,res, next)=>{
     try{
         var data = {
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
+        // console.log(req.user)
         const request = pool.request()
-        const result = await request.query(`SELECT * from dbo.winners
-                                            LEFT join games on winners.Event_ID=games.Event_ID`)
-        data.winners = result.recordsets[0]  
+        const result = await request.query(`SELECT winners.*, 
+        games.Start_Date, 
+        games.Start_Time, 
+        games.[Location], 
+        games.Team1_ID, 
+        games.Team2_ID, 
+        games.season, 
+        games.subseason, 
+        games.league 
+        from dbo.winners
+        LEFT join games on winners.Event_ID=games.Event_ID
+        order by paid`)
+        data.winners = result.recordsets[0] 
+        // console.log(data.winners) 
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
@@ -493,7 +641,8 @@ app.get(['/winners'], async (req,res, next)=>{
 app.get(['/users'], async (req,res, next)=>{
     try{
         var data = {
-            page: req.route.path[0].replace('/','')
+            page: req.route.path[0].replace('/',''),
+            user: req.user
         }
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -567,7 +716,8 @@ app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
             ],
             game: game,
             page: req.route.path[0].replace('/',''),
-            Event_ID: req.query.Event_ID
+            Event_ID: req.query.Event_ID,
+            user: req.user
         }
         res.render('index.ejs',{data: data}) 
     } catch(err){
@@ -605,7 +755,14 @@ app.post(['/eventLog'], async (req,res,next)=>{
             // res.redirect('back')
             res.json({ message: 'Reload', data: data })
         }else{
-            result = await request.query(`insert into scorecard.dbo.eventLog (playerId, teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}','${req.body.periodTime}','${req.body.period}','${req.body.value}','${req.body.type}','${req.body.Event_ID}','${req.body.opponentKeeper}','${req.body.season}','${req.body.subseason}')`)
+            console.log(`${req.body.type == 'owngoal' ? 'myKeeper': req.body.type == 'goal' ? 'oppKeeper' : null}`)
+            result = await request.query(`insert into scorecard.dbo.eventLog (playerId, 
+                teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) 
+            VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}',
+            '${req.body.periodTime}','${req.body.period}','${req.body.value}',
+            '${req.body.type}','${req.body.Event_ID}',${req.body.type == 'owngoal' ? "'"+req.body.keeper+"'": req.body.type == 'goal' ? "'"+req.body.opponentKeeper+"'" : null},
+            '${req.body.season}','${req.body.subseason}')`)
+            
             result = await request.query(`
             DECLARE @Team1_ID VARCHAR(255);
             DECLARE @Team2_ID VARCHAR(255)
@@ -665,6 +822,61 @@ app.post(['/addPlayer'], async (req,res,next)=>{
         next(err)
     }
 })
+app.post('/gameInfo', async (req, res, next) => {
+    // Process form data here
+    try{
+        var data = {
+        }
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        // console.log(formData.Event_ID)
+        result = await request.query(`
+        select * 
+        from games 
+        where Event_ID = '${formData.Event_ID}'
+
+        SELECT id 
+        from teams
+        where league in (
+            select league 
+            from games
+            where Event_ID = '${formData.Event_ID}'
+            )
+        SELECT userId,roleId,firstName,lastName
+        FROM [user_role]
+        left join users on user_role.userId=users.ID
+        where roleId in (select id from roles where name in ('scorekeeper'))`)
+        data.game = result.recordsets[0][0]
+        data.teams = result.recordsets[1]
+        data.scoreKeepers = result.recordsets[2]
+        res.json({ message: 'Form submitted successfully!', data: data });
+    }catch(err){
+        next(err)
+    }
+  });
+app.post('/updateGameInfo', async (req, res, next) => {
+// Process form data here
+    try{
+        // var data = {
+        // }
+        const formData = req.body;
+
+        const request = pool.request()
+
+        result = await request.query(`
+        update games
+        set Team1_ID = '${formData.Team1_ID}',
+        Team2_ID = '${formData.Team2_ID}',
+        scoreKeeperId = ${formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID}
+        where Event_ID = '${formData.Event_ID}'
+        `)
+        res.json({ message: 'Data updated successfully!' });
+    }catch(err){
+        next(err)
+    }
+});
 app.post('/switchSides', async (req, res, next) => {
     // Process form data here
     try{
@@ -678,6 +890,46 @@ app.post('/switchSides', async (req, res, next) => {
         next(err)
     }
   });
+app.post('/send-email', async (req, res) => {
+    // const { recipientEmail, subject, message } = req.body;
+
+    try {
+        // const response = await mailchimp.transactional.messages.send({
+        //     message: {
+        //         subject: 'test',
+        //         text: 'testing',
+        //         to: [{
+        //             email: 'forslund.scott@gmail.com',
+        //         }],
+        //     },
+        // });
+        // const run = async () => {
+        //     // const response = await mailchimp.marketing.lists
+        //     // const response = await mailchimp.marketing.lists.getListMembersInfo("0e63a5b642")
+        //     const response = await mailchimp.marketing.lists.getAllLists();
+            
+        //     // const response = await mailchimp.marketing.lists.getList({
+        //     //     name: { match: 'Greater Lansing Open Soccer'}
+        //     // })
+        //     console.log(response.lists[0].name)
+        //     console.log(response.lists.find(obj => obj.name === 'Greater Lansing Open Soccer'));
+        //   };
+        //   run()
+
+        // console.log('Email sent:', response);
+        // console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
+        console.log(await mailchimp.getCampaigns())
+        // await mailchimp.sendMessage('forslund.scott@gmail.com','Testing Madrill Email', 'Testing Transactional email sending through MailChimp module Madrill.')
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.length)
+        // const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+        // console.log(await mailchimp.getMemberTags(listId,(await mailchimp.getListMembers(listId)).members[1].id))
+        // console.log(await mailchimp.getLists());
+        res.send('Email sent successfully');
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).send('Failed to send email');
+    }
+})
 
 app.post(['/uploadGames'], async (req,res)=>{
     // for upload
@@ -816,10 +1068,16 @@ app.get(['/test'], async (req,res)=>{
 
 app.delete('/logout', (req,res) => {
     try{
-        req.logOut((err)=> {
-            if(err){return next(err)}
-            res.redirect('/login')
-        })
+        if(req.session){
+            if(req.session.passport){
+                delete req.session.passport
+                res.redirect('back')
+            }
+        }
+        // req.logOut((err)=> {
+        //     if(err){return next(err)}
+        //     res.redirect('/login')
+        // })
     }catch(err){
         console.error('Error:', err)
     }    
@@ -845,6 +1103,35 @@ function checkNotAuthenticated(req, res, next) {
     }catch(err){
         console.error('Error:', err)
     }    
+}
+function authRole(roleName){
+    
+    // try{
+    
+    
+    return async (req,res,next)=>{
+        try{
+        const role = ROLES[roleName]
+        console.log(role)
+        const request = pool.request()
+        const result = await request
+        .query(`select roleId
+                from user_role
+                where userId = ${req.user.id}
+        `)
+        if(result.recordset.some(record=> record.roleId === role)){
+            console.log('match');
+            return next()
+        }
+        console.log('no');
+        return res.status(403).end()
+        }catch(err){
+            console.error('Error:', err)
+        }
+    }
+    // }catch(err){
+    //     console.error('Error:', err)
+    // }
 }
 app.use((err, req, res, next) => {
     console.error(err);

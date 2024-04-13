@@ -37,6 +37,7 @@ Thank you and have a nice day!`);
                     </div>
                 
                 <div class="gameInfo" style="text-align: center;">
+                    <%# console.log(`${winner.Event_ID}-${winner.paid}`) %>
                     <label for="<%=winner.Event_ID%>">Paid</label><input type="checkbox" name="<%=winner.Event_ID%>" <%= winner.paid== 'true'? 'checked': ''%>>
                 </div>
                 

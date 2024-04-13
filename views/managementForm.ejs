@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
+    <form id="managementForm" class="popupForm" action="javascript:void(0);" style="display: none; touch-action: none;">
+        <div class="primaryStyle primaryBorder" style="text-align: center;">
+            <div class="playerName" style="font-size: 175%;">
+                Standings
+            </div>
+        </div>
+        <% var types = ['team','individual','keeper'] %>
+        <% var leagues = ['MOI','PCI','OCI','SCI'] %>
+        <% for(const type of types) {%>
+            <% for(const league of leagues) {%>
+            <div class="statButton">
+                <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="<%=type%><%=league%>" onclick="window.location.href = 'https://glad-pika-totally.ngrok-free.app/standings/<%=type%>/<%=league%>';" ><%= `${league} ${type}` %></button>                    
+            </div>
+            <% } %>
+        <% } %>
+        
+        <!-- <div class="statButton">
+            <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="makekeeper" onclick="window.location.href = 'https://example.com';" >Make Keeper</button>                    
+        </div>
+        <div class="statButton">
+            <button class="floatingActionButtons floatAbove hidden">+1</button>
+            <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="makecaptain" onclick="statHandler(this, currentPeriod)" >Make Captain</button>                    
+            <button class="floatingActionButtons floatBelow hidden">-1</button>
+        </div> -->
+        <!-- <div class="statButton">
+            <button class="floatingActionButtons floatAbove hidden">+1</button>
+            <button class="itemFormat secondaryStyle" name="type" value="switchteam" onclick="statHandler(this)" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)">Switch Team</button>                    
+            <button class="floatingActionButtons floatBelow hidden">-1</button>
+        </div> -->
+        <!-- <div id="floatingBackground" class="hidden" onclick="closeFloating()"></div> -->
+    </form>
+</body>
+</html>
