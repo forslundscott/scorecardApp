@@ -5,7 +5,11 @@ var teamData = [
     ['FCF','FCF',4],
     ['FTK','FTK',3],
     ['OVO','OVO',2],
-    ['TOG','TOG',1]
+    ['TOG','TOG',1],
+    ['HON','HON',3]
+    ,['BSG','BSG',2]
+    // ,['CTM','CTM',5]
+    // ,['DSC','DSC',4]
 ]
 class game {
     constructor(){
@@ -61,6 +65,7 @@ class team{
         this.id = ''
         this.name = ''
         this.rating = 3
+        this.gamesPlayed = 0
     }
 }
 class player{
@@ -142,55 +147,146 @@ function scheduleForUpload(gamesPerTeam){
     // window.open("data:text/csv,"+encodeURI(csvStr))
     // // return csvStr
 }
+function makeLeague(teams,gamesPerTeam,teamsPerLeague,leagueId,subLeagueId){
+    let league = {
+        teams:[],
+        playoffs: false,
+        possibleMatches: getMatches(teams),
+        leagueId: leagueId,
+        subLeagueId: subLeagueId,
+        totalGames: (teams.length*gamesPerTeam)/2,
+        scheduleMatches: [],
+        teamsPlayed: []
+    }
+    for(var j=0;j<teamsPerLeague;j++){
+        league.teams.push(teams[j])
+        // teams.shift()
+    }
+    if(gamesPerTeam%(league.teams.length-1)!==0){
+        league.playoffs = true
+    }
+    return league
+}
+function leagueSplit(gamesPerTeam,leagueId){
+    let teams = getTeams()
+    let opponentCount = teams.length - 1
+    const leagueCount = Math.ceil(opponentCount/gamesPerTeam)
+    const teamsPerLeague = teams.length / leagueCount
+    const lrgLeaguesCount= ((teamsPerLeague) - Math.floor(teamsPerLeague))*leagueCount
+    const leagueList = []
+    for(var i=0;i<leagueCount;i++){
+        if(i<lrgLeaguesCount){
+            // Leagues with extra game
+            leagueList.push(makeLeague(teams,gamesPerTeam,Math.ceil(teamsPerLeague),leagueId,i+1))
+        }else{   
+            leagueList.push(makeLeague(teams,gamesPerTeam,Math.floor(teamsPerLeague),leagueId,i+1))
+        }
+    }
+    return leagueList
+}
+
+function leagueSchedule(gamesPerTeam,leagueId){
+    var subLeagues = leagueSplit(gamesPerTeam,leagueId)
+    for(const subLeague of subLeagues){
+        for(var i=0;i<subLeague.totalGames;i++){
+            for(let j = 0; j< subLeague.possibleMatches.length;j++){
+                var match = subLeague.possibleMatches[j]
+                var minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
+                if(match.teams[0].gamesPlayed!= gamesPerTeam && match.teams[1].gamesPlayed!= gamesPerTeam && !(match.teams[0].gamesPlayed>minGamesPlayed && match.teams[1].gamesPlayed>minGamesPlayed)){
+                    match.teams[0].gamesPlayed +=1
+                    match.teams[1].gamesPlayed +=1
+                    subLeague.scheduleMatches.push(`${match.teams[0].id} vs ${match.teams[1].id}`)
+                    subLeague.possibleMatches = moveToEnd(subLeague.possibleMatches,match)
+                    break
+                }
+                // if playoffs subtract 2 from games/team
+            }
+        }
+        // console.log(subLeague.teams);
+        subLeague.teams.forEach(item =>{
+            console.log(`${item.id }: ${item.gamesPlayed}`)
+        })
+        var playOffSchedule = []
+        var tempStr = ''
+        // round 1
+        for(var i=0;i<Math.floor(subLeague.teams.length/2);i++){
+            // if(subLeague.teams.length%2===0){
+                // evens
+                if(i+1==Math.floor(subLeague.teams.length/2 && subLeague.teams.length%2===0)){
+                    tempStr = `Game ${Math.floor(subLeague.teams.length/2)}: ${subLeague.teams[0].id} vs ${subLeague.teams[subLeague.teams.length-1].id}`
+                    playOffSchedule.push(tempStr)
+                    console.log(tempStr)
+                }else{
+                    tempStr = `Game ${i+1}: ${subLeague.teams[(2*i)+1].id} vs ${subLeague.teams[(2*i)+2].id}`
+                    // console.log(`Game ${i+1}:`)
+                    playOffSchedule.push(tempStr)
+                    console.log(tempStr)
+                }
+            // }else{
+            //     // odds
+                
+            // }
+        }
+        // round 2
+        var firstRounGames = subLeague.teams.length-playOffSchedule.length
+        for(var i=0;i<firstRounGames;i++){
+            if(i==0){
+                tempStr = `Game ${playOffSchedule.length+1}: ${subLeague.teams[0].id} vs Winner of ${playOffSchedule[0]}`
+                playOffSchedule.push(tempStr)
+                console.log(tempStr)
+            // }else if(i+1==firstRounGames && subLeague.teams.length%2!==0){
+            //     tempStr = `Game ${subLeague.teams.length}: ${subLeague.teams[subLeague.teams.length-1].id} vs Loser of ${playOffSchedule[playOffSchedule.length-2]}`
+            //     playOffSchedule.push(tempStr)
+            //     console.log(tempStr)
+            }else if(i+1==firstRounGames){
+                if(subLeague.teams.length%2===0){
+                    // even
+                    tempStr = `Game ${subLeague.teams.length}: ${subLeague.teams[subLeague.teams.length-1].id} vs Loser of ${playOffSchedule[playOffSchedule.length-2]}`
+                    playOffSchedule.push(tempStr)
+                    console.log(tempStr)
+                }else{
+                    // odd
+                    tempStr = `Game ${playOffSchedule.length+1}: ${subLeague.teams[0].id} vs Loser of ${playOffSchedule[playOffSchedule.length-1]}`
+                    playOffSchedule.push(tempStr)
+                    console.log(tempStr)
+                }
+            }else{
+                tempStr = `Game ${playOffSchedule.length+1}: Winner of ${playOffSchedule[i]} vs Loser of ${playOffSchedule[i-1]}`
+                // console.log(`Game ${i+1}:`)
+                playOffSchedule.push(tempStr)
+                console.log(tempStr)
+            }
+        }
+
+    }
+    console.log(subLeagues)
+}
 function simpleCsvSchedule(gamesPerTeam){
     var teams = getTeams()
     var totalGames = (teams.length*gamesPerTeam)/2
     var matches = getMatches(teams)
-    var weeks = []
     var matchList = []
     var teamList = []
+    console.log(leagueSplit(teams,gamesPerTeam))
     for(var i=0;i<totalGames;i++){
-        // var week = new round
-        console.log('out')
         for(let j = 0; j< matches.length;j++){
             var match = matches[j]
             if(((teamList.filter(iteam => iteam == match.teams[0].name).length + teamList.filter(iteam => iteam == match.teams[1].name).length)/2)<=teamList.length/teams.length){
-                // week.ids = week.ids.concat(match.ids)
-                // week.mathes.push(match)
                 if(teamList.filter(iteam => iteam == match.teams[0].name).length!= gamesPerTeam && teamList.filter(iteam => iteam == match.teams[1].name).length!= gamesPerTeam){
-                    console.log('in')
-                    console.log(`${match.teams[0].id }: ${(teamList.filter(iteam => iteam == match.teams[0].name).length)} : ${teamList.length/teams.length}: ${match.teams[0].id} vs ${match.teams[1].id}`)
-                    console.log(`${match.teams[1].id }: ${(teamList.filter(iteam => iteam == match.teams[1].name).length)} : ${teamList.length/teams.length}: ${match.teams[0].id} vs ${match.teams[1].id}`)
                     teamList.push(match.teams[0].name)
                     teamList.push(match.teams[1].name)
                     matchList.push(`${match.teams[0].id} vs ${match.teams[1].id}`)
-                    
                     matches = moveToEnd(matches,match)
                     break
                 }
             }
         }
-        // weeks.push(week)
     }
     teams.forEach(item =>{
         console.log(`${item.id }: ${teamList.filter(iteam => iteam == item.name).length}`)
     })
     console.log(matchList)
-    // for(var iteam in teams){
-        
-    // }
-    // console.log(weeks)
-    // var csvStr = ''
-    // for(var wk=0;wk<weeks.length;wk++){
-    //     if(!csvStr==''){csvStr+='\n\n\n'}
-    //     for(var mt=0;mt<weeks[wk].mathes.length;mt++){
-    //         if(!csvStr==''){csvStr+='\n'}
-    //         csvStr+=weeks[wk].mathes[mt].ids[0]+','+weeks[wk].mathes[mt].ids[1]
-    //     }
-    // }
-    // console.log(csvStr)
-    // window.open("data:text/csv,"+encodeURI(csvStr))
-    // return [weeks,csvStr]
 }
 function tomorrow(date){
     date.setDate(date.getDate()+1)

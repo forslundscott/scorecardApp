@@ -1,10 +1,19 @@
 <meta name="viewport" content="maximum-scale=1">
 <link rel="stylesheet" href="/styles.css">
 <div id="formBackground" style="touch-action: '';"></div>
-<form id="newPlayerForm" class="popupForm secondaryStyle" action="register" method="post" style="text-align: center; ">
+<form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="register" method="post" style="text-align: center; ">
         <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
             Register
         </div>
+        <br>
+        <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="mainLogo"></div>
+        <br>
+        <% if (messages.error) { %>
+            <%= messages.error %>
+            <%#= console.log(messages);  %>
+        <% } else if (messages.message) { %>
+            <%= messages.message %>
+        <% } %>
         <br>
         <input type="text" name="firstName" value="" placeholder="First Name" style="margin-bottom: .75vh; font-size: 250%;" required>
         <br>
@@ -27,7 +36,9 @@
         <br>
         <!-- <input type="password" name="password2" value="" placeholder="Re-Enter Password" style="margin-bottom: 1.25vh; font-size: 250%;" required>
         <br> -->
-        <button type="submit" style="margin-bottom: 1.5vh; font-size: 250%; background-color: black; color: white;">Register</button>
+        <button type="submit" style="margin-bottom: 1.5vh; font-size: 250%;">Register</button>
         <br>
-        <a href="/login" style="margin-bottom: 1.5vh; font-size: 250%; display: block;">Login</a>
+        <a href="/forgotPassword" class="" style="margin-bottom: 1.25vh; font-size: 250%;">Forgot Password</a>
+        <br>
+        <a href="/login" style="margin-bottom: 1.5vh; font-size: 250%; display: block;">Login Page</a>
 </form>

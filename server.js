@@ -84,40 +84,22 @@ const sessionStore = new SessionStore({
 initializePassport(
     passport, 
     async email => {
-        // try{
-            // const pool = new sql.ConnectionPool(config)
-            // await pool.connect();
             const request = pool.request()
             const result = await request
-            .query(`select firstName, id, email, [password] 
+            .query(`select t1.firstName, t1.id, t1.email, t2.password 
             from users as t1
-            LEFT JOIN emails as t2
+            LEFT JOIN credentials as t2 
             on t1.ID=t2.userID
-            LEFT JOIN credentials as t3 
-            on t1.ID=t3.userID
-            where email = '${email}'`)
+            where t1.email = '${email}'`)
             return result
-        // }catch(err){
-        //     console.error('Error:', err)
-        //     return err
-        // }  
         },
     async id => {
-        // try{
-            // const pool = new sql.ConnectionPool(config)
-            // await pool.connect();
             const request = pool.request()
             const result = await request
             .query(`select firstName, id, email
-            from users as t1
-            LEFT JOIN emails as t2
-            on t1.ID=t2.userID
+            from users
             where id = '${id}'`)
             return result
-        // }catch(err){
-        //     console.error('Error:', err)
-        //     return err
-        // }  
         }
     )
 // const open = require('open')
@@ -240,6 +222,16 @@ app.get(['/register'], async (req,res)=>{
 app.post(['/register'], async (req,res)=>{
     // console.log(req.body);
     try {
+        const emailExistsResult = await pool.request()
+            // .input('email', sql.VarChar, req.body.email)
+            .query(`SELECT COUNT(*) AS count FROM users WHERE email = '${req.body.email}'`);
+        
+        // If email already exists, respond with a message
+        console.log(emailExistsResult.recordset[0].count)
+        if (emailExistsResult.recordset[0].count > 0) {
+            return res.render('register.ejs', {messages: {message: 'User with specified email already exists, Please use reset Password link.'}})
+            // return res.status(400).send('User with specified email already exists');
+        }
         const hashedpassword = await bcrypt.hash(req.body.password, 10)
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -249,17 +241,15 @@ app.post(['/register'], async (req,res)=>{
             DECLARE @tempTable table (
                 id int
             )
-            
-            insert into users (firstName, lastName)
+            BEGIN TRANSACTION
+            insert into users (firstName, lastName, email)
             OUTPUT inserted.id
             into @tempTable
-            values ('${req.body.firstName}', '${req.body.lastName}')
-            
-            insert into emails (userID,email)
-            select id, '${req.body.email}' from @tempTable
+            values ('${req.body.firstName}', '${req.body.lastName}', '${req.body.email}')
             
             insert into credentials (userID,[password])
-            select id, '${hashedpassword}' from @tempTable`)        
+            select id, '${hashedpassword}' from @tempTable
+            COMMIT`)        
         res.redirect('/login')
     }catch(err){
         console.log(err)
@@ -280,10 +270,8 @@ app.post(['/forgotPassword'], async (req,res)=>{
     const request = pool.request();
   const userQuery = `select firstName, id, email, [password] 
                         from users as t1
-                        LEFT JOIN emails as t2
+                        LEFT JOIN credentials as t2 
                         on t1.ID=t2.userID
-                        LEFT JOIN credentials as t3 
-                        on t1.ID=t3.userID
                         where email = '${email}'`;
 
   try {
@@ -393,11 +381,24 @@ app.post('/reset/:token', async (req, res, next) => {
             return res.status(404).json({ message: 'User not found' });
         }
         const hashedpassword = await bcrypt.hash(password, 10)
-        const updateUserQuery = `
-            UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}
-        `;
+        const passwordExistsResult = await pool.request()
+        // .input('userID', sql.VarChar, user.ID)
+        .query(`SELECT COUNT(*) AS count FROM credentials WHERE userID = ${user.ID}`);
+        // const updateUserQuery = ''
+        if (passwordExistsResult.recordset[0].count > 0) {
+            // update password if it exists
+            await request.query(`UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}`);
+            // updateUserQuery = `UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}`;
+        }else{
+            // Insert password if one doesn't exist
+            await request.query(`insert into credentials (userID,[password])
+            Values('${user.ID}','${hashedpassword}')`);
+        }
+        // const updateUserQuery = `
+        //     UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}
+        // `;
     
-        await request.query(updateUserQuery);
+        // await request.query(updateUserQuery);
         const removeResetTokenQuery = `DELETE FROM ResetTokens WHERE token = '${token}'`;
         await request.query(removeResetTokenQuery);
         res.redirect('/')
