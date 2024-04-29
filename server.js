@@ -22,6 +22,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const initializePassport = require('./passport-config')
 const mailchimp = require('./helpers/mailChimp')
+const processingStatus = {};
 // mailchimp.marketing.setConfig({
 //     apiKey: process.env.MAILCHIMP_KEY,
 //     server: process.env.MAILCHIMP_SERVER, // e.g., us1
@@ -781,6 +782,46 @@ app.post('/exportSchedules', async (req, res, next) => {
         res.setHeader('Content-disposition', `'attachment; filename=${req.body.fileName}.csv'`);
         res.set('Content-Type', 'text/csv');
         res.status(200).send(csvData);
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post('/periodEnd', async (req, res, next) => {
+    try{
+        // check if it has been called for this event yet
+        if(processingStatus[req.body.Event_ID]){
+            res.status(409).send('Request with this id is already being processed.')
+        }else {
+            processingStatus[req.body.Event_ID] = true;
+            var game
+            const request = pool.request()
+            const result = await request
+            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = '${req.query.Event_ID}'`)
+            game = result.recordset[0]
+            if(game.period===req.body.period){
+                if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
+                    if(game.period<game.maxPeriods){
+                        game.period=game.period +1
+                        game.timerState =0
+                        game.timerTime = game.timePerPeriod
+                    } else{
+                        game.timerState = 2
+                        game.timerTime = 0
+                    }
+                    await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = '${req.query.Event_ID}'`)
+                    processingStatus[req.body.Event_ID] = false;
+                    res.send('Request processed successfully.')
+                }
+            }else{
+                res.status(409).send('Request with this id is already being processed.')
+            }
+        }
+        // const csvData = await functions.exportToCSV(result.recordset);
+        // console.log(csvData)
+        // // Set response headers for CSV download
+        // res.setHeader('Content-disposition', `'attachment; filename=${req.body.fileName}.csv'`);
+        // res.set('Content-Type', 'text/csv');
+        // res.status(200).send(csvData);
     }catch(err){
         console.error('Error:', err)
     }

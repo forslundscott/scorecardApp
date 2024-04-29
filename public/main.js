@@ -150,7 +150,7 @@ function setDragScroll(ele){
 // var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
 if(document.getElementById('timerForm')){
     var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
-    var x = setInterval(function() {
+    var x = setInterval(async function() {
     ;
     
     if(document.getElementById('timerForm').querySelector('[name="timerState"]').value == 1){
@@ -170,13 +170,32 @@ if(document.getElementById('timerForm')){
             // if(navigator.platform !== 'iPhone'){
                 // alert(navigator.platform);
                 playSoundAndWait('whistle.mp3')
-                function playSoundAndWait(soundFilePath) {
+                async function playSoundAndWait(soundFilePath) {
                     // var audio = new Audio(soundFilePath);
                     console.log(audio)
+                    var form = document.getElementById('timerForm')
+                    // var statType = ele.value
+                    
+                        // form.querySelector('[name="realTime"]').value = Date.now()
+                        // // console.log(form.querySelector('[name="realTime"]').value)
+                        // form.querySelector('[name="value"]').value = val
+                        
+                        // form.querySelector('[name="period"]').value = xperiod
+                        // form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
+                        // form.querySelector('[name="type"]').value = ele.value
+                        var formData = new FormData(form)
+                    const response = await fetch('/periodEnd', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(formData).toString(),
+                    });
                     if(audio.autoplay == true){
                         audio.src = soundFilePath
                         // Set up an event listener for the 'ended' event
                         audio.addEventListener('ended', function() {
+                            
                             location.reload()
                         });
                     
