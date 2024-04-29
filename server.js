@@ -124,6 +124,7 @@ app.use(methodOverride('_method'))
 
 // Helpers and Routes
 const functions = require('./helpers/functions');
+const scheduler = require('./helpers/scheduler');
 const { log } = require('console');
 // const { next } = require('cheerio/lib/api/traversing');
 // const forms = require('./routes/forms')
@@ -428,6 +429,7 @@ app.post('/reset/:token', async (req, res, next) => {
 // })
   app.get('/standings/:type/:league', async (req, res, next) => {
     try{
+        // console.log(req.params)
         const request = pool.request()
         const result = await request
         .query(`DECLARE @league varchar(255)
@@ -447,26 +449,338 @@ app.post('/reset/:token', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
-app.post('/CSVExport', async (req, res, next) => {
+app.get(['/standings','/schedules'], async (req, res, next) => {
+    try{
+        // const request = pool.request()
+        // const result = await request
+        // .query(`DECLARE @league varchar(255)
+        // Set @league = '${req.params.league}'
+        // Execute ${req.params.type}Standings @league
+        // `)
+        var data = {
+            page: `${req.originalUrl.split('/')[1]}`,
+            user: req.user
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/schedules/list'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        const result = await request
+        .query(`select * from schedules
+        `)
+        console.log(req.originalUrl)
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user,
+            list: result.recordsets[0]
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post(['/schedules/list'], async (req, res, next) => {
+    try{
+        // const request = pool.request()
+        // const result = await request
+        // .query(`select * from schedule_games
+        // where scheduleId = '${req.scheduleId}'
+        // `)
+        // console.log(req.originalUrl)
+        // var data = {
+        //     page: `${req.originalUrl}`,
+        //     user: req.user,
+        //     list: result.recordsets[0]
+        // }
+        res.redirect(`/schedules/item/${req.body.scheduleId}`)
+        // res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/schedules/new'], async (req, res, next) => {
+    try{
+        // const request = pool.request()
+        // const result = await request
+        // .query(`DECLARE @league varchar(255)
+        // Set @league = '${req.params.league}'
+        // Execute ${req.params.type}Standings @league
+        // `)
+        console.log(req.originalUrl)
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post(['/schedules/new'], async (req, res, next) => {
+    try{
+        console.log(req.body)
+        const request = pool.request()
+        var leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(req.body.sport, req.body.seasonId),parseInt(req.body.gamesPerTeam))
+        var allRegularGames = []
+        var allGames = []
+        var allGameDays = []
+        var scheduleName = req.body.scheduleName !== '' ? req.body.scheduleName : `${req.body.seasonId} ${req.body.sport}`
+        var timeParts = req.body.firstGameTime.split(':')
+        var firstGameTime = (timeParts[0]*3600 + timeParts[1]*60)*1000
+        var dailyGameTimesCount = req.body.lastGameTime.split(':')[0]-req.body.firstGameTime.split(':')[0]+1
+        var totalFields = 4
+        var timeFieldList = []
+        for(var i=0;i<dailyGameTimesCount;i++){
+            // ((i)*1000*60*60)+firstGameTime
+            for(var j=0;j<totalFields;j++){
+                var timeFieldItem = {
+                    timeMs: ((i)*1000*60*60)+firstGameTime
+                }
+                timeFieldItem.fieldNumber = j+1
+                timeFieldList.push(timeFieldItem)
+            }
+        }
+        console.log(timeFieldList)
+        var seasonStartDate = new Date(req.body.seasonStartDate)
+        seasonStartDate = new Date(`${seasonStartDate.toLocaleDateString('en-US', {
+            timeZone: 'UTC',
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric'
+          })}`)
+        var seasonEndDate = new Date(req.body.seasonEndDate)
+        seasonEndDate = new Date(`${seasonEndDate.toLocaleDateString('en-US', {
+            timeZone: 'UTC',
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric'
+        })}`)
+        console.log(`${seasonStartDate.toLocaleDateString()} to ${seasonEndDate.toLocaleDateString()}`)
+        // setting match days for all leagues
+        for(var league of leagueList){
+            var gameDays = playableDays(seasonStartDate.toLocaleDateString(),seasonEndDate.toLocaleDateString(),league.dayOfWeek)
+            var matchesPerPlayableDay = (league.scheduleMatches.length+league.playoffMatches.length)/gameDays.length
+            var daysWithExtraGame = (matchesPerPlayableDay%1)*gameDays.length
+            var imatch = 0
+            for(var i=0;i<gameDays.length;i++){
+                if(!allGameDays.some(obj => obj.getTime() === gameDays[i].getTime())){
+                    allGameDays.push(gameDays[i])
+                }
+                if(i<daysWithExtraGame){
+                    var numberOfMatches = Math.ceil(matchesPerPlayableDay)
+                }else{
+                    var numberOfMatches = Math.floor(matchesPerPlayableDay)
+                }
+                // console.log(`${league.leagueId} ${numberOfMatches} ${league.totalRegularSeasonGames} ${imatch} ${league.playoffs} ${league.teams.length}`)
+                for(var j=0;j<numberOfMatches;j++){
+                    console.log(`${league.leagueId}`);
+                    if(imatch<league.totalRegularSeasonGames){
+                        // console.log(league.scheduleMatches[imatch])
+                        league.scheduleMatches[imatch].startDate = new Date(gameDays[i].getTime())
+                    }else{
+                        // console.log(league.playoffMatches[imatch-league.totalRegularSeasonGames])
+                        league.playoffMatches[imatch-league.totalRegularSeasonGames].startDate = new Date(gameDays[i].getTime())
+                    }
+                    imatch++
+                }
+                
+            }
+
+            // for(var i=0;i<league.scheduleMatches;i++){
+            //     // need to account for playoffs as well
+            //     var imatch = league.scheduleMatches(i)
+
+
+            // }
+            allGames = allGames.concat(league.scheduleMatches)
+            allGames = allGames.concat(league.playoffMatches)
+            // allRegularGames = allRegularGames.concat(league.scheduleMatches)
+        }
+        allGames.sort((a, b) => a.startDate - b.startDate)
+        console.log()
+        // setting match times
+        for(var i=0;i< allGameDays.length;i++){
+            var currentGameDay = allGameDays[i]
+            // console.log(currentGameDay)
+            var currentTimeFieldList = [...timeFieldList]
+            var currentDayMatches = allGames.filter(obj => obj.startDate.getTime() === currentGameDay.getTime())
+            // console.log(currentDayMatches)
+            var fieldNumber = 1
+            var maxFieldNumber = 4
+            var timeNumber = 0
+            // var firstHour = 6+12
+            for(var j=0;j< currentDayMatches.length;j++){
+                for(var k=0;k<currentTimeFieldList.length;k++){
+                    if(currentDayMatches.some(obj => 
+                        (obj.team1Id === currentDayMatches[j].team1Id || 
+                            obj.team2Id === currentDayMatches[j].team1Id || 
+                            obj.team1Id === currentDayMatches[j].team2Id || 
+                            obj.team2Id === currentDayMatches[j].team2Id)&&
+                            obj.startDate.getTime() === currentDayMatches[j].startDate.getTime()+currentTimeFieldList[k].timeMs
+                        ))
+                    {
+                        // nothing
+                    }else{
+                        currentDayMatches[j].startDate.setTime(currentDayMatches[j].startDate.getTime()+currentTimeFieldList[k].timeMs)
+                        currentDayMatches[j].fieldNumber = currentTimeFieldList[0].fieldNumber
+                        currentTimeFieldList.shift()
+                        break;
+                    }
+                }
+                
+                currentDayMatches[j].startTime=currentDayMatches[j].startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true}).replace(/\s/g, " ")
+                // console.log(currentDayMatches[j].startTime)
+                // currentDayMatches[j].fieldNumber = currentTimeFieldList[0].fieldNumber
+                
+                console.log(`${currentDayMatches[j].startDate.toLocaleDateString()} ${currentDayMatches[j].startDate.toLocaleTimeString()} ${currentDayMatches[j].fieldNumber}`)
+                
+
+
+
+                // currentDayMatches[j].startDate.setTime(currentDayMatches[j].startDate.getTime()+((timeNumber)*1000*60*60)+firstGameTime)
+                // currentDayMatches[j].startTime=currentDayMatches[j].startDate.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true}).replace(/\s/g, " ")
+                // console.log(currentDayMatches[j].startTime)
+                // currentDayMatches[j].fieldNumber = fieldNumber
+                // console.log(`${currentDayMatches[j].startDate.toLocaleDateString()} ${currentDayMatches[j].startDate.toLocaleTimeString()} ${currentDayMatches[j].fieldNumber}`)
+                // if(fieldNumber < maxFieldNumber){
+                //     fieldNumber++
+                    
+                // }else{
+                //     fieldNumber = 1
+                //     timeNumber++
+                // }
+            }
+        }
+        // for(var i=0;i<allGames.length;i++){
+        //     console.log(allGames[i])
+        // }
+        // console.log(allGameDays)
+        // console.log(allGames)
+        // console.log(allRegularGames.filter(obj=> obj.dayOfWeek===0).length)
+        // return res.status(204).send()
+            result = await request.query(`BEGIN TRY
+            BEGIN TRANSACTION;
+            DECLARE @GameValues TABLE (
+                type VARCHAR(255),
+                team1Id VARCHAR(255),
+                team2Id VARCHAR(255),
+                leagueId VARCHAR(255),
+                subLeagueId VARCHAR(255),
+                fieldId VARCHAR(255),
+                startTime VARCHAR(255),
+                startDate VARCHAR(255),
+                startUnixTime bigint,
+                location VARCHAR(255)
+            );
+
+            INSERT INTO @GameValues (type, team1Id,team2Id,leagueId,subLeagueId,fieldId,startTime,startDate,startUnixTime,location)
+            VALUES ${allGames.map(obj => `('${obj.type}', '${obj.team1Id}', '${obj.team2Id}', '${obj.leagueId}', '${obj.subLeagueId}', '${obj.fieldNumber}', '${obj.startTime}', '${obj.startDate.toLocaleDateString('en-US')}', '${obj.startDate.getTime()}', 'Field ${obj.fieldNumber}')`).join(',')}
+            DECLARE @ScheduleId INT
+            -- Insert into schedules table to get the auto-generated ID
+            INSERT INTO schedules (season,sport,name)
+            VALUES ('${req.body.seasonId}','${req.body.sport}','${scheduleName}');
+
+            -- Retrieve the generated ID
+            SET @ScheduleId = SCOPE_IDENTITY();
+
+            -- Insert into schedule_games using the generated ID for each row in @GameValues
+            INSERT INTO schedule_games (ScheduleId, type, team1Id,team2Id,leagueId,subLeagueId,fieldId,startTime,startDate,startUnixTime,location)
+            SELECT @ScheduleId, type, team1Id,team2Id,leagueId,subLeagueId,fieldId,startTime,startDate,startUnixTime,location
+            FROM @GameValues;
+
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            IF @@TRANCOUNT > 0
+                ROLLBACK TRANSACTION;
+
+            -- You can handle the error as needed, e.g., raise an error, log it, etc.
+            THROW;
+        END CATCH;`)
+        res.status(204).send()
+            
+            // res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/schedules/item/:scheduleId'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        const result = await request
+        .query(`select * from schedule_games
+        where scheduleId = '${req.params.scheduleId}'
+        select name from schedules
+        where scheduleId = '${req.params.scheduleId}'
+        `)
+        console.log(req.originalUrl)
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user,
+            list: result.recordsets[0],
+            scheduleName: result.recordsets[1][0].name,
+            scheduleId: req.params.scheduleId
+        }
+        // res.redirect(`/schedules/${req.body.scheduleId}`)
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post('/standings', async (req, res, next) => {
+    try{
+        // const request = pool.request()
+        // const result = await request
+        // .query(`DECLARE @league varchar(255)
+        // Set @league = '${req.params.league}'
+        // Execute ${req.params.type}Standings @league
+        // `)
+        // var data = {
+        //     page: `${req.originalUrl.split('/')[1]}`,
+        //     user: req.user
+        // }
+        // console.log(req.body)
+        res.redirect(`/standings/${req.body.type}/${req.body.leagueId}`)
+        // res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post('/exportStandings', async (req, res, next) => {
     try{
         
         const request = pool.request()
         const result = await request
         .query(req.body.queryString)
-        const csvData = await functions.exportToCSV(result);
+        const csvData = await functions.exportToCSV(result.recordset);
         console.log(csvData)
         // Set response headers for CSV download
-        res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+        res.setHeader('Content-disposition', `'attachment; filename=${req.body.fileName}.csv'`);
         res.set('Content-Type', 'text/csv');
         res.status(200).send(csvData);
-        // var data = {
-        //     league: req.params.league,
-        //     type: req.params.type,
-        //     page: `${req.originalUrl.split('/')[1]}`,
-        //     list: result.recordsets[0]
-        // }
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.post('/exportSchedules', async (req, res, next) => {
+    try{
         
-        // res.render('index.ejs',{data: data})
+        const request = pool.request()
+        const result = await request
+        .query(req.body.queryString)
+        const csvData = await functions.exportToCSV(result.recordset);
+        console.log(csvData)
+        // Set response headers for CSV download
+        res.setHeader('Content-disposition', `'attachment; filename=${req.body.fileName}.csv'`);
+        res.set('Content-Type', 'text/csv');
+        res.status(200).send(csvData);
     }catch(err){
         console.error('Error:', err)
     }
@@ -661,14 +975,14 @@ app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        let result = await request.query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
-        Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')`)
+        let result = await request.query(`Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team1_ID}' and keeper in (Select userId from [scorecard].[dbo].[user_team] where teamid ='${req.query.Team1_ID}')
+        Select * from [scorecard].[dbo].[teams] where id ='${req.query.Team2_ID}' and keeper in (Select userId from [scorecard].[dbo].[user_team] where teamid ='${req.query.Team2_ID}')`)
         if(result.recordsets[0].length == 0){
             // var pool = await sql.connect(config)
             // pool.request()
             await request.query(`
             update teams
-            set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team1_ID}')
+            set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${req.query.Team1_ID}')
             where id = '${req.query.Team1_ID}'
             `)
         }
@@ -677,7 +991,7 @@ app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
             // pool.request()
             await request.query(`
             update teams
-            set keeper = (Select top 1 id from [scorecard].[dbo].[players] where team ='${req.query.Team2_ID}')
+            set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${req.query.Team2_ID}')
             where id = '${req.query.Team2_ID}'
             `)
         }
@@ -932,140 +1246,68 @@ app.post('/send-email', async (req, res) => {
     }
 })
 
-app.post(['/uploadGames'], async (req,res)=>{
-    // for upload
-    // open glos site
-    window.location.href = 'https://www.glosoccer.com/'
-    document.getElementsByClassName('theme-nav-dropdown dropdown-align-left')[0].getElementsByTagName('a')[0].click() 
-    document.getElementById('tool-game-schedule').getElementsByTagName('a')[0].click()
-    document.getElementById('slider_day_2023_12_17').getElementsByTagName('a')[0].click()
-    // game list headers
-    // document.getElementsByTagName('thead')[0]
-    // header items
-    // document.getElementsByTagName('thead')[0].getElementsByTagName('th')
-    // loop through header items to find status column
-    for(var i=0;i<document.getElementsByTagName('thead')[0].getElementsByTagName('th').length;i++){
-        if(document.getElementsByTagName('thead')[0].getElementsByTagName('th')[i].innerText == 'Status'){
-            // collection of game list rows 
-            var pageList = []
-            for(var j=0;j<document.getElementsByTagName('tbody')[0].getElementsByTagName('tr').length;j++){
-                pageList.push(document.getElementsByTagName('tbody')[0].getElementsByTagName('tr')[0].getElementsByTagName('td')[i].getElementsByTagName('a')[0].href)
-            }
-            break
-        }
-    }
-    await open(pageList[0])
-})
-
-  app.post('/testEventLog', async (req, res, next) => {
-    // Process form data here
-    const formData = req.body;
-    // console.log(formData)
-    // await sql.connect(config).then(pool => {
-    //     // Query
-
-    //     return pool.request().query(`EXEC [scorecard].[dbo].[switchSides] @eventId ='${req.body.Event_ID}'`)
-    // }).then(result => {
-        
-    // }).catch(err => {
-    //     next(err)
-    // // ... error checks
-    // });  
-    // Send a response back to the client
-    res.json({ message: 'Form submitted successfully!', data: formData });
-  });
-// from mass
-// document.getElementsByClassName('js-league leagueSelect')[0]
-
-
-// // game list body
-// document.getElementsByTagName('tbody')[0]
-// // checks current league selected
-// document.getElementsByClassName('js-league leagueSelect')[0].querySelectorAll(`option[value='${document.getElementsByClassName('js-league leagueSelect')[0].value}']`)[0].text 
+  
 app.get(['/test'], async (req,res)=>{
-    (async () => {
-        const browser = await puppeteer.launch({headless: false})
-        const page = await browser.newPage()
-        await page.goto('https://www.glosoccer.com')
-        // nb-sign-in-link
-        await page.goto(
-            await page.evaluate(() => {
-                return document.getElementById('nb-sign-in-link').href
-            })
-        )
-        await page.evaluate(() => {
-            
-            document.getElementById('user_login').value = 'forslund.scott@gmail.com'
-            document.getElementById('user_login').form.submit()
-            return true
-        })
-        await page.waitForNavigation()
-        await page.evaluate(() => {
-            
-            document.getElementById('user_password').value = 'Planbsk8!'
-            document.getElementById('user_password').form.submit()
-            return true
-        })
-        // continuebutton.value = 'forslund.scott@gmail.com'
-        // continuebutton.form.submit
-    })()
+    // var data = {
+    // // }
+    const request = pool.request()
+        // result = await request.query(`insert into schedules (season,sport,name)
+        // values ('Indoor','Soccer', 'Indoor Soccer')`)
+    //     data.teams = result.recordsets[0]
+    //     // console.log(result.recordsets[0])
+    //     for(var iteam of data.teams){
+    //         result = await request.query(`exec conflictingTeams @teamId='${iteam.teamId}'`)
+    //         iteam.conflictingTeams = result.recordsets[0].map(item => item.teamId)
+    //         // console.log(iteam.conflictingTeams)
+    //     }
+    var sportName = 'Soccer'
+    var leagueName = 'Indoor'
+    var leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(sportName, leagueName),8)
+    var allRegularGames = []
+    for(var league of leagueList){
+        allRegularGames = allRegularGames.concat(league.scheduleMatches)
+        // console.log(league.scheduleMatches)
+        // console.log(league.scheduleMatches.map(obj => `('${obj.type}', '${obj.team1Id}', '${obj.team2Id}', '${obj.leagueId}', '${obj.subLeagueId}')`).join(','))
+    }
+    console.log(allRegularGames)
+    
+        result = await request.query(`BEGIN TRY
+        BEGIN TRANSACTION;
+        DECLARE @GameValues TABLE (
+            type VARCHAR(255),
+            team1Id VARCHAR(255),
+            team2Id VARCHAR(255),
+            leagueId VARCHAR(255),
+            subLeagueId VARCHAR(255)
+        );
+
+        INSERT INTO @GameValues (type, team1Id,team2Id,leagueId,subLeagueId)
+        VALUES ${allRegularGames.map(obj => `('${obj.type}', '${obj.team1Id}', '${obj.team2Id}', '${obj.leagueId}', '${obj.subLeagueId}')`).join(',')}
+        DECLARE @ScheduleId INT
+        -- Insert into schedules table to get the auto-generated ID
+        INSERT INTO schedules (season,sport,name)
+        VALUES ('${leagueName}','${sportName}','${leagueName} ${sportName}');
+
+        -- Retrieve the generated ID
+        SET @ScheduleId = SCOPE_IDENTITY();
+
+        -- Insert into schedule_games using the generated ID for each row in @GameValues
+        INSERT INTO schedule_games (ScheduleId, type, team1Id,team2Id,leagueId,subLeagueId)
+        SELECT @ScheduleId, type, team1Id,team2Id,leagueId,subLeagueId
+        FROM @GameValues;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        -- You can handle the error as needed, e.g., raise an error, log it, etc.
+        THROW;
+    END CATCH;`)
+        // console.log(await getLeaguesForScheduler('Soccer', 'Indoor'))
     res.status(204).send()
-})
-// // // selected league text
-// document.getElementsByClassName('js-league leagueSelect')[0].selectedOptions[0].text 
-// // // selected season text
-// document.getElementsByClassName('js-season seasonSelect')[0].selectedOptions[0].text 
-// // // set to all teams
-// document.getElementsByClassName('js-team teamSelect')[0].value = ''
-// // // refresh button
-// document.getElementsByClassName('js-refreshTool saveChanges')[0]
-// // mass page
-// // game list
-// var gameList = document.getElementsByClassName('MssEdItem Game clr')
-// for(var igame=0;igame<gameList.length;igame++){
-
-
-// // game item
-// var gameList = document.getElementsByClassName('MssEdItem Game clr')
-// for(var igame=0;igame<gameList.length;igame++){
-
-
-// // game item
-//     var gameItem = gameList[igame]
-//     if(gameItem.getElementsByClassName('js-gameStatus')[0].value !== 'completed'){
-//         var dateTimeBox = gameItem.getElementsByClassName('date_time')[0]
-//         var startDate = dateTimeBox.getElementsByClassName('dateTimeDate')[0].value
-//         var startTime = dateTimeBox.getElementsByClassName('dateTimeTime')[0].value 
-//         var t1 = gameItem.getElementsByClassName('teams')[0].getElementsByClassName('team1')[0].innerText 
-//         var t2 = gameItem.getElementsByClassName('teams')[0].getElementsByClassName('team2')[0].innerText 
-//         // Edit Stats button
-//         var statButton = gameItem.getElementsByClassName('game_stats')[0]
-//         // check stats is selected
-//         if(!statButton.classList.contains('selected')){
-//             statButton.click()
-//         }
-//         // game stats section
-//         var gameStatsSection = gameItem.getElementsByClassName('js-gameStats')[0]
-//         // team tabs
-//         var teamTabs = gameStatsSection.getElementsByClassName('js-tabs')[0].children
-//         for(var i=0;i<teamTabs.length;i++){
-//             var currentTeam = teamTabs[i]
-//             if(currentTeam.innerText !== 'Scoring'){
-				
-//                     currentTeam.click()
-// 					setTimeout(function() { }, 3600)
-// 					console.log(gameStatsSection.getElementsByClassName('js-tabContent tabContent')[0].children[i].innerHTML)
-//                     var playerTypeTabs = gameStatsSection.getElementsByClassName('js-tabContent tabContent')[0].children[i].getElementsByClassName('js-team uiTabs subTabs')[0].getElementsByTagName('li')
-//                     for(var j=1;j<playerTypeTabs.length;j++){
-//                         var currentPlayerType = playerTypeTabs[j]
-//                             currentPlayerType.click()
-//             //                 console.log(currentPlayerType.getElementsByTagName('caption')[0].innerText)
-//                     }
-                
-//             }
-//         }
-//     }
-// }                                                       
+})                                                
 
 app.delete('/logout', (req,res) => {
     try{
@@ -1083,7 +1325,102 @@ app.delete('/logout', (req,res) => {
         console.error('Error:', err)
     }    
 })
-
+function playableDays(startDate,endDate,dayOfWeek){
+    // var totalDays = 1 + Math.round((d1-d0)/(24*3600*1000))
+    var firstGameDate = new Date(startDate)
+    var lastGameDate = new Date(endDate)
+    var msInWeek = 1000*60*60*24*7
+    var holidays = [new Date('May 24, 2024'),
+        new Date('May 27, 2024'),
+        new Date('July 4, 2024'),
+        new Date('July 5, 2024'),
+        new Date('July 8, 2024'),
+        new Date('August 30, 2024'),
+        new Date('September 2, 2024')
+    ]
+    var gameDays = []
+    // set first game date
+    if(dayOfWeek< firstGameDate.getDay()){
+        firstGameDate.setDate(firstGameDate.getDate()+7-(firstGameDate.getDay()-dayOfWeek))
+    }else{
+        firstGameDate.setDate(firstGameDate.getDate()+(dayOfWeek-firstGameDate.getDay()))
+    }
+    // console.log(firstGameDate);
+    // set last game date
+    if(dayOfWeek> lastGameDate.getDay()){
+        lastGameDate.setDate(lastGameDate.getDate()-7+(dayOfWeek-lastGameDate.getDay()))
+    }else{
+        lastGameDate.setDate(lastGameDate.getDate()-(lastGameDate.getDay()-dayOfWeek))
+    }
+    for(var i=0;i<((lastGameDate.getTime()-firstGameDate.getTime())/msInWeek)+1;i++){
+        var newDate = new Date(firstGameDate.getTime()+(i*msInWeek))
+        // newDate.setDate(firstGameDate.getTime()+(i*msInWeek))
+        // console.log(firstGameDate.getDate()+(i*7))
+        if(!holidays.some(function (holiday) {return holiday.getTime() === newDate.getTime()})){
+            gameDays.push(newDate)
+        }
+    }
+//     var holidaysDuringSeason = holidays.filter(date => 
+//         {
+//         var currentHoliday = new Date(date)
+//         return currentHoliday.getDay() === dayOfWeek 
+//         && currentHoliday >= firstGameDate 
+//         && currentHoliday <= lastGameDate
+//     }
+// ).length
+    return gameDays
+    // return ((lastGameDate-firstGameDate)/msInWeek)+1 - holidaysDuringSeason
+}
+async function getTeamsForScheduler(xSport, xSeason){
+    var teams = []
+    const request = pool.request()
+        result = await request.query(`exec teamListForScheduler @sport='${xSport}', @season='${xSeason}'`)
+        teams = result.recordsets[0]
+        for(var iteam of teams){
+            result = await request.query(`exec conflictingTeams @teamId='${iteam.teamId}'`)
+            iteam.conflictingTeams = result.recordsets[0].map(item => item.teamId)
+            iteam.gamesPlayed = 0
+        }
+        return teams
+}
+async function getLeaguesForScheduler(xSport, xSeason){
+    var teams = []
+    var leagues = []
+    var league = {}
+    const request = pool.request()
+        result = await request.query(`exec teamListForScheduler @sport='${xSport}', @season='${xSeason}'`)
+        teams = result.recordsets[0]
+        for(var iteam of teams){
+            result = await request.query(`exec conflictingTeams @teamId='${iteam.teamId}'`)
+            iteam.conflictingTeams = result.recordsets[0].map(item => item.teamId)
+            iteam.gamesPlayed = 0
+            if(leagues.length == 0){
+                league = {
+                    leagueId: iteam.league,
+                    dayOfWeek: iteam.dayOfWeek,
+                    teams: []
+                }
+                league.teams.push(iteam)
+                leagues.push(league)
+                // console.log(leagues)
+            }else if(leagues.some(obj=>obj.leagueId===iteam.league)){
+                league = leagues.find(obj=>obj.leagueId===iteam.league)
+                league.teams.push(iteam)
+            }else{
+                league = {
+                    leagueId: iteam.league,
+                    dayOfWeek: iteam.dayOfWeek,
+                    teams: []
+                }
+                league.teams.push(iteam)
+                leagues.push(league)
+            }
+        }
+        // for(var ileague of leagues){
+        //     console.log(ileague)
+        // }
+        return leagues
+}
 function checkAuthenticated(req, res, next) {
     try{
         if (req.isAuthenticated()) {

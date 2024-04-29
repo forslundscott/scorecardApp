@@ -10,12 +10,20 @@
       <% if (data.page == 'games') { %>
        Games
       <% } else if (data.page == 'standings') { %>
+        <% if (data.hasOwnProperty('list')) { %>
         <%= data.league %> Standings
-        <br>
-        <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportStandings('<%= data.type%>', '<%=data.league%>')" >Export to CSV</button>
+          <br>
+          <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportStandings('<%= data.type%>', '<%=data.league%>')" >Export to CSV</button>
+        <% }else { %>
+          Standings
+        <% } %>
         <!-- <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button> -->
-      <% } else if (data.page == 'readyForUpload') { %>
-        Ready For Upload to SE
+      <%# } else if (data.page == 'readyForUpload') { %>
+        <!-- Ready For Upload to SE -->
+      <% } else if (data.page.startsWith('/schedules/item/')) { %>
+        Schedule: <%= data.scheduleName %>
+        <br>
+        <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportSchedule('<%= data.scheduleId%>')" >Export to CSV</button>
       <% } else if (data.page == 'winners') { %>
         <div>Winners</div>
         <div style="height: 40%; width: 100%;">
@@ -89,6 +97,8 @@
             </div>
           </form>
         </div>
+      <% }else { %>
+        <%= data.page %>
       <% } %>
     </div>
   </header>

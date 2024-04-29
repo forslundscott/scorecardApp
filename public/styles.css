@@ -216,6 +216,13 @@ input::-webkit-inner-spin-button {
   width: calc(100%/5);
   text-align: center;
 }
+.scheduleGameItem{
+  float: left;
+  font-size: 110%;
+  height: 100%;
+  width: calc(100%/5);
+  text-align: center;
+}
 .keeperStandingsItem{
   float: left;
   font-size: 110%;
@@ -346,6 +353,17 @@ input::-webkit-inner-spin-button {
   opacity: 60%;
 }
 #floatingBackground{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:4;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
+}
+.popupBackground{
   width:100%;
   height:100%;
   left:0;/*IE*/

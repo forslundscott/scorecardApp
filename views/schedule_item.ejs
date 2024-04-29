@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+        <form class="listItem" action="/schedules/list" method="post">
+            <input type="hidden" name="scheduleId" value="<%= item.scheduleId %>">
+            <button class="playerButton" name="type" value="game" onclick="">
+        <div class="itemFormat primaryStyle">
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    <%= item.name %>
+                </div>
+            </div>
+             
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    <%= item.season %> <%= item.sport %>
+                </div>
+            </div>                   
+        </div>
+        </button>
+    </form>
+</body>
+</html>

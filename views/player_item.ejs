@@ -3,8 +3,9 @@
 <head>
 </head>
 <body>
-        <form class="listItem" action="javascript:void(0);" id="<%= player.Id + team.id %>" style="width: 96%;float: <%=side %>;">
-            <input type="hidden" name="playerId" value="<%= player.Id %>">
+    <% console.log(team) %>
+        <form class="listItem" action="javascript:void(0);" id="<%= player.userId + team.id %>" style="width: 96%;float: <%=side %>;">
+            <input type="hidden" name="playerId" value="<%= player.userId %>">
             <input type="hidden" name="teamName" value="<%= team.id %>">
             <input type="hidden" name="realTime" value="">
             <input type="hidden" name="periodTime" value="">
@@ -23,7 +24,8 @@
                         <div class="playerName" style="margin: 0% 0% 0% 0%;">
                             <%= player.firstName %>
                             <%= player.lastName[0] + "." %>
-                            <%= player.Id == team.keeper ? '(K)' : player.Id == team.captain ? '(C)' : '' %>
+                            <%= player.userId == team.keeper ? '(K)' : '' %>
+                            <%= player.userId == team.captain ? '(C)' : '' %>
                         </div>
                         <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
                     </div>

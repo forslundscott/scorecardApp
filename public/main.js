@@ -491,12 +491,12 @@ function toggleForm(formName){
 async function exportStandings(xtype,xleague){
     var sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
     console.log(sqlString)
-    const response = await fetch('/CSVExport', {
+    const response = await fetch('/exportStandings', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        body: new URLSearchParams({queryString: sqlString}).toString(),
+        body: new URLSearchParams({queryString: sqlString, fileName: `${xleague}_${xtype}_standings`}).toString(),
       });
       if (response.ok) {
         const blob = await response.blob();
@@ -519,16 +519,40 @@ async function exportStandings(xtype,xleague){
         console.error('CSV export failed');
         // Handle error response
       }
-
-
-    //   if (response.ok) {
-    //     const responseData = await response.json();
-    //     console.log(responseData.message);
-    //     // location.reload()
-    //   } else {
-    //     console.error('Form submission failed');
-    //     // Handle error response
-    //   }
+}
+async function exportSchedule(xscheduleID){
+    var sqlString = `SELECT type,startDate,startTime,fieldId,team1Id,team2Id, scorekeeperId, leagueId, subLeagueId
+    FROM schedule_games
+    where scheduleId = '${xscheduleID}'`
+    console.log(sqlString)
+    const response = await fetch('/exportSchedules', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        body: new URLSearchParams({queryString: sqlString, fileName: 'data'}).toString(),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const filename = `Schedule.csv`;
+        if (window.navigator.msSaveOrOpenBlob) {
+          // For IE and Edge
+          window.navigator.msSaveBlob(blob, filename);
+        } else {
+          // For other browsers
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = filename;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
+      } else {
+        console.error('CSV export failed');
+        // Handle error response
+      }
 }
 function touchMoveHandler(e,ele){
     var rect = ele.getBoundingClientRect()
