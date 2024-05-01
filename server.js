@@ -538,17 +538,17 @@ app.post(['/schedules/new'], async (req, res, next) => {
         var dailyGameTimesCount = req.body.lastGameTime.split(':')[0]-req.body.firstGameTime.split(':')[0]+1
         var totalFields = 4
         var timeFieldList = []
-        for(var i=0;i<dailyGameTimesCount;i++){
+        for(var i=0;i<totalFields;i++){
             // ((i)*1000*60*60)+firstGameTime
-            for(var j=0;j<totalFields;j++){
+            for(var j=0;j<dailyGameTimesCount;j++){
                 var timeFieldItem = {
-                    timeMs: ((i)*1000*60*60)+firstGameTime
+                    timeMs: ((j)*1000*60*60)+firstGameTime
                 }
-                timeFieldItem.fieldNumber = j+1
+                timeFieldItem.fieldNumber = i+1
                 timeFieldList.push(timeFieldItem)
             }
         }
-        console.log(timeFieldList)
+        // console.log(timeFieldList)
         var seasonStartDate = new Date(req.body.seasonStartDate)
         seasonStartDate = new Date(`${seasonStartDate.toLocaleDateString('en-US', {
             timeZone: 'UTC',
@@ -563,13 +563,16 @@ app.post(['/schedules/new'], async (req, res, next) => {
             month: 'numeric',
             day: 'numeric'
         })}`)
-        console.log(`${seasonStartDate.toLocaleDateString()} to ${seasonEndDate.toLocaleDateString()}`)
+        // console.log(`${seasonStartDate.toLocaleDateString()} to ${seasonEndDate.toLocaleDateString()}`)
         // setting match days for all leagues
         for(var league of leagueList){
             var gameDays = playableDays(seasonStartDate.toLocaleDateString(),seasonEndDate.toLocaleDateString(),league.dayOfWeek)
             var matchesPerPlayableDay = (league.scheduleMatches.length+league.playoffMatches.length)/gameDays.length
-            var daysWithExtraGame = (matchesPerPlayableDay%1)*gameDays.length
+            var daysWithExtraGame = Math.round((matchesPerPlayableDay%1)*gameDays.length)
             var imatch = 0
+            
+            // console.log(`${league.leagueId} ${league.playoffMatches.length} ${league.scheduleMatches.length} ${matchesPerPlayableDay} ${daysWithExtraGame} ${gameDays.length}`)
+            // console.log(league.teams.length);
             for(var i=0;i<gameDays.length;i++){
                 if(!allGameDays.some(obj => obj.getTime() === gameDays[i].getTime())){
                     allGameDays.push(gameDays[i])
@@ -577,16 +580,17 @@ app.post(['/schedules/new'], async (req, res, next) => {
                 if(i<daysWithExtraGame){
                     var numberOfMatches = Math.ceil(matchesPerPlayableDay)
                 }else{
+                    // console.log('floor');
                     var numberOfMatches = Math.floor(matchesPerPlayableDay)
                 }
                 // console.log(`${league.leagueId} ${numberOfMatches} ${league.totalRegularSeasonGames} ${imatch} ${league.playoffs} ${league.teams.length}`)
                 for(var j=0;j<numberOfMatches;j++){
-                    console.log(`${league.leagueId}`);
+                    // console.log(`${j} ${daysWithExtraGame} ${matchesPerPlayableDay%1} ${numberOfMatches}`);
                     if(imatch<league.totalRegularSeasonGames){
-                        // console.log(league.scheduleMatches[imatch])
+                        // console.log(`${league.leagueId}: ${league.playoffs} ${league.scheduleMatches.length} ${imatch} ${numberOfMatches} ${j} R`)
                         league.scheduleMatches[imatch].startDate = new Date(gameDays[i].getTime())
                     }else{
-                        // console.log(league.playoffMatches[imatch-league.totalRegularSeasonGames])
+                        // console.log(`${league.leagueId}: ${league.playoffs} ${league.playoffMatches.length} ${imatch-league.totalRegularSeasonGames} ${numberOfMatches} ${j} P`)
                         league.playoffMatches[imatch-league.totalRegularSeasonGames].startDate = new Date(gameDays[i].getTime())
                     }
                     imatch++
@@ -605,14 +609,19 @@ app.post(['/schedules/new'], async (req, res, next) => {
             // allRegularGames = allRegularGames.concat(league.scheduleMatches)
         }
         allGames.sort((a, b) => a.startDate - b.startDate)
-        console.log()
+        // console.log(allGameDays)
         // setting match times
         for(var i=0;i< allGameDays.length;i++){
+            // console.log(`${i} ${allGameDays.length}`);
             var currentGameDay = allGameDays[i]
-            // console.log(currentGameDay)
+            // console.log(currentGameDay.getTime())
+            // for(var igame of allGames){
+            //     console.log(igame);
+            // }
+            // console.log(allGames[1]);
             var currentTimeFieldList = [...timeFieldList]
             var currentDayMatches = allGames.filter(obj => obj.startDate.getTime() === currentGameDay.getTime())
-            // console.log(currentDayMatches)
+            // console.log(timeFieldList)
             var fieldNumber = 1
             var maxFieldNumber = 4
             var timeNumber = 0
@@ -620,18 +629,27 @@ app.post(['/schedules/new'], async (req, res, next) => {
             for(var j=0;j< currentDayMatches.length;j++){
                 for(var k=0;k<currentTimeFieldList.length;k++){
                     if(currentDayMatches.some(obj => 
-                        (obj.team1Id === currentDayMatches[j].team1Id || 
-                            obj.team2Id === currentDayMatches[j].team1Id || 
-                            obj.team1Id === currentDayMatches[j].team2Id || 
-                            obj.team2Id === currentDayMatches[j].team2Id)&&
-                            obj.startDate.getTime() === currentDayMatches[j].startDate.getTime()+currentTimeFieldList[k].timeMs
+                        (((obj.team1Id === currentDayMatches[j].team1Id || 
+                            obj.team1Id === currentDayMatches[j].team2Id) 
+                            && obj.team1Id !== 'TBD')
+                            || ((obj.team2Id === currentDayMatches[j].team1Id || 
+                            obj.team2Id === currentDayMatches[j].team2Id)
+                            && obj.team2Id !== 'TBD')
+                        )
+
+                            && obj.startDate.getTime() === currentDayMatches[j].startDate.getTime()+currentTimeFieldList[k].timeMs
                         ))
                     {
                         // nothing
                     }else{
+                        // console.log(`${currentDayMatches[j].team1Id} ${currentDayMatches[j].team2Id}`)
+                        if((currentDayMatches[j].team1Id == 'CYD' && currentDayMatches[j].team2Id == 'SPY') || (currentDayMatches[j].team1Id == 'GKS'&& currentDayMatches[j].team2Id == 'FBS')){
+                            console.log(currentTimeFieldList)
+                            console.log(currentTimeFieldList[k])
+                        }
                         currentDayMatches[j].startDate.setTime(currentDayMatches[j].startDate.getTime()+currentTimeFieldList[k].timeMs)
-                        currentDayMatches[j].fieldNumber = currentTimeFieldList[0].fieldNumber
-                        currentTimeFieldList.shift()
+                        currentDayMatches[j].fieldNumber = currentTimeFieldList[k].fieldNumber
+                        currentTimeFieldList.splice(k,1)
                         break;
                     }
                 }
@@ -640,7 +658,7 @@ app.post(['/schedules/new'], async (req, res, next) => {
                 // console.log(currentDayMatches[j].startTime)
                 // currentDayMatches[j].fieldNumber = currentTimeFieldList[0].fieldNumber
                 
-                console.log(`${currentDayMatches[j].startDate.toLocaleDateString()} ${currentDayMatches[j].startDate.toLocaleTimeString()} ${currentDayMatches[j].fieldNumber}`)
+                // console.log(`${currentDayMatches[j].startDate.toLocaleDateString()} ${currentDayMatches[j].startDate.toLocaleTimeString()} ${currentDayMatches[j].fieldNumber}`)
                 
 
 
@@ -697,6 +715,7 @@ app.post(['/schedules/new'], async (req, res, next) => {
             FROM @GameValues;
 
             COMMIT TRANSACTION;
+            SELECT @ScheduleId AS ScheduleId
         END TRY
         BEGIN CATCH
             IF @@TRANCOUNT > 0
@@ -705,7 +724,10 @@ app.post(['/schedules/new'], async (req, res, next) => {
             -- You can handle the error as needed, e.g., raise an error, log it, etc.
             THROW;
         END CATCH;`)
-        res.status(204).send()
+        console.log(result.recordset[0].ScheduleId)
+        // console.log(result.recordset[0]['@ScheduleId']);
+        res.redirect(`/schedules/item/${result.recordset[0].ScheduleId}`)
+        // res.status(204).send()
             
             // res.render('index.ejs',{data: data})
     }catch(err){
@@ -772,14 +794,60 @@ app.post('/exportStandings', async (req, res, next) => {
 })
 app.post('/exportSchedules', async (req, res, next) => {
     try{
-        
         const request = pool.request()
-        const result = await request
-        .query(req.body.queryString)
+        
+        // var result = await request
+        // .query(
+        //     `select distinct leagueId from schedule_games
+        //     where scheduleId = ${req.body.scheduleId}`
+        // )
+        // var leagueArray = result.recordset
+        // for(var ileague of leagueArray){
+        //     var csvData = ''
+        //     result = await request
+        //     .query(
+        //         `select distinct CONVERT(DATE, startDate, 101) as ds, startDate from schedule_games
+        //         where scheduleId = ${req.body.scheduleId} and leagueId = '${ileague.leagueId}'
+        //         ORDER BY CONVERT(DATE, startDate, 101)`
+        //     )
+        //     var dateArray = result.recordset
+        //     for(var idate of dateArray){
+        //         result = await request
+        //         .query(
+        //             `select distinct CONVERT(DATE, startDate, 101) as ds, startDate from schedule_games
+        //             where scheduleId = ${req.body.scheduleId} and leagueId = '${ileague.leagueId}'
+        //             ORDER BY CONVERT(DATE, startDate, 101)`
+        //         )
+        //         csvData = `${csvData}\n\n${(await functions.exportToCSV(result.recordset))}`
+        //     }
+        // }
+        result = await request
+        .query(`SELECT startDate as Date
+        ,startTime as Time
+        ,fieldId as Field
+        ,team1Id as Home
+        ,team2Id as Away
+        , '' as Staff
+        , leagueId, subLeagueId
+        , type
+        , DATEPART(WEEKDAY,CONVERT(date,startDate)) as weekday
+        ,case
+            when schedule_games.team1Id = 'TBD' then 'TBD'
+            else t1.fullName
+        end as HomeFullName
+        ,case
+            when schedule_games.team2Id = 'TBD' then 'TBD'
+            else t2.fullName
+        end as AwayFullName
+                FROM schedule_games
+                LEFT JOIN teams as t1 on schedule_games.team1Id=t1.id and schedule_games.leagueId=t1.league
+                LEFT JOIN teams as t2 on schedule_games.team2Id=t2.id and schedule_games.leagueId=t2.league
+            where scheduleId = ${req.body.scheduleId}
+            ORDER by weekday, startUnixTime, fieldId`)
         const csvData = await functions.exportToCSV(result.recordset);
         console.log(csvData)
         // Set response headers for CSV download
-        res.setHeader('Content-disposition', `'attachment; filename=${req.body.fileName}.csv'`);
+        res.setHeader('Content-disposition', `'attachment; filename=Schedule_${req.body.scheduleId}.csv'`);
         res.set('Content-Type', 'text/csv');
         res.status(200).send(csvData);
     }catch(err){

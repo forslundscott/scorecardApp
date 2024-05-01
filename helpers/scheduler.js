@@ -108,7 +108,7 @@ function makeLeague(teams,gamesPerTeam,teamsPerLeague,leagueId,subLeagueId,dayOf
         regularSeasonGamesPerTeam: gamesPerTeam,
         dayOfWeek: dayOfWeek
     }
-    console.log(leagueId&&subLeagueId)
+    // console.log(leagueId&&subLeagueId)
     for(var j=0;j<teamsPerLeague;j++){
         league.teams.push(teams[j])
         // teams.shift()
@@ -125,7 +125,7 @@ function leagueSplit(leagues,gamesPerTeam){
     // let teams = teams
     var leagueList = []
     for(var league of leagues){
-        console.log(league.leagueId)
+        // console.log(league.leagueId)
         var opponentCount = league.teams.length - 1
         var leagueCount = Math.ceil(opponentCount/gamesPerTeam)
         var teamsPerLeague = league.teams.length / leagueCount
@@ -145,13 +145,23 @@ function leagueSplit(leagues,gamesPerTeam){
 
 function leagueSchedule(leagues,gamesPerTeam){
     var subLeagues = leagueSplit(leagues,gamesPerTeam)
+    // console.log(subLeagues)
     for(const subLeague of subLeagues){
         for(var i=0;i<subLeague.totalRegularSeasonGames;i++){
             for(let j = 0; j< subLeague.possibleMatches.length;j++){
                 var match = subLeague.possibleMatches[j]
                 var minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                var avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
+                    return accumulator + currentValue.gamesPlayed;
+                }, 0))/subLeague.teams.length
                 // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
-                if(match.teams[0].gamesPlayed!= subLeague.regularSeasonGamesPerTeam && match.teams[1].gamesPlayed!= subLeague.regularSeasonGamesPerTeam && !(match.teams[0].gamesPlayed>minGamesPlayed && match.teams[1].gamesPlayed>minGamesPlayed)){
+                if(match.teams[0].gamesPlayed!= subLeague.regularSeasonGamesPerTeam 
+                    && match.teams[1].gamesPlayed!= subLeague.regularSeasonGamesPerTeam 
+                    && !(match.teams[0].gamesPlayed>minGamesPlayed && match.teams[1].gamesPlayed>minGamesPlayed)
+                    && !(avGamesPlayed<((match.teams[0].gamesPlayed + match.teams[1].gamesPlayed)/2))
+                ){
+                    // if(subLeague.leagueId ==='OCO2'){
+                    //     console.log(`${minGamesPlayed} ${match.teams[0].id}: ${match.teams[0].gamesPlayed} ${match.teams[1].id}: ${match.teams[1].gamesPlayed} ${(match.teams[0].gamesPlayed + match.teams[1].gamesPlayed)/2} ${avGamesPlayed}`)}
                     match.teams[0].gamesPlayed +=1
                     match.teams[1].gamesPlayed +=1
                     // console.log({team1Id: match.teams[0].id,team2Id: match.teams[1].id})

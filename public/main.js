@@ -549,11 +549,11 @@ async function exportSchedule(xscheduleID){
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        body: new URLSearchParams({queryString: sqlString, fileName: 'data'}).toString(),
+        body: new URLSearchParams({queryString: sqlString, fileName: 'data', scheduleId: xscheduleID}).toString(),
       });
       if (response.ok) {
         const blob = await response.blob();
-        const filename = `Schedule.csv`;
+        const filename = `Schedule_${xscheduleID}.csv`;
         if (window.navigator.msSaveOrOpenBlob) {
           // For IE and Edge
           window.navigator.msSaveBlob(blob, filename);

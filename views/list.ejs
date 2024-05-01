@@ -34,12 +34,12 @@
                 
                 <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" required>
                     <option value="" disabled selected hidden>Season</option>
-                    <option value="Spring 2024">Spring 2024</option>
+                    <option value="Spring 2024" selected>Spring 2024</option>
                     <option value="Indoor">Indoor</option>
                 </select>
                 <select name="sport" id="sport" class="primaryStyle" style="font-size: 100%;" required>
                     <option value="" disabled selected hidden>Sport</option>
-                    <option value="soccer">Soccer</option>
+                    <option value="soccer" selected>Soccer</option>
                     <option value="futsal">futsal</option>
                 </select>
                 <br>
@@ -51,18 +51,18 @@
                 <div class="primaryStyle" style="font-size: 100%;">
                     Dates:
                     <br>
-                    <input type="date" name="seasonStartDate" class="primaryStyle" style="font-size: 100%;" required>
+                    <input type="date" name="seasonStartDate" class="primaryStyle" style="font-size: 100%;" value="2024-05-06" required>
                     To
-                    <input type="date" name="seasonEndDate" class="primaryStyle" style="font-size: 100%;" required>
+                    <input type="date" name="seasonEndDate" class="primaryStyle" style="font-size: 100%;" value="2024-07-03" required>
                 </div>
                 <br>
                 <div class="primaryStyle" style="font-size: 100%;">
                     Times:
                     <br>
                     First:
-                    <input type="time" name="firstGameTime" class="primaryStyle" style="font-size: 100%;" required>
+                    <input type="time" name="firstGameTime" class="primaryStyle" style="font-size: 100%;" value="18:00" required>
                     Last:
-                    <input type="time" name="lastGameTime" class="primaryStyle" style="font-size: 100%;" required>
+                    <input type="time" name="lastGameTime" class="primaryStyle" style="font-size: 100%;" value="20:00" required>
                 </div>
                 <br>
                 <input type="text" name="scheduleName" class="primaryStyle" style="font-size: 100%;" placeholder="Schedule Name (Optional)">
