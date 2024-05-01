@@ -573,6 +573,14 @@ app.post(['/schedules/new'], async (req, res, next) => {
             
             // console.log(`${league.leagueId} ${league.playoffMatches.length} ${league.scheduleMatches.length} ${matchesPerPlayableDay} ${daysWithExtraGame} ${gameDays.length}`)
             // console.log(league.teams.length);
+            var allMatches = []
+            allMatches = allMatches.concat(league.scheduleMatches,league.playoffMatches)
+            // allMatches.push(league.scheduleMatches)
+            // allMatches.push(league.playoffMatches)
+            // var copyAllMatches =[...allMatches]
+            // console.log(`${allMatches.length} ${copyAllMatches.length}`)
+            // console.log(allMatches)
+            // console.log(league.scheduleMatches.length);;
             for(var i=0;i<gameDays.length;i++){
                 if(!allGameDays.some(obj => obj.getTime() === gameDays[i].getTime())){
                     allGameDays.push(gameDays[i])
@@ -585,14 +593,115 @@ app.post(['/schedules/new'], async (req, res, next) => {
                 }
                 // console.log(`${league.leagueId} ${numberOfMatches} ${league.totalRegularSeasonGames} ${imatch} ${league.playoffs} ${league.teams.length}`)
                 for(var j=0;j<numberOfMatches;j++){
+                    const counts = {};
+
+                    // Iterate through the array of objects
+                    allMatches.forEach(obj => {
+                        // Extract the values from the specified properties
+                        const value1 = obj.team1Id;
+                        const value2 = obj.team2Id;
+                        // Increment the count for value1
+                        counts[value1] = (counts[value1] || 0) 
+
+                        // Increment the count for value2
+                        counts[value2] = (counts[value2] || 0) 
+                        if(obj.startDate !== null){
+                            if(obj.startDate.getTime() === gameDays[i].getTime()){
+                                // Extract the values from the specified properties
+                                // const value1 = obj.team1Id;
+                                // const value2 = obj.team2Id;
+                                // Increment the count for value1
+                                counts[value1] = (counts[value1] || 0) + 1;
+
+                                // Increment the count for value2
+                                counts[value2] = (counts[value2] || 0) + 1;
+                            }
+                        }    
+                    })
+                    // Find the minimum count among the unique values
+                    const minCount = Object.keys(counts).length > 0 ? Math.min(...Object.values(counts)) : 0;
+
+                    // Count how many items in counts equal the minimum value
+                    const minCountValues = Object.values(counts).filter(count => count === minCount).length;
+                    // if(counts['BEER']){
+                    //     console.log('yes')
+                    // }else{
+                    //     console.log('no');
+                    // }
+                    // console.log(counts);
+                    // console.log(`${minCount} ${minCountValues}`)
+                    // console.log(minCountValues)
                     // console.log(`${j} ${daysWithExtraGame} ${matchesPerPlayableDay%1} ${numberOfMatches}`);
-                    if(imatch<league.totalRegularSeasonGames){
-                        // console.log(`${league.leagueId}: ${league.playoffs} ${league.scheduleMatches.length} ${imatch} ${numberOfMatches} ${j} R`)
-                        league.scheduleMatches[imatch].startDate = new Date(gameDays[i].getTime())
-                    }else{
-                        // console.log(`${league.leagueId}: ${league.playoffs} ${league.playoffMatches.length} ${imatch-league.totalRegularSeasonGames} ${numberOfMatches} ${j} P`)
-                        league.playoffMatches[imatch-league.totalRegularSeasonGames].startDate = new Date(gameDays[i].getTime())
+                    var matchesNoDate = allMatches.filter(obj => obj.startDate === null)
+                    matchesNoDate.sort((a, b) => {
+                        const aHasTBD = a.team1Id === 'TBD' || a.team2Id === 'TBD';
+                        const bHasTBD = b.team1Id === 'TBD' || b.team2Id === 'TBD';
+                        
+                        // Sort objects with 'TBD' first
+                        if (aHasTBD && !bHasTBD) {
+                            return 1;
+                        } else if (!aHasTBD && bHasTBD) {
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    });
+                    for(var k=0;k<matchesNoDate.length;k++){
+                        // console.log(matchesNoDate[k].team1Id)
+                        // console.log(counts)
+                        if(matchesNoDate[k].team1Id==='TBD'||matchesNoDate[k].team2Id==='TBD'){
+                            console.log('next')
+                            // matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                            // break
+                        }
+                        if(!counts[matchesNoDate[k].team1Id] && !counts[matchesNoDate[k].team2Id]){
+                            matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                            break
+                        }
+                        if(counts[matchesNoDate[k].team1Id]&& counts[matchesNoDate[k].team2Id]){
+                            if((counts[matchesNoDate[k].team1Id]> minCount|| counts[matchesNoDate[k].team2Id]>minCount)&&minCountValues>1){
+                                console.log('next')
+                            }else{
+                                // console.log(counts)
+                                // console.log(`${counts[matchesNoDate[k].team1Id]} ${counts[matchesNoDate[k].team2Id]} ${minCountValues}`);
+                                matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                                break
+                            }
+                            // console.log(counts[matchesNoDate[k].team1Id])
+                        }else if(counts[matchesNoDate[k].team1Id]){
+                            if((counts[matchesNoDate[k].team1Id]> minCount)&&minCountValues>1){
+                                console.log('next')
+                            }else{
+                                matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                                break
+                            }
+                        }else if(counts[matchesNoDate[k].team2Id]){
+                            if((counts[matchesNoDate[k].team2Id]> minCount)&&minCountValues>1){
+                                console.log('next')
+                            }else{
+                                matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                                break
+                            }
+                        }else{
+                            console.log('leftover');
+                            matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                            break
+                        }
+                        if(k===matchesNoDate.length-1){
+                            matchesNoDate[0].startDate = new Date(gameDays[i].getTime())
+                            break
+                        }
+                        console.log(`${league.leagueId} ${k} ${matchesNoDate.length}`);
+                        // matchesNoDate[k].startDate = new Date(gameDays[i].getTime())
+                        // break
                     }
+                    // if(imatch<league.totalRegularSeasonGames){
+                    //     // console.log(`${league.leagueId}: ${league.playoffs} ${league.scheduleMatches.length} ${imatch} ${numberOfMatches} ${j} R`)
+                    //     league.scheduleMatches[imatch].startDate = new Date(gameDays[i].getTime())
+                    // }else{
+                    //     // console.log(`${league.leagueId}: ${league.playoffs} ${league.playoffMatches.length} ${imatch-league.totalRegularSeasonGames} ${numberOfMatches} ${j} P`)
+                    //     league.playoffMatches[imatch-league.totalRegularSeasonGames].startDate = new Date(gameDays[i].getTime())
+                    // }
                     imatch++
                 }
                 
@@ -627,7 +736,36 @@ app.post(['/schedules/new'], async (req, res, next) => {
             var timeNumber = 0
             // var firstHour = 6+12
             for(var j=0;j< currentDayMatches.length;j++){
+                // const counts = {};
+
+                // // Iterate through the array of objects
+                // currentDayMatches.forEach(obj => {
+                //     // Extract the values from the specified properties
+                //     const value1 = obj.team1Id;
+                //     const value2 = obj.team2Id;
+
+                //     // Increment the count for value1
+                //     counts[value1] = (counts[value1] || 0) + 1;
+
+                //     // Increment the count for value2
+                //     counts[value2] = (counts[value2] || 0) + 1;
+                // })
+                // // Find the minimum count among the unique values
+                // const minCount = Math.min(...Object.values(counts));
+
+                // // Count how many items in counts equal the minimum value
+                // const minCountValues = Object.values(counts).filter(count => count === minCount).length;
+                // console.log(`${minCount} ${minCountValues}`)
+                // console.log(minCountValues)
                 for(var k=0;k<currentTimeFieldList.length;k++){
+                    // console.log(array.reduce((minCount, obj) => {
+                    //     // Count occurrences of the value in both properties
+                    //     const count1 = obj.team1Id === value ? 1 : 0;
+                    //     const count2 = obj.team2Id === value ? 1 : 0;
+                        
+                    //     // Update the minimum count
+                    //     return Math.min(minCount, count1 + count2);
+                    //   }, Infinity))
                     if(currentDayMatches.some(obj => 
                         (((obj.team1Id === currentDayMatches[j].team1Id || 
                             obj.team1Id === currentDayMatches[j].team2Id) 
