@@ -4,7 +4,7 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="addPlayer" method="post" style="display: none; text-align: center;">
+    <form id="newPlayerForm" class="floatingPopupForm primaryStyle primaryBorder" action="addPlayer" method="post" style="display: none; text-align: center;">
         <!-- <div class="playerTag itemFormat"> -->
             <div class="playerName">
                 Add New Player
@@ -12,15 +12,20 @@
             <br>
             <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
             <br>
+            <input type="email" name="email" value="" placeholder="Email" required>
+            <br>
             <input type="text" name="firstName" value="" placeholder="First Name" required>
             <br>
             <input type="text" name="lastName" value="" placeholder="Last Name" required>
             <br>
-            <input type="text" name="team" value="Test2" hidden>
-            
+            <input type="text" name="preferredName" value="" placeholder="Preferred Name (Optional)">
+            <br>
+            <input type="text" name="team" value="" hidden>
+            <input type="text" name="season" value="" hidden>
+            <input type="text" name="eventId" value="" hidden>
             Rostered <input type="radio" name="playerType" value="Rostered"> Sub <input type="radio" name="playerType" value="Sub" checked>
             <br>
-            <label for="waiver">Signed Waiver</label><input type="checkbox" id="waiver" oninvalid="this.setCustomValidity('Player must sign waiver to play')" onchange="this.setCustomValidity('')" required>
+            <label for="waiver">Signed Waiver</label><input type="checkbox" name="waiver" id="waiver" oninvalid="this.setCustomValidity('Player must sign waiver to play')" onchange="this.setCustomValidity('')" required>
             <br>
             <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Player</button>
             <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->

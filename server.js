@@ -117,6 +117,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
+    maxAge: 24*60*60*1000
 }))
 app.use(passport.initialize())
 app.use(passport.session())
@@ -306,7 +307,7 @@ app.post(['/forgotPassword'], async (req,res)=>{
         logger: true
     });
 
-    const resetLink = `https://glad-pika-totally.ngrok-free.app/reset/${token}`;
+    const resetLink = `${req.protocol}://${req.hostname}/reset/${token}`;
     const mailOptions = {
       from: process.env.ORG_EMAIL,
       to: user.email,
@@ -1086,8 +1087,7 @@ app.get(['/timer'], async (req,res,next)=>{
                 .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone, Event_ID, paid)
                 select top 1 *, '${req.query.Event_ID}', 'false' as Event_ID 
                 from winningTeamContact('${result.recordset[0].teamName}')
-                where not 'MOI' in (Select league from teams
-                    where id = '${result.recordset[0].teamName}')`)
+                where giftCards = 1`)
             }  
             await request.query(`UPDATE [scorecard].[dbo].[games] 
             set [Status] = 1 
@@ -1129,6 +1129,7 @@ app.get('/admin', checkAuthenticated, authRole('admin'), (req, res) => {
 });
 app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
     try{
+        console.log(req.user)
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
@@ -1218,6 +1219,8 @@ app.get(['/users'], async (req,res, next)=>{
 })
 app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
     try {
+        console.log(req.protocol)
+        console.log(req.hostname)
         var game
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
@@ -1258,7 +1261,8 @@ app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
                 team2.score = result.recordsets[5][0].score
             }
             game = result.recordsets[6][0]
-        
+            // team1.priorSubs = result.recordsets[7]
+            // team2.priorSubs = result.recordsets[8]
         
         if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
             if(game.period<game.maxPeriods){
@@ -1339,7 +1343,10 @@ app.post(['/eventLog'], async (req,res,next)=>{
                 '${req.body.teamName}',
                 '${req.body.Event_ID}'
                 ) 
-            where Id = '${req.body.playerId}'
+            where userId = '${req.body.playerId}'
+            UNION ALL
+            select * from [scorecard].[dbo].[subGameStats] ('${req.body.teamName}', '${req.body.Event_ID}')
+            where userId = '${req.body.playerId}'
 
             SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,'${req.body.Event_ID}',@Team2_ID)
             SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,'${req.body.Event_ID}',@Team1_ID)
@@ -1373,12 +1380,158 @@ app.post(['/eventLog'], async (req,res,next)=>{
         next(err)
     }
 })
+app.post(['/checkEmail'], async (req,res,next)=>{
+    try{
+        
+        const request = pool.request()
+        result = await request.query(`select * from users
+        where email = '${req.body.email}'`)
+        console.log(result.recordset[0])
+        res.json({ message: 'Success', user: result.recordset[0] })
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
+app.post(['/getPastSubs'], async (req,res,next)=>{
+    try{
+        const request = pool.request()
+        result = await request.query(`
+        SELECT distinct users.*
+        FROM subTeamGame
+        LEFT JOIN users ON subTeamGame.userId = users.ID
+        WHERE subTeamGame.teamId = '${req.body.team}' 
+        AND NOT EXISTS (
+            SELECT 1
+            FROM subTeamGame AS sg
+            WHERE sg.userId = subTeamGame.userId
+                AND sg.teamId = '${req.body.team}'
+                AND sg.eventId = '${req.body.eventId}'
+  );`)
+        // console.log(`
+        // select users.* 
+        // from subTeamGame
+        // left JOIN users on subTeamGame.userId=users.ID
+        // where teamId='${req.body.team}' and not eventId='${req.body.eventId}'`)
+        console.log(result.recordset)
+        res.json({ message: 'Success', subs: result.recordset })
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
+app.post(['/addPastSub'], async (req,res,next)=>{
+    try{
+        const request = pool.request()
+        result = await request.query(`
+        insert into subTeamGame (userId,teamId,eventId)
+        VALUES ('${req.body.existingSubs}','${req.body.team}','${req.body.eventId}')`)
+        // console.log(`
+        // select users.* 
+        // from subTeamGame
+        // left JOIN users on subTeamGame.userId=users.ID
+        // where teamId='${req.body.team}' and not eventId='${req.body.eventId}'`)
+        console.log(req.body)
+        res.json({ message: 'Success'})
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
 app.post(['/addPlayer'], async (req,res,next)=>{
     try{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        await request.query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
+        var result = await request.query(`select id from users
+        where email = '${req.body.email}'`)
+        if(!result.recordset[0]){
+            // console.log(req.body.season)
+            // console.log(req.body.team)
+            // console.log(result.recordset[0].id)
+            // result = await request.query(`DECLARE @userId varchar(255)
+            // DECLARE @teamId varchar(255)
+            // DECLARE @seasonId varchar(255)
+            
+            // set @email = '${req.body.email}'
+            // set @teamId = '${req.body.team}'
+            // set @seasonId = '${req.body.season}'
+            
+            // EXECUTE [dbo].[insert_userTeamSeason] 
+            //    @email
+            //   ,@teamId
+            //   ,@seasonId
+            // `)
+        // }else{
+            result = await request.query(`
+            DECLARE @firstName varchar(255)
+            DECLARE @lastName varchar(255)
+            DECLARE @preferredName varchar(255)
+            DECLARE @email varchar(255)
+            DECLARE @userId varchar(255)
+            DECLARE @sport varchar(255)
+            DECLARE @rating decimal(10,3)
+            DECLARE @teamId varchar(255)
+            DECLARE @seasonId varchar(255)
+            
+            set @firstName = '${req.body.firstName}'
+            set @lastName = '${req.body.lastName}'
+            set @preferredName = '${req.body.preferredName}'
+            set @email = '${req.body.email}'
+            set @sport = '${req.body.sport}'
+            set @rating = 3
+            set @teamId = '${req.body.team}'
+            set @seasonId = '${req.body.season}'
+            
+            EXECUTE  [dbo].[insert_user] 
+               @firstName
+              ,@lastName
+              ,@preferredName
+              ,@email
+
+            EXECUTE [dbo].[insert_userSportRating] 
+            @sport
+            ,@email
+            ,@rating
+
+            `)
+        }
+        if(req.body.playerType == 'Rostered'){
+            result = await request.query(`
+            DECLARE @email varchar(255)
+            DECLARE @teamId varchar(255)
+            DECLARE @seasonId varchar(255)
+            
+            set @email = '${req.body.email}'
+            set @teamId = '${req.body.team}'
+            set @seasonId = '${req.body.season}'
+            
+            EXECUTE [dbo].[insert_userTeamSeason] 
+               @email
+              ,@teamId
+              ,@seasonId
+            `)
+        }else{
+            result = await request.query(`
+            DECLARE @email varchar(255)
+            DECLARE @teamId varchar(255)
+            DECLARE @seasonId varchar(255)
+            DECLARE @eventId varchar(255)
+            
+            set @email = '${req.body.email}'
+            set @teamId = '${req.body.team}'
+            set @seasonId = '${req.body.season}'
+            set @eventId = '${req.body.eventId}'
+            
+            EXECUTE [dbo].[insert_subTeamGame] 
+               @email
+              ,@teamId
+              ,@eventId
+              ,@seasonId
+            `)
+        }
+        // console.log(result.recordset[0])
+        // await request.query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
         res.redirect('back')
     }catch(err){
         next(err)
@@ -1424,17 +1577,33 @@ app.post('/updateGameInfo', async (req, res, next) => {
         // var data = {
         // }
         const formData = req.body;
-
+        console.log(formData)
         const request = pool.request()
 
         result = await request.query(`
         update games
         set Team1_ID = '${formData.Team1_ID}',
         Team2_ID = '${formData.Team2_ID}',
-        scoreKeeperId = ${formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID}
+        scoreKeeperId = ${formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID},
+        period = ${formData.period}
         where Event_ID = '${formData.Event_ID}'
         `)
-        res.json({ message: 'Data updated successfully!' });
+        if(formData.gameCancel){
+            result = await request.query(`
+            UPDATE games
+            SET status = 
+                CASE
+                    WHEN CAST(period as DECIMAL) / maxperiods > cast(2 as decimal)/3 THEN 2
+                    ELSE 1
+                END 
+            WHERE event_id = '${formData.Event_ID}'
+            AND status = 0;
+            `)
+            res.redirect(302,'/games')
+        }else{
+            res.json({ message: 'Data updated successfully!' });
+        }
+        
     }catch(err){
         next(err)
     }
