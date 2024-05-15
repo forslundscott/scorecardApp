@@ -434,9 +434,14 @@ function toggleAddPlayer(xform){
 async function toggleTeamForm(xform){
     var teamForm = document.getElementById('teamForm')
     var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
+    if(document.getElementById('formBackground').style.display == 'none'){
+        document.getElementById('formBackground').style.display = ''
+    }else{
+        document.getElementById('formBackground').style.display = 'none'
+    }
     if(teamForm.style.display == 'none'){
         // var color = xform.querySelector('[name="color"]').value
-        teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="team"]').value
+        teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="teamName"]').value
         teamForm.style.display = ''
         teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
         teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
@@ -475,11 +480,7 @@ async function toggleTeamForm(xform){
     }else{
         teamForm.style.display = 'none'
     }
-    if(document.getElementById('formBackground').style.display == 'none'){
-        document.getElementById('formBackground').style.display = ''
-    }else{
-        document.getElementById('formBackground').style.display = 'none'
-    }
+    
 }
 async function toggleGameInfoForm(xform){
     

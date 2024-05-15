@@ -11,7 +11,7 @@ const app = express()
 // const bodyParser = require('body-parser')
 const sql = require('mssql');
 const bcrypt = require('bcrypt')
-const puppeteer = require('puppeteer')
+
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
@@ -103,10 +103,13 @@ initializePassport(
             return result
         }
     )
-// const open = require('open')
 
 const port = process.env.APP_PORT
-let options = {}
+let options = {
+    maxAge: '1w', // Set max-age directive to 1 day
+  etag: true, // Enable ETag
+  lastModified: false, // Disable Last-Modified header
+}
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public',options))
@@ -128,7 +131,6 @@ app.use(methodOverride('_method'))
 const functions = require('./helpers/functions');
 const scheduler = require('./helpers/scheduler');
 const { log } = require('console');
-// const { next } = require('cheerio/lib/api/traversing');
 // const forms = require('./routes/forms')
 // app.use('/forms',forms)
 app.locals.functions = functions
@@ -169,7 +171,7 @@ async function roleSetter() {
 
 
 
-app.get(['/'], checkAuthenticated, async (req,res)=>{
+app.get(['/'], async (req,res)=>{
     // res.render('index.ejs')
     try{
         // console.log(req.user)
@@ -1003,8 +1005,9 @@ app.post('/periodEnd', async (req, res, next) => {
             var game
             const request = pool.request()
             const result = await request
-            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = '${req.query.Event_ID}'`)
+            .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = '${req.body.Event_ID}'`)
             game = result.recordset[0]
+            console.log(req.query)
             if(game.period===req.body.period){
                 if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
                     if(game.period<game.maxPeriods){
@@ -1084,8 +1087,8 @@ app.get(['/timer'], async (req,res,next)=>{
             .query(`select * from winningTeam('${req.query.Event_ID}')`)
             if(result.recordset[0].length=1){
                 await request
-                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, phone, Event_ID, paid)
-                select top 1 *, '${req.query.Event_ID}', 'false' as Event_ID 
+                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
+                select top 1 Teamid,fullName,shortName,color,captain,player,email, '${req.query.Event_ID}' as Event_ID, 'false' 
                 from winningTeamContact('${result.recordset[0].teamName}')
                 where giftCards = 1`)
             }  
@@ -1127,7 +1130,7 @@ app.get('/admin', checkAuthenticated, authRole('admin'), (req, res) => {
     // Only accessible by users with admin role
     res.send('Admin Page');
 });
-app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
+app.get(['/games'], async (req,res,next)=>{
     try{
         console.log(req.user)
         if (req.isAuthenticated()) {
@@ -1145,7 +1148,8 @@ app.get(['/games'], checkAuthenticated, async (req,res,next)=>{
         // await pool.connect();
         const request = pool.request()
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
-        const result = await request.query(`Select * from gamesList() order by startUnixTime, location`)
+        const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        // const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){
@@ -1217,7 +1221,7 @@ app.get(['/users'], async (req,res, next)=>{
         next(err)
     }
 })
-app.get(['/activeGame'], checkAuthenticated, async (req,res,next)=>{
+app.get(['/activeGame'], async (req,res,next)=>{
     try {
         console.log(req.protocol)
         console.log(req.hostname)
@@ -1377,7 +1381,8 @@ app.post(['/eventLog'], async (req,res,next)=>{
             }
         }
     }catch(err){
-        next(err)
+        console.log(err)
+        // next(err)
     }
 })
 app.post(['/checkEmail'], async (req,res,next)=>{
@@ -1425,7 +1430,9 @@ app.post(['/addPastSub'], async (req,res,next)=>{
         const request = pool.request()
         result = await request.query(`
         insert into subTeamGame (userId,teamId,eventId)
-        VALUES ('${req.body.existingSubs}','${req.body.team}','${req.body.eventId}')`)
+        VALUES ('${req.body.existingSubs}','${req.body.team}','${req.body.eventId}')
+        delete from subTeamGame
+              where userId = 'undefined'`)
         // console.log(`
         // select users.* 
         // from subTeamGame
@@ -1528,6 +1535,9 @@ app.post(['/addPlayer'], async (req,res,next)=>{
               ,@teamId
               ,@eventId
               ,@seasonId
+              
+              delete from subTeamGame
+              where userId = 'undefined'
             `)
         }
         // console.log(result.recordset[0])
@@ -1590,14 +1600,35 @@ app.post('/updateGameInfo', async (req, res, next) => {
         `)
         if(formData.gameCancel){
             result = await request.query(`
+            DECLARE @teamName NVARCHAR(255)
             UPDATE games
             SET status = 
                 CASE
-                    WHEN CAST(period as DECIMAL) / maxperiods > cast(2 as decimal)/3 THEN 2
-                    ELSE 1
+                    WHEN CAST(period as DECIMAL) / maxperiods > cast(2 as decimal)/3 THEN 1
+                    ELSE 2
                 END 
             WHERE event_id = '${formData.Event_ID}'
             AND status = 0;
+            IF EXISTS (
+                SELECT 1
+                FROM games
+                WHERE event_id = '${formData.Event_ID}'
+                AND status = 1
+            )
+            BEGIN
+                EXEC recordTeamResults '${formData.Event_ID}'
+                EXEC updateGameResults '${formData.Event_ID}'
+                IF EXISTS (
+                    SELECT 1 FROM winningTeam('${req.query.Event_ID}')
+                )
+                BEGIN
+                    SELECT @teamName = teamName FROM winningTeam('${req.query.Event_ID}')
+                    INSERT INTO winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
+                    SELECT TOP 1 Teamid, fullName, shortName, color, captain, player, email, '${req.query.Event_ID}', 'false'
+                    FROM winningTeamContact(@teamName)
+                    WHERE giftCards = 1
+                END
+            END
             `)
             res.redirect(302,'/games')
         }else{
