@@ -12,7 +12,7 @@
         <% } %>
     <% } %>
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
-        <% if (data.page == 'games' || data.page == 'readyForUpload') { %>
+        <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>

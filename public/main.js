@@ -395,7 +395,7 @@ async function addPreviousSub(xform){
             //     })
             // }
             console.log(responseData.message);
-            // location.reload()
+            location.reload()
           } else {
             console.error('Form submission failed');
             // Handle error response
@@ -541,6 +541,12 @@ async function toggleGameInfoForm(xform){
                 // var color = xform.querySelector('[name="color"]').value
                 document.getElementById('gameInfoForm').style.display = ''
                 document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
+                // var gameUnixTime = new Date(Number(responseData.data.game.startUnixTime))
+                // console.log(typeof responseData.data.game.startUnixTime)
+                // console.log(`${gameUnixTime.getFullYear()}-${gameUnixTime.getMonth()+1}-${gameUnixTime.getDate()}`)
+                // console.log(responseData.data.game.Start_Time)
+                // document.getElementById('gameInfoForm').querySelector('[name="startDate"]').value = `${gameUnixTime.getFullYear()}-${gameUnixTime.getMonth()+1<10?`0${gameUnixTime.getMonth()+1}`:gameUnixTime.getMonth()+1}-${gameUnixTime.getDate()<10? `0${gameUnixTime.getDate()}`:gameUnixTime.getDate()}`
+                // document.getElementById('gameInfoForm').querySelector('[name="startTime"]').value = `${String(gameUnixTime.getHours()).padStart(2, '0')}:${String(gameUnixTime.getMinutes()).padStart(2, '0')}`
                 // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
                 
                 // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
@@ -565,7 +571,7 @@ async function updateGameData(xele){
     var xform = xele.form
     var formData = new FormData(xform)
     console.log(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value)
-    if(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value){
+    if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 'TBD'){
       xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
         xform.querySelector('[name="Team1_ID"]').reportValidity()
         return
