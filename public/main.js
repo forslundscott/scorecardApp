@@ -431,6 +431,73 @@ function toggleAddPlayer(xform){
         document.getElementById('teamFormBackground').style.display = 'none'
     }
 }
+function toggleSearchUser(xform){
+    var searchForm = document.getElementById('userSearchForm')
+    if(searchForm.style.display == 'none'){
+        // var color = xform.querySelector('[name="color"]').value
+        searchForm.style.display = ''
+        // searchForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
+        // searchForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        // searchForm.querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
+        // searchForm.src = `images/${xform.querySelector('[name="team"]').value}.png`
+        
+        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+    }else{
+        searchForm.style.display = 'none'
+    }
+    // if(document.getElementById('teamFormBackground').style.display == 'none'){
+    //     document.getElementById('teamFormBackground').style.display = ''
+    // }else{
+    //     document.getElementById('teamFormBackground').style.display = 'none'
+    // }
+}
+async function userSearch(xForm){
+    // document.getElementById('userSearchForm').addEventListener('submit', async function (event) {
+        // event.preventDefault();
+        const query = document.getElementById('userSearchField').value;
+        try {
+            // const response = await fetch(`/userSearch?query=${query}`);
+            var formData = new FormData(xForm)
+            const response = await fetch(`/userSearch`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                body: new URLSearchParams(formData).toString(),
+              });
+            // const results = await response.json();
+            
+            if (response.ok) {
+                const results = await response.json();
+                const resultsList = document.getElementById('userSearchResults');
+                resultsList.innerHTML = '';
+                results.forEach(user => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('primaryBorder')
+                    listItem.textContent = `${user.firstName} ${user.lastName} - ${user.preferredName} - ${user.email}`;
+                    resultsList.appendChild(listItem);
+            });
+                // if(responseData.subs){
+                //     responseData.subs.forEach(function(sub){
+                //         var option = document.createElement('option')
+                //         option.text = sub.firstName + ' ' + sub.lastName
+                //         option.value = sub.ID
+                //         pastSubsDropdown.add(option)
+                //     })
+                // }
+                // console.log(responseData.message);
+                // location.reload()
+              } else {
+                console.error('Form submission failed');
+                // Handle error response
+              }
+            
+            
+        } catch (error) {
+            console.error('Error fetching results:', error);
+        }
+    // });
+}
 async function toggleTeamForm(xform){
     var teamForm = document.getElementById('teamForm')
     var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')

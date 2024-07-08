@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
+    <form id="userSearchForm" class="floatingPopupForm primaryStyle primaryBorder" style="display: none; text-align: center;">
+        <!-- <div class="playerTag itemFormat"> -->
+            <div class="playerName">
+                User Search
+            </div>
+            <br>
+            <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
+            <br>
+            <input type="text" id="userSearchField" name="userSearchValue" placeholder="Search..." required>
+            <br>
+            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="userSearch(this.form)">Search</button>
+            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser(this.form)">Back</button>
+            <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->
+        <!-- </div> -->
+        <div id="userSearchContent">
+            <div id="userSearchResults" class="singleColumn">
+
+            </div>
+            <!-- <ul class="primaryStyle" id="userSearchResults"></ul>      -->
+        </div>
+    </form>
+    
+</body>
+</html>

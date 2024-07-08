@@ -1382,6 +1382,30 @@ app.get(['/activeGame'], async (req,res,next)=>{
     }
 })
 
+app.post('/userSearch', async (req, res) => {
+    const query  = req.body.userSearchValue;
+    // console.log(req.body.userSearchValue)
+    if (!query) {
+        return res.status(400).send('Query parameter is required');
+    }
+
+    try {
+        const request = pool.request()
+        const result = await request.query(`
+            SELECT * FROM users 
+            WHERE firstName LIKE '%${query}%' 
+            OR lastName LIKE '%${query}%' 
+            OR preferredName LIKE '%${query}%' 
+            OR email LIKE '%${query}%'
+        `);
+        console.log(result.recordset)
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Query failed: ', err);
+        res.status(500).send('Internal server error');
+    }
+});
+
 // app.post(['/'], async (req,res)=>{
 //     // res.render('index.ejs')
 //     res.render('smartphone.ejs') 
@@ -2012,6 +2036,7 @@ function authRole(roleName){
 }
 app.use((err, req, res, next) => {
     console.error(err);
+    console.log(req.originalUrl)
     // console.log(req)
 
     // Respond with an appropriate error message
