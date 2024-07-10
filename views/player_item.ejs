@@ -22,7 +22,7 @@
                 <div class="playerItem" style="<%= side == 'left' ? 'margin: 0% 0% 0% 25%; text-align: left;' : 'margin: 0% 25% 0% 0%; text-align: right;' %>">
                     <div class="playerTag">
                         <div class="playerName" style="margin: 0% 0% 0% 0%;">
-                            <%= player.firstName %>
+                            <%= player.preferredName %>
                             <%= player.lastName[0] + "." %>
                             <%= player.userId == team.keeper ? '(K)' : '' %>
                             <%= player.userId == team.captain ? '(C)' : '' %>

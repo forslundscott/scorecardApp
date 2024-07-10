@@ -12,7 +12,7 @@
             <br>
             <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
             <br>
-            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser(this.form)">Search For Existing</button>
+            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser()">Search For Existing</button>
             <br>
             <input type="email" name="email" value="" placeholder="Email" required>
             <br>
@@ -25,8 +25,12 @@
             <input type="text" name="team" value="" hidden>
             <input type="text" name="season" value="" hidden>
             <input type="text" name="eventId" value="" hidden>
-            Rostered <input type="radio" name="playerType" value="Rostered"> Sub <input type="radio" name="playerType" value="Sub" checked>
+            Rostered <input type="radio" name="playerType" value="Rostered" onclick="togglePaidCheckbox()"> Sub <input type="radio" name="playerType" value="Sub" onclick="togglePaidCheckbox()" checked>
             <br>
+            <div id="paidContainer" style="display: none;">
+                <label for="paid">Paid</label><input type="checkbox" name="paid" id="paid" oninvalid="this.setCustomValidity('Player must pay season fee to be rostered.')" onchange="this.setCustomValidity('')" required>
+            </div>
+            <!-- <br> -->
             <label for="waiver">Signed Waiver</label><input type="checkbox" name="waiver" id="waiver" oninvalid="this.setCustomValidity('Player must sign waiver to play')" onchange="this.setCustomValidity('')" required>
             <br>
             <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Player</button>

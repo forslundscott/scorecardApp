@@ -1599,7 +1599,7 @@ app.post(['/addPlayer'], async (req,res,next)=>{
             
             set @firstName = '${req.body.firstName}'
             set @lastName = '${req.body.lastName}'
-            set @preferredName = '${req.body.preferredName}'
+            set @preferredName = '${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}'
             set @email = '${req.body.email}'
             set @sport = '${req.body.sport}'
             set @rating = 3
