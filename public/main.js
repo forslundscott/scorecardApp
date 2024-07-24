@@ -522,9 +522,12 @@ function togglePaidCheckbox() {
         if (radioButton.checked) {
             if (radioButton.value === 'Rostered') {
                 checkboxContainer.style.display = '';
+                document.getElementById('paid').required = true
             } else {
                 checkboxContainer.style.display = 'none';
+                document.getElementById('paid').required = false
             }
+            // document.getElementById('paid').required = !document.getElementById('paid');
         }
     }
 }
