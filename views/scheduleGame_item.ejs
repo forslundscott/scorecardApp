@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+        <form class="listItem" action="activeGame" method="get">
+            <input type="hidden" name="Team1_ID" value="<%= game.Team1Id %>">
+            <input type="hidden" name="Team2_ID" value="<%= game.Team2Id %>">
+            <input type="hidden" name="type" value="<%= game.type %>">
+            <input type="hidden" name="leagueId" value="<%= game.leagueId %>">
+            <input type="hidden" name="subLeagueId" value="<%= game.subLeagueId %>">
+            <input type="hidden" name="scheduleId" value="<%= game.scheduleId%>">
+            <input type="hidden" name="periodTime" value="">
+            <input type="hidden" name="period" value="">
+            <input type="hidden" name="value" value="">
+            <button class="playerButton" name="type" value="game" onclick="">
+        <div class="itemFormat primaryStyle" >
+            <%const tempDate = new Date()
+                tempDate.setTime(game.startUnixTime) %>
+            <div class="statContainer">  
+                <div class="individualStandingsItem">
+                    Date
+                    <br>
+                    <%= tempDate.toLocaleString('en-US', {
+                        timeZone: 'America/New_York', // Setting timezone to EST
+                        month: '2-digit',
+                        day: '2-digit'
+                      }) %>
+                    </div>
+                <div class="individualStandingsItem">
+                    Time
+                    <br>
+                    <%= tempDate.toLocaleString('en-US', {
+                        timeZone: 'America/New_York', // Setting timezone to EST
+                        hour: 'numeric',
+                        minute: '2-digit'
+                      })  %>
+                    </div>
+                <div class="individualStandingsItem">
+                    Field
+                    <br>
+                    <%= game.fieldId %></div>
+                <div class="individualStandingsItem">
+                    Teams
+                    <br>
+                    <%= game.team1Id %>
+                    vs
+                    <%= game.team2Id %></div>
+                <div class="individualStandingsItem">
+                    Staff
+                    <br>
+                    <%= game.scorekeeperId %></div>
+            </div>                    
+
+
+
+
+                            
+        </div>
+        </button>
+    </form>
+</body>
+</html>

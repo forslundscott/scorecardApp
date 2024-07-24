@@ -32,11 +32,11 @@ function getOrdinalNumber(number) {
             return num + 'th';
     }
 }
-async function exportToCSV(sqlResult) {
+async function exportToCSV(sqlRecordset) {
     try {
       // Convert query result to CSV format
       const parser = new Parser();
-      const csv = parser.parse(sqlResult.recordset);
+      const csv = parser.parse(sqlRecordset).replace(/"/g, '');
       return csv;
     } catch (error) {
       throw error;

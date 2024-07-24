@@ -1,23 +1,38 @@
 # node-mssql
 
-Microsoft SQL Server client for Node.js
+**Microsoft SQL Server client for Node.js**
 
 [![NPM Version][npm-image]][npm-url] [![NPM Downloads][downloads-image]][downloads-url] [![Appveyor CI][appveyor-image]][appveyor-url] [![Join the chat at https://gitter.im/patriksimek/node-mssql](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/patriksimek/node-mssql?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Supported TDS drivers:
+
 - [Tedious][tedious-url] (pure JavaScript - Windows/macOS/Linux, default)
-- [Microsoft / Contributors Node V8 Driver for Node.js for SQL Server][msnodesqlv8-url] (v2 native - Windows or Linux/macOS 64 bits only)
+- [MSNodeSQLv8][msnodesqlv8-url] (Microsoft / Contributors Node V8 Driver for Node.js for SQL Server, v2 native - Windows or Linux/macOS 64 bits only)
 
 ## Installation
 
-    npm install mssql
+### Tedious driver (default)
+
+```
+npm install mssql
+```
+
+### MSNodeSQLv8 driver (optional)
+
+```
+npm install mssql msnodesqlv8
+```
+
+## SQL Server prerequisites
+
+This package requires TCP/IP to connect to SQL Server, and you may need to enable this in your installation.
 
 ## Short Example: Use Connect String
 
 ```javascript
 const sql = require('mssql')
 
-async () => {
+(async () => {
     try {
         // make sure that any items are correctly URL encoded in the connection string
         await sql.connect('Server=localhost,1433;Database=database;User Id=username;Password=password;Encrypt=true')
@@ -26,7 +41,7 @@ async () => {
     } catch (err) {
         // ... error checks
     }
-}
+})()
 ```
 
 If you're on Windows Azure, add `?encrypt=true` to your connection string. See [docs](#configuration) to learn more.
@@ -39,6 +54,7 @@ Assuming you have set the appropriate environment variables, you can construct a
 
 ```javascript
 const sql = require('mssql')
+
 const sqlConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PWD,
@@ -55,7 +71,7 @@ const sqlConfig = {
   }
 }
 
-async () => {
+(async () => {
  try {
   // make sure that any items are correctly URL encoded in the connection string
   await sql.connect(sqlConfig)
@@ -64,7 +80,33 @@ async () => {
  } catch (err) {
   // ... error checks
  }
-}
+})()
+```
+
+## Windows Authentication Example Using MSNodeSQLv8
+
+```javascript
+const sql = require('mssql/msnodesqlv8');
+
+const config = {
+  server: "MyServer",
+  database: "MyDatabase",
+  options: {
+    trustedConnection: true, // Set to true if using Windows Authentication
+    trustServerCertificate: true, // Set to true if using self-signed certificates
+  },
+  driver: "msnodesqlv8", // Required if using Windows Authentication
+};
+
+(async () => {
+  try {
+    await sql.connect(config);
+    const result = await sql.query`select TOP 10 * from MyTable`;
+    console.dir(result);
+  } catch (err) {
+    console.error(err);
+  }
+})();
 ```
 
 ## Documentation
@@ -86,7 +128,7 @@ async () => {
 ### Drivers
 
 * [Tedious](#tedious)
-* [Microsoft / Contributors Node V8 Driver for Node.js for SQL Server](#microsoft--contributors-node-v8-driver-for-nodejs-for-sql-server)
+* [MSNodeSQLv8](#msnodesqlv8)
 
 ### Connections
 
@@ -173,16 +215,16 @@ const sql = require('mssql')
         let result1 = await pool.request()
             .input('input_parameter', sql.Int, value)
             .query('select * from mytable where id = @input_parameter')
-            
+
         console.dir(result1)
-    
+
         // Stored procedure
-        
+
         let result2 = await pool.request()
             .input('input_parameter', sql.Int, value)
             .output('output_parameter', sql.VarChar(50))
             .execute('procedure_name')
-        
+
         console.dir(result2)
     } catch (err) {
         // ... error checks
@@ -207,7 +249,7 @@ sql.on('error', err => {
 
 sql.connect(config).then(pool => {
     // Query
-    
+
     return pool.request()
         .input('input_parameter', sql.Int, value)
         .query('select * from mytable where id = @input_parameter')
@@ -228,9 +270,9 @@ sql.on('error', err => {
 })
 
 sql.connect(config).then(pool => {
-    
+
     // Stored procedure
-    
+
     return pool.request()
         .input('input_parameter', sql.Int, value)
         .output('output_parameter', sql.VarChar(50))
@@ -262,7 +304,7 @@ sql.on('error', err => {
 })
 ```
 
-All values are automatically sanitized against sql injection. 
+All values are automatically sanitized against sql injection.
 This is because it is rendered as prepared statement, and thus all limitations imposed in MS SQL on parameters apply.
 e.g. Column names cannot be passed/set in statements using variables.
 
@@ -579,7 +621,7 @@ In addition to configuration object there is an option to pass config as a conne
 ```
 Server=localhost,1433;Database=database;User Id=username;Password=password;Encrypt=true
 ```
-###### Standard configuration using msnodesqlv8 driver
+###### Standard configuration using MSNodeSQLv8 driver
 ```
 Driver=msnodesqlv8;Server=(local)\INSTANCE;Database=database;UID=DOMAIN\username;PWD=password;Encrypt=true
 ```
@@ -647,12 +689,21 @@ On top of the extra options, an `authentication` property can be added to the po
 - **authentication** - An object with authentication settings, according to the [Tedious Documentation](https://tediousjs.github.io/tedious/api-connection.html). Passing this object will override `user`, `password`, `domain` settings.
 - **authentication.type** - Type of the authentication method, valid types are `default`, `ntlm`, `azure-active-directory-password`, `azure-active-directory-access-token`, `azure-active-directory-msi-vm`, or `azure-active-directory-msi-app-service`
 - **authentication.options** - Options of the authentication required by the `tedious` driver, depends on `authentication.type`. For more details, check [Tedious Authentication Interfaces](https://github.com/tediousjs/tedious/blob/v11.1.1/src/connection.ts#L200-L318)
+- `tedious` does not support Windows Authentication/Trusted Connection, however the `msnodesqlv8` driver does.
 
 More information about Tedious specific options: http://tediousjs.github.io/tedious/api-connection.html
 
-### Microsoft / Contributors Node V8 Driver for Node.js for SQL Server
+___
 
-**Requires Node.js v10+ or newer. Windows 32-64 bits or Linux/macOS 64 bits only.** This driver is not part of the default package and must be installed separately by `npm install msnodesqlv8@^2`. To use this driver, use this require syntax: `const sql = require('mssql/msnodesqlv8')`.
+### MSNodeSQLv8
+
+Alternative driver, requires Node.js v10+ or newer; Windows (32 or 64-bit) or Linux/macOS (64-bit only). It's not part of the default package so it must be [installed](#msnodesqlv8-driver) in addition. Supports [Windows/Trusted Connection authentication](#windows-authentication-example-using-msnodesqlv8).
+
+**To use this driver you must use this `require` statement:**
+
+```javascript
+const sql = require('mssql/msnodesqlv8')
+```
 
 Note: If you use import into your lib to prepare your request (`const { VarChar } = require('mssql')`) you also need to upgrade all your types import into your code (`const { VarChar } = require('mssql/msnodesqlv8')`) or a `connection.on is not a function` error will be thrown.
 
@@ -676,6 +727,8 @@ Driver={SQL Server Native Client 11.0};Server={#{server}\\#{instance}};Database=
 ```
 
 Please note that the connection string with this driver is not the same than tedious and use yes/no instead of true/false. You can see more on the [ODBC](https://docs.microsoft.com/fr-fr/dotnet/api/system.data.odbc.odbcconnection.connectionstring?view=dotnet-plat-ext-5.0) documentation.
+
+___
 
 ## Connections
 
@@ -1340,7 +1393,7 @@ ps.prepare('select @param as value', err => {
 
         console.log(result.recordset[0].value) // return 12345
         console.log(result.rowsAffected) // Returns number of affected rows in case of INSERT, UPDATE or DELETE statement.
-        
+
         ps.unprepare(err => {
             // ... error checks
         })
@@ -1373,9 +1426,9 @@ ps.prepare('select @param as value', err => {
 
     request.on('done', result => {
         // Always emitted as the last one
-        
+
         console.log(result.rowsAffected) // Returns number of affected rows in case of INSERT, UPDATE or DELETE statement.
-        
+
         ps.unprepare(err => {
             // ... error checks
         })
@@ -1681,7 +1734,7 @@ More information about JSON support can be found in [official documentation](htt
 
 ## Handling Duplicate Column Names
 
-If your queries contain output columns with identical names, the default behaviour of `mssql` will only return column metadata for the last column with that name. You will also not always be able to re-assemble the order of output columns requested. 
+If your queries contain output columns with identical names, the default behaviour of `mssql` will only return column metadata for the last column with that name. You will also not always be able to re-assemble the order of output columns requested.
 
 Default behaviour:
 ```javascript

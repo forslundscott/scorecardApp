@@ -8,17 +8,99 @@
     
     <% if (data.page == 'activeGame') { %>
         <% if (team.id !== 'TBD') { %>
-            <%- include('player_item',{player: team.players[team.players.map(function(o){return o.Id}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
+            <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
     <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
-        <% if (data.page == 'games' || data.page == 'readyForUpload') { %>
+        <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>
-        <% } else if (data.page == 'standings') { %>
+        <% } else if (data.page == 'schedules') { %>
+            <div class="textCenter">
+                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
+                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/list'">Existing</button>
+            </div>
+        <% } else if (data.page.startsWith('/schedules/item/')) { %>
             <% for(var i=0; i< data.list.length; i++) {%>
-                <%- include(`${data.type}Standings_item`,{item: data.list[i]}); %>
+                <%- include(`scheduleGame_item`,{game: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == '/schedules/list') { %>
+            <% for(var i=0; i< data.list.length; i++) {%>
+                <%- include(`schedule_item`,{item: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == '/schedules/new') { %>
+            <form action="<%= data.page %>" method="post" class="textCenter">
+                
+                <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" required>
+                    <option value="" disabled selected hidden>Season</option>
+                    <option value="Spring 2024" selected>Spring 2024</option>
+                    <option value="Indoor">Indoor</option>
+                </select>
+                <select name="sport" id="sport" class="primaryStyle" style="font-size: 100%;" required>
+                    <option value="" disabled selected hidden>Sport</option>
+                    <option value="soccer" selected>Soccer</option>
+                    <option value="futsal">futsal</option>
+                </select>
+                <br>
+                <br>
+                <label for="gamesPerTeam" class="primaryStyle" style="font-size: 100%;">Games Per Team</label>
+                <input name="gamesPerTeam" class="primaryStyle" style="font-size: 100%; width: 10vw;" type="number" value="8" min="1">
+                <br>
+                <br>
+                <div class="primaryStyle" style="font-size: 100%;">
+                    Dates:
+                    <br>
+                    <input type="date" name="seasonStartDate" class="primaryStyle" style="font-size: 100%;" value="2024-05-06" required>
+                    To
+                    <input type="date" name="seasonEndDate" class="primaryStyle" style="font-size: 100%;" value="2024-07-03" required>
+                </div>
+                <br>
+                <div class="primaryStyle" style="font-size: 100%;">
+                    Times:
+                    <br>
+                    First:
+                    <input type="time" name="firstGameTime" class="primaryStyle" style="font-size: 100%;" value="18:00" required>
+                    Last:
+                    <input type="time" name="lastGameTime" class="primaryStyle" style="font-size: 100%;" value="20:00" required>
+                </div>
+                <br>
+                <input type="text" name="scheduleName" class="primaryStyle" style="font-size: 100%;" placeholder="Schedule Name (Optional)">
+                <br>
+                <br>
+                <br>
+                <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Generate</button>
+            </form>
+        <% } else if (data.page == 'standings') { %>
+            <% if (data.hasOwnProperty('list')) { %>
+                <% for(var i=0; i< data.list.length; i++) {%>
+                    <%- include(`${data.type}Standings_item`,{item: data.list[i]}); %>
+                <% } %>
+            <% }else { %>
+                <form action="/standings" method="post" class="textCenter">
+                    <!-- <select name="seasonId" id="seasonId" required>
+                        <option value="" disabled selected hidden>Season</option>
+                        <option value="S2024">Spring 2024</option>
+                        <option value="Ind">Indoor</option>
+                    </select> -->
+                    <select name="leagueId" id="leagueId" class="primaryStyle" style="font-size: 100%;" required>
+                        <option value="" disabled selected hidden>League</option>
+                        <option value="MOO">MOO</option>
+                        <option value="PCO">PCO</option>
+                        <option value="OCO1">OCO1</option>
+                        <option value="OCO2">OCO2</option>
+                        <option value="SCO">SCO</option>
+                    </select>
+                    <select name="type" id="type" class="primaryStyle" style="font-size: 100%;" required>
+                        <option value="" disabled selected hidden>Type</option>
+                        <option value="team">Team</option>
+                        <option value="individual">Individual</option>
+                        <option value="keeper">Keeper</option>
+                    </select>
+                    <br>
+                    <br>
+                    <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">GO</button>
+                </form>
             <% } %>
         <% } else if (data.page == 'winners') { %>
             <% var url = ''; %>
@@ -65,7 +147,7 @@ Thank you and have a nice day!`
         <% } else if (data.page == 'activeGame') { %>
             
             <% for(var i=0; i< team.players.length; i++) {%>
-                <% if (team.players[i].Id !== team.keeper) { %>
+                <% if (team.players[i].userId !== team.keeper) { %>
                     <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
                 <% } %>
             <% } %>
