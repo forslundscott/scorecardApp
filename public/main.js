@@ -637,7 +637,7 @@ async function toggleGameInfoForm(xform){
                   })
                   responseData.data.scoreKeepers.forEach(function(xoption) {
                     var option = document.createElement("option");
-                    option.text = `${xoption.firstName} ${xoption.lastName}`;
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
                     option.value = xoption.userId;
                     scoreKeeperSelect.add(option);
                   })
