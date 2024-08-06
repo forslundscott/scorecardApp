@@ -1768,7 +1768,7 @@ app.post('/switchSides', async (req, res, next) => {
         next(err)
     }
   });
-app.post('/send-email', async (req, res) => {
+app.get('/send-email', async (req, res) => {
     // const { recipientEmail, subject, message } = req.body;
 
     try {
@@ -1795,9 +1795,10 @@ app.post('/send-email', async (req, res) => {
         //   run()
 
         // console.log('Email sent:', response);
-        // console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
-        console.log(await mailchimp.getCampaigns())
+        console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
+        // console.log(await mailchimp.getCampaigns())
         // await mailchimp.sendMessage('forslund.scott@gmail.com','Testing Madrill Email', 'Testing Transactional email sending through MailChimp module Madrill.')
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.find(item=>item.email_address == 'aidenhanchett4@gmail.com'))
         // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.length)
         // const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
         // console.log(await mailchimp.getMemberTags(listId,(await mailchimp.getListMembers(listId)).members[1].id))

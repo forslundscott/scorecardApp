@@ -25,6 +25,42 @@ async function getListByName(xname){
     //   run()
     
 }
+async function getAllContacts() {
+    let allContacts = [];
+  let offset = 0;
+  const count = 100; // Number of results per request, adjust as needed
+
+  try {
+    while (true) {
+      const response = await axios.get(`${BASE_URL}/lists/${LIST_ID}/members`, {
+        headers: {
+          'Authorization': `apikey ${API_KEY}`
+        },
+        params: {
+          offset: offset,
+          count: count
+        }
+      });
+
+      const contacts = response.data.members;
+      allContacts = allContacts.concat(contacts);
+
+      // Check if we've fetched all contacts
+      if (contacts.length < count) {
+        break;
+      }
+
+      offset += count;
+    }
+
+    // Handle response
+    console.log('Total contacts:', allContacts.length);
+    console.log('Contacts:', allContacts);
+  } catch (error) {
+    console.error('Error fetching contacts:', error.response.data);
+  }
+}
+
 async function sendMessage(recipientEmail, subject, message){
     const response = await mailchimp.transactional.messages.send({
             message: {
