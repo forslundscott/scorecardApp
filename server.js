@@ -1685,7 +1685,7 @@ app.post('/gameInfo', async (req, res, next) => {
             from games
             where Event_ID = '${formData.Event_ID}'
             )
-        SELECT userId,roleId,firstName,lastName
+        SELECT userId,roleId,firstName,lastName, preferredName
         FROM [user_role]
         left join users on user_role.userId=users.ID
         where roleId in (select id from roles where name in ('scorekeeper'))`)
