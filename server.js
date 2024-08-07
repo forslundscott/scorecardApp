@@ -1688,7 +1688,8 @@ app.post('/gameInfo', async (req, res, next) => {
         SELECT userId,roleId,firstName,lastName, preferredName
         FROM [user_role]
         left join users on user_role.userId=users.ID
-        where roleId in (select id from roles where name in ('scorekeeper'))`)
+        where roleId in (select id from roles where name in ('scorekeeper'))
+        order by preferredName`)
         data.game = result.recordsets[0][0]
         data.teams = result.recordsets[1]
         data.scoreKeepers = result.recordsets[2]
