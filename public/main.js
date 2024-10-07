@@ -1047,6 +1047,48 @@ document.getElementById('newPlayerForm').querySelector('[name="email"]').addEven
         // Handle error response
       }
 });
+async function getTeams(xform){
+    try {
+        // const response = await fetch(`/userSearch?query=${query}`);
+        var formData = new FormData(xform)
+        const response = await fetch(`/getTeams`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams(formData).toString()
+          });
+        // const results = await response.json();
+        
+        if (response.ok) {
+            const results = await response.json();
+            // console.log(results)
+            var team1 = xform.querySelector('[name="team1Id"]');
+            var team2 = xform.querySelector('[name="team2Id"]');
+            team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+            team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
+            results.teams.forEach(team => {
+                var option1 = document.createElement('option');
+                option1.value = team.id;
+                option1.text = team.id;
+                team1.appendChild(option1);
+                
+                var option2 = document.createElement('option');
+                option2.value = team.id;
+                option2.text = team.id;
+                team2.appendChild(option2);
+                
+        });
+          } else {
+            console.error('Form submission failed');
+            // Handle error response
+          }
+        
+        
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+}
 
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

@@ -1,0 +1,50 @@
+<form id="newGameForm" action="" method="post" class="textCenter">
+                
+    <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" required>
+        <!-- <option value="" disabled selected hidden>Season</option> -->
+        <option value="Fall 2024" selected>Fall 2024</option>
+        <!-- <option value="Indoor">Indoor</option> -->
+    </select>
+    <select name="leagueId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getTeams(this.form)" required>
+        <option value="" disabled selected>League</option>
+        <!-- <script>console.log(document.getElementById('newGameForm').getElementsByName('leagueId')[0])</script> -->
+        <% for(var i=0; i< data.leagues.length; i++) {%>
+            <option value="<%= data.leagues[i].abbreviation%>"><%= data.leagues[i].shortName%></option>
+        <% } %>
+    </select>
+    <br>
+    <br>
+    <select name="team1Id" class="primaryStyle" style="font-size: 100%;" required>
+        <option value="" disabled selected>Team 1</option>
+    </select>
+    
+    <select name="team2Id" class="primaryStyle" style="font-size: 100%;" required>
+        <option value="" disabled selected>Team 2</option>
+    </select>
+    <br>
+    <br>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Date:
+        <br>
+        <input type="date" name="seasonStartDate" class="primaryStyle" style="font-size: 100%;" value="2024-05-06" required>
+    </div>
+    <br>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Time:
+        <br>
+
+        <input type="time" name="firstGameTime" class="primaryStyle" style="font-size: 100%;" value="18:00" required>
+
+        
+    </div>
+    <br>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Number of Periods:
+        <br>
+        <input type="number" name="scheduleName" class="primaryStyle" style="font-size: 100%;" value="2" min="2" max="4">
+    </div>
+    <br>
+    <br>
+    <br>
+    <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Add Game</button>
+</form>
