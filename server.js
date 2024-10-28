@@ -453,7 +453,30 @@ app.post('/reset/:token', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
-app.get(['/standings','/schedules'], async (req, res, next) => {
+app.get(['/standings'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        const result = await request
+        .query(`select shortName, abbreviation from leagues
+            where abbreviation in (
+            select ls.leagueId from league_season as ls
+            left join seasons as s on ls.seasonId=s.seasonName
+            where s.active = 1
+            )
+        `)
+        var data = {
+            page: `${req.originalUrl.split('/')[1]}`,
+            user: req.user,
+            leagues: result.recordset
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+
+app.get(['/schedules'], async (req, res, next) => {
     try{
         // const request = pool.request()
         // const result = await request
