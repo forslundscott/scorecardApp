@@ -534,18 +534,24 @@ app.post(['/schedules/list'], async (req, res, next) => {
 app.get(['/newGame'], async (req, res, next) => {
     try{
         const request = pool.request()
-        const result = await request
-        .query(`SELECT * from league_season ls
-            LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = 'Fall 2024'
-        `)
-        console.log(req)
+        
         var data = {
             page: `${req.originalUrl}`,
-            user: req.user,
-            leagues: result.recordset
+            user: req.user
+            
         }
+        var result = await request
+        .query(`select top 1 seasonName from seasons where active = 1
+        `)
+            data.season = result.recordset[0].seasonName
+        result = await request
+        .query(`SELECT * from league_season ls
+            LEFT join leagues l on ls.leagueId=l.abbreviation
+            where seasonId = '${data.season}'
+        `)
+        // console.log(req)
         
+        data.leagues = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -1195,8 +1201,8 @@ app.get(['/games'], async (req,res,next)=>{
         // await pool.connect();
         const request = pool.request()
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
-        const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
-        // const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){
@@ -1596,6 +1602,22 @@ app.post(['/getTeams'], async (req,res,next)=>{
         next(err)
     }
 })
+app.post(['/getTeams'], async (req,res,next)=>{
+    try{
+        // console.log(req.body)
+        const request = pool.request()
+        result = await request.query(`
+            select * from leagues as l
+            LEFT join league_season as ls on l.abbreviation=ls.leagueId
+            where ls.seasonId = '${req.body.seasonId}'
+        `)
+        // console.log(result.recordset)
+        res.json({ message: 'Success', leagues: result.recordset })
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
 app.post(['/addPastSub'], async (req,res,next)=>{
     try{
         const request = pool.request()
@@ -1828,6 +1850,21 @@ app.post('/updateGameInfo', async (req, res, next) => {
         next(err)
     }
 });
+app.post('/addGame', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        await request.query(`EXEC newGame '${formData.startDate}', '${formData.startTime}', '${formData.court}', '${formData.team1Id}', '${formData.team2Id}', ${formData.maxPeriods}, '${formData.seasonId}', '${formData.leagueId}'`)
+        // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/games')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
 app.post('/switchSides', async (req, res, next) => {
     // Process form data here
     try{

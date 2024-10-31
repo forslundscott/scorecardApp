@@ -1089,6 +1089,41 @@ async function getTeams(xform){
         console.error('Error fetching results:', error);
     }
 }
-
+async function getLeagues(xform){
+    try {
+        // const response = await fetch(`/userSearch?query=${query}`);
+        var formData = new FormData(xform)
+        const response = await fetch(`/getLeagues`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams(formData).toString()
+          });
+        // const results = await response.json();
+        
+        if (response.ok) {
+            const results = await response.json();
+            // console.log(results)
+            var league1 = xform.querySelector('[name="leagueId"]');
+            // var team2 = xform.querySelector('[name="team2Id"]');
+            league1.innerHTML = '<option value="" disabled selected>League</option>';
+            // team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
+            results.leagues.forEach(league => {
+                var option1 = document.createElement('option');
+                option1.value = league.id;
+                option1.text = league.id;
+                league1.appendChild(option1);
+            });
+          } else {
+            console.error('Form submission failed');
+            // Handle error response
+          }
+        
+        
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+}
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);
