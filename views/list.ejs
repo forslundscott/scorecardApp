@@ -11,7 +11,7 @@
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
-    <div class="fielderColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
+    <div class="fielderColumn dragColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
@@ -85,11 +85,13 @@
                     </select> -->
                     <select name="leagueId" id="leagueId" class="primaryStyle" style="font-size: 100%;" required>
                         <option value="" disabled selected hidden>League</option>
-                        <option value="MOO">MOO</option>
-                        <option value="PCO">PCO</option>
-                        <option value="OCO1">OCO1</option>
-                        <option value="OCO2">OCO2</option>
-                        <option value="SCO">SCO</option>
+                        <!-- <option value="MOI">MOI</option>
+                        <option value="PCI">PCI</option>
+                        <option value="OCI">OCI</option>
+                        <option value="SCI">SCI</option> -->
+                        <% for(var i=0; i< data.leagues.length; i++) {%>
+                            <option value="<%= data.leagues[i].abbreviation%>"><%= data.leagues[i].shortName%></option>
+                        <% } %>
                     </select>
                     <select name="type" id="type" class="primaryStyle" style="font-size: 100%;" required>
                         <option value="" disabled selected hidden>Type</option>

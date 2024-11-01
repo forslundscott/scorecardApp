@@ -453,7 +453,30 @@ app.post('/reset/:token', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
-app.get(['/standings','/schedules'], async (req, res, next) => {
+app.get(['/standings'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        const result = await request
+        .query(`select shortName, abbreviation from leagues
+            where abbreviation in (
+            select ls.leagueId from league_season as ls
+            left join seasons as s on ls.seasonId=s.seasonName
+            where s.active = 1
+            )
+        `)
+        var data = {
+            page: `${req.originalUrl.split('/')[1]}`,
+            user: req.user,
+            leagues: result.recordset
+        }
+        
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+
+app.get(['/schedules'], async (req, res, next) => {
     try{
         // const request = pool.request()
         // const result = await request
@@ -1382,6 +1405,30 @@ app.get(['/activeGame'], async (req,res,next)=>{
     }
 })
 
+app.post('/userSearch', async (req, res) => {
+    const query  = req.body.userSearchValue;
+    // console.log(req.body.userSearchValue)
+    if (!query) {
+        return res.status(400).send('Query parameter is required');
+    }
+
+    try {
+        const request = pool.request()
+        const result = await request.query(`
+            SELECT * FROM users 
+            WHERE firstName LIKE '%${query}%' 
+            OR lastName LIKE '%${query}%' 
+            OR preferredName LIKE '%${query}%' 
+            OR email LIKE '%${query}%'
+        `);
+        console.log(result.recordset)
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Query failed: ', err);
+        res.status(500).send('Internal server error');
+    }
+});
+
 // app.post(['/'], async (req,res)=>{
 //     // res.render('index.ejs')
 //     res.render('smartphone.ejs') 
@@ -1575,7 +1622,7 @@ app.post(['/addPlayer'], async (req,res,next)=>{
             
             set @firstName = '${req.body.firstName}'
             set @lastName = '${req.body.lastName}'
-            set @preferredName = '${req.body.preferredName}'
+            set @preferredName = '${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}'
             set @email = '${req.body.email}'
             set @sport = '${req.body.sport}'
             set @rating = 3
@@ -1661,10 +1708,11 @@ app.post('/gameInfo', async (req, res, next) => {
             from games
             where Event_ID = '${formData.Event_ID}'
             )
-        SELECT userId,roleId,firstName,lastName
+        SELECT userId,roleId,firstName,lastName, preferredName
         FROM [user_role]
         left join users on user_role.userId=users.ID
-        where roleId in (select id from roles where name in ('scorekeeper'))`)
+        where roleId in (select id from roles where name in ('scorekeeper'))
+        order by preferredName`)
         data.game = result.recordsets[0][0]
         data.teams = result.recordsets[1]
         data.scoreKeepers = result.recordsets[2]
@@ -1744,7 +1792,7 @@ app.post('/switchSides', async (req, res, next) => {
         next(err)
     }
   });
-app.post('/send-email', async (req, res) => {
+app.get('/send-email', async (req, res) => {
     // const { recipientEmail, subject, message } = req.body;
 
     try {
@@ -1771,9 +1819,10 @@ app.post('/send-email', async (req, res) => {
         //   run()
 
         // console.log('Email sent:', response);
-        // console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
-        console.log(await mailchimp.getCampaigns())
+        console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
+        // console.log(await mailchimp.getCampaigns())
         // await mailchimp.sendMessage('forslund.scott@gmail.com','Testing Madrill Email', 'Testing Transactional email sending through MailChimp module Madrill.')
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.find(item=>item.email_address == 'aidenhanchett4@gmail.com'))
         // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.length)
         // const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
         // console.log(await mailchimp.getMemberTags(listId,(await mailchimp.getListMembers(listId)).members[1].id))
@@ -2012,6 +2061,7 @@ function authRole(roleName){
 }
 app.use((err, req, res, next) => {
     console.error(err);
+    console.log(req.originalUrl)
     // console.log(req)
 
     // Respond with an appropriate error message

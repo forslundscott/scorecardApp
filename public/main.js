@@ -72,7 +72,7 @@ class GameEvent {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    const eles = document.getElementsByClassName('fielderColumn')
+    const eles = document.getElementsByClassName('dragColumn')
     
     for(var i=0;i<eles.length;i++){
         const ele = eles[i]
@@ -347,7 +347,7 @@ function handleLongPress(e){
 }
 async function addPreviousSub(xform){
     var teamForm = document.getElementById('teamForm')
-    var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
+    // var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
     // if(teamForm.style.display == 'none'){
         // var color = xform.querySelector('[name="color"]').value
         // teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="team"]').value
@@ -431,9 +431,119 @@ function toggleAddPlayer(xform){
         document.getElementById('teamFormBackground').style.display = 'none'
     }
 }
+function toggleSearchUser(){
+    var searchForm = document.getElementById('userSearchContainer')
+    if(searchForm.style.display == 'none'){
+        // var color = xform.querySelector('[name="color"]').value
+        searchForm.style.display = ''
+        // searchForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
+        // searchForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        // searchForm.querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
+        // searchForm.src = `images/${xform.querySelector('[name="team"]').value}.png`
+        
+        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+    }else{
+        searchForm.style.display = 'none'
+        document.getElementById('userSearchField').value
+        document.getElementById('userSearchResults').innerHTML = ''
+    }
+    // if(document.getElementById('teamFormBackground').style.display == 'none'){
+    //     document.getElementById('teamFormBackground').style.display = ''
+    // }else{
+    //     document.getElementById('teamFormBackground').style.display = 'none'
+    // }
+}
+async function userSearch(xForm,event){
+    // document.getElementById('userSearchForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const query = document.getElementById('userSearchField').value;
+        try {
+            // const response = await fetch(`/userSearch?query=${query}`);
+            var formData = new FormData(xForm)
+            const response = await fetch(`/userSearch`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  },
+                body: new URLSearchParams(formData).toString(),
+              });
+            // const results = await response.json();
+            
+            if (response.ok) {
+                const results = await response.json();
+                const resultsList = document.getElementById('userSearchResults');
+                resultsList.innerHTML = '';
+                results.forEach(user => {
+                    const userCard = `
+                        <form class="" action="" method="post">
+                            <input type="hidden" name="email" value="${user.email}">
+                            <input type="hidden" name="firstName" value="${user.firstName}">
+                            <input type="hidden" name="lastName" value="${user.lastName}">
+                            <input type="hidden" name="preferredName" value="${user.preferredName}">
+                            <button type="button" class="playerButton" name="type" value="game" onclick="selectUser(this.form)">
+                            <div class="itemFormat primaryStyle primaryBorder">
+                                <div class="playerTag">
+                                    <div class="playerName" style="text-align: center;">
+                                        ${user.firstName} ${user.lastName} - ${user.preferredName} - ${user.email}
+                                    </div>
+                                </div>                
+                            </div>
+                            </button>
+                        </form>
+                    `
+                    resultsList.innerHTML += userCard
+            });
+                // if(responseData.subs){
+                //     responseData.subs.forEach(function(sub){
+                //         var option = document.createElement('option')
+                //         option.text = sub.firstName + ' ' + sub.lastName
+                //         option.value = sub.ID
+                //         pastSubsDropdown.add(option)
+                //     })
+                // }
+                // console.log(responseData.message);
+                // location.reload()
+              } else {
+                console.error('Form submission failed');
+                // Handle error response
+              }
+            
+            
+        } catch (error) {
+            console.error('Error fetching results:', error);
+        }
+    // });
+}
+function togglePaidCheckbox() {
+    const checkboxContainer = document.getElementById('paidContainer');
+    const radioButtons = document.getElementsByName('playerType');
+
+    for (const radioButton of radioButtons) {
+        if (radioButton.checked) {
+            if (radioButton.value === 'Rostered') {
+                checkboxContainer.style.display = '';
+                document.getElementById('paid').required = true
+            } else {
+                checkboxContainer.style.display = 'none';
+                document.getElementById('paid').required = false
+            }
+            // document.getElementById('paid').required = !document.getElementById('paid');
+        }
+    }
+}
+function selectUser(xform){
+    // const searchForm = document.getElementById('userSearchForm')
+    const newPlayerForm = document.getElementById('newPlayerForm')
+    newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
+    newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
+    newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
+    newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
+    newPlayerForm.querySelector('[name="waiver"]').checked = true
+    toggleSearchUser()
+}
 async function toggleTeamForm(xform){
     var teamForm = document.getElementById('teamForm')
-    var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
+    // var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
     if(document.getElementById('formBackground').style.display == 'none'){
         document.getElementById('formBackground').style.display = ''
     }else{
@@ -447,33 +557,33 @@ async function toggleTeamForm(xform){
         teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
         teamForm.getElementsByClassName('formLogo')[0].src = `images/${xform.querySelector('[name="team"]').value}.png`
-        while(pastSubsDropdown.options.length>1){
-            pastSubsDropdown.remove(1)
-        }
-        var formData = new FormData(teamForm)
-        const response = await fetch('/getPastSubs', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            const responseData = await response.json();
-            if(responseData.subs){
-                responseData.subs.forEach(function(sub){
-                    var option = document.createElement('option')
-                    option.text = sub.firstName + ' ' + sub.lastName
-                    option.value = sub.ID
-                    pastSubsDropdown.add(option)
-                })
-            }
-            console.log(responseData.message);
-            // location.reload()
-          } else {
-            console.error('Form submission failed');
-            // Handle error response
-          }
+        // while(pastSubsDropdown.options.length>1){
+        //     pastSubsDropdown.remove(1)
+        // }
+        // var formData = new FormData(teamForm)
+        // const response = await fetch('/getPastSubs', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/x-www-form-urlencoded',
+        //       },
+        //     body: new URLSearchParams(formData).toString(),
+        //   });
+        //   if (response.ok) {
+        //     const responseData = await response.json();
+        //     if(responseData.subs){
+        //         responseData.subs.forEach(function(sub){
+        //             var option = document.createElement('option')
+        //             option.text = sub.firstName + ' ' + sub.lastName
+        //             option.value = sub.ID
+        //             pastSubsDropdown.add(option)
+        //         })
+        //     }
+        //     console.log(responseData.message);
+        //     // location.reload()
+        //   } else {
+        //     console.error('Form submission failed');
+        //     // Handle error response
+        //   }
         console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
 
         // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
@@ -527,7 +637,7 @@ async function toggleGameInfoForm(xform){
                   })
                   responseData.data.scoreKeepers.forEach(function(xoption) {
                     var option = document.createElement("option");
-                    option.text = `${xoption.firstName} ${xoption.lastName}`;
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
                     option.value = xoption.userId;
                     scoreKeeperSelect.add(option);
                   })
