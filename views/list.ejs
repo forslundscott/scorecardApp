@@ -16,6 +16,10 @@
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
             <% } %>
+        <% } else if (data.page == 'teams') { %>
+            <% for(var i=0; i< data.teams.length; i++) {%>
+                <%- include('team_item',{team: data.teams[i]}); %>
+            <% } %>
         <% } else if (data.page == 'schedules') { %>
             <div class="textCenter">
                 <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>

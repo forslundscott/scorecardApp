@@ -1235,6 +1235,38 @@ app.get(['/games'], async (req,res,next)=>{
         next(err)
     }
 })
+app.get(['/teams'], async (req,res,next)=>{
+    try{
+        console.log(req.user)
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        var data = {
+            teams: [
+                team1,
+                team2
+            ],
+            page: req.route.path[0].replace('/',''),
+            user: req.user
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await request.query(`select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor from teams as t
+            left join leagues as l on t.league=l.abbreviation
+            LEFT join users as u on t.captain=u.ID
+            where season in (select seasonName from seasons
+            where active = 1)
+            ORDER by t.league, fullName
+        `)
+        data.teams = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+})
 app.get(['/readyForUpload'], async (req,res, next)=>{
     try{
         var data = {
