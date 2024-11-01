@@ -1529,6 +1529,8 @@ app.post('/userSearch', async (req, res) => {
             OR lastName LIKE '%${query}%' 
             OR preferredName LIKE '%${query}%' 
             OR email LIKE '%${query}%'
+            OR firstName + ' ' + lastName LIKE '%${query}%'
+            OR preferredName + ' ' + lastName LIKE '%${query}%'
         `);
         console.log(result.recordset)
         res.json(result.recordset);
