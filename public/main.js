@@ -1111,8 +1111,8 @@ async function getLeagues(xform){
             // team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
             results.leagues.forEach(league => {
                 var option1 = document.createElement('option');
-                option1.value = league.id;
-                option1.text = league.id;
+                option1.value = league.name;
+                option1.text = league.leagueId;
                 league1.appendChild(option1);
             });
           } else {

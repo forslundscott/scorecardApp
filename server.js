@@ -22,6 +22,11 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const initializePassport = require('./passport-config')
 const mailchimp = require('./helpers/mailChimp')
+const multer = require('multer');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
+// const helmet = require('helmet');
 const processingStatus = {};
 // mailchimp.marketing.setConfig({
 //     apiKey: process.env.MAILCHIMP_KEY,
@@ -110,7 +115,7 @@ let options = {
   etag: true, // Enable ETag
   lastModified: false, // Disable Last-Modified header
 }
-
+// app.use(helmet()); // Basic security headers
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public',options))
 app.set('view-engine','ejs')
@@ -136,6 +141,20 @@ const { log } = require('console');
 app.locals.functions = functions
 
 // var connection = functions.getAccess()
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2MB
+  fileFilter: (req, file, cb) => {
+    const isPng = file.mimetype === 'image/png';
+    if (isPng) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PNG images are allowed'));
+    }
+  },
+});
 
 var team1 = {
     id: '',
@@ -566,18 +585,24 @@ app.get(['/newTeam'], async (req, res, next) => {
             user: req.user
             
         }
-        // var result = await request
-        // .query(`select top 1 seasonName from seasons where active = 1
-        // `)
-        //     data.season = result.recordset[0].seasonName
-        // result = await request
-        // .query(`SELECT * from league_season ls
-        //     LEFT join leagues l on ls.leagueId=l.abbreviation
-        //     where seasonId = '${data.season}'
-        // `)
-        // // console.log(req)
+        var result = await request
+        .query(`select top 1 seasonName from seasons where active = 1
+             and not seasonName = 'Test Season'
+        `)
+            data.season = result.recordset[0].seasonName
+        result = await request
+        .query(`select seasonName from seasons where active = 1
+        `)
+        data.seasons = result.recordset
+        result = await request
+        .query(`SELECT * from league_season ls
+            LEFT join leagues l on ls.leagueId=l.abbreviation
+            where seasonId = '${data.season}'
+        `)
+        // console.log(req)
         
-        // data.leagues = result.recordset
+        data.leagues = result.recordset
+        console.log(data)
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -1660,7 +1685,7 @@ app.post(['/getTeams'], async (req,res,next)=>{
         next(err)
     }
 })
-app.post(['/getTeams'], async (req,res,next)=>{
+app.post(['/getLeagues'], async (req,res,next)=>{
     try{
         // console.log(req.body)
         const request = pool.request()
@@ -1918,6 +1943,49 @@ app.post('/addGame', async (req, res, next) => {
         await request.query(`EXEC newGame '${formData.startDate}', '${formData.startTime}', '${formData.court}', '${formData.team1Id}', '${formData.team2Id}', ${formData.maxPeriods}, '${formData.seasonId}', '${formData.leagueId}'`)
         // res.json({ message: 'Form submitted successfully!', data: formData });
         res.redirect(302,'/games')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
+  app.post('/addTeam', upload.single('teamLogo'), async (req, res, next) => {
+    // Process form data here
+    try{
+            // Validate the image file further with Sharp
+        const metadata = await sharp(req.file.buffer).metadata();
+        if (metadata.format !== 'png') {
+        throw new Error('File is not a valid PNG image');
+        }
+
+        // Resize and optimize the PNG image
+        const processedImage = await sharp(req.file.buffer)
+        .resize(800, 800, { fit: sharp.fit.inside, withoutEnlargement: true })
+        .png({ quality: 90 }) // Compress PNG with quality setting
+        .toBuffer();
+
+        // Save the processed image to disk
+        const outputDir = path.join(__dirname, 'public/images');
+        if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir);
+        }
+        const filename = `${req.body.abbreviation}.png`;
+        const outputPath = path.join(outputDir, filename);
+        fs.writeFileSync(outputPath, processedImage);
+
+        // res.status(200).json({ message: 'Image uploaded successfully', file: filename });
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM teams WHERE id = '${req.body.abbreviation}')
+            BEGIN
+                INSERT INTO teams (id, fullName, shortName, league, season, abbreviation, color)
+                VALUES ('${req.body.abbreviation}', '${req.body.teamName}', '${req.body.teamName}', '${req.body.leagueId}', '${req.body.seasonId}', '${req.body.abbreviation}', '${req.body.color}')
+            END
+            `)
+        // // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/teams')
     }catch(err){
         next(err)
     }
