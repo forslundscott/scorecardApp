@@ -557,6 +557,32 @@ app.get(['/newGame'], async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+app.get(['/newTeam'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
+        // var result = await request
+        // .query(`select top 1 seasonName from seasons where active = 1
+        // `)
+        //     data.season = result.recordset[0].seasonName
+        // result = await request
+        // .query(`SELECT * from league_season ls
+        //     LEFT join leagues l on ls.leagueId=l.abbreviation
+        //     where seasonId = '${data.season}'
+        // `)
+        // // console.log(req)
+        
+        // data.leagues = result.recordset
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 app.get(['/schedules/new'], async (req, res, next) => {
     try{
         // const request = pool.request()
