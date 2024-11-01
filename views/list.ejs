@@ -71,6 +71,8 @@
                 <br>
                 <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Generate</button>
             </form>
+        <% } else if (data.page == '/newGame') { %>
+            <%- include(`newGameForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>
             <% if (data.hasOwnProperty('list')) { %>
                 <% for(var i=0; i< data.list.length; i++) {%>

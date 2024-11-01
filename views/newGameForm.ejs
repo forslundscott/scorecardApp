@@ -1,0 +1,58 @@
+<form id="newGameForm" action="addGame" method="post" class="textCenter">
+                
+    <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getLeagues(this.form)" required>
+        <!-- <option value="" disabled selected hidden>Season</option> -->
+        <option value="<%= data.season %>" selected><%= data.season %></option>
+        <!-- <option value="Indoor">Indoor</option> -->
+    </select>
+    <select name="leagueId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getTeams(this.form)" required>
+        <option value="" disabled selected>League</option>
+        <!-- <script>console.log(document.getElementById('newGameForm').getElementsByName('leagueId')[0])</script> -->
+        <% for(var i=0; i< data.leagues.length; i++) {%>
+            <option value="<%= data.leagues[i].abbreviation%>"><%= data.leagues[i].shortName%></option>
+        <% } %>
+    </select>
+    <br>
+    <br>
+    <select name="team1Id" class="primaryStyle" style="font-size: 100%;" required>
+        <option value="" disabled selected>Team 1</option>
+    </select>
+    
+    <select name="team2Id" class="primaryStyle" style="font-size: 100%;" required>
+        <option value="" disabled selected>Team 2</option>
+    </select>
+    <br>
+    <br>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Date:
+        <br>
+        <input type="date" name="startDate" class="primaryStyle" style="font-size: 100%;" value="<%= new Date().toISOString().split('T')[0] %>" required>
+    </div>
+    <br>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Time:
+        <br>
+
+        <input type="time" name="startTime" class="primaryStyle" style="font-size: 100%;" value="15:00" required>
+
+        
+    </div>
+    <br>
+    <select name="court" class="primaryStyle" style="font-size: 100%;" autocomplete="off" required>
+        <!-- <option value="" disabled selected hidden>Season</option> -->
+        <option value="Court 1" selected>Court 1</option>
+        <option value="Court 2" >Court 2</option>
+        <!-- <option value="Indoor">Indoor</option> -->
+    </select>
+    <br>
+    <br>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Number of Periods:
+        <br>
+        <input type="number" name="maxPeriods" class="primaryStyle" style="font-size: 100%;" value="3" min="2" max="4">
+    </div>
+    <br>
+    <br>
+    <br>
+    <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Add Game</button>
+</form>

@@ -531,6 +531,32 @@ app.post(['/schedules/list'], async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+app.get(['/newGame'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
+        var result = await request
+        .query(`select top 1 seasonName from seasons where active = 1
+        `)
+            data.season = result.recordset[0].seasonName
+        result = await request
+        .query(`SELECT * from league_season ls
+            LEFT join leagues l on ls.leagueId=l.abbreviation
+            where seasonId = '${data.season}'
+        `)
+        // console.log(req)
+        
+        data.leagues = result.recordset
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 app.get(['/schedules/new'], async (req, res, next) => {
     try{
         // const request = pool.request()
@@ -1559,6 +1585,39 @@ app.post(['/getPastSubs'], async (req,res,next)=>{
         next(err)
     }
 })
+app.post(['/getTeams'], async (req,res,next)=>{
+    try{
+        console.log(req.body)
+        const request = pool.request()
+        result = await request.query(`
+        SELECT * 
+        FROM teams
+        WHERE league = '${req.body.leagueId}' 
+        AND season = '${req.body.seasonId}';
+        `)
+        // console.log(result.recordset)
+        res.json({ message: 'Success', teams: result.recordset })
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
+app.post(['/getTeams'], async (req,res,next)=>{
+    try{
+        // console.log(req.body)
+        const request = pool.request()
+        result = await request.query(`
+            select * from leagues as l
+            LEFT join league_season as ls on l.abbreviation=ls.leagueId
+            where ls.seasonId = '${req.body.seasonId}'
+        `)
+        // console.log(result.recordset)
+        res.json({ message: 'Success', leagues: result.recordset })
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
 app.post(['/addPastSub'], async (req,res,next)=>{
     try{
         const request = pool.request()
@@ -1753,7 +1812,7 @@ app.post('/updateGameInfo', async (req, res, next) => {
                 SELECT 1
                 FROM games
                 WHERE event_id = '${formData.Event_ID}'
-                AND status = 1
+                AND status in (1,2)
             )
             BEGIN
                 EXEC recordTeamResults '${formData.Event_ID}'
@@ -1772,13 +1831,40 @@ app.post('/updateGameInfo', async (req, res, next) => {
             `)
             res.redirect(302,'/games')
         }else{
+            result = await request.query(`
+                DECLARE @teamName NVARCHAR(255)
+                IF EXISTS (
+                    SELECT 1
+                    FROM games
+                    WHERE event_id = '${formData.Event_ID}'
+                    AND status in (1,2)
+                )
+                BEGIN
+                    EXEC recordTeamResults '${formData.Event_ID}'
+                    EXEC updateGameResults '${formData.Event_ID}'
+                END
+                `)
             res.json({ message: 'Data updated successfully!' });
         }
-        
     }catch(err){
         next(err)
     }
 });
+app.post('/addGame', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        await request.query(`EXEC newGame '${formData.startDate}', '${formData.startTime}', '${formData.court}', '${formData.team1Id}', '${formData.team2Id}', ${formData.maxPeriods}, '${formData.seasonId}', '${formData.leagueId}'`)
+        // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/games')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
 app.post('/switchSides', async (req, res, next) => {
     // Process form data here
     try{

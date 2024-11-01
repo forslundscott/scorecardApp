@@ -325,7 +325,187 @@ function leagueSchedule(leagues,gamesPerTeam){
     return subLeagues
 }
 
-
+function leagueScheduleOld(leagues,gamesPerTeam){
+    var subLeagues = leagueSplit(leagues,gamesPerTeam)
+    // console.log(subLeagues)
+    for(const subLeague of subLeagues){
+        for(var i=0;i<subLeague.totalRegularSeasonGames;i++){
+            for(let j = 0; j< subLeague.possibleMatches.length;j++){
+                var match = subLeague.possibleMatches[j]
+                var minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                var avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
+                    return accumulator + currentValue.gamesPlayed;
+                }, 0))/subLeague.teams.length
+                // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
+                if(match.teams[0].gamesPlayed!= subLeague.regularSeasonGamesPerTeam 
+                    && match.teams[1].gamesPlayed!= subLeague.regularSeasonGamesPerTeam 
+                    && !(match.teams[0].gamesPlayed>minGamesPlayed && match.teams[1].gamesPlayed>minGamesPlayed)
+                    && !(avGamesPlayed<((match.teams[0].gamesPlayed + match.teams[1].gamesPlayed)/2))
+                ){
+                    // if(subLeague.leagueId ==='OCO2'){
+                    //     console.log(`${minGamesPlayed} ${match.teams[0].id}: ${match.teams[0].gamesPlayed} ${match.teams[1].id}: ${match.teams[1].gamesPlayed} ${(match.teams[0].gamesPlayed + match.teams[1].gamesPlayed)/2} ${avGamesPlayed}`)}
+                    match.teams[0].gamesPlayed +=1
+                    match.teams[1].gamesPlayed +=1
+                    // console.log({team1Id: match.teams[0].id,team2Id: match.teams[1].id})
+                    subLeague.scheduleMatches.push(
+                        {gameNumber: subLeague.scheduleMatches.length +1
+                            ,type: 'R'
+                            ,team1Id: match.teams[0].id
+                            ,team2Id: match.teams[1].id
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null
+                            ,Team1Ranking: null 
+                            ,Team2Ranking: null
+                        }
+                    )
+                    subLeague.possibleMatches = moveToEnd(subLeague.possibleMatches,match)
+                    break
+                }
+                // if playoffs subtract 2 from games/team
+            }
+        }
+        // console.log(subLeague.teams);
+        // subLeague.teams.forEach(item =>{
+        //     console.log(`${item.id }: ${item.gamesPlayed}`)
+        // })
+        var playOffSchedule = []
+        var tempStr = ''
+        // round 1
+        var firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
+        for(var i=0;i<firstRounGames;i++){
+            // if(subLeague.teams.length%2===0){
+                // evens
+                if(i+1==Math.floor(subLeague.teams.length/2) && subLeague.teams.length%2===0){
+                    tempStr = `Game ${Math.floor(subLeague.teams.length/2)}: ${subLeague.teams[0].id} vs ${subLeague.teams[subLeague.teams.length-1].id}`
+                    subLeague.playoffMatches.push(
+                        {gameNumber: Math.floor(subLeague.teams.length/2),
+                        type: 'P', 
+                        team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                        Team1Ranking: 1, 
+                        Team2Ranking: subLeague.teams.length}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }else{
+                    tempStr = `Game ${i+1}: ${subLeague.teams[(2*i)+1].id} vs ${subLeague.teams[(2*i)+2].id}`
+                    // console.log(`Game ${i+1}:`)
+                    subLeague.playoffMatches.push(
+                        {gameNumber: i+1,
+                            type: 'P', 
+                            team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                            Team1Ranking: (2*i)+2, 
+                            Team2Ranking: (2*i)+3}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }
+            // }else{
+            //     // odds
+                
+            // }
+        }
+        // round 2
+        
+        for(var i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
+            if(i==0){
+                tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Winner of ${subLeague.playoffMatches[0].gameNumber}`
+                subLeague.playoffMatches.push(
+                    {gameNumber: subLeague.playoffMatches.length+1,
+                        type: 'P', 
+                        team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                        Team1Ranking: 1, 
+                        Team2Ranking: `Winner of ${subLeague.playoffMatches[0].gameNumber}`}
+                )
+                playOffSchedule.push(tempStr)
+                // console.log(tempStr)
+            // }else if(i+1==firstRounGames && subLeague.teams.length%2!==0){
+            //     tempStr = `Game ${subLeague.teams.length}: ${subLeague.teams[subLeague.teams.length-1].id} vs Loser of ${playOffSchedule[playOffSchedule.length-2]}`
+            //     playOffSchedule.push(tempStr)
+            //     console.log(tempStr)
+            }else if(i+1==firstRounGames){
+                if(subLeague.teams.length%2===0){
+                    // even
+                    tempStr = `Game ${subLeague.teams.length}: ${subLeague.teams[subLeague.teams.length-1].id} vs Loser of ${subLeague.playoffMatches[subLeague.playoffMatches.length-2].gameNumber}`
+                    subLeague.playoffMatches.push(
+                        {gameNumber: subLeague.teams.length,
+                            type: 'P', 
+                            team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                            Team1Ranking: subLeague.teams.length, 
+                            Team2Ranking: `Loser of ${subLeague.playoffMatches[firstRounGames-2].gameNumber}`}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }else{
+                    // odd
+                    tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Loser of ${subLeague.playoffMatches[subLeague.playoffMatches.length-1].gameNumber}`
+                    subLeague.playoffMatches.push(
+                        {gameNumber: subLeague.playoffMatches.length+1,
+                            type: 'P', 
+                            team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                            Team1Ranking: 1, 
+                            Team2Ranking: `Loser of ${subLeague.playoffMatches[subLeague.playoffMatches.length-1].gameNumber}`}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }
+            }else{
+                tempStr = `Game ${subLeague.playoffMatches.length+1}: Winner of ${subLeague.playoffMatches[i].gameNumber} vs Loser of ${subLeague.playoffMatches[i-1].gameNumber}`
+                // console.log(`Game ${i+1}:`)
+                subLeague.playoffMatches.push(
+                    {gameNumber: subLeague.playoffMatches.length+1,
+                        type: 'P', 
+                        team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                        Team1Ranking: `Winner of ${subLeague.playoffMatches[i].gameNumber}`, 
+                        Team2Ranking: `Loser of ${subLeague.playoffMatches[i-1].gameNumber}`}
+                )
+                playOffSchedule.push(tempStr)
+                // console.log(tempStr)
+            }
+        }
+        // console.log(subLeague.playoffMatches)
+    }
+    // console.log(subLeagues[1])
+    return subLeagues
+}
 
 
 
