@@ -22,7 +22,12 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newSeason" onclick="window.location.href = '/newSeason';" >New Season</button>
-      <% } else if (data.page == 'standings') { %>
+      <% } else if (data.page == 'leagues') { %>
+        Leagues
+        <br>
+        <br>
+        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newLeague" onclick="window.location.href = '/newLeague';" >New League</button>
+       <% } else if (data.page == 'standings') { %>
         <% if (data.hasOwnProperty('list')) { %>
         <%= data.league %> Standings
           <br>

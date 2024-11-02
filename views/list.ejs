@@ -24,6 +24,10 @@
             <% for(var i=0; i< data.seasons.length; i++) {%>
                 <%- include('season_item',{season: data.seasons[i]}); %>
             <% } %>
+        <% } else if (data.page == 'leagues') { %>
+            <% for(var i=0; i< data.leagues.length; i++) {%>
+                <%- include('league_item',{league: data.leagues[i]}); %>
+            <% } %>
         <% } else if (data.page == 'schedules') { %>
             <div class="textCenter">
                 <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
@@ -87,6 +91,8 @@
             <%- include(`newUserForm`,{data: data}); %>
         <% } else if (data.page == '/newSeason') { %>
             <%- include(`newSeasonForm`,{data: data}); %>
+        <% } else if (data.page == '/newLeague') { %>
+            <%- include(`newLeagueForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>
             <% if (data.hasOwnProperty('list')) { %>
                 <% for(var i=0; i< data.list.length; i++) {%>
