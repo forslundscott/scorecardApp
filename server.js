@@ -608,6 +608,38 @@ app.get(['/newTeam'], async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+app.get(['/newUser'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
+        // var result = await request
+        // .query(`select top 1 seasonName from seasons where active = 1
+        //      and not seasonName = 'Test Season'
+        // `)
+        //     data.season = result.recordset[0].seasonName
+        // result = await request
+        // .query(`select seasonName from seasons where active = 1
+        // `)
+        // data.seasons = result.recordset
+        // result = await request
+        // .query(`SELECT * from league_season ls
+        //     LEFT join leagues l on ls.leagueId=l.abbreviation
+        //     where seasonId = '${data.season}'
+        // `)
+        // // console.log(req)
+        
+        // data.leagues = result.recordset
+        // console.log(data)
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 app.get(['/schedules/new'], async (req, res, next) => {
     try{
         // const request = pool.request()
@@ -1944,6 +1976,28 @@ app.post('/addGame', async (req, res, next) => {
         const request = pool.request()
         await request.query(`EXEC newGame '${formData.startDate}', '${formData.startTime}', '${formData.court}', '${formData.team1Id}', '${formData.team2Id}', ${formData.maxPeriods}, '${formData.seasonId}', '${formData.leagueId}'`)
         // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/games')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
+  app.post('/addUser', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        console.log(formData)
+        const pool = new sql.ConnectionPool(config)
+        await pool.connect();
+        const request = pool.request()
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM users WHERE email = '${req.body.email}')
+            BEGIN
+                insert into users (firstName, lastName, preferredName, email)
+                values ('${req.body.firstName}','${req.body.lastName}','${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}','${req.body.email}')
+            END
+            `)
+        // // res.json({ message: 'Form submitted successfully!', data: formData });
         res.redirect(302,'/games')
     }catch(err){
         next(err)

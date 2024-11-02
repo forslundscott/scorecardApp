@@ -79,6 +79,8 @@
             <%- include(`newGameForm`,{data: data}); %>
         <% } else if (data.page == '/newTeam') { %>
             <%- include(`newTeamForm`,{data: data}); %>
+        <% } else if (data.page == '/newUser') { %>
+            <%- include(`newUserForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>
             <% if (data.hasOwnProperty('list')) { %>
                 <% for(var i=0; i< data.list.length; i++) {%>
