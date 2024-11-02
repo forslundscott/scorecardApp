@@ -20,6 +20,10 @@
             <% for(var i=0; i< data.teams.length; i++) {%>
                 <%- include('team_item',{team: data.teams[i]}); %>
             <% } %>
+        <% } else if (data.page == 'seasons') { %>
+            <% for(var i=0; i< data.seasons.length; i++) {%>
+                <%- include('season_item',{season: data.seasons[i]}); %>
+            <% } %>
         <% } else if (data.page == 'schedules') { %>
             <div class="textCenter">
                 <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
@@ -81,6 +85,8 @@
             <%- include(`newTeamForm`,{data: data}); %>
         <% } else if (data.page == '/newUser') { %>
             <%- include(`newUserForm`,{data: data}); %>
+        <% } else if (data.page == '/newSeason') { %>
+            <%- include(`newSeasonForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>
             <% if (data.hasOwnProperty('list')) { %>
                 <% for(var i=0; i< data.list.length; i++) {%>
