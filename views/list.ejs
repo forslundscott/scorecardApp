@@ -7,7 +7,7 @@
      
     
     <% if (data.page == 'activeGame') { %>
-        <% if (team.id !== 'TBD') { %>
+        <% if (team.id !== 'TBD' && team.players.length > 0) { %>
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
@@ -15,6 +15,18 @@
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'teams') { %>
+            <% for(var i=0; i< data.teams.length; i++) {%>
+                <%- include('team_item',{team: data.teams[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'seasons') { %>
+            <% for(var i=0; i< data.seasons.length; i++) {%>
+                <%- include('season_item',{season: data.seasons[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'leagues') { %>
+            <% for(var i=0; i< data.leagues.length; i++) {%>
+                <%- include('league_item',{league: data.leagues[i]}); %>
             <% } %>
         <% } else if (data.page == 'schedules') { %>
             <div class="textCenter">
@@ -73,6 +85,14 @@
             </form>
         <% } else if (data.page == '/newGame') { %>
             <%- include(`newGameForm`,{data: data}); %>
+        <% } else if (data.page == '/newTeam') { %>
+            <%- include(`newTeamForm`,{data: data}); %>
+        <% } else if (data.page == '/newUser') { %>
+            <%- include(`newUserForm`,{data: data}); %>
+        <% } else if (data.page == '/newSeason') { %>
+            <%- include(`newSeasonForm`,{data: data}); %>
+        <% } else if (data.page == '/newLeague') { %>
+            <%- include(`newLeagueForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>
             <% if (data.hasOwnProperty('list')) { %>
                 <% for(var i=0; i< data.list.length; i++) {%>

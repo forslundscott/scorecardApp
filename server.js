@@ -22,6 +22,11 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const initializePassport = require('./passport-config')
 const mailchimp = require('./helpers/mailChimp')
+const multer = require('multer');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
+// const helmet = require('helmet');
 const processingStatus = {};
 // mailchimp.marketing.setConfig({
 //     apiKey: process.env.MAILCHIMP_KEY,
@@ -110,7 +115,7 @@ let options = {
   etag: true, // Enable ETag
   lastModified: false, // Disable Last-Modified header
 }
-
+// app.use(helmet()); // Basic security headers
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public',options))
 app.set('view-engine','ejs')
@@ -136,6 +141,20 @@ const { log } = require('console');
 app.locals.functions = functions
 
 // var connection = functions.getAccess()
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2MB
+  fileFilter: (req, file, cb) => {
+    const isPng = file.mimetype === 'image/png';
+    if (isPng) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PNG images are allowed'));
+    }
+  },
+});
 
 var team1 = {
     id: '',
@@ -552,6 +571,90 @@ app.get(['/newGame'], async (req, res, next) => {
         // console.log(req)
         
         data.leagues = result.recordset
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/newTeam'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
+        var result = await request
+        .query(`select top 1 seasonName from seasons where active = 1
+             and not seasonName = 'Test Season'
+        `)
+            data.season = result.recordset[0].seasonName
+        result = await request
+        .query(`select seasonName from seasons where active = 1
+        `)
+        data.seasons = result.recordset
+        result = await request
+        .query(`SELECT * from league_season ls
+            LEFT join leagues l on ls.leagueId=l.abbreviation
+            where seasonId = '${data.season}'
+        `)
+        // console.log(req)
+        
+        data.leagues = result.recordset
+        console.log(data)
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/newLeague'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
+        var result = await request
+        .query(`select top 1 seasonName from seasons where active = 1
+             and not seasonName = 'Test Season'
+        `)
+            data.season = result.recordset[0].seasonName
+        result = await request
+        .query(`select seasonName from seasons where active = 1
+        `)
+        data.seasons = result.recordset
+        console.log(data)
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/newUser'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+app.get(['/newSeason'], async (req, res, next) => {
+    try{
+        const request = pool.request()
+        
+        var data = {
+            page: `${req.originalUrl}`,
+            user: req.user
+            
+        }
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -1209,6 +1312,89 @@ app.get(['/games'], async (req,res,next)=>{
         next(err)
     }
 })
+app.get(['/teams'], async (req,res,next)=>{
+    try{
+        console.log(req.user)
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        var data = {
+            teams: [
+                team1,
+                team2
+            ],
+            page: req.route.path[0].replace('/',''),
+            user: req.user
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await request.query(`select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor from teams as t
+            left join leagues as l on t.league=l.abbreviation
+            LEFT join users as u on t.captain=u.ID
+            where season in (select seasonName from seasons
+            where active = 1)
+            ORDER by t.league, fullName
+        `)
+        data.teams = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+})
+app.get(['/seasons'], async (req,res,next)=>{
+    try{
+        console.log(req.user)
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        var data = {
+            
+            page: req.route.path[0].replace('/',''),
+            user: req.user
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await request.query(`select * from seasons
+            order by active desc
+        `)
+        data.seasons = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+})
+app.get(['/leagues'], async (req,res,next)=>{
+    try{
+        console.log(req.user)
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        var data = {
+            
+            page: req.route.path[0].replace('/',''),
+            user: req.user
+        }
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await request.query(`select * from leagues as l
+            left join league_season as ls on l.abbreviation=ls.leagueId
+            where seasonId in (select seasonName from seasons where active = 1)
+        `)
+        data.leagues = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+})
 app.get(['/readyForUpload'], async (req,res, next)=>{
     try{
         var data = {
@@ -1446,6 +1632,8 @@ app.post('/userSearch', async (req, res) => {
             OR lastName LIKE '%${query}%' 
             OR preferredName LIKE '%${query}%' 
             OR email LIKE '%${query}%'
+            OR firstName + ' ' + lastName LIKE '%${query}%'
+            OR preferredName + ' ' + lastName LIKE '%${query}%'
         `);
         console.log(result.recordset)
         res.json(result.recordset);
@@ -1602,7 +1790,7 @@ app.post(['/getTeams'], async (req,res,next)=>{
         next(err)
     }
 })
-app.post(['/getTeams'], async (req,res,next)=>{
+app.post(['/getLeagues'], async (req,res,next)=>{
     try{
         // console.log(req.body)
         const request = pool.request()
@@ -1860,6 +2048,116 @@ app.post('/addGame', async (req, res, next) => {
         await request.query(`EXEC newGame '${formData.startDate}', '${formData.startTime}', '${formData.court}', '${formData.team1Id}', '${formData.team2Id}', ${formData.maxPeriods}, '${formData.seasonId}', '${formData.leagueId}'`)
         // res.json({ message: 'Form submitted successfully!', data: formData });
         res.redirect(302,'/games')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
+  app.post('/addUser', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        console.log(formData)
+        const pool = new sql.ConnectionPool(config)
+        await pool.connect();
+        const request = pool.request()
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM users WHERE email = '${req.body.email}')
+            BEGIN
+                insert into users (firstName, lastName, preferredName, email)
+                values ('${req.body.firstName}','${req.body.lastName}','${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}','${req.body.email}')
+            END
+            `)
+        // // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/games')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
+  app.post('/addSeason', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        console.log(formData)
+        const pool = new sql.ConnectionPool(config)
+        await pool.connect();
+        const request = pool.request()
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM seasons WHERE seasonName = '${req.body.seasonName}')
+            BEGIN
+                insert into seasons (seasonName, active)
+                values ('${req.body.seasonName}',${req.body.active ? 1 : 0})
+            END
+            `)
+        // // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/seasons')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
+  app.post('/addLeague', async (req, res, next) => {
+    // Process form data here
+    try{
+        const formData = req.body;
+        const pool = new sql.ConnectionPool(config)
+        await pool.connect();
+        const request = pool.request()
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM leagues WHERE abbreviation = '${req.body.abbreviation}')
+            BEGIN
+                insert into leagues (name, color, shortName, abbreviation)
+                values ('${req.body.leagueName}','${req.body.color}','${req.body.leagueName}','${req.body.abbreviation}')
+                insert into league_season (leagueId, seasonId)
+                values ('${req.body.abbreviation}','${req.body.seasonId}')
+            END
+            `)
+        // // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/leagues')
+    }catch(err){
+        next(err)
+    }
+    // res.redirect(302,'/games')
+  });
+  app.post('/addTeam', upload.single('teamLogo'), async (req, res, next) => {
+    // Process form data here
+    try{
+            // Validate the image file further with Sharp
+        const metadata = await sharp(req.file.buffer).metadata();
+        if (metadata.format !== 'png') {
+        throw new Error('File is not a valid PNG image');
+        }
+
+        // Resize and optimize the PNG image
+        const processedImage = await sharp(req.file.buffer)
+        .resize(800, 800, { fit: sharp.fit.inside, withoutEnlargement: true })
+        .png({ quality: 90 }) // Compress PNG with quality setting
+        .toBuffer();
+
+        // Save the processed image to disk
+        const outputDir = path.join(__dirname, 'public/images');
+        if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir);
+        }
+        const filename = `${req.body.abbreviation}.png`;
+        const outputPath = path.join(outputDir, filename);
+        fs.writeFileSync(outputPath, processedImage);
+
+        // res.status(200).json({ message: 'Image uploaded successfully', file: filename });
+        const formData = req.body;
+        // const pool = new sql.ConnectionPool(config)
+        // await pool.connect();
+        const request = pool.request()
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM teams WHERE id = '${req.body.abbreviation}')
+            BEGIN
+                INSERT INTO teams (id, fullName, shortName, league, season, abbreviation, color)
+                VALUES ('${req.body.abbreviation}', '${req.body.teamName}', '${req.body.teamName}', '${req.body.leagueId}', '${req.body.seasonId}', '${req.body.abbreviation}', '${req.body.color}')
+            END
+            `)
+        // // res.json({ message: 'Form submitted successfully!', data: formData });
+        res.redirect(302,'/teams')
     }catch(err){
         next(err)
     }
