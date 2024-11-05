@@ -1538,7 +1538,18 @@ app.get(['/activeGame/:eventId'], async (req,res,next)=>{
             where Event_ID = ${req.params.eventId}
             `)
             eventResult = eventResult.recordset[0]
-            // console.log(eventResult)
+            console.log(eventResult)
+            if(eventResult == undefined){
+                // alert(`Game ${req.params.eventId} does not exist. Redirecting to games page.`)
+                // res.redirect(404,'/games')
+                res.send(`
+                    <script>
+                        alert("Game ${req.params.eventId} does not exist. Redirecting to games page.");
+                        window.location.href = "/games";
+                    </script>
+                `);
+                return
+            }
         let result = await request.query(`
             Select * 
             from [scorecard].[dbo].[teams] 
