@@ -1532,34 +1532,42 @@ app.get(['/activeGame'], async (req,res,next)=>{
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
-        let result = await request.query(`Select * 
-        from [scorecard].[dbo].[teams] 
-        where id ='${req.query.Team1_ID}' 
-        and keeper in (Select userId 
-            from [scorecard].[dbo].[user_team] 
-            where teamid ='${req.query.Team1_ID}'
-            union all
-            Select userId from [scorecard].[dbo].[subTeamGame] where teamid ='${req.query.Team1_ID}'
-            and eventId = '${req.query.Event_ID}'
+        let eventResult = await request.query(`
+            select Team1_ID, Team2_ID, Event_ID
+            from games
+            where Event_ID = ${req.query.Event_ID}
+            `)
+            eventResult = eventResult.recordset[0]
+            // console.log(eventResult)
+        let result = await request.query(`
+            Select * 
+            from [scorecard].[dbo].[teams] 
+            where id ='${eventResult.Team1_ID}' 
+            and keeper in (Select userId 
+                from [scorecard].[dbo].[user_team] 
+                where teamid ='${eventResult.Team1_ID}'
+                union all
+                Select userId from [scorecard].[dbo].[subTeamGame] where teamid ='${eventResult.Team1_ID}'
+                and eventId = '${eventResult.Event_ID}'
         )
 
-        Select * 
-        from [scorecard].[dbo].[teams] 
-        where id ='${req.query.Team2_ID}' 
-        and keeper in (Select userId 
-            from [scorecard].[dbo].[user_team] 
-            where teamid ='${req.query.Team2_ID}'
-            union all
-            Select userId from [scorecard].[dbo].[subTeamGame] where teamid ='${req.query.Team2_ID}'
-            and eventId = '${req.query.Event_ID}'
+            Select * 
+            from [scorecard].[dbo].[teams] 
+            where id ='${eventResult.Team2_ID}' 
+            and keeper in (Select userId 
+                from [scorecard].[dbo].[user_team] 
+                where teamid ='${eventResult.Team2_ID}'
+                union all
+                Select userId from [scorecard].[dbo].[subTeamGame] where teamid ='${eventResult.Team2_ID}'
+                and eventId = '${eventResult.Event_ID}'
         )`)
         if(result.recordsets[0].length == 0){
             // var pool = await sql.connect(config)
             // pool.request()
             await request.query(`
             update teams
-            set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${req.query.Team1_ID}')
-            where id = '${req.query.Team1_ID}'
+            set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${eventResult.Team1_ID}')
+            where id = '${eventResult.Team1_ID}'
             `)
         }
         if(result.recordsets[1].length == 0){
@@ -1567,11 +1575,11 @@ app.get(['/activeGame'], async (req,res,next)=>{
             // pool.request()
             await request.query(`
             update teams
-            set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${req.query.Team2_ID}')
-            where id = '${req.query.Team2_ID}'
+            set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${eventResult.Team2_ID}')
+            where id = '${eventResult.Team2_ID}'
             `)
         }
-        result = await request.query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${req.query.Event_ID}'`)
+        result = await request.query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId ='${eventResult.Event_ID}'`)
         team1 = result.recordsets[0][0]
             team2 = result.recordsets[1][0]
             team1.players = result.recordsets[2]
