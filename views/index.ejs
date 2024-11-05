@@ -34,7 +34,7 @@
     </script>  
         <%- include('header', {data: data}); %>
         
-        <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
+        <div id="innerBody"  style= "<%= data.page.includes('activeGame') ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
             <div id="content">
                 <%- include('bodyColumns',{data: data}); %>
             </div>

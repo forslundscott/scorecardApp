@@ -51,7 +51,7 @@
             <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button>
           <!-- </a>  -->
         </div>
-      <% }else if (data.page == 'activeGame') {%>
+      <% }else if (data.page.includes('activeGame')) {%>
         <% var currentPeriod = data.game.period %>
         <script>
          var currentPeriod = '<%= data.game.period  %>'
@@ -65,7 +65,7 @@
             <input type="hidden" name="color" value="<%= data.teams[0].color %>">
             <input type="hidden" name="season" value="<%= data.teams[0].season %>">
             <div style="float: left; width: 100%; height: 100%;" onclick="toggleTeamForm(this.parentElement)">
-              <img src="images/<%=data.teams[0].id%>.png" alt="<%=data.teams[0].id%> Logo" class="headerTopRow">
+              <img src="/images/<%=data.teams[0].id%>.png" alt="<%=data.teams[0].id%> Logo" class="headerTopRow">
               <div style="float: left; width: 83%;"><%= data.teams[0].abbreviation %></div>
               <div style="float: left; width: 17%;" id="<%= data.teams[0].id + "Score" %>"><%= data.teams[0].score %></div>
             </div>
@@ -102,7 +102,7 @@
                 <div style="font-size: 50%;" id="court"><%- data.game.Location %></div>
               </button>
               <br>
-              <button type="button" onclick="switchSides(this)" style="height: 30%;"><img src="swapIcon.png" alt="Switch Sides" style="height: 100%;" ></button>
+              <button type="button" onclick="switchSides(this)" style="height: 30%;"><img src="/swapIcon.png" alt="Switch Sides" style="height: 100%;" ></button>
             </div>
           </form>
         </div>
@@ -113,7 +113,7 @@
             <input type="hidden" name="color" value="<%= data.teams[1].color %>">
             <input type="hidden" name="season" value="<%= data.teams[1].season %>">
             <div style="float: right; width: 100%; height: 100%;" onclick="toggleTeamForm(this.parentElement)">
-              <img src="images/<%=data.teams[1].id%>.png" alt="<%=data.teams[1].id%> Logo" class="headerTopRow">
+              <img src="/images/<%=data.teams[1].id%>.png" alt="<%=data.teams[1].id%> Logo" class="headerTopRow">
               <div style="float: right; width: 83%;"><%= data.teams[1].abbreviation %></div>
               <div style="float: right; width: 17%;" id="<%= data.teams[1].id + "Score" %>"><%= data.teams[1].score %></div>
             </div>

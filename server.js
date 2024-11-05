@@ -1524,7 +1524,7 @@ app.get(['/users'], async (req,res, next)=>{
         next(err)
     }
 })
-app.get(['/activeGame'], async (req,res,next)=>{
+app.get(['/activeGame/:eventId'], async (req,res,next)=>{
     try {
         console.log(req.protocol)
         console.log(req.hostname)
@@ -1535,7 +1535,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
         let eventResult = await request.query(`
             select Team1_ID, Team2_ID, Event_ID
             from games
-            where Event_ID = ${req.query.Event_ID}
+            where Event_ID = ${req.params.eventId}
             `)
             eventResult = eventResult.recordset[0]
             // console.log(eventResult)
@@ -1607,7 +1607,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
                 game.timerState = 2
                 game.timerTime = 0
             }
-            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = '${req.query.Event_ID}'`)
+            await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = '${eventResult.Event_ID}'`)
         }
         var data = {
             teams: [
@@ -1616,7 +1616,7 @@ app.get(['/activeGame'], async (req,res,next)=>{
             ],
             game: game,
             page: req.route.path[0].replace('/',''),
-            Event_ID: req.query.Event_ID,
+            Event_ID: eventResult.Event_ID,
             user: req.user
         }
         res.render('index.ejs',{data: data}) 

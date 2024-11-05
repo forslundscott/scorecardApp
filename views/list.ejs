@@ -6,12 +6,12 @@
     
      
     
-    <% if (data.page == 'activeGame') { %>
+    <% if (data.page.includes('activeGame')) { %>
         <% if (team.id !== 'TBD' && team.players.length > 0) { %>
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
-    <div class="fielderColumn dragColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
+    <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? "height: calc(100% - 10vh)"  : "" %>">
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(var i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
@@ -168,7 +168,7 @@ Thank you and have a nice day!`
                 //     window.location.href = url
                 // }
             </script>
-        <% } else if (data.page == 'activeGame') { %>
+        <% } else if (data.page.includes('activeGame')) { %>
             
             <% for(var i=0; i< team.players.length; i++) {%>
                 <% if (team.players[i].userId !== team.keeper) { %>
