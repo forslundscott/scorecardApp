@@ -176,10 +176,10 @@ Thank you and have a nice day!`
                 <% } %>
             <% } %>
         <% } else if (data.page == 'users') { %>
-        
-            <% for(var i=0; i< data.users.length; i++) {%>
-                    <%- include('user_item',{user: data.users[i]}); %>
-            <% } %>
+            <%- include('userSearchForm',{user: data.users[i], display: ''}); %>
+            <%# for(var i=0; i< data.users.length; i++) {%>
+                    <%# include('user_item',{user: data.users[i]}); %>
+            <%# } %>
         <% } %>
     </div>
 </body>

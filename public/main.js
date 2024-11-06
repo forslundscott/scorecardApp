@@ -419,7 +419,7 @@ function toggleAddPlayer(xform){
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
         document.getElementById('newPlayerForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         document.getElementById('newPlayerForm').querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
-        document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
+        document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="team"]').value}.png`
         
         // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
@@ -556,7 +556,7 @@ async function toggleTeamForm(xform){
         teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
         teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
-        teamForm.getElementsByClassName('formLogo')[0].src = `images/${xform.querySelector('[name="team"]').value}.png`
+        teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="team"]').value}.png`
         // while(pastSubsDropdown.options.length>1){
         //     pastSubsDropdown.remove(1)
         // }
