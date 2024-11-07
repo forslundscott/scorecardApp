@@ -434,31 +434,31 @@ function toggleAddPlayer(xform){
 function toggleSearchUser(){
     var searchForm = document.getElementById('userSearchContainer')
     if(searchForm.style.display == 'none'){
-        // var color = xform.querySelector('[name="color"]').value
         searchForm.style.display = ''
-        // searchForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        // searchForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
-        // searchForm.querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
-        // searchForm.src = `images/${xform.querySelector('[name="team"]').value}.png`
-        
-        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         searchForm.style.display = 'none'
         document.getElementById('userSearchField').value
         document.getElementById('userSearchResults').innerHTML = ''
     }
-    // if(document.getElementById('teamFormBackground').style.display == 'none'){
-    //     document.getElementById('teamFormBackground').style.display = ''
-    // }else{
-    //     document.getElementById('teamFormBackground').style.display = 'none'
-    // }
+    
+}
+function toggleSearchPlayer(){
+    var searchForm = document.getElementById('playerSearchContainer')
+    if(searchForm.style.display == 'none'){
+        searchForm.style.display = ''
+    }else{
+        searchForm.style.display = 'none'
+        document.getElementById('playerSearchField').value
+        document.getElementById('playerSearchResults').innerHTML = ''
+    }
+    
 }
 async function userSearch(xForm,event){
-    // document.getElementById('userSearchForm').addEventListener('submit', async function (event) {
+
         event.preventDefault();
         const query = document.getElementById('userSearchField').value;
         try {
-            // const response = await fetch(`/userSearch?query=${query}`);
+
             var formData = new FormData(xForm)
             const response = await fetch(`/userSearch`, {
                 method: 'POST',
@@ -467,7 +467,7 @@ async function userSearch(xForm,event){
                   },
                 body: new URLSearchParams(formData).toString(),
               });
-            // const results = await response.json();
+
             
             if (response.ok) {
                 const results = await response.json();
@@ -493,16 +493,6 @@ async function userSearch(xForm,event){
                     `
                     resultsList.innerHTML += userCard
             });
-                // if(responseData.subs){
-                //     responseData.subs.forEach(function(sub){
-                //         var option = document.createElement('option')
-                //         option.text = sub.firstName + ' ' + sub.lastName
-                //         option.value = sub.ID
-                //         pastSubsDropdown.add(option)
-                //     })
-                // }
-                // console.log(responseData.message);
-                // location.reload()
               } else {
                 console.error('Form submission failed');
                 // Handle error response
@@ -512,7 +502,58 @@ async function userSearch(xForm,event){
         } catch (error) {
             console.error('Error fetching results:', error);
         }
-    // });
+
+}
+async function playerSearch(xForm,event){
+
+    event.preventDefault();
+    const query = document.getElementById('playerSearchField').value;
+    try {
+
+        var formData = new FormData(xForm)
+        const response = await fetch(`/playerSearch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+
+        
+        if (response.ok) {
+            const results = await response.json();
+            const resultsList = document.getElementById('playerSearchResults');
+            resultsList.innerHTML = '';
+            results.forEach(user => {
+                const userCard = `
+                    <form class="" action="" method="post">
+                        <input type="hidden" name="email" value="${user.email}">
+                        <input type="hidden" name="firstName" value="${user.firstName}">
+                        <input type="hidden" name="lastName" value="${user.lastName}">
+                        <input type="hidden" name="preferredName" value="${user.preferredName}">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="selectPlayer(this.form)">
+                        <div class="itemFormat primaryStyle primaryBorder">
+                            <div class="playerTag">
+                                <div class="playerName" style="text-align: center;">
+                                    ${user.firstName} ${user.lastName} - ${user.preferredName} - ${user.email}
+                                </div>
+                            </div>                
+                        </div>
+                        </button>
+                    </form>
+                `
+                resultsList.innerHTML += userCard
+        });
+          } else {
+            console.error('Form submission failed');
+            // Handle error response
+          }
+        
+        
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+
 }
 function togglePaidCheckbox() {
     const checkboxContainer = document.getElementById('paidContainer');
@@ -531,8 +572,18 @@ function togglePaidCheckbox() {
         }
     }
 }
+function selectPlayer(xform){
+
+    const newPlayerForm = document.getElementById('newPlayerForm')
+    newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
+    newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
+    newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
+    newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
+    newPlayerForm.querySelector('[name="waiver"]').checked = true
+    toggleSearchPlayer()
+}
 function selectUser(xform){
-    // const searchForm = document.getElementById('userSearchForm')
+
     const newPlayerForm = document.getElementById('newPlayerForm')
     newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
     newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
@@ -1049,7 +1100,7 @@ document.getElementById('newPlayerForm').querySelector('[name="email"]').addEven
 });
 async function getTeams(xform){
     try {
-        // const response = await fetch(`/userSearch?query=${query}`);
+
         var formData = new FormData(xform)
         const response = await fetch(`/getTeams`, {
             method: 'POST',
@@ -1091,7 +1142,7 @@ async function getTeams(xform){
 }
 async function getLeagues(xform){
     try {
-        // const response = await fetch(`/userSearch?query=${query}`);
+
         var formData = new FormData(xform)
         const response = await fetch(`/getLeagues`, {
             method: 'POST',

@@ -4,22 +4,22 @@
 </head>
 <body>
 
-    <div id="userSearchContainer" class="floatingPopupForm primaryStyle primaryBorder" style="display: none; text-align: center;">
-        <div>
-            <form id="userSearchForm" class="primaryStyle primaryBorder" style=" text-align: center;" onsubmit="userSearch(this,event)">
-                    <div class="playerName">
+    <div id="userSearchContainer" class=" primaryStyle" style="display: ''; text-align: center; height: 100%;">
+        <div style="height: 15%;">
+            <form id="userSearchForm" class="primaryStyle" style=" text-align: center;" onsubmit="userSearch(this,event)">
+                    <!-- <div class="playerName">
                         User Search
                     </div>
                     <br>
                     <div class="textCenter" style="height: 15vh;"><img src="/GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
-                    <br>
+                    <br> -->
                     <input type="text" id="userSearchField" name="userSearchValue" placeholder="Search..." required>
                     <br>
                     <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Search</button>
                     <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser(this.form)">Back</button>
             </form>
         </div>
-        <div id="userSearchContent" style="height: 20vh;">
+        <div id="userSearchContent" style="height: 85%;">
             <div id="userSearchResults" class="singleColumn dragColumn fielderColumn">
             </div>
         </div>

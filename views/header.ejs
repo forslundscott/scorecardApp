@@ -17,8 +17,13 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = '/newTeam';" >New Team</button>
-      <% } else if (data.page == 'seasons') { %>
-        seasons
+       <% } else if (data.page == 'users') { %>
+        Users
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newUser" onclick="window.location.href = '/newUser';" >New User</button>
+       <% } else if (data.page == 'seasons') { %>
+        Seasons
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newSeason" onclick="window.location.href = '/newSeason';" >New Season</button>
