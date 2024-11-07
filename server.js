@@ -33,23 +33,6 @@ const processingStatus = {};
 //     server: process.env.MAILCHIMP_SERVER, // e.g., us1
 // })
 
-const ROLES = {}
-const config = {
-        server: process.env.DB_SERVER,
-        database: process.env.DB_NAME,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        trustServerCertificate: true,
-        options: {
-            encrypt: true,
-            connectionTimeout: 30000,
-            pool: {
-              max: 10,
-              min: 0,
-              idleTimeoutMillis: 30000,
-            },
-          },
-    };
 const sequelize = new Sequelize({
     dialect: 'mssql',
     host: process.env.DB_SERVER,
@@ -61,19 +44,7 @@ const sequelize = new Sequelize({
         timestamps: false,
     },
 });
-    const pool = new sql.ConnectionPool(config)
-    pool.connect().then(async () => {
-        console.log('Connected to MSSQL with global connection pool');
-        try{
-            await roleSetter()
-            console.log(ROLES.admin)
-        }catch(err){
-            console.error('Error:', err)
-        }
-      })
-      .catch((err) => {
-        console.error('Error connecting to MSSQL:', err);
-      });
+const pool = require(`${__dirname}/db`)
 
 const Session = sequelize.define('Session', {
     sid: {
@@ -171,24 +142,6 @@ var team2 = {
     keeper: '',
     players: []
 }
-var games = []
-
-async function roleSetter() {
-    try{
-        const request = pool.request();
-        const result = await request.query(`
-        SELECT name, id
-        FROM roles
-        `);
-        result.recordset.forEach(row => {
-            ROLES[row.name] = row.id;
-        });
-    }catch(err){
-        console.error('Error:', err)
-    }  
-};
-
-
 
 app.get(['/'], async (req,res)=>{
     // res.render('index.ejs')
