@@ -45,6 +45,8 @@ const sequelize = new Sequelize({
     },
 });
 const pool = require(`${__dirname}/db`)
+app.use(express.urlencoded({ extended: true }))
+app.use('/users', require(`${__dirname}/routes/users`));
 
 const Session = sequelize.define('Session', {
     sid: {
@@ -87,7 +89,7 @@ let options = {
   lastModified: false, // Disable Last-Modified header
 }
 // app.use(helmet()); // Basic security headers
-app.use(express.urlencoded({ extended: true }))
+
 app.use(express.static('public',options))
 app.set('view-engine','ejs')
 app.use(flash())
@@ -1253,6 +1255,7 @@ app.get(['/games'], async (req,res,next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
+        console.log(req.originalUrl)
         // const pool = new sql.ConnectionPool(config)
         // await pool.connect();
         const request = pool.request()
@@ -1493,22 +1496,22 @@ app.get(['/winners'], async (req,res, next)=>{
         next(err)
     }
 })
-app.get(['/users'], async (req,res, next)=>{
-    try{
-        var data = {
-            page: req.route.path[0].replace('/',''),
-            user: req.user
-        }
-        // const pool = new sql.ConnectionPool(config)
-        // await pool.connect();
-        const request = pool.request()
-        const result = await request.query(`SELECT * from dbo.users`)
-        data.users = result.recordsets[0]  
-        res.render('index.ejs',{data: data})
-    }catch(err){
-        next(err)
-    }
-})
+// app.get(['/users'], async (req,res, next)=>{
+//     try{
+//         var data = {
+//             page: req.route.path[0].replace('/',''),
+//             user: req.user
+//         }
+//         // const pool = new sql.ConnectionPool(config)
+//         // await pool.connect();
+//         const request = pool.request()
+//         const result = await request.query(`SELECT * from dbo.users`)
+//         data.users = result.recordsets[0]  
+//         res.render('index.ejs',{data: data})
+//     }catch(err){
+//         next(err)
+//     }
+// })
 app.get(['/activeGame/:eventId'], async (req,res,next)=>{
     try {
         console.log(req.protocol)
@@ -1639,7 +1642,7 @@ app.post('/userSearch', async (req, res) => {
             OR firstName + ' ' + lastName LIKE '%${query}%'
             OR preferredName + ' ' + lastName LIKE '%${query}%'
         `);
-        console.log(result.recordset)
+        // console.log(result.recordset)
         res.json(result.recordset);
     } catch (err) {
         console.error('Query failed: ', err);

@@ -473,14 +473,11 @@ async function userSearch(xForm,event){
                 const results = await response.json();
                 const resultsList = document.getElementById('userSearchResults');
                 resultsList.innerHTML = '';
+                console.log(window.location.pathname)
                 results.forEach(user => {
                     const userCard = `
-                        <form class="" action="" method="post">
-                            <input type="hidden" name="email" value="${user.email}">
-                            <input type="hidden" name="firstName" value="${user.firstName}">
-                            <input type="hidden" name="lastName" value="${user.lastName}">
-                            <input type="hidden" name="preferredName" value="${user.preferredName}">
-                            <button type="button" class="playerButton" name="type" value="game" onclick="selectUser(this.form)">
+                        <form class="" action="/${window.location.pathname.replace(/\//g, '')}/${user.ID}" method="get">
+                            <button type="submit" class="playerButton">
                             <div class="itemFormat primaryStyle primaryBorder">
                                 <div class="playerTag">
                                     <div class="playerName" style="text-align: center;">

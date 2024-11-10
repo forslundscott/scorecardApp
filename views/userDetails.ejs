@@ -5,7 +5,13 @@
 <body>
 
     <div id="userSearchContainer" class=" primaryStyle" style="display: ''; text-align: center; height: 100%;">
-        <div style="height: 15%;">
+        <div class="statButton" style="width: calc(100%/3);">
+            <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="teams" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/teams';" >Teams</button>                    
+        </div>
+        <div class="statButton" style="width: calc(100%/3);">
+            <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="roles" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/roles';" >Roles</button>                    
+        </div>
+        <!-- <div style="height: 15%;">
             <form id="userSearchForm" class="primaryStyle" style=" text-align: center;" onsubmit="userSearch(this,event)">
                     
                     <input type="text" id="userSearchField" name="userSearchValue" placeholder="Search..." required>
@@ -17,7 +23,7 @@
         <div id="userSearchContent" style="height: 85%;">
             <div id="userSearchResults" class="singleColumn dragColumn fielderColumn">
             </div>
-        </div>
+        </div> -->
     </div>
 </body>
 </html>

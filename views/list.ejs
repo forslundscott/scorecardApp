@@ -130,7 +130,7 @@
             <% var url = ''; %>
             <form action="/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
                 <% for(var i=0; i< data.winners.length; i++) {%>
-                    <%# console.log(`${data.winners[i].Event_ID}-${data.winners[i].paid}`) %>
+                    
                     <% if (data.winners[i].paid == 'false') { %>
                         <% var url = url + data.winners[i].email %>
                         <% if (i < data.winners.length - 1) { %>
@@ -161,9 +161,9 @@ Thank you and have a nice day!`
                     window.location.href = `mailto:?bcc=${bccAddress}&subject=${emailSubject}&body=${emailBody}`;
                 }
                 var testvar = document.getElementById('emailAllButton')
-                console.log(testvar);
+              
                 testvar.onclick = openMailtoLink
-                console.log(testvar);
+                
                 // document.getElementById('emailAllButton').onclick = function(){
                 //     window.location.href = url
                 // }
@@ -174,6 +174,18 @@ Thank you and have a nice day!`
                 <% if (team.players[i].userId !== team.keeper) { %>
                     <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
                 <% } %>
+            <% } %>
+        <% } else if (data.page == 'users/details') { %>
+            <%- include('userDetails',{data: data}); %>
+            <%# for(var i=0; i< data.users.length; i++) {%>
+                    <%# include('user_item',{user: data.users[i]}); %>
+            <%# } %>
+        <% } else if (data.page == 'user/newRole') { %>
+                <%- include(`newUserRole`,{data: data}); %>
+        <% } else if (data.page == 'users/roles') { %>
+            <% console.log(data.list) %>
+            <% for(var i=0; i< data.list.length; i++) {%>
+                <%- include(`userRole_item`,{data: data.list[i]}); %>
             <% } %>
         <% } else if (data.page == 'users') { %>
             <%- include('userSearchForm',{user: data.users[i], display: ''}); %>

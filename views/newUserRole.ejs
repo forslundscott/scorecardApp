@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <form id="newUserRoleForm" class="textCenter" action="addRole" method="post" style="display: ''; text-align: center;">
+        <select name="roleId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="" required>
+            <option value="" disabled selected>Role</option>
+            <!-- <script>console.log(document.getElementById('newGameForm').getElementsByName('leagueId')[0])</script> -->
+            <% for(var i=0; i< data.roles.length; i++) {%>
+                <option value="<%= data.roles[i].id%>"><%= data.roles[i].name%></option>
+            <% } %>
+        </select>
+        <br>
+        <br>
+        <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Role</button>
+    </form>
+</body>
+</html>

@@ -17,6 +17,11 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = '/newTeam';" >New Team</button>
+       <% } else if (data.page == 'users/roles') { %>
+        <%= data.userId%> Roles
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newRole" onclick="window.location.href = 'roles/newRole';" >New Role</button>
        <% } else if (data.page == 'users') { %>
         Users
        <br>
