@@ -519,6 +519,10 @@ app.get(['/newGame'], async (req, res, next) => {
         `)
             data.season = result.recordset[0].seasonName
         result = await request
+        .query(`select seasonName from seasons where active = 1
+        `)
+        data.seasons = result.recordset
+        result = await request
         .query(`SELECT * from league_season ls
             LEFT join leagues l on ls.leagueId=l.abbreviation
             where seasonId = '${data.season}'

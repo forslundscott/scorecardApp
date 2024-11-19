@@ -1110,23 +1110,41 @@ async function getTeams(xform){
         
         if (response.ok) {
             const results = await response.json();
-            // console.log(results)
-            var team1 = xform.querySelector('[name="team1Id"]');
-            var team2 = xform.querySelector('[name="team2Id"]');
-            team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
-            team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
-            results.teams.forEach(team => {
-                var option1 = document.createElement('option');
-                option1.value = team.id;
-                option1.text = team.id;
-                team1.appendChild(option1);
-                
-                var option2 = document.createElement('option');
-                option2.value = team.id;
-                option2.text = team.id;
-                team2.appendChild(option2);
-                
-        });
+            console.log(xform.id)
+            switch(xform.id){
+                case 'newUserTeamForm':
+                    var team1 = xform.querySelector('[name="teamId"]');
+                    team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+                    results.teams.forEach(team => {
+                        var option = document.createElement('option');
+                        option.value = team.id;
+                        option.text = team.id;
+                        team1.appendChild(option);
+                        
+                    });
+                    break
+                case 'newGameForm':
+                    var team1 = xform.querySelector('[name="team1Id"]');
+                    var team2 = xform.querySelector('[name="team2Id"]');
+                    team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+                    team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
+                    results.teams.forEach(team => {
+                        var option1 = document.createElement('option');
+                        option1.value = team.id;
+                        option1.text = team.id;
+                        team1.appendChild(option1);
+                        
+                        var option2 = document.createElement('option');
+                        option2.value = team.id;
+                        option2.text = team.id;
+                        team2.appendChild(option2);
+                        
+                    });
+                    break
+                default:
+                    break
+            }
+            
           } else {
             console.error('Form submission failed');
             // Handle error response
