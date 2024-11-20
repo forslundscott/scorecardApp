@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        function confirmSubmit(event) {
+            const isConfirmed = confirm("Are you sure you want to submit the changes?");
+            if (!isConfirmed) {
+                event.preventDefault(); // Cancel the form submission
+            }
+        }
+    </script>
+</head>
+<body>
+    <form id="editUserForm" class="textCenter" action="editUser" onsubmit="confirmSubmit(event)" method="post" style="display: ''; text-align: center;">
+            <input type="email" name="email" value="<%= data.data.email %>" placeholder="Email" required>
+            <br>
+            <input type="text" name="firstName" value="<%= data.data.firstName %>" placeholder="First Name" required>
+            <br>
+            <input type="text" name="lastName" value="<%= data.data.lastName %>" placeholder="Last Name" required>
+            <br>
+            <input type="text" name="preferredName" value="<%= data.data.preferredName %>" placeholder="Preferred Name (Optional)">
+            <br>
+            <br>
+            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Update User</button>
+    </form>
+</body>
+</html>

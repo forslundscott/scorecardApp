@@ -89,6 +89,8 @@
             <%- include(`newTeamForm`,{data: data}); %>
         <% } else if (data.page == '/newUser') { %>
             <%- include(`newUserForm`,{data: data}); %>
+        <% } else if (data.page == '/editUser') { %>
+            <%- include(`editUserForm`,{data: data}); %>
         <% } else if (data.page == '/newSeason') { %>
             <%- include(`newSeasonForm`,{data: data}); %>
         <% } else if (data.page == '/newLeague') { %>

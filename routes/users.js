@@ -215,6 +215,54 @@ router.get('/:userId/roles', async (req,res, next)=>{
         next(err)
     }
 });
+router.post('/:userId/editUser', async (req,res, next)=>{
+    try{
+        console.log(`test ${req.params.userId}`)
+        var data = {
+            user: req.user,
+            page: 'user/editUser',
+            userId: req.params.userId
+        }
+        console.log(req)
+        const request = pool.request()
+        const result = await request.query(`
+            UPDATE users
+            set firstName = '${req.body.firstName}',
+            lastName = '${req.body.lastName}',
+            preferredName = '${req.body.preferredName}',
+            email = '${req.body.email}'
+            where ID = ${req.params.userId}
+            `)
+            // console.log(result.recordsets[0])
+        
+        // data.roles = result.recordset
+        // res.render('index.ejs',{data: data})
+        res.redirect(302,`/users/${req.params.userId}`)
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/:userId/editUser', async (req,res, next)=>{
+    try{
+        // console.log(`test ${req.params.userId}`)
+        var data = {
+            user: req.user,
+            page: '/editUser'
+        }
+        const request = pool.request()
+        const result = await request.query(`
+            SELECT * 
+            from dbo.users
+            where id = ${req.params.userId}
+            `)
+            console.log(result.recordsets[0])
+        
+        data.data = result.recordset[0]
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        next(err)
+    }
+});
 router.get('/:userId', async (req,res, next)=>{
     try{
         // console.log(`test ${req.params.userId}`)

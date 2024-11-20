@@ -17,6 +17,14 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = '/newTeam';" >New Team</button>
+       <% } else if (data.page == 'users/details') { %>
+        <% console.log(data) %>
+        <%= data.data.firstName %> <%= data.data.lastName %><%= data.data.firstName !== data.data.preferredName ? ` (${data.data.preferredName})`:`` %>
+        <br>
+        <%= data.data.email %>
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="editUser" onclick="window.location.href = '<%= data.data.ID %>/editUser';" >Edit User Info</button>
        <% } else if (data.page == 'users/roles') { %>
         <%= data.userId%> Roles
        <br>
