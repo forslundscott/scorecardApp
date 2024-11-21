@@ -1,4 +1,5 @@
 const { Parser } = require('json2csv');
+const Color = require('color');
 function titleCase(xstr){
     return xstr.charAt(0).toUpperCase() + xstr.slice(1)
 }
@@ -42,4 +43,12 @@ async function exportToCSV(sqlRecordset) {
       throw error;
     }
   }
-module.exports = {titleCase,getOrdinalNumber,exportToCSV}
+function getHexColor(colorName) {
+    try {
+        return Color(colorName).hex(); // Converts color name to hex
+    } catch (e) {
+        return null; // Return null if the color name is invalid
+    }
+}
+
+module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor}

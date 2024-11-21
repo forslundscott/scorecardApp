@@ -91,6 +91,8 @@
             <%- include(`newUserForm`,{data: data}); %>
         <% } else if (data.page == '/editUser') { %>
             <%- include(`editUserForm`,{data: data}); %>
+        <% } else if (data.page == '/editTeam') { %>
+            <%- include(`editTeamForm`,{data: data}); %>
         <% } else if (data.page == '/newSeason') { %>
             <%- include(`newSeasonForm`,{data: data}); %>
         <% } else if (data.page == '/newLeague') { %>
@@ -179,6 +181,8 @@ Thank you and have a nice day!`
             <% } %>
         <% } else if (data.page == 'users/details') { %>
             <%- include('userDetails',{data: data}); %>
+        <% } else if (data.page == 'teams/details') { %>
+            <%- include('teamDetails',{data: data}); %>
             <%# for(var i=0; i< data.users.length; i++) {%>
                     <%# include('user_item',{user: data.users[i]}); %>
             <%# } %>

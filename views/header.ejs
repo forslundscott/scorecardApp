@@ -5,14 +5,22 @@
 <body>
   
   <header class="header" >
-    
+    <% console.log(data.page)%>
     <div id="pageName" class="headerText">
       <% if (data.page == 'games') { %>
        Games
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newGame" onclick="window.location.href = '/newGame';" >New Game</button>
-      <% } else if (data.page == 'teams') { %>
+       <% } else if (data.page == 'teams/details') { %>
+        <% console.log(data) %>
+        <%= data.data.fullName %> (<%= data.data.abbreviation %>)
+        <br>
+        <%= data.data.league %>
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="editTeam" onclick="window.location.href = '<%= data.data.id %>/editTeam';" >Edit Team Info</button>
+       <% } else if (data.page == 'teams') { %>
         Teams
        <br>
        <br>
