@@ -118,29 +118,67 @@ router.use(express.static('../public',options))
 //         next(err)
 //     }
 // });
-// router.post('/:userId/roles/addRole', async (req,res, next)=>{
-//     try{
-//         console.log(`test ${req.params.userId}`)
-//         var data = {
-//             user: req.user,
-//             page: 'user/newRole',
-//             userId: req.params.userId
-//         }
-//         console.log(req)
-//         const request = pool.request()
-//         const result = await request.query(`
-//             insert into user_role (userId,roleId)
-//             values (${req.params.userId},${req.body.roleId})
-//             `)
-//             // console.log(result.recordsets[0])
+router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
+    try{
+        const request = pool.request()
+        var result = await request.query(`select id from users
+        where email = '${req.body.email}'`)
+        if(!result.recordset[0]){
+            result = await request.query(`
+            DECLARE @firstName varchar(255)
+            DECLARE @lastName varchar(255)
+            DECLARE @preferredName varchar(255)
+            DECLARE @email varchar(255)
+            DECLARE @userId varchar(255)
+            DECLARE @sport varchar(255)
+            DECLARE @rating decimal(10,3)
+            DECLARE @teamId varchar(255)
+            DECLARE @seasonId varchar(255)
+            
+            set @firstName = '${req.body.firstName}'
+            set @lastName = '${req.body.lastName}'
+            set @preferredName = '${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}'
+            set @email = '${req.body.email}'
+            set @sport = '${req.body.sport}'
+            set @rating = 3
+            set @teamId = '${req.body.team}'
+            set @seasonId = '${req.body.season}'
+            
+            EXECUTE  [dbo].[insert_user] 
+               @firstName
+              ,@lastName
+              ,@preferredName
+              ,@email
+
+            EXECUTE [dbo].[insert_userSportRating] 
+            @sport
+            ,@email
+            ,@rating
+
+            `)
+        }
+
+        result = await request.query(`
+        DECLARE @email varchar(255)
+        DECLARE @teamId varchar(255)
+        DECLARE @seasonId varchar(255)
         
-//         // data.roles = result.recordset
-//         // res.render('index.ejs',{data: data})
-//         res.redirect(302,`/users/${req.params.userId}/roles`)
-//     }catch(err){
-//         next(err)
-//     }
-// });
+        set @email = '${req.body.email}'
+        set @teamId = '${req.body.team}'
+        set @seasonId = '${req.body.season}'
+        
+        EXECUTE [dbo].[insert_userTeamSeason] 
+            @email
+            ,@teamId
+            ,@seasonId
+        `)
+        console.log()
+        res.redirect('./')
+        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+});
 router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
@@ -155,7 +193,7 @@ router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
             where id = '${req.params.teamId}'
             `)
             // console.log(result.recordsets[0])
-        data.leagueId = result.recordset[0].league
+        data.seasonId = result.recordset[0].season
         // data.roles = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){

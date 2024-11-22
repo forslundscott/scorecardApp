@@ -570,13 +570,24 @@ function togglePaidCheckbox() {
     }
 }
 function selectPlayer(xform){
-
-    const newPlayerForm = document.getElementById('newPlayerForm')
-    newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
-    newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
-    newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
-    newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
-    newPlayerForm.querySelector('[name="waiver"]').checked = true
+    // console.log(window.location.href)
+    if(window.location.href.includes('activeGame')){
+        var newPlayerForm = document.getElementById('newPlayerForm')
+        newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
+        newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
+        newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
+        newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
+    }else if(window.location.href.includes('roster/newPlayer')){
+        // console.log(window.location.href)
+        var newPlayerForm = document.getElementById('newRosterPlayerForm')
+    }
+        newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
+        newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
+        newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
+        newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
+    
     toggleSearchPlayer()
 }
 function selectUser(xform){

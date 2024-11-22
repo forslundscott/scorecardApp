@@ -1,2 +1,7 @@
+#ignores
 .env
 node_modules
+images/profile-images/*
+
+#keeps
+!images/profile-images/.gitkeep
