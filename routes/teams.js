@@ -141,32 +141,27 @@ router.use(express.static('../public',options))
 //         next(err)
 //     }
 // });
-// router.get('/:userId/roles/newRole', async (req,res, next)=>{
-//     try{
-//         console.log(`test ${req.params.userId}`)
-//         var data = {
-//             user: req.user,
-//             page: 'user/newRole',
-//             userId: req.params.userId
-//         }
-//         const request = pool.request()
-//         const result = await request.query(`
-//             select * 
-//             from roles
-//             where not id in (
-//                 select roleId 
-//                 from user_role 
-//                 where userId = ${req.params.userId}
-//                 )
-//             `)
-//             // console.log(result.recordsets[0])
-        
-//         data.roles = result.recordset
-//         res.render('index.ejs',{data: data})
-//     }catch(err){
-//         next(err)
-//     }
-// });
+router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
+    try{
+        console.log(`test ${req.params.userId}`)
+        var data = {
+            user: req.user,
+            page: 'team/newPlayer',
+            teamId: req.params.teamId
+        }
+        const request = pool.request()
+        var result = await request.query(`
+            select season from teams
+            where id = '${req.params.teamId}'
+            `)
+            // console.log(result.recordsets[0])
+        data.leagueId = result.recordset[0].league
+        // data.roles = result.recordset
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        next(err)
+    }
+});
 // router.get('/:userId/roles/:roleId', async (req,res, next)=>{
 //     try{
 //         console.log(`test ${req.params.userId}`)
@@ -192,30 +187,30 @@ router.use(express.static('../public',options))
 //         next(err)
 //     }
 // });
-// router.get('/:userId/roles', async (req,res, next)=>{
-//     try{
-//         console.log(`test ${req.params.userId}`)
-//         var data = {
-//             user: req.user,
-//             page: 'users/roles',
-//             userId: req.params.userId
-//         }
-//         const request = pool.request()
-//         const result = await request.query(`
-//             select userId, preferredName,lastName, roleId, name
-//             from user_role as ur 
-//             LEFT join users as u on ur.userId=u.ID
-//             left join roles as r on ur.roleId=r.id
-//             where userId = ${req.params.userId}
-//             `)
-//             // console.log(result.recordsets[0])
+router.get('/:teamId/roster', async (req,res, next)=>{
+    try{
         
-//         data.list = result.recordset
-//         res.render('index.ejs',{data: data})
-//     }catch(err){
-//         next(err)
-//     }
-// });
+        var data = {
+            user: req.user,
+            page: 'team/roster',
+            userId: req.params.userId
+        }
+        const request = pool.request()
+        const result = await request.query(`
+            select userId, preferredName,lastName
+            from user_team as ut
+            LEFT join users as u on ut.userId=u.ID
+            left join teams as t on ut.teamId=t.id
+            where teamId = '${req.params.teamId}'
+            `)
+            // console.log(result.recordsets[0])
+        
+        data.list = result.recordset
+        res.render('index.ejs',{data: data})
+    }catch(err){
+        next(err)
+    }
+});
 router.post('/:teamId/editTeam', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)

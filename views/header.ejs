@@ -13,11 +13,11 @@
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newGame" onclick="window.location.href = '/newGame';" >New Game</button>
        <% } else if (data.page == 'teams/details') { %>
-        <% console.log(data) %>
+        <div class="textCenter" style="height: 10vh;"><img src="/images/<%=data.data.id%>.png" alt="<%= data.data.id %> Logo" class="formLogo"></div>
         <%= data.data.fullName %> (<%= data.data.abbreviation %>)
         <br>
         <%= data.data.league %>
-       <br>
+       <!-- <br> -->
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="editTeam" onclick="window.location.href = '<%= data.data.id %>/editTeam';" >Edit Team Info</button>
        <% } else if (data.page == 'teams') { %>
@@ -25,6 +25,11 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = '/newTeam';" >New Team</button>
+       <% } else if (data.page == 'team/roster') { %>
+        <%= data.teamId%> Roster
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newPlayer" onclick="window.location.href = 'roster/newPlayer';" >New Player</button>
        <% } else if (data.page == 'users/details') { %>
         <% console.log(data) %>
         <%= data.data.firstName %> <%= data.data.lastName %><%= data.data.firstName !== data.data.preferredName ? ` (${data.data.preferredName})`:`` %>

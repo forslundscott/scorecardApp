@@ -186,12 +186,19 @@ Thank you and have a nice day!`
             <%# for(var i=0; i< data.users.length; i++) {%>
                     <%# include('user_item',{user: data.users[i]}); %>
             <%# } %>
+        <% } else if (data.page == 'team/newPlayer') { %>
+            <%- include(`newRosterPlayerForm`,{data: data}); %>
         <% } else if (data.page == 'user/newRole') { %>
                 <%- include(`newUserRole`,{data: data}); %>
         <% } else if (data.page == 'users/roles') { %>
             <% console.log(data.list) %>
             <% for(var i=0; i< data.list.length; i++) {%>
                 <%- include(`userRole_item`,{data: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'team/roster') { %>
+            
+            <% for(var i=0; i< data.list.length; i++) {%>
+                <%- include(`teamRoster_item`,{data: data.list[i]}); %>
             <% } %>
         <% } else if (data.page == 'user/newTeam') { %>
             <%- include(`newUserTeam`,{data: data}); %>
