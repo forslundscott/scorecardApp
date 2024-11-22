@@ -31,8 +31,8 @@ function initialize(passport, getUserByEmail, getUserById){
     authenticateUser))
     passport.serializeUser((user, done) => done(null, user.id))
     passport.deserializeUser(async (id, done) => {
-        const result = await getUserById(id)
-        const user = result.recordset[0]
+        const user = await getUserById(id)
+        // const user = result
         return done(null, user)
     })
 }

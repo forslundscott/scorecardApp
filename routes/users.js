@@ -276,7 +276,7 @@ router.get('/:userId', async (req,res, next)=>{
             from dbo.users
             where id = ${req.params.userId}
             `)
-            console.log(result.recordsets[0])
+            console.log(req)
         
         data.data = result.recordset[0]
         res.render('index.ejs',{data: data})

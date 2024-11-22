@@ -8,9 +8,11 @@
         <div class="statButton" style="width: calc(100%/3);">
             <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="teams" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/teams';" >Teams</button>                    
         </div>
+        <% if (data.user?.roles?.some(role => ['admin', 'Manager'].includes(role.name))) { %>
         <div class="statButton" style="width: calc(100%/3);">
             <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="roles" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/roles';" >Roles</button>                    
         </div>
+        <% } %>
         <!-- <div style="height: 15%;">
             <form id="userSearchForm" class="primaryStyle" style=" text-align: center;" onsubmit="userSearch(this,event)">
                     

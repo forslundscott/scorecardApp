@@ -46,8 +46,7 @@ const sequelize = new Sequelize({
 });
 const pool = require(`${__dirname}/db`)
 app.use(express.urlencoded({ extended: true }))
-app.use('/users', require(`${__dirname}/routes/users`));
-app.use('/teams', require(`${__dirname}/routes/teams`));
+
 
 const Session = sequelize.define('Session', {
     sid: {
@@ -75,11 +74,18 @@ initializePassport(
         },
     async id => {
             const request = pool.request()
-            const result = await request
+            var result = await request
             .query(`select firstName, id, email
             from users
             where id = '${id}'`)
-            return result
+            const user = result.recordset[0]
+            result = await request
+            .query(`select r.id, r.name
+            from user_role as ur
+            left join roles as r on ur.roleId=r.id
+            where ur.userId = '${id}'`)
+            user.roles = result.recordset
+            return user
         }
     )
 
@@ -107,6 +113,8 @@ app.use(methodOverride('_method'))
 // sequelize.sync()
 
 // Helpers and Routes
+app.use('/users', require(`${__dirname}/routes/users`));
+app.use('/teams', require(`${__dirname}/routes/teams`));
 const functions = require('./helpers/functions');
 const scheduler = require('./helpers/scheduler');
 const { log } = require('console');
@@ -168,14 +176,13 @@ app.get(['/login'], checkNotAuthenticated, async (req,res)=>{
             // console.log(req.session.cookie.returnTo)
             // console.log(req.session.returnTo)
         }
-        await sequelize.sync({force: true})
+        // await sequelize.sync({force: true})
         res.render('login.ejs')
     }catch(err){
         console.error('Error:', err)
     }    
 })
-app.post(['/login'], 
-function(req, res, next) { passport.authenticate('local', function(err, user, info, status) {
+app.post(['/login'], function(req, res, next) { passport.authenticate('local', function(err, user, info, status) {
     if (err) { return next(err) }
     try{
         console.log(info)
@@ -1244,6 +1251,7 @@ app.get(['/timer'], async (req,res,next)=>{
 })
 app.get('/admin', checkAuthenticated, authRole('admin'), (req, res) => {
     // Only accessible by users with admin role
+    console.log(req.user)
     res.send('Admin Page');
 });
 app.get(['/games'], async (req,res,next)=>{
@@ -2450,34 +2458,17 @@ function checkNotAuthenticated(req, res, next) {
         console.error('Error:', err)
     }    
 }
-function authRole(roleName){
-    
-    // try{
-    
-    
+function authRole(role){
     return async (req,res,next)=>{
         try{
-        const role = ROLES[roleName]
-        console.log(role)
-        const request = pool.request()
-        const result = await request
-        .query(`select roleId
-                from user_role
-                where userId = ${req.user.id}
-        `)
-        if(result.recordset.some(record=> record.roleId === role)){
-            console.log('match');
+        if(req.user.roles.some(userRole=> userRole.id === role || userRole.name === role)){
             return next()
         }
-        console.log('no');
         return res.status(403).end()
         }catch(err){
             console.error('Error:', err)
         }
     }
-    // }catch(err){
-    //     console.error('Error:', err)
-    // }
 }
 app.use((err, req, res, next) => {
     console.error(err);
