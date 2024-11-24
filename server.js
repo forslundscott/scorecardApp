@@ -198,15 +198,15 @@ app.post(['/login'], function(req, res, next) { passport.authenticate('local', f
 })(req, res, next)
 })
 
-app.get(['/register'], async (req,res)=>{
+app.get(['/createProfile'], async (req,res)=>{
     try{
-        res.render('register.ejs')
+        res.render('createProfile.ejs')
     }catch(err){
         console.error('Error:', err)
     }    
 })
 
-app.post(['/register'], async (req,res)=>{
+app.post(['/createProfile'], async (req,res)=>{
     // console.log(req.body);
     try {
         const emailExistsResult = await pool.request()
@@ -216,7 +216,7 @@ app.post(['/register'], async (req,res)=>{
         // If email already exists, respond with a message
         console.log(emailExistsResult.recordset[0].count)
         if (emailExistsResult.recordset[0].count > 0) {
-            return res.render('register.ejs', {messages: {message: 'User with specified email already exists, Please use reset Password link.'}})
+            return res.render('createProfile.ejs', {messages: {message: 'User with specified email already exists, Please use reset Password link.'}})
             // return res.status(400).send('User with specified email already exists');
         }
         const hashedpassword = await bcrypt.hash(req.body.password, 10)
@@ -240,7 +240,7 @@ app.post(['/register'], async (req,res)=>{
         res.redirect('/login')
     }catch(err){
         console.log(err)
-        res.redirect('/register')
+        res.redirect('/createProfile')
     }
     
     // console.log(users)
