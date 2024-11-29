@@ -11,7 +11,7 @@
        Games
        <br>
        <br>
-       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newGame" onclick="window.location.href = '/newGame';" >New Game</button>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="/games/newGame" onclick="window.location.href = '/games/newGame';" >New Game</button>
        <% } else if (data.page == 'teams/details') { %>
         <div class="textCenter" style="height: 10vh;"><img src="/images/<%=data.data.id%>.png" alt="<%= data.data.id %> Logo" class="formLogo"></div>
         <%= data.data.fullName %> (<%= data.data.abbreviation %>)
@@ -24,7 +24,7 @@
         Teams
        <br>
        <br>
-       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = '/newTeam';" >New Team</button>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = '/teams/newTeam';" >New Team</button>
        <% } else if (data.page == 'team/roster') { %>
         <%= data.teamId%> Roster
        <br>
@@ -47,22 +47,23 @@
         <%= data.userId%> Teams
        <br>
        <br>
+       <!-- Change next line href to ./newTeam -->
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newTeam" onclick="window.location.href = 'teams/newTeam';" >New Team</button>
        <% } else if (data.page == 'users') { %>
         Users
        <br>
        <br>
-       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newUser" onclick="window.location.href = '/newUser';" >New User</button>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newUser" onclick="window.location.href = '/users/newUser';" >New User</button>
        <% } else if (data.page == 'seasons') { %>
         Seasons
        <br>
        <br>
-       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newSeason" onclick="window.location.href = '/newSeason';" >New Season</button>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newSeason" onclick="window.location.href = '/seasons/newSeason';" >New Season</button>
       <% } else if (data.page == 'leagues') { %>
         Leagues
         <br>
         <br>
-        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newLeague" onclick="window.location.href = '/newLeague';" >New League</button>
+        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newLeague" onclick="window.location.href = '/leagues/newLeague';" >New League</button>
        <% } else if (data.page == 'standings') { %>
         <% if (data.hasOwnProperty('list')) { %>
         <%= data.league %> Standings
@@ -71,22 +72,19 @@
         <% }else { %>
           Standings
         <% } %>
-        <!-- <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button> -->
-      <%# } else if (data.page == 'readyForUpload') { %>
-        <!-- Ready For Upload to SE -->
       <% } else if (data.page.startsWith('/schedules/item/')) { %>
         Schedule: <%= data.scheduleName %>
         <br>
         <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportSchedule('<%= data.scheduleId%>')" >Export to CSV</button>
-      <% } else if (data.page == 'winners') { %>
+      <!-- <%# } else if (data.page == 'winners') { %>
         <div>Winners</div>
         <div style="height: 40%; width: 100%;">
-          <!-- <a href="mailto:?bcc=<%=encodeURIComponent('test@test')%>&subject=<%=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%=encodeURIComponent('This is a reminder to send gift card payments.')%>" style="height: 100%; width: 100%;"> -->
+           <a href="mailto:?bcc=<%#=encodeURIComponent('test@test')%>&subject=<%#=encodeURIComponent('GLOS: Gift Card Payment')%>&body=<%#=encodeURIComponent('This is a reminder to send gift card payments.')%>" style="height: 100%; width: 100%;">
             <button id="emailAllButton" type="button" class="secondaryStyle" style="height: 80%" >Send Reminder to All</button>
             <br>
             <button id="savePaidChanges" type="submit" class="secondaryStyle" style="height: 80%" form="paidForm">Save Changes</button>
-          <!-- </a>  -->
-        </div>
+           </a>  
+        </div> -->
       <% }else if (data.page.includes('activeGame')) {%>
         <% var currentPeriod = data.game.period %>
         <script>
@@ -109,7 +107,7 @@
         </div>
         <div class="triColumn textCenter">
           
-          <form id="timerForm" action="timer" enctype="application/x-www-form-urlencoded">
+          <form id="timerForm" action="/games/timer" enctype="application/x-www-form-urlencoded">
             <input type="hidden" name="Event_ID" value="<%= data.Event_ID %>">
             <input type="hidden" name="period" value="<%- data.game.period %>">
             <input type="hidden" name="timerState" value="<%- data.game.timerState %>">

@@ -42,7 +42,7 @@
                 <%- include(`schedule_item`,{item: data.list[i]}); %>
             <% } %>
         <% } else if (data.page == '/schedules/new') { %>
-            <form action="<%= data.page %>" method="post" class="textCenter">
+            <form action="/<%= data.page %>" method="post" class="textCenter">
                 
                 <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" required>
                     <option value="" disabled selected hidden>Season</option>
@@ -132,7 +132,7 @@
             <% } %>
         <% } else if (data.page == 'winners') { %>
             <% var url = ''; %>
-            <form action="/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
+            <form action="/old/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
                 <% for(var i=0; i< data.winners.length; i++) {%>
                     
                     <% if (data.winners[i].paid == 'false') { %>

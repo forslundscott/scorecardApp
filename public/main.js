@@ -1,12 +1,7 @@
 // const { data } = require("cheerio/lib/api/attributes");
 
 const audio = new Audio()
-var eventLog = [
 
-]
-function sendGameData(){
-    
-}
 if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || sessionStorage.gameInfo == null) {
     var gameInfo = {
         period: 1,
@@ -14,19 +9,14 @@ if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || se
         timerButtonState: 'Start',
         touchTime: Date.now()
     }
-    // document.getElementById('gameTimer').innerHTML = gameInfo.time
-    // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
-    // document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
+
 }else {
     gameInfo = JSON.parse(sessionStorage.gameInfo)
-    // document.getElementById('gameTimer').innerHTML = gameInfo.time
-    // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
-    // document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
+
 }
 
 window.addEventListener('beforeunload', (event) => {
-    // gameInfo.time = document.getElementById('gameTimer').innerHTML
-    // gameInfo.timerButtonState = document.getElementById('timerButton').innerHTML
+
     sessionStorage.setItem('gameInfo',JSON.stringify(gameInfo))
   });
 class Game {
@@ -92,14 +82,7 @@ document.addEventListener('click', function enableAudio() {
     
 }, false);
 
-// document.addEventListener('visibilitychange', async () => {
-//     if (screenLock !== null && document.visibilityState === 'visible') {
-//       screenLock = await navigator.wakeLock.request('screen');
-//     }
-//   });
-// document.addEventListener('touchstart', function () {
-//     gameInfo.touchTime = Date.now()
-// })
+
 function setDragScroll(ele){
     ele.style.cursor = 'grab';
 
@@ -147,7 +130,7 @@ function setDragScroll(ele){
     ele.addEventListener('mousedown', mouseDownHandler);
     ele.addEventListener('ontouchstart', mouseDownHandler);
 }
-// var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
+
 if(document.getElementById('timerForm')){
     var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
     var x = setInterval(async function() {
@@ -184,7 +167,7 @@ if(document.getElementById('timerForm')){
                         // form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
                         // form.querySelector('[name="type"]').value = ele.value
                         var formData = new FormData(form)
-                    const response = await fetch('/periodEnd', {
+                    const response = await fetch('/games/periodEnd', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -261,7 +244,7 @@ if(document.getElementById('timerForm')){
         var formData = new FormData(form)
         // console.log(formData)
         try{
-            const response = await fetch('/eventLog', {
+            const response = await fetch('/games/eventLog', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -345,73 +328,7 @@ function handleLongPress(e){
         return false
     }
 }
-async function addPreviousSub(xform){
-    var teamForm = document.getElementById('teamForm')
-    // var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
-    // if(teamForm.style.display == 'none'){
-        // var color = xform.querySelector('[name="color"]').value
-        // teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="team"]').value
-        // teamForm.style.display = ''
-        // teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        // teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
-        // teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
-        // teamForm.getElementsByClassName('formLogo')[0].src = `images/${xform.querySelector('[name="team"]').value}.png`
-        // while(pastSubsDropdown.options.length>1){
-        //     pastSubsDropdown.remove(1)
-        // }
-        var formData = new FormData(teamForm)
-        console.log(formData)
-        const response = await fetch('/addPastSub', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            // const responseData = await response.json();
-            var selectedOption = pastSubsDropdown.options[selectElement.selectedIndex];
-  
-            if (selectedOption) {
-                var selectedIndex = selectedOption.index;
-                pastSubsDropdown.selectedIndex = 0
-                pastSubsDropdown.remove(selectedIndex);
-                
-                // Update selection if necessary
-                // if (selectedIndex < selectElement.options.length) {
-                // selectElement.options[selectedIndex].selected = true;
-                // } else if (selectElement.options.length > 0) {
-                // selectElement.options[selectElement.options.length - 1].selected = true;
-                // }
-            } else {
-                console.log("No option is selected");
-            }
-            // if(responseData.subs){
-            //     responseData.subs.forEach(function(sub){
-            //         var option = document.createElement('option')
-            //         option.text = sub.firstName + ' ' + sub.lastName
-            //         option.value = sub.id
-            //         pastSubsDropdown.add(option)
-            //     })
-            // }
-            console.log(responseData.message);
-            location.reload()
-          } else {
-            console.error('Form submission failed');
-            // Handle error response
-          }
-        console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
 
-        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
-    // }else{
-    //     teamForm.style.display = 'none'
-    // }
-    // if(document.getElementById('formBackground').style.display == 'none'){
-    //     document.getElementById('formBackground').style.display = ''
-    // }else{
-    //     document.getElementById('formBackground').style.display = 'none'
-    // }
-}
 function toggleAddPlayer(xform){
     if(document.getElementById('newPlayerForm').style.display == 'none'){
         // var color = xform.querySelector('[name="color"]').value
@@ -460,7 +377,7 @@ async function userSearch(xForm,event){
         try {
 
             var formData = new FormData(xForm)
-            const response = await fetch(`/userSearch`, {
+            const response = await fetch(`/users/userSearch`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -508,7 +425,7 @@ async function playerSearch(xForm,event){
     try {
 
         var formData = new FormData(xForm)
-        const response = await fetch(`/playerSearch`, {
+        const response = await fetch(`/games/playerSearch`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -616,33 +533,6 @@ async function toggleTeamForm(xform){
         teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
         teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="team"]').value}.png`
-        // while(pastSubsDropdown.options.length>1){
-        //     pastSubsDropdown.remove(1)
-        // }
-        // var formData = new FormData(teamForm)
-        // const response = await fetch('/getPastSubs', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/x-www-form-urlencoded',
-        //       },
-        //     body: new URLSearchParams(formData).toString(),
-        //   });
-        //   if (response.ok) {
-        //     const responseData = await response.json();
-        //     if(responseData.subs){
-        //         responseData.subs.forEach(function(sub){
-        //             var option = document.createElement('option')
-        //             option.text = sub.firstName + ' ' + sub.lastName
-        //             option.value = sub.ID
-        //             pastSubsDropdown.add(option)
-        //         })
-        //     }
-        //     console.log(responseData.message);
-        //     // location.reload()
-        //   } else {
-        //     console.error('Form submission failed');
-        //     // Handle error response
-        //   }
         console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
 
         // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
@@ -655,7 +545,7 @@ async function toggleGameInfoForm(xform){
     
     try{
         var formData = new FormData(xform)
-        const response = await fetch('/gameInfo', {
+        const response = await fetch('/games/gameInfo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -707,19 +597,10 @@ async function toggleGameInfoForm(xform){
                     scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
                   }
                 
-                // var color = xform.querySelector('[name="color"]').value
+
                 document.getElementById('gameInfoForm').style.display = ''
                 document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
-                // var gameUnixTime = new Date(Number(responseData.data.game.startUnixTime))
-                // console.log(typeof responseData.data.game.startUnixTime)
-                // console.log(`${gameUnixTime.getFullYear()}-${gameUnixTime.getMonth()+1}-${gameUnixTime.getDate()}`)
-                // console.log(responseData.data.game.Start_Time)
-                // document.getElementById('gameInfoForm').querySelector('[name="startDate"]').value = `${gameUnixTime.getFullYear()}-${gameUnixTime.getMonth()+1<10?`0${gameUnixTime.getMonth()+1}`:gameUnixTime.getMonth()+1}-${gameUnixTime.getDate()<10? `0${gameUnixTime.getDate()}`:gameUnixTime.getDate()}`
-                // document.getElementById('gameInfoForm').querySelector('[name="startTime"]').value = `${String(gameUnixTime.getHours()).padStart(2, '0')}:${String(gameUnixTime.getMinutes()).padStart(2, '0')}`
-                // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
-                
-                // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
-            }else{
+             }else{
                 document.getElementById('gameInfoForm').style.display = 'none'
             }
             if(document.getElementById('formBackground').style.display == 'none'){
@@ -812,7 +693,7 @@ function toggleForm(formName){
 async function exportStandings(xtype,xleague){
     var sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
     console.log(sqlString)
-    const response = await fetch('/exportStandings', {
+    const response = await fetch('/standings/exportStandings', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -846,7 +727,7 @@ async function exportSchedule(xscheduleID){
     FROM schedule_games
     where scheduleId = '${xscheduleID}'`
     console.log(sqlString)
-    const response = await fetch('/exportSchedules', {
+    const response = await fetch('/schedules/exportSchedules', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -957,7 +838,7 @@ function convertUnixTimeToMMDD(unixTime) {
     var formData = new FormData(form)
     console.log(formData)
     try{
-        const response = await fetch('/switchSides', {
+        const response = await fetch('/games/switchSides', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1068,7 +949,7 @@ function convertUnixTimeToMMDD(unixTime) {
     }
 }
 function handleVisibilityChange() {
-    // console.log(window.location.pathname.indexOf('activeGame'))
+
     if (document.visibilityState === 'visible' && window.location.pathname.indexOf('activeGame') !== -1) {
         // Page is visible, refresh the page
         window.location.reload(true);
@@ -1079,7 +960,7 @@ document.getElementById('newPlayerForm').querySelector('[name="email"]').addEven
     var email = this.value;
     var formData = new FormData(document.getElementById('newPlayerForm'))
     console.log(formData)
-    const response = await fetch('/checkEmail', {
+    const response = await fetch('/games/checkEmail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -1110,7 +991,7 @@ async function getTeams(xform){
     try {
 
         var formData = new FormData(xform)
-        const response = await fetch(`/getTeams`, {
+        const response = await fetch(`/teams/getTeams`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1170,7 +1051,7 @@ async function getLeagues(xform){
     try {
 
         var formData = new FormData(xform)
-        const response = await fetch(`/getLeagues`, {
+        const response = await fetch(`/leagues/getLeagues`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

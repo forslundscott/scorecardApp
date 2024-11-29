@@ -1,0 +1,72 @@
+const express = require('express');
+const router = express.Router();
+const pool = require(`../db`)
+const functions = require('../helpers/functions')
+const mailchimp = require('../helpers/mailChimp')
+const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
+
+// const mailchimp = {
+//     marketing: require('@mailchimp/mailchimp_marketing'),
+//     transactional: require('@mailchimp/mailchimp_transactional')(process.env.MANDRILL_KEY)
+//     }
+// const bodyParser = require('body-parser')
+// mailchimp.marketing.setConfig({
+//     apiKey: process.env.MAILCHIMP_KEY,
+//     server: process.env.MAILCHIMP_SERVER, // e.g., us1
+// })
+router.get('/send-email', async (req, res) => {
+    // const { recipientEmail, subject, message } = req.body;
+
+    try {
+        // const response = await mailchimp.transactional.messages.send({
+        //     message: {
+        //         subject: 'test',
+        //         text: 'testing',
+        //         to: [{
+        //             email: 'forslund.scott@gmail.com',
+        //         }],
+        //     },
+        // });
+        // const run = async () => {
+        //     // const response = await mailchimp.marketing.lists
+        //     // const response = await mailchimp.marketing.lists.getListMembersInfo("0e63a5b642")
+        //     const response = await mailchimp.marketing.lists.getAllLists();
+            
+        //     // const response = await mailchimp.marketing.lists.getList({
+        //     //     name: { match: 'Greater Lansing Open Soccer'}
+        //     // })
+        //     console.log(response.lists[0].name)
+        //     console.log(response.lists.find(obj => obj.name === 'Greater Lansing Open Soccer'));
+        //   };
+        //   run()
+
+        // console.log('Email sent:', response);
+        console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
+        // console.log(await mailchimp.getCampaigns())
+        // await mailchimp.sendMessage('forslund.scott@gmail.com','Testing Madrill Email', 'Testing Transactional email sending through MailChimp module Madrill.')
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.find(item=>item.email_address == 'aidenhanchett4@gmail.com'))
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.length)
+        // const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+        // console.log(await mailchimp.getMemberTags(listId,(await mailchimp.getListMembers(listId)).members[1].id))
+        // console.log(await mailchimp.getLists());
+        res.send('Email sent successfully');
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).send('Failed to send email');
+    }
+})
+router.get('/', async (req,res, next)=>{
+    // try{
+    //  
+    // }catch(err){
+    //     next(err)
+    // }
+});
+
+// Define a POST route for `/users`
+// router.post('/', (req, res) => {
+//   res.send('Create a new user');
+// });
+
+// Export the router so it can be used in other files
+module.exports = router;

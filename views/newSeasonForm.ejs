@@ -4,7 +4,7 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="newSeasonForm" class="textCenter" action="addSeason" method="post" style="display: ''; text-align: center;">
+    <form id="newSeasonForm" class="textCenter" action="/seasons/addSeason" method="post" style="display: ''; text-align: center;">
         <!-- <div class="playerTag itemFormat"> -->
             
             <input type="text" name="seasonName" value="" placeholder="Season Name" required>

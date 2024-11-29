@@ -22,17 +22,12 @@
             <input type="text" name="abbreviation" value="<%= data.data.abbreviation %>" placeholder="abbreviation" required>
             <br>
             <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getLeagues(this.form)" required>
-                <!-- <option value="" disabled selected hidden>Season</option> -->
-                <!-- <option value="<%# data.season %>" selected><%= data.season %></option> -->
                 <% for(var i=0; i< data.seasons.length; i++) {%>
-                    <%# console.log(data.seasons.length) %>
                     <option value="<%= data.seasons[i].seasonName%>" <%= data.seasons[i].seasonName== data.data.season? 'selected' : ''%>><%= data.seasons[i].seasonName%></option>
                 <% } %>
-                <!-- <option value="Indoor">Indoor</option> -->
             </select>
             <select name="leagueId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="" required>
                 <option value="" disabled selected>League</option>
-                <!-- <script>console.log(document.getElementById('newGameForm').getElementsByName('leagueId')[0])</script> -->
                 <% for(var i=0; i< data.leagues.length; i++) {%>
                     <option value="<%= data.leagues[i].abbreviation%>" <%= data.leagues[i].name== data.data.league? 'selected' : ''%>><%= data.leagues[i].shortName%></option>
                 <% } %>
