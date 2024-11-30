@@ -11,7 +11,7 @@ const Sequelize = require('sequelize');
 const SessionStore = require('express-session-sequelize')(session.Store)
 const methodOverride = require('method-override')
 const initializePassport = require('./passport-config')
-
+const pool = require(`./db`)
 // const helmet = require('helmet');
 
 const sequelize = new Sequelize({
@@ -25,7 +25,7 @@ const sequelize = new Sequelize({
         timestamps: false,
     },
 });
-const pool = require(`${__dirname}/db`)
+
 app.use(express.urlencoded({ extended: true }))
 const defineSession = require('./models/session');
 const Session = defineSession(sequelize);
@@ -79,16 +79,17 @@ app.use(passport.session())
 app.use(methodOverride('_method'))
 
 // Helpers and Routes
-app.use('/users', require(`${__dirname}/routes/users`));
-app.use('/games', require(`${__dirname}/routes/games`));
-app.use('/teams', require(`${__dirname}/routes/teams`));
-app.use('/seasons', require(`${__dirname}/routes/seasons`));
-app.use('/leagues', require(`${__dirname}/routes/leagues`));
-app.use('/standings', require(`${__dirname}/routes/standings`));
-app.use('/auth', require(`${__dirname}/routes/auth`))
-app.use('/notifications', require(`${__dirname}/routes/notifications`))
-app.use('/schedules', require(`${__dirname}/routes/schedules`))
-app.use('/old', require(`${__dirname}/routes/old`))
+app.use('/users', require(`./routes/users`));
+app.use('/games', require(`./routes/games`));
+app.use('/teams', require(`./routes/teams`));
+app.use('/seasons', require(`./routes/seasons`));
+app.use('/leagues', require(`./routes/leagues`));
+app.use('/standings', require(`./routes/standings`));
+app.use('/auth', require(`./routes/auth`))
+app.use('/notifications', require(`./routes/notifications`))
+app.use('/api/payments', require(`./routes/payments`))
+app.use('/schedules', require(`./routes/schedules`))
+app.use('/old', require(`./routes/old`))
 const functions = require('./helpers/functions');
 
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('./middleware/authMiddleware')
