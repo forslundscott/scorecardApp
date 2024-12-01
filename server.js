@@ -78,6 +78,13 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
 
+// Middleware to add the `ngrok-skip-browser-warning` header to requests
+app.use((req, res, next) => {
+    res.setHeader('ngrok-skip-browser-warning', 'true');
+    next();
+  });
+  
+
 // Helpers and Routes
 app.use('/users', require(`./routes/users`));
 app.use('/games', require(`./routes/games`));
