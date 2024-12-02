@@ -1,0 +1,24 @@
+<form id="checkout-form" onsubmit="paymentSubmit(this,event)">
+    <input type="number" id="amount" name="amount" placeholder="Enter amount in cents" required />
+    <button type="submit">Pay with Stripe Checkout</button>
+</form>
+<script src="/main.js"></script>
+<!-- <script>
+    document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const form = document.getElementById('checkout-form');
+  
+            event.preventDefault();
+            var formData = new FormData(form)
+            const response = await fetch('./payments/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString(),
+            })
+        const { url } = await response.json();
+        window.location.href = url; // Redirect to Stripe Checkout
+    });
+</script> -->

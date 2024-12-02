@@ -1083,5 +1083,23 @@ async function getLeagues(xform){
         console.error('Error fetching results:', error);
     }
 }
+async function paymentSubmit(form,event) {
+        // const form = document.getElementById('checkout-form');
+            event.preventDefault();
+            var formData = new FormData(form)
+            const response = await fetch('/api/payments/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString(),
+            })
+
+
+
+        const { url } = await response.json();
+        window.location.href = url; // Redirect to Stripe Checkout
+
+}
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

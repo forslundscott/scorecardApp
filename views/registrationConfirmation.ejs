@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Registration</title>
+</head>
+<body>
+    <header>
+        <h1>Confirm Your Pickup Soccer Registration</h1>
+    </header>
+
+    <main>
+        <h2>Registration Details</h2>
+        <p><strong>Name:</strong> <%= name %></p>
+        <p><strong>Email:</strong> <%= email %></p>
+        <p><strong>Team Preference:</strong> <%= team ? team : 'None' %></p>
+        
+        <h3>Total Cost: $<%= cost %></h3>
+
+        <!-- Button to proceed to Stripe checkout -->
+        <form action="/api/payments/create-checkout-session" method="POST">
+            <input type="number" name="amount" value="50" hidden>
+            <button type="submit">Proceed to Payment</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Pickup Soccer</p>
+    </footer>
+</body>
+</html>

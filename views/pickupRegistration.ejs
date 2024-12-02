@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/GLOSLogo.png">
+    <title>Pickup Soccer Registration</title>
+</head>
+<body>
+    <header>
+        <h1>Register for Pickup Soccer</h1>
+    </header>
+    <br>
+    <main>
+        <form action="/pickup/register" method="POST" onsubmit="paymentSubmit(this,event)">
+
+            <input type="text" id="name" name="name" placeholder="Full Name" required>
+            
+
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <br>
+            <br>
+            <label>
+                <input type="radio" name="priceId" value="price_1QRQwYFGzuNCeWURftUafpEX" required> 1 hr
+            </label>
+            <br>
+            <label>
+                <input type="radio" name="priceId" value="price_1QRQzpFGzuNCeWUR7QZ81kCi"> 2 hrs
+            </label>
+            <br>
+            <br>
+            <button type="submit" class="primaryBorder" style="border-width: thin;">Register</button>
+        </form>
+    </main>
+    <br>
+    <footer>
+        <p>&copy; 2024 Pickup Soccer</p>
+    </footer>
+    <script src="/main.js"></script>
+</body>
+</html>

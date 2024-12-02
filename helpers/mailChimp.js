@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 if(process.env.NODE_ENV !== 'production'){
     require('dotenv').config()
 }
@@ -121,4 +122,61 @@ async function getCampaigns(){
     const response = await mailchimp.marketing.campaigns.list();
     return response
 }
-module.exports = {getListByName,sendMessage,getListMembers,getMemberTags,getLists,getRoot,getTemplates,getCampaigns}
+async function fetchAllMembers(listId){
+  const allMembers = [];
+  let offset = 0;
+  const count = 1000; // Max members per request
+
+  try {
+    while (true) {
+      const response = await mailchimp.marketing.lists.getListMembersInfo(listId, {
+        count,
+        offset,
+      });
+
+      // Add fetched members to the allMembers array
+      allMembers.push(...response.members);
+
+      // If less than 'count' members are returned, we've reached the end
+      if (response.members.length < count) {
+        break;
+      }
+
+      // Increment offset for the next batch
+      offset += count;
+    }
+
+    return allMembers;
+  } catch (error) {
+    console.error("Error fetching members:", error);
+    throw error;
+  }
+};
+async function getMemberByEmail(listId, email){
+  try {
+    // Hash the email to the MD5 format required by Mailchimp
+    const emailHash = crypto.createHash("md5").update(email.toLowerCase()).digest("hex");
+
+    // Fetch the member details using the hashed email
+    const member = await mailchimp.marketing.lists.getListMember(listId, emailHash);
+
+    return member; // Return the member details
+  } catch (error) {
+    console.error("Error fetching member:", error);
+    throw error; // Propagate the error to the caller
+  }
+};
+async function listInterestCategories(listId){
+  try {
+    // Fetch the interest categories for the specified list ID
+    const response = await mailchimp.marketing.lists.listInterestCategories(listId, {
+      count: 100, // Maximum number of categories to fetch
+    });
+
+    return response.categories; // Return the categories array
+  } catch (error) {
+    console.error("Error fetching interest categories:", error);
+    throw error; // Propagate the error to the caller
+  }
+};
+module.exports = {getListByName,sendMessage,getListMembers,getMemberTags,getLists,getRoot,getTemplates,getCampaigns,fetchAllMembers,getMemberByEmail,marketing: mailchimp.marketing,listInterestCategories}

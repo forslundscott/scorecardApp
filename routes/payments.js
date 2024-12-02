@@ -25,13 +25,51 @@ router.post('/create-payment-intent', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+router.get('/success', async (req,res, next)=>{
+    try{
+        
+        res.render('paymentSuccess.ejs');
+        // res.render('payment.ejs', { stripePublicKey });
+    }catch(err){
+        next(err)
+    }
+});
 router.get('/', async (req,res, next)=>{
     try{
         const stripePublicKey = process.env.STRIPE_TEST_PARISHABLE_KEY
-        res.render('payment.ejs', { stripePublicKey });
+        res.render('checkoutForm.ejs', { stripePublicKey });
+        // res.render('payment.ejs', { stripePublicKey });
     }catch(err){
         next(err)
+    }
+});
+router.post('/create-checkout-session', async (req, res) => {
+    const { amount, currency = 'usd', priceId,email } = req.body;
+    console.log(req.body.amount)
+    try {
+        const session = await stripe.checkout.sessions.create({
+            line_items: [
+                {
+                    // price_data: {
+                    //     currency: currency,
+                    //     product_data: {
+                    //         name: 'Sample Product',
+                    //     },
+                    //     unit_amount: amount,
+                    // },
+                    price: priceId,
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            mode: 'payment', // For one-time payments
+            success_url: `${req.headers.origin}/api/payments/success`,
+            cancel_url: req.get('Referer') || 'https://example.com',
+        });
+        // console.log(session)
+        res.json({ url: session.url });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 

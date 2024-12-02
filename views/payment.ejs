@@ -66,14 +66,6 @@
         const form = document.getElementById('payment-form');
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-            
-            // const amount = document.getElementById('amount').value;
-            
-            // const { clientSecret } = await fetch('payments/create-payment-intent', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ amount: amount })  // Send the amount to the backend
-            // }).then((res) => res.json());
             var formData = new FormData(form)
             const { clientSecret } = await fetch('payments/create-payment-intent', {
                 method: 'POST',

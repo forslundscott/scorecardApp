@@ -14,6 +14,70 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 //     apiKey: process.env.MAILCHIMP_KEY,
 //     server: process.env.MAILCHIMP_SERVER, // e.g., us1
 // })
+
+  
+  // Express route to fetch all list members
+  router.get("/tagSearch", async (req, res) => {
+    
+  
+    try {
+        const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+      const tags = await mailchimp.marketing.lists.tagSearch(listId
+    //     , {
+    //     name: 'pickup'
+    //   }
+    );
+      res.status(200).json({ tags });
+    } catch (error) {
+      res.status(500).json({
+        error: "Failed to fetch interests",
+        details: error.message,
+      });
+    }
+  });
+  router.get("/listInterests", async (req, res) => {
+    
+  
+    try {
+        const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+      const interests = await mailchimp.marketing.lists.getListInterestCategories(listId);
+      res.status(200).json({ interests });
+    } catch (error) {
+      res.status(500).json({
+        error: "Failed to fetch interests",
+        details: error.message,
+      });
+    }
+  });
+  router.get("/memberbyemail", async (req, res) => {
+    
+  
+    try {
+        const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+      const member = await mailchimp.getMemberByEmail(listId,'forslund.scott@gmail.com');
+      res.status(200).json({ member });
+    } catch (error) {
+      res.status(500).json({
+        error: "Failed to fetch members",
+        details: error.message,
+      });
+    }
+  });
+  router.get("/members", async (req, res) => {
+    
+  
+    try {
+        const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+      const members = await mailchimp.fetchAllMembers(listId);
+      res.status(200).json({ total: members.length, members });
+    } catch (error) {
+      res.status(500).json({
+        error: "Failed to fetch members",
+        details: error.message,
+      });
+    }
+  });
+  
 router.get('/send-email', async (req, res) => {
     // const { recipientEmail, subject, message } = req.body;
 
@@ -41,10 +105,11 @@ router.get('/send-email', async (req, res) => {
         //   run()
 
         // console.log('Email sent:', response);
-        console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
-        // console.log(await mailchimp.getCampaigns())
+        // console.log(await mailchimp.getListByName('Greater Lansing Open Soccer'))
+        console.log(await mailchimp.getCampaigns()[0])
         // await mailchimp.sendMessage('forslund.scott@gmail.com','Testing Madrill Email', 'Testing Transactional email sending through MailChimp module Madrill.')
-        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.find(item=>item.email_address == 'aidenhanchett4@gmail.com'))
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.find(item=>item.email_address == 'forslund.scott@gmail.com'))
+        // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members)
         // console.log((await mailchimp.getListMembers((await mailchimp.getListByName('Greater Lansing Open Soccer')).id)).members.length)
         // const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
         // console.log(await mailchimp.getMemberTags(listId,(await mailchimp.getListMembers(listId)).members[1].id))
