@@ -42,7 +42,7 @@ router.get('/', async (req,res, next)=>{
         }
         var data = {
             
-            page: req.route.path[0].replace('/',''),
+            page: 'seasons',
             user: req.user
         }
         const request = pool.request()
