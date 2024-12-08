@@ -171,7 +171,7 @@ router.post('/addTeam', upload.single('teamLogo'), async (req, res, next) => {
         .toBuffer();
 
         // Save the processed image to disk
-        const outputDir = path.join(__dirname, 'public/images');
+        const outputDir = path.join(__dirname, '../public/images');
         if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir);
         }

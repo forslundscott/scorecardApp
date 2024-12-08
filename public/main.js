@@ -627,7 +627,7 @@ async function updateGameData(xele){
         return
     }
     xform.querySelector('[name="Team1_ID"]').setCustomValidity('')
-    const response = await fetch('/updateGameInfo', {
+    const response = await fetch('/games/updateGameInfo', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

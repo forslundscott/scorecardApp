@@ -10,7 +10,7 @@ const processingStatus = {};
 //         console.log(req)
 //         next()
 //     })
-router.post('/games/updateGameInfo', async (req, res, next) => {
+router.post('/updateGameInfo', async (req, res, next) => {
     // Process form data here
         try{
             // var data = {
@@ -503,8 +503,9 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             where id = '${eventResult.Team1_ID}'
             `)
         }
+        console.log(result.recordsets[1].length)
         if(result.recordsets[1].length == 0){
-
+            console.log(eventResult.Team2_ID)
             await request.query(`
             update teams
             set keeper = (Select top 1 userId from [scorecard].[dbo].[user_team] where teamid ='${eventResult.Team2_ID}')
@@ -542,7 +543,9 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             await request.query(`UPDATE [scorecard].[dbo].[games] set [timerTime] = ${game.timerTime}, [period] = ${game.period}, [timerState] = ${game.timerState} WHERE event_Id = '${eventResult.Event_ID}'`)
         }
         var data = {
-            teams: [],
+            teams: [team1,
+                team2
+            ],
             game: game,
             page: req.route.path[0].replace('/',''),
             Event_ID: eventResult.Event_ID,

@@ -44,9 +44,22 @@ router.get('/', async (req,res, next)=>{
     }
 });
 router.post('/create-checkout-session', async (req, res) => {
-    const { amount, currency = 'usd', priceId,email } = req.body;
-    console.log(req.body.amount)
+    const { amount, currency = 'usd',email } = req.body;
+    console.log(req.body.hour.length)
     try {
+        var priceId = ''
+        switch(req.body.hour.length){
+            case 1:
+                priceId = 'price_1QRQwYFGzuNCeWURftUafpEX'
+                break
+            case 2:
+                priceId = 'price_1QRQzpFGzuNCeWUR7QZ81kCi'
+                break
+            default:
+                priceId = 'price_1QRQwYFGzuNCeWURftUafpEX'
+                break
+
+        }
         const session = await stripe.checkout.sessions.create({
             line_items: [
                 {

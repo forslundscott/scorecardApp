@@ -7,21 +7,22 @@
     <link rel="icon" href="/GLOSLogo.png">
     <title>Pickup Soccer Registration</title>
 </head>
-<body>
+<body style="text-align: center;">
     <header>
-        <h1>Register for Pickup Soccer</h1>
+        <h1>Pickup Futsal Signup</h1>
     </header>
     <br>
     <main>
-        <form action="/pickup/register" method="POST" onsubmit="paymentSubmit(this,event)">
+        <form action="" method="POST" onsubmit="return handleSubmit(this,event)">
 
             <input type="text" id="name" name="name" placeholder="Full Name" required>
-            
-
+            <input type="text" name="firstName" placeholder="First Name" required>
+            <input type="text" name="lastName" placeholder="Last Name" required>
+            <br>
             <input type="email" id="email" name="email" placeholder="Email" required>
             <br>
             <br>
-            <label>
+            <!-- <label>
                 <input type="radio" name="priceId" value="price_1QRQwYFGzuNCeWURftUafpEX" required> 1 hr
             </label>
             <br>
@@ -29,14 +30,41 @@
                 <input type="radio" name="priceId" value="price_1QRQzpFGzuNCeWUR7QZ81kCi"> 2 hrs
             </label>
             <br>
+            <br> -->
+            <label>
+                <input type="checkbox" name="hour" value="1"> 6:30-7:30
+            </label>
             <br>
-            <button type="submit" class="primaryBorder" style="border-width: thin;">Register</button>
+            <label>
+                <input type="checkbox" name="hour" value="2"> 7:30-8:30
+            </label>
+            <br>
+            <br>
+            <button type="submit" class="primaryBorder" style="border-width: thin;">Sign Up</button>
         </form>
     </main>
     <br>
     <footer>
         <p>&copy; 2024 Pickup Soccer</p>
     </footer>
+    <script>
+        function validateCheckboxes(form) {
+            const checkboxes = form.querySelectorAll('input[name="hour"]');
+            for (const checkbox of checkboxes) {
+                if (checkbox.checked) {
+                    return true; // At least one checkbox is checked
+                }
+            }
+            alert("Please select at least one option.");
+            return false; // No checkbox is checked
+        }
+        function handleSubmit(form,event) {
+            if (!validateCheckboxes(form)) {
+                return false; 
+            }
+            paymentSubmit(form,event)
+        }
+    </script>
     <script src="/main.js"></script>
 </body>
 </html>

@@ -24,6 +24,14 @@
             <% for(var i=0; i< data.seasons.length; i++) {%>
                 <%- include('season_item',{season: data.seasons[i]}); %>
             <% } %>
+        <% } else if (data.page == 'facilities') { %>
+            <% for(var i=0; i< data.list.length; i++) {%>
+                <%- include('facility_item',{item: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'pickup') { %>
+            <% for(var i=0; i< data.list.length; i++) {%>
+                <%- include('pickup_item',{item: data.list[i]}); %>
+            <% } %>
         <% } else if (data.page == 'leagues') { %>
             <% for(var i=0; i< data.leagues.length; i++) {%>
                 <%- include('league_item',{league: data.leagues[i]}); %>
@@ -95,6 +103,10 @@
             <%- include(`editTeamForm`,{data: data}); %>
         <% } else if (data.page == '/newSeason') { %>
             <%- include(`newSeasonForm`,{data: data}); %>
+        <% } else if (data.page == '/newFacility') { %>
+            <%- include(`newFacilityForm`,{data: data}); %>
+        <% } else if (data.page == '/newPickup') { %>
+            <%- include(`newPickupForm`,{data: data}); %>
         <% } else if (data.page == '/newLeague') { %>
             <%- include(`newLeagueForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>

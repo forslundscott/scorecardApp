@@ -83,6 +83,7 @@ app.use('/users', require(`./routes/users`));
 app.use('/games', require(`./routes/games`));
 app.use('/teams', require(`./routes/teams`));
 app.use('/seasons', require(`./routes/seasons`));
+app.use('/facilities', require(`./routes/facilities`));
 app.use('/pickup', require(`./routes/pickup`));
 app.use('/leagues', require(`./routes/leagues`));
 app.use('/standings', require(`./routes/standings`));

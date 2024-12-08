@@ -59,7 +59,18 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newSeason" onclick="window.location.href = '/seasons/newSeason';" >New Season</button>
-      <% } else if (data.page == 'leagues') { %>
+       <% } else if (data.page == 'facilities') { %>
+        Facilities
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" onclick="window.location.href = '/facilities/new';" >New Facility</button>
+       <% } else if (data.page == 'pickup') { %>
+        Pickup
+       <br>
+       <br>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" onclick="window.location.href = '/pickup/new';" >New Pickup</button>
+
+       <% } else if (data.page == 'leagues') { %>
         Leagues
         <br>
         <br>
@@ -91,6 +102,7 @@
          var currentPeriod = '<%= data.game.period  %>'
 
         </script>
+        <% console.log(data.teams)%>
         <!-- onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'" -->
         <div class="triColumn textCenter">
           <form action="javascript:void(0);" style="height: 100%;">
