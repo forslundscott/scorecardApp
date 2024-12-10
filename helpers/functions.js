@@ -3,36 +3,44 @@ const Color = require('color');
 const pool = require(`../db`)
 const sql = require('mssql'); 
 function titleCase(xstr){
-    return xstr.charAt(0).toUpperCase() + xstr.slice(1)
+    try{
+        return xstr.charAt(0).toUpperCase() + xstr.slice(1)
+    }catch(err){
+        console.log(err)
+    }
 }
 function getOrdinalNumber(number) {
-    // Convert the input to a number if it's a string
-    const num = typeof number === 'string' ? parseInt(number, 10) : number;
+    try{
+        // Convert the input to a number if it's a string
+        const num = typeof number === 'string' ? parseInt(number, 10) : number;
 
-    if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
-        return 'Invalid input';
-    }
+        if (isNaN(num) || num < 0 || !Number.isInteger(num)) {
+            return 'Invalid input';
+        }
 
-    if (num === 0) {
-        return '0th';
-    }
+        if (num === 0) {
+            return '0th';
+        }
 
-    const lastDigit = num % 10;
-    const secondLastDigit = Math.floor((num % 100) / 10);
+        const lastDigit = num % 10;
+        const secondLastDigit = Math.floor((num % 100) / 10);
 
-    if (secondLastDigit === 1) {
-        return num + 'th';
-    }
-
-    switch (lastDigit) {
-        case 1:
-            return num + 'st';
-        case 2:
-            return num + 'nd';
-        case 3:
-            return num + 'rd';
-        default:
+        if (secondLastDigit === 1) {
             return num + 'th';
+        }
+
+        switch (lastDigit) {
+            case 1:
+                return num + 'st';
+            case 2:
+                return num + 'nd';
+            case 3:
+                return num + 'rd';
+            default:
+                return num + 'th';
+        }
+    }catch(err){
+        console.log(err)
     }
 }
 async function exportToCSV(sqlRecordset) {
@@ -53,23 +61,28 @@ function getHexColor(colorName) {
     }
 }
 function millisecondsToTimeString(milliseconds) {
-    if (milliseconds < 0 || milliseconds >= 86400000) {
-        throw new Error("Milliseconds must be between 0 and 86399999.");
+    try{
+        if (milliseconds < 0 || milliseconds >= 86400000) {
+            throw new Error("Milliseconds must be between 0 and 86399999.");
+        }
+
+        const totalMinutes = Math.floor(milliseconds / 60000); // Convert to total minutes
+        const hours24 = Math.floor(totalMinutes / 60); // Extract hours (24-hour format)
+        const minutes = totalMinutes % 60; // Extract remaining minutes
+
+        // Convert 24-hour format to 12-hour format and determine AM/PM
+        const period = hours24 >= 12 ? "pm" : "am";
+        const hours12 = hours24 % 12 || 12; // Convert to 12-hour format (0 becomes 12)
+
+        // Format the result as a time string
+        return `${hours12}:${minutes.toString().padStart(2, "0")}${period}`;
+    }catch(err){
+        console.log(err)
     }
-
-    const totalMinutes = Math.floor(milliseconds / 60000); // Convert to total minutes
-    const hours24 = Math.floor(totalMinutes / 60); // Extract hours (24-hour format)
-    const minutes = totalMinutes % 60; // Extract remaining minutes
-
-    // Convert 24-hour format to 12-hour format and determine AM/PM
-    const period = hours24 >= 12 ? "pm" : "am";
-    const hours12 = hours24 % 12 || 12; // Convert to 12-hour format (0 becomes 12)
-
-    // Format the result as a time string
-    return `${hours12}:${minutes.toString().padStart(2, "0")}${period}`;
 }
 const addUserToDatabase = async (userData) => {
-    const request = pool.request();
+    try{
+        const request = pool.request();
     const { firstName, lastName, email } = userData;
 
     // Use preferredName if it exists; fallback to firstName otherwise
@@ -86,6 +99,9 @@ const addUserToDatabase = async (userData) => {
                 VALUES (@firstName, @lastName, @preferredName, @email)
             END
         `);
+    }catch(err){
+        console.log(err)
+    }
 };
 const getUser = async (userData) => {
     try{
