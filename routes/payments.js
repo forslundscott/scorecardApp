@@ -27,7 +27,7 @@ router.post('/create-payment-intent', async (req, res) => {
 });
 router.get('/success', async (req,res, next)=>{
     try{
-        
+        console.log(req.body)
         res.render('paymentSuccess.ejs');
         // res.render('payment.ejs', { stripePublicKey });
     }catch(err){
@@ -36,7 +36,7 @@ router.get('/success', async (req,res, next)=>{
 });
 router.get('/', async (req,res, next)=>{
     try{
-        const stripePublicKey = process.env.STRIPE_TEST_PARISHABLE_KEY
+        const stripePublicKey = process.env.STRIPE_TEST_PUBLISHABLE_KEY
         res.render('checkoutForm.ejs', { stripePublicKey });
         // res.render('payment.ejs', { stripePublicKey });
     }catch(err){
@@ -44,7 +44,7 @@ router.get('/', async (req,res, next)=>{
     }
 });
 router.post('/create-checkout-session', async (req, res) => {
-    const { amount, currency = 'usd', email } = req.body;
+    const { amount, email } = req.body;
     console.log(req.body.hour.length)
     try {
         var priceId = ''

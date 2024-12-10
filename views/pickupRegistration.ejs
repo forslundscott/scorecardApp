@@ -32,25 +32,18 @@
     <br>
     <main>
         <form action="" method="POST" onsubmit="return handleSubmit(this,event)">
+            <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
+            <br><br>
 
-            <input type="text" id="name" name="name" placeholder="Full Name" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <br>
             <input type="text" name="firstName" placeholder="First Name" required>
             <input type="text" name="lastName" placeholder="Last Name" required>
             <br>
-            <input type="email" id="email" name="email" placeholder="Email" required>
+            
             <br>
-            <br>
-            <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
-            <br><br>
-            <!-- <label>
-                <input type="radio" name="priceId" value="price_1QRQwYFGzuNCeWURftUafpEX" required> 1 hr
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="priceId" value="price_1QRQzpFGzuNCeWUR7QZ81kCi"> 2 hrs
-            </label>
-            <br>
-            <br> -->
+            
+
             <% console.log(data) %>
             <% for (var i=0; i<data.pickupEvents.length;i++) {%>
             <label>
@@ -58,11 +51,6 @@
             </label>
             <br>
             <% } %>
-            <!-- <br>
-            <label>
-                <input type="checkbox" name="hour" value="2"> 7:30-8:30
-            </label> -->
-            <!-- <br> -->
             <br>
             <button type="submit" class="primaryBorder" style="border-width: thin;">Sign Up</button>
         </form>
@@ -89,6 +77,68 @@
             }
             paymentSubmit(form,event)
         }
+        async function fillExistingUserInfo(emailElement){
+            var form = emailElement.form;
+            var formData = new FormData(form)
+            // console.log(formData)
+            const response = await fetch('/games/checkEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(formData).toString()
+            })
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData)
+                if(responseData.user){
+                    form.querySelector('[name="firstName"]').value = responseData.user.firstName
+                    form.querySelector('[name="lastName"]').value = responseData.user.lastName
+                    form.querySelector('[name="preferredName"]').value = responseData.user.preferredName
+                    form.querySelector('[name="waiver"]').checked = true
+                }else{
+                    form.querySelector('[name="firstName"]').value = ''
+                    form.querySelector('[name="lastName"]').value = ''
+                    form.querySelector('[name="preferredName"]').value = ''
+                    form.querySelector('[name="waiver"]').checked = false
+                }
+                // location.reload()
+            } else {
+                console.error('Form submission failed');
+                // Handle error response
+            }
+        }
+        document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
+            var email = this.value;
+            var formData = new FormData(document.getElementById('newPlayerForm'))
+            console.log(formData)
+            const response = await fetch('/games/checkEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(formData).toString()
+            })
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData)
+                if(responseData.user){
+                    this.form.querySelector('[name="firstName"]').value = responseData.user.firstName
+                    this.form.querySelector('[name="lastName"]').value = responseData.user.lastName
+                    this.form.querySelector('[name="preferredName"]').value = responseData.user.preferredName
+                    this.form.querySelector('[name="waiver"]').checked = true
+                }else{
+                    this.form.querySelector('[name="firstName"]').value = ''
+                    this.form.querySelector('[name="lastName"]').value = ''
+                    this.form.querySelector('[name="preferredName"]').value = ''
+                    this.form.querySelector('[name="waiver"]').checked = false
+                }
+                // location.reload()
+            } else {
+                console.error('Form submission failed');
+                // Handle error response
+            }
+        });
     </script>
     <script src="/main.js"></script>
 </body>
