@@ -26,15 +26,22 @@ router.get(['/new'], async (req, res, next) => {
 router.post('/add', async (req, res, next) => {
     // Process form data here
     try{
-        console.log(req.body.date)
-        // const request = pool.request()
-        // await request.query(`
-        //     IF NOT EXISTS (SELECT 1 FROM facilities WHERE name = '${req.body.name}')
-        //     BEGIN
-        //         insert into facilities (name, address)
-        //         values ('${req.body.name}','${req.body.address}')
-        //     END
-        //     `)
+        console.log(req.body)
+        // Ensure pickupHours is an array
+        const pickupHours = Array.isArray(req.body.pickupHours)
+            ? req.body.pickupHours
+            : [req.body.pickupHours];
+        const request = pool.request()
+        for (const hour of pickupHours) {
+            console.log(hour)
+        await request.query(`
+            IF NOT EXISTS (SELECT 1 FROM pickupEvents WHERE date = ${req.body.date} and time = ${hour})
+            BEGIN
+                insert into pickupEvents (date, time, totalSlots, notifyAt, facilityId, active)
+                values (${req.body.date},${hour},${req.body.totalSlots},${req.body.notifyAt},${req.body.facilityId},${req.body.active ? 1 : 0})
+            END
+            `)
+        }
         // res.redirect(302,'/pickup')
         res.redirect('back')
     }catch(err){
@@ -56,25 +63,24 @@ router.get('/confirmation', (req, res) => {
     // Display the registration details and total cost
     res.render('registrationConfirmation.ejs', { name, email, cost: 20, priceId }); // Cost for registration
 });
-router.get('/register', async (req,res, next)=>{
+router.get('/register/:date', async (req,res, next)=>{
     try{
         // console.log(req.user)
         // if (req.isAuthenticated()) {
         //     // console.log(req.user)
         // }
-        // var data = {
-        //     teams: [],
-        //     page: 'games',
-        //     user: req.user
-        // }
+        var data = {
+        }
         // console.log(req.originalUrl)
 
-        // const request = pool.request()
-        // // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
-        // // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const request = pool.request()
+
+        var result = await request.query(`select * from pickupEvents
+        where [date] = ${req.params.date} 
+        `)
         // const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
-        // data.games = result.recordset
-        res.render('pickupRegistration.ejs') 
+        data.pickupEvents = result.recordset
+        res.render('pickupRegistration.ejs',{data: data}) 
     }catch(err){
         next(err)
     }

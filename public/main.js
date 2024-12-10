@@ -1101,5 +1101,6 @@ async function paymentSubmit(form,event) {
         window.location.href = url; // Redirect to Stripe Checkout
 
 }
+
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

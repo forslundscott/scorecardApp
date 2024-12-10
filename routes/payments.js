@@ -44,7 +44,7 @@ router.get('/', async (req,res, next)=>{
     }
 });
 router.post('/create-checkout-session', async (req, res) => {
-    const { amount, currency = 'usd',email } = req.body;
+    const { amount, currency = 'usd', email } = req.body;
     console.log(req.body.hour.length)
     try {
         var priceId = ''
@@ -60,6 +60,9 @@ router.post('/create-checkout-session', async (req, res) => {
                 break
 
         }
+        console.log(req.body)
+        await functions.addUserToDatabase(req.body);
+        const userId = functions.getUser(req.body)
         const session = await stripe.checkout.sessions.create({
             line_items: [
                 {
@@ -76,6 +79,11 @@ router.post('/create-checkout-session', async (req, res) => {
             ],
             customer_email: email,
             mode: 'payment', // For one-time payments
+            metadata: {
+                hours: JSON.stringify(req.body.hour),
+                userId: `${userId}`,
+                date: `${req.body.date}`
+              },
             success_url: `${req.headers.origin}/api/payments/success`,
             cancel_url: req.get('Referer') || 'https://example.com',
         });

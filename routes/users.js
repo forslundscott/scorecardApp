@@ -51,14 +51,15 @@ router.get(['/newUser'], async (req, res, next) => {
 router.post('/addUser', async (req, res, next) => {
     // Process form data here
     try{
-        const request = pool.request()
-        await request.query(`
-            IF NOT EXISTS (SELECT 1 FROM users WHERE email = '${req.body.email}')
-            BEGIN
-                insert into users (firstName, lastName, preferredName, email)
-                values ('${req.body.firstName}','${req.body.lastName}','${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}','${req.body.email}')
-            END
-            `)
+        await addUserToDatabase(req.body);
+        // const request = pool.request()
+        // await request.query(`
+        //     IF NOT EXISTS (SELECT 1 FROM users WHERE email = '${req.body.email}')
+        //     BEGIN
+        //         insert into users (firstName, lastName, preferredName, email)
+        //         values ('${req.body.firstName}','${req.body.lastName}','${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}','${req.body.email}')
+        //     END
+        //     `)
         res.redirect(302,'/games')
     }catch(err){
         next(err)

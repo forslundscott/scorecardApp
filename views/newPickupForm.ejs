@@ -3,6 +3,17 @@
         <input type="date" name="date" required>
             <br>
             <br>
+            <label for="hourInput">Pickup Hours:</label>
+                <input type="text" id="hourInput" placeholder="e.g., 9:00pm" onkeypress="addHour(event)">
+                <small>Type a time and press Enter.</small>
+                <br><br>
+                <div id="hoursList">
+                        <label><input type="checkbox" name="pickupHours" value="66600000" checked> 6:30pm</label>
+                        <br>
+                        <label><input type="checkbox" name="pickupHours" value="70200000" checked> 7:30pm</label>
+                        <!-- Dynamic checkboxes will appear here -->
+                </div>
+                <br><br>
             <select name="facilityId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getMax(this)" required>
                 <option value="" disabled selected>Facility</option>
                 <% for(var i=0; i< data.facilities.length; i++) {%>
@@ -11,7 +22,10 @@
             </select>
             <br>
             <br>
-            <label for="maxPlayers">Max Players: <input type="number" name="maxPlayers" value="10"></label>
+            <label for="totalSlots">Max Players/Hour: <input type="number" name="totalSlots" value="10"></label>
+            <br>
+            <br>
+            <label for="notifyAt">Notify Me at: <input type="number" name="notifyAt" value="10"></label>
             <br>
             <br>
             <label for="active"><input type="checkbox" name="active" checked> Active</label>
@@ -20,13 +34,73 @@
             <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Pickup</button>
     </form>
     <script>
+        function getTimeInMilliseconds(timeString) {
+                const timePattern = /(\d{1,2}):(\d{2})(am|pm)/i;
+                const match = timeString.match(timePattern);
+
+                if (!match) {
+                        throw new Error("Invalid time format.");
+                }
+
+                let hour = parseInt(match[1], 10);
+                const minutes = parseInt(match[2], 10);
+                const period = match[3].toLowerCase();
+
+                // Adjust hours for AM/PM
+                if (period === "pm" && hour !== 12) {
+                        hour += 12;
+                } else if (period === "am" && hour === 12) {
+                        hour = 0;
+                }
+
+                // Calculate milliseconds from midnight
+                const milliseconds = (hour * 3600000) + (minutes * 60000);
+                return milliseconds;
+                }
+        function addHour(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission
+            
+            const hourInput = document.getElementById('hourInput');
+            const hoursList = document.getElementById('hoursList');
+            const hourValue = hourInput.value.trim();
+
+            // Validate input (basic example for 12-hour format with AM/PM)
+            const hourPattern = /^(1[0-2]|0?[1-9]):[0-5][0-9](am|pm)$/i;
+            if (!hourPattern.test(hourValue)) {
+                alert('Please enter a valid time in 12-hour format (e.g., 9:00am or 9:00pm).');
+                return;
+            }
+
+            // Create checkbox and label
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'pickupHours';
+            checkbox.value = getTimeInMilliseconds(hourValue);
+            checkbox.checked = true;
+
+            const label = document.createElement('label');
+            label.textContent = ` ${hourValue}`;
+            label.prepend(checkbox);
+
+            // Add to list
+            const listItem = document.createElement('div');
+            listItem.appendChild(label);
+            hoursList.appendChild(listItem);
+
+            // Clear input
+            hourInput.value = '';
+        }
+    }
         async function getMax(ele) {
                 switch(ele.value){
                         case '1000000000':
-                                ele.form.querySelector('[name="maxPlayers"]').value = 16
+                                ele.form.querySelector('[name="totalSlots"]').value = 16
+                                ele.form.querySelector('[name="notifyAt"]').value = 16
                                 break
                         default:
-                                ele.form.querySelector('[name="maxPlayers"]').value = 10
+                                ele.form.querySelector('[name="totalSlots"]').value = 10
+                                ele.form.querySelector('[name="notifyAt"]').value = 10
                                 break
                 }
         }

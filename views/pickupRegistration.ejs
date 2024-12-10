@@ -8,6 +8,24 @@
     <title>Pickup Soccer Registration</title>
 </head>
 <body style="text-align: center;">
+    <script>
+        function millisecondsToTimeString(milliseconds) {
+            if (milliseconds < 0 || milliseconds >= 86400000) {
+                throw new Error("Milliseconds must be between 0 and 86399999.");
+            }
+
+            const totalMinutes = Math.floor(milliseconds / 60000); // Convert to total minutes
+            const hours24 = Math.floor(totalMinutes / 60); // Extract hours (24-hour format)
+            const minutes = totalMinutes % 60; // Extract remaining minutes
+
+            // Convert 24-hour format to 12-hour format and determine AM/PM
+            const period = hours24 >= 12 ? "pm" : "am";
+            const hours12 = hours24 % 12 || 12; // Convert to 12-hour format (0 becomes 12)
+
+            // Format the result as a time string
+            return `${hours12}:${minutes.toString().padStart(2, "0")}${period}`;
+        }
+    </script>
     <header>
         <h1>Pickup Futsal Signup</h1>
     </header>
@@ -22,6 +40,8 @@
             <input type="email" id="email" name="email" placeholder="Email" required>
             <br>
             <br>
+            <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
+            <br><br>
             <!-- <label>
                 <input type="radio" name="priceId" value="price_1QRQwYFGzuNCeWURftUafpEX" required> 1 hr
             </label>
@@ -31,14 +51,18 @@
             </label>
             <br>
             <br> -->
+            <% console.log(data) %>
+            <% for (var i=0; i<data.pickupEvents.length;i++) {%>
             <label>
-                <input type="checkbox" name="hour" value="1"> 6:30-7:30
+                <input type="checkbox" name="hour" value="<%= data.pickupEvents[i].time %>"> <%= functions.millisecondsToTimeString(data.pickupEvents[i].time) %>
             </label>
             <br>
+            <% } %>
+            <!-- <br>
             <label>
                 <input type="checkbox" name="hour" value="2"> 7:30-8:30
-            </label>
-            <br>
+            </label> -->
+            <!-- <br> -->
             <br>
             <button type="submit" class="primaryBorder" style="border-width: thin;">Sign Up</button>
         </form>
@@ -48,6 +72,7 @@
         <p>&copy; 2024 Pickup Soccer</p>
     </footer>
     <script>
+        
         function validateCheckboxes(form) {
             const checkboxes = form.querySelectorAll('input[name="hour"]');
             for (const checkbox of checkboxes) {

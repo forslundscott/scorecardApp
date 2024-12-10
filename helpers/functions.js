@@ -1,5 +1,7 @@
 const { Parser } = require('json2csv');
 const Color = require('color');
+const pool = require(`../db`)
+const sql = require('mssql'); 
 function titleCase(xstr){
     return xstr.charAt(0).toUpperCase() + xstr.slice(1)
 }
@@ -50,5 +52,60 @@ function getHexColor(colorName) {
         return null; // Return null if the color name is invalid
     }
 }
+function millisecondsToTimeString(milliseconds) {
+    if (milliseconds < 0 || milliseconds >= 86400000) {
+        throw new Error("Milliseconds must be between 0 and 86399999.");
+    }
 
-module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor}
+    const totalMinutes = Math.floor(milliseconds / 60000); // Convert to total minutes
+    const hours24 = Math.floor(totalMinutes / 60); // Extract hours (24-hour format)
+    const minutes = totalMinutes % 60; // Extract remaining minutes
+
+    // Convert 24-hour format to 12-hour format and determine AM/PM
+    const period = hours24 >= 12 ? "pm" : "am";
+    const hours12 = hours24 % 12 || 12; // Convert to 12-hour format (0 becomes 12)
+
+    // Format the result as a time string
+    return `${hours12}:${minutes.toString().padStart(2, "0")}${period}`;
+}
+const addUserToDatabase = async (userData) => {
+    const request = pool.request();
+    const { firstName, lastName, email } = userData;
+
+    // Use preferredName if it exists; fallback to firstName otherwise
+    const nameToUse = userData?.preferredName?.trim() || firstName;
+    console.log(nameToUse)
+    await request.input('firstName', sql.VarChar, firstName)
+        .input('lastName', sql.VarChar, lastName)
+        .input('preferredName', sql.VarChar, nameToUse)
+        .input('email', sql.VarChar, email)
+        .query(`
+            IF NOT EXISTS (SELECT 1 FROM users WHERE email = @email)
+            BEGIN
+                INSERT INTO users (firstName, lastName, preferredName, email)
+                VALUES (@firstName, @lastName, @preferredName, @email)
+            END
+        `);
+};
+const getUser = async (userData) => {
+    try{
+    const request = pool.request();
+    const {email } = userData;
+
+    
+    request.input('email', sql.VarChar, email)
+    const result = await request.query(`
+            SELECT * from users
+            where email = @email
+        `);
+    return result.recordset
+    }catch(err){
+        console.log(err)
+    }
+};
+const formatDate = (timestamp) => {
+    console.log(Number(timestamp))
+    const date = new Date(Number(timestamp));
+    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  };
+module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate}
