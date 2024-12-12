@@ -31,11 +31,13 @@
     </header>
     <br>
     <main>
+        <img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
+        <br><br>
         <form action="" method="POST" onsubmit="return handleSubmit(this,event)">
             <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
             <br><br>
 
-            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="email" id="email" name="email" placeholder="Email" onblur="fillExistingUserInfo(this)" required>
             <br>
             <input type="text" name="firstName" placeholder="First Name" required>
             <input type="text" name="lastName" placeholder="Last Name" required>
@@ -44,10 +46,15 @@
             <br>
             
 
-            <% console.log(data) %>
+            <%# console.log(data) %>
             <% for (var i=0; i<data.pickupEvents.length;i++) {%>
             <label>
-                <input type="checkbox" name="hour" value="<%= data.pickupEvents[i].time %>"> <%= functions.millisecondsToTimeString(data.pickupEvents[i].time) %>
+                <input 
+                type="checkbox" 
+                name="hour" 
+                value="<%= data.pickupEvents[i].time %>" 
+                <%= data.pickupEvents[i].attendeeCount >= data.pickupEvents[i].totalSlots ? 'disabled' : '' %>> 
+                <%= functions.millisecondsToTimeString(data.pickupEvents[i].time) %> <%= data.pickupEvents[i].attendeeCount >= data.pickupEvents[i].totalSlots ? ' (Closed)' : '' %>
             </label>
             <br>
             <% } %>
@@ -57,7 +64,7 @@
     </main>
     <br>
     <footer>
-        <p>&copy; 2024 Pickup Soccer</p>
+        <p>&copy; 2024 GLOS</p>
     </footer>
     <script>
         
@@ -94,13 +101,21 @@
                 if(responseData.user){
                     form.querySelector('[name="firstName"]').value = responseData.user.firstName
                     form.querySelector('[name="lastName"]').value = responseData.user.lastName
-                    form.querySelector('[name="preferredName"]').value = responseData.user.preferredName
-                    form.querySelector('[name="waiver"]').checked = true
+                    if(form.querySelector('[name="preferredName"]').value && responseData.user.preferredName){
+                        form.querySelector('[name="preferredName"]').value = responseData.user.preferredName
+                    }
+                    if(form.querySelector('[name="waiver"]').value){
+                        form.querySelector('[name="waiver"]').checked = true
+                    }
                 }else{
                     form.querySelector('[name="firstName"]').value = ''
                     form.querySelector('[name="lastName"]').value = ''
-                    form.querySelector('[name="preferredName"]').value = ''
-                    form.querySelector('[name="waiver"]').checked = false
+                    if(form.querySelector('[name="preferredName"]').value){
+                        form.querySelector('[name="preferredName"]').value = ''
+                    }
+                    if(form.querySelector('[name="waiver"]').value){
+                        form.querySelector('[name="waiver"]').checked = false
+                    }
                 }
                 // location.reload()
             } else {

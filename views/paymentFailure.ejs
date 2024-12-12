@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/GLOSLogo.png">
     <title>Payment Failed</title>
 </head>
-<body>
+<body style="text-align: center;">
     <header>
         <h1>Payment Failed</h1>
-        <nav>
-            <a href="/">Home</a>
-        </nav>
+        
     </header>
 
     <main>
+        <img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
+        <br><br>
         <h2>Unfortunately, your payment could not be processed.</h2>
         <p>Please check your payment details and try again.</p>
+        <br><br>
+        <nav>
+            <a href="<%= data.url  %>" class="primaryBorder">Back to Signup Page</a>
+        </nav>
     </main>
-
+    <br>
     <footer>
-        <p>&copy; 2024 My Store</p>
+        <p>&copy; 2024 GLOS</p>
     </footer>
 </body>
 </html>

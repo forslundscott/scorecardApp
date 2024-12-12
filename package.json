@@ -4,7 +4,7 @@
   "description": "Simplifies sport score keeping",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "nodemon server.js",
     "dataDownload": "downloadSEData.js"
   },
@@ -44,5 +44,8 @@
     "sequelize": "^6.37.1",
     "sharp": "^0.33.5",
     "stripe": "^17.4.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

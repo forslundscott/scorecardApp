@@ -75,8 +75,12 @@ router.get('/register/:date', async (req,res, next)=>{
 
         const request = pool.request()
 
-        var result = await request.query(`select * from pickupEvents
-        where [date] = ${req.params.date} 
+        var result = await request.query(`
+            select e.*, (select count(a.userId) 
+            from pickupAttendees as a
+            where e.id=a.pickupId) attendeeCount 
+            from pickupEvents as e
+            where [date] = ${req.params.date} 
         `)
         // const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
         data.pickupEvents = result.recordset

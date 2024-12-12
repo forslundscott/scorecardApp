@@ -3,7 +3,7 @@
             <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick;">
                 <div style="width: 100%;">
                     <div class="playerName" style="text-align: center;">
-                        <%= new Date(item.date).toLocaleDateString() %>
+                        <%= functions.formatDate(item.date) %>
                         <br>
                         <%= item.name %>
                         <br>

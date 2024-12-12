@@ -2,9 +2,13 @@ const { Parser } = require('json2csv');
 const Color = require('color');
 const pool = require(`../db`)
 const sql = require('mssql'); 
-function titleCase(xstr){
+function titleCase(str){
     try{
-        return xstr.charAt(0).toUpperCase() + xstr.slice(1)
+        let words = str.split(' ')
+        for(let i=0;i<words.length;i++){
+            words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1).toLowerCase()
+        }
+        return words.join(' ')
     }catch(err){
         console.log(err)
     }
@@ -87,7 +91,7 @@ const addUserToDatabase = async (userData) => {
 
     // Use preferredName if it exists; fallback to firstName otherwise
     const nameToUse = userData?.preferredName?.trim() || firstName;
-    console.log(nameToUse)
+    // console.log(nameToUse)
     await request.input('firstName', sql.VarChar, firstName)
         .input('lastName', sql.VarChar, lastName)
         .input('preferredName', sql.VarChar, nameToUse)
@@ -114,7 +118,7 @@ const getUser = async (userData) => {
             SELECT * from users
             where email = @email
         `);
-    return result.recordset
+    return result.recordset[0]
     }catch(err){
         console.log(err)
     }
