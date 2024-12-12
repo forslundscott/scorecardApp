@@ -144,18 +144,18 @@ router.post('/create-checkout-session', async (req, res) => {
         {
             switch(req.body.hour.length){
                 case 1:
-                    priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7' 
+                    priceId = 'price_1QVIctFGzuNCeWURECfArCPl' 
                     break
                 case 2:
-                    priceId = 'price_1QRQzpFGzuNCeWUR7QZ81kCi'
+                    priceId = 'price_1QVIcqFGzuNCeWURgegdgjJv'
                     break
                 default:
-                    priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7'
+                    priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
                     break
 
             }
         }else{
-            priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7'
+            priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
         }
         console.log(JSON.stringify(req.body.hour))
         await functions.addUserToDatabase(req.body);
@@ -185,7 +185,7 @@ router.post('/create-checkout-session', async (req, res) => {
             success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}` ,
         });
-        // console.log(session)
+        console.log(session)
         res.json({ url: session.url });
     } catch (error) {
         res.status(500).json({ error: error.message });
