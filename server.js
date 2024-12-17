@@ -106,7 +106,9 @@ app.get(['/'], async (req,res)=>{
     }    
 })
 
-
+app.use((req, res, next) => {
+    res.render('doesNotExist.ejs')
+  });
 app.use(require('./middleware/errorHandler'));
 
 app.listen(process.env.APP_PORT, function(err){

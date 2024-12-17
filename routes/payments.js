@@ -5,9 +5,31 @@ const router = express.Router();
 const pool = require(`../db`)
 const nodemailer = require('nodemailer');
 const functions = require('../helpers/functions')
+const gateway = require('../config/braintreeConfig');
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
 const stripe = Stripe(process.env.STRIPE_LIVE_SECRET_KEY);
+
+router.get('/checkout', async (req, res) => {
+    try {
+      const result = await gateway.clientToken.generate({});
+      res.render('checkout.ejs', { clientToken: result.clientToken });
+    } catch (error) {
+      console.error('Error generating client token:', error);
+      res.status(500).send('Error generating client token');
+    }
+  });
+  
+  
+
+router.post('/checkout', async (req, res) => {
+
+  try {
+        res.render('payment.ejs')
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Create payment intent route
 router.post('/create-payment-intent', async (req, res) => {

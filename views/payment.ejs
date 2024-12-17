@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/GLOSLogo.png">
     <title>Stripe Payment</title>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
@@ -11,7 +13,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f9f9f9;
+            /* background-color: #f9f9f9; */
+            text-align: center;
         }
         .container {
             max-width: 400px;
@@ -37,53 +40,30 @@
     </style>
 </head>
 <body>
+    <h2>Payment Form</h2>
     <div class="container">
-        <h2>Stripe Payment Form</h2>
+        <!-- <h2>Stripe Payment Form</h2>
         <form id="payment-form">
             <label for="amount">Amount (USD):</label>
             <input type="number" name="amount" id="amount" min="1" step="1" value="5000" required />
             <div id="card-element">
-                <!-- A Stripe Element will be inserted here. -->
+                
             </div>
             <button id="submit" disabled>Pay</button>
-        </form>
+        </form> -->
         <p id="payment-result"></p>
+        <div id="paypal-button-container" style="text-align: center;"></div>
     </div>
-    <script>
-        const stripe = Stripe('<%= stripePublicKey %>');
-        const elements = stripe.elements();
-        const cardElement = elements.create('card');
-        cardElement.mount('#card-element');
+    
+    
+    <script
 
-        const submitButton = document.getElementById('submit');
-        const paymentResult = document.getElementById('payment-result');
-        
-        cardElement.on('change', (event) => {
-            submitButton.disabled = event.empty || event.error;
-            paymentResult.textContent = event.error ? event.error.message : '';
-        });
+    src="https://www.paypal.com/sdk/js?client-id=test&buyer-country=US&currency=USD&components=buttons&enable-funding=venmo,paylater,card"
 
-        const form = document.getElementById('payment-form');
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            var formData = new FormData(form)
-            const { clientSecret } = await fetch('payments/create-payment-intent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(formData).toString(),
-            }).then((res) => res.json());
-            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: { card: cardElement }
-            });
+    data-sdk-integration-source="developer-studio"
 
-            if (error) {
-                paymentResult.textContent = `Error: ${error.message}`;
-            } else {
-                paymentResult.textContent = `Payment successful! PaymentIntent ID: ${paymentIntent.id}`;
-            }
-        });
-    </script>
+></script>
+    <script src="/paypal.js"></script>
+    <script src="/main.js"></script>
 </body>
 </html>

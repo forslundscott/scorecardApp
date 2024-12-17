@@ -121,11 +121,15 @@ const getUser = async (userData) => {
     return result.recordset[0]
     }catch(err){
         console.log(err)
+        throw err
     }
 };
 const formatDate = (timestamp) => {
-    console.log(Number(timestamp))
-    const date = new Date(Number(timestamp));
-    return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    try{
+        const date = new Date(Number(timestamp));
+        return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) == 'Invalid Date' ? undefined : date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+    }catch(err){
+        return undefined
+    }
   };
 module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate}

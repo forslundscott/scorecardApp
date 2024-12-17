@@ -1,8 +1,8 @@
-const {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate} = require('../helpers/functions')
+const {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate} = require('../../helpers/functions')
 const { Parser } = require('json2csv');
-const pool = require('../db'); // Assuming this is the db module
+const pool = require('../../db');
 
-jest.mock('../db'); // Mock the entire pool module
+jest.mock('../../db'); // Mock the entire pool module
 jest.mock('json2csv');
 describe('titleCase function', () => {
     it('should capitalize the first letter of each word in string', () => {
@@ -75,7 +75,7 @@ describe('titleCase function', () => {
   
       const userData = { email: 'john.doe@example.com' };
       const result = await getUser(userData);
-      expect(result).toEqual([{ firstName: 'John', lastName: 'Doe' }]);
+      expect(result).toEqual({ firstName: 'John', lastName: 'Doe' });
     });
   
     it('should handle database errors gracefully', async () => {
@@ -88,3 +88,16 @@ describe('titleCase function', () => {
       await expect(getUser(userData)).rejects.toThrow('Database error');
     });
   });
+
+
+describe('formatDate function', () => {
+  it('should format timestamp to a date string', () => {
+    const timestamp = new Date('January 1, 2021'); // January 1, 2021
+    expect(formatDate(timestamp)).toBe('01/01/2021');
+  });
+
+  it('should handle invalid timestamp gracefully', () => {
+    const invalidTimestamp = 'invalid';
+    expect(formatDate(invalidTimestamp)).toBeUndefined(); 
+  });
+});

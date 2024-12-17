@@ -8,24 +8,7 @@
     <title>Pickup Soccer Registration</title>
 </head>
 <body style="text-align: center;">
-    <script>
-        function millisecondsToTimeString(milliseconds) {
-            if (milliseconds < 0 || milliseconds >= 86400000) {
-                throw new Error("Milliseconds must be between 0 and 86399999.");
-            }
-
-            const totalMinutes = Math.floor(milliseconds / 60000); // Convert to total minutes
-            const hours24 = Math.floor(totalMinutes / 60); // Extract hours (24-hour format)
-            const minutes = totalMinutes % 60; // Extract remaining minutes
-
-            // Convert 24-hour format to 12-hour format and determine AM/PM
-            const period = hours24 >= 12 ? "pm" : "am";
-            const hours12 = hours24 % 12 || 12; // Convert to 12-hour format (0 becomes 12)
-
-            // Format the result as a time string
-            return `${hours12}:${minutes.toString().padStart(2, "0")}${period}`;
-        }
-    </script>
+    
     <header>
         <h1>Pickup Futsal Signup</h1>
     </header>
@@ -33,7 +16,7 @@
     <main>
         <img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
         <br><br>
-        <form action="" method="POST" onsubmit="return handleSubmit(this,event)">
+        <form action="/api/payments/checkout" method="POST" onsubmit="return handleSubmit(this,event)">
             <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
             <br><br>
 
@@ -82,7 +65,7 @@
             if (!validateCheckboxes(form)) {
                 return false; 
             }
-            paymentSubmit(form,event)
+            // paymentSubmit(form,event)
         }
         async function fillExistingUserInfo(emailElement){
             var form = emailElement.form;
@@ -155,6 +138,7 @@
             }
         });
     </script>
+    
     <script src="/main.js"></script>
 </body>
 </html>
