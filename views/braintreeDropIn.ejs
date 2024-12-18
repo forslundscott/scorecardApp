@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <script src="https://js.braintreegateway.com/web/dropin/1.36.0/js/dropin.min.js"></script>
+</head>
+<body>
+  <h1>Checkout</h1>
+  <div id="dropin-container"></div>
+  <button id="pay-button">Pay</button>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const clientToken = '<%= clientToken %>'; // Injected from the server
+
+      // Initialize the Drop-in UI
+      braintree.dropin.create({
+        authorization: clientToken,
+        container: '#dropin-container',
+        applePay: {
+          displayName: 'Your Business Name',
+          paymentRequest: {
+            total: {
+              label: 'Your Business Name',
+              amount: '10.00', // Replace with your dynamic amount
+            },
+          },
+        },
+        googlePay: {
+          merchantId: 'your_google_pay_merchant_id', // Replace if using Google Pay
+        },
+        venmo: { allowDesktop: true },
+        // paypal: { flow: 'checkout' },
+      }).then((dropinInstance) => {
+        document.getElementById('pay-button').addEventListener('click', async () => {
+          try {
+            const { nonce } = await dropinInstance.requestPaymentMethod();
+            
+            // Send the nonce and amount to the server
+            const response = await fetch('/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentMethodNonce: nonce, amount: '10.00' }), // Replace with your dynamic amount
+            });
+
+            const result = await response.json();
+            if (result.success) {
+              alert('Payment successful!');
+            } else {
+              alert('Payment failed. Please try again.');
+            }
+          } catch (err) {
+            console.error('Error processing payment:', err);
+          }
+        });
+      }).catch((err) => {
+        console.error('Error initializing Drop-in UI:', err);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -8,7 +8,7 @@ const functions = require('../helpers/functions')
 const gateway = require('../config/braintreeConfig');
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
-const stripe = Stripe(process.env.STRIPE_LIVE_SECRET_KEY);
+const stripe = Stripe(process.env.STRIPE_TEST_SECRET_KEY);
 
 router.get('/checkout', async (req, res) => {
     try {
@@ -19,7 +19,21 @@ router.get('/checkout', async (req, res) => {
       res.status(500).send('Error generating client token');
     }
   });
-  
+  router.get('/config', (req, res) => {
+    res.send({
+      publishableKey: process.env.STRIPE_TEST_PUBLISHABLE_KEY,
+    });
+  });
+  router.get('/test', async (req, res) => {
+    try {
+    //   const result = await gateway.clientToken.generate({});
+    //   res.render('braintreeDropIn.ejs', { clientToken: result.clientToken });
+    res.render('customCheckoutStripe.ejs')
+    } catch (error) {
+      console.error('Error generating client token:', error);
+      res.status(500).send('Error generating client token');
+    }
+  });
   
 
 router.post('/checkout', async (req, res) => {
@@ -34,16 +48,18 @@ router.post('/checkout', async (req, res) => {
 // Create payment intent route
 router.post('/create-payment-intent', async (req, res) => {
     console.log(req.body)
-  const { amount } = req.body;
+//   const { amount } = req.body || 50;
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: 50,
       currency: 'usd',
-      payment_method_types: ['card'],
+      automatic_payment_methods: {
+        enabled: true,
+      },
     });
-    
-    res.json({ clientSecret: paymentIntent.client_secret });
+    res.send({ clientSecret: paymentIntent.client_secret });
+    // res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
