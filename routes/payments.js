@@ -12,8 +12,35 @@ const stripe = Stripe(process.env.STRIPE_TEST_SECRET_KEY);
 
 router.get('/checkout', async (req, res) => {
     try {
+      let description = ''
+      let price = ''
+        if(Array.isArray(req.query.hour))
+        {
+            switch(req.query.hour.length){
+                case 1:
+                  description = 'Pickup Futsal 1 Hour' 
+                  price = '10.00'
+                    break
+                case 2:
+                  description = 'Pickup Futsal 2 Hours'
+                  price = '15.00'
+                    break
+                default:
+                  // description = 'Pickup Futsal 1 Hour'
+                  // price = '10.00'
+                    break
+
+            }
+        }else{
+          description = 'Pickup Futsal 1 Hour'
+          price = '10.00'
+        }
+        console.log(req)
+        await functions.addUserToDatabase(req.query);
+        const user = await functions.getUser(req.query)
+        console.log(user)
       const result = await gateway.clientToken.generate({});
-      res.render('checkout.ejs', { clientToken: result.clientToken });
+      res.render('checkout.ejs', { clientToken: result.clientToken, userId: user.ID, price: price, description: description, hours: req.query.hour, date: req.query.date });
     } catch (error) {
       console.error('Error generating client token:', error);
       res.status(500).send('Error generating client token');
@@ -44,7 +71,48 @@ router.post('/checkout', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router.get('/venmoCheckout', async (req, res) => {
+  try {
+    res.render('checkout.ejs')
+  } catch (error) {
+  res.status(500).json({ error: error.message });
+}
+})
+router.post('/venmoCheckout', async (req, res) => {
 
+  const { paymentMethodNonce, purchaseDetails } = req.body;
+
+  try {
+    // Process the payment
+    const result = await gateway.transaction.sale({
+      amount: purchaseDetails.price, 
+      descriptor: 'VENMO  *GLOSPickup',
+      paymentMethodNonce: paymentMethodNonce,
+      lineItems: [
+        {
+        name: purchaseDetails.description
+        }
+      ],
+      options: {
+        submitForSettlement: true, // Automatically settle the transaction
+      },
+    });
+
+    if (result.success) {
+      // Save purchase details to database (optional)
+      console.log('Transaction ID:', result.transaction.id);
+      console.log('Purchase Details:', purchaseDetails);
+
+      res.json({ success: true, transactionId: result.transaction.id });
+    } else {
+      console.error('Transaction failed:', result.message);
+      res.status(500).json({ success: false, message: result.message });
+    }
+  } catch (err) {
+    console.error('Error processing transaction:', err);
+    res.status(500).json({ success: false, error: err });
+  }
+});
 // Create payment intent route
 router.post('/create-payment-intent', async (req, res) => {
     console.log(req.body)
@@ -62,6 +130,55 @@ router.post('/create-payment-intent', async (req, res) => {
     // res.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+router.post('/successVenmo', async (req,res, next)=>{
+  try{
+      // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
+      // console.log(session)
+
+      const hoursArray = Array.isArray(req.body.hours) ? req.body.hours : [req.body.hours];
+      const hoursString = hoursArray.join(',');
+      // const request = pool.request()
+      console.log(hoursString)
+      console.log(req.body)
+      // let result = await request.query(`
+      //     INSERT into pickupAttendees (userId,pickupId,transactionId)
+      //     select '${req.body.userId}' as userId,
+      //     id as pickupId,
+      //     '${req.body.transactionId}' as transactionId
+      //     from pickupEvents
+      //     where date = ${req.body.date} and time in (${hoursString})
+      //     AND NOT EXISTS (
+      //         SELECT 1
+      //         FROM pickupAttendees
+      //         WHERE userId = '${req.body.userId}' AND pickupId = pickupEvents.id
+      //     )
+      //     `)
+      //     result = await request.query(`
+      //         select e.*, (select count(a.userId) 
+      //         from pickupAttendees as a
+      //         where e.id=a.pickupId) attendeeCount 
+      //         from pickupEvents as e
+      //         where [date] = ${req.body.date}
+      //         and time in (${hoursString})
+      //         and (select count(a.userId) 
+      //         from pickupAttendees as a
+      //         where e.id=a.pickupId) = totalSlots
+      //     `)
+      //     await fullEmail(result.recordset)
+          // IF NOT EXISTS (SELECT 1 FROM users WHERE email = @email)
+          // BEGIN
+          // END
+      // await request.query(`
+      //     INSERT into pickupAttendees (userId,pickupId,transactionId)
+      //     VALUES()
+      // `)
+      console.log(result.recordset)
+      res.render('paymentSuccess.ejs');
+      
+  }catch(err){
+      next(err)
   }
 });
 router.get('/success', async (req,res, next)=>{
