@@ -35,10 +35,10 @@ router.get('/checkout', async (req, res) => {
           description = 'Pickup Futsal 1 Hour'
           price = '10.00'
         }
-        console.log(req)
+        // console.log(req)
         await functions.addUserToDatabase(req.query);
         const user = await functions.getUser(req.query)
-        console.log(user)
+        // console.log(user)
       const result = await gateway.clientToken.generate({});
       res.render('checkout.ejs', { clientToken: result.clientToken, userId: user.ID, price: price, description: description, hours: req.query.hour, date: req.query.date });
     } catch (error) {
@@ -80,17 +80,20 @@ router.get('/venmoCheckout', async (req, res) => {
 })
 router.post('/venmoCheckout', async (req, res) => {
 
-  const { paymentMethodNonce, purchaseDetails } = req.body;
-
+  const { paymentMethodNonce, purchaseDetails, itemName, price } = req.body;
+  console.log(req.body)
   try {
     // Process the payment
     const result = await gateway.transaction.sale({
-      amount: purchaseDetails.price, 
-      descriptor: 'VENMO  *GLOSPickup',
+      amount: price, 
       paymentMethodNonce: paymentMethodNonce,
       lineItems: [
         {
-        name: purchaseDetails.description
+        name: itemName,
+        totalAmount: price,
+        unitAmount: price,
+        kind: 'debit',
+        quantity: 1,
         }
       ],
       options: {
@@ -139,34 +142,34 @@ router.post('/successVenmo', async (req,res, next)=>{
 
       const hoursArray = Array.isArray(req.body.hours) ? req.body.hours : [req.body.hours];
       const hoursString = hoursArray.join(',');
-      // const request = pool.request()
+      const request = pool.request()
       console.log(hoursString)
       console.log(req.body)
-      // let result = await request.query(`
-      //     INSERT into pickupAttendees (userId,pickupId,transactionId)
-      //     select '${req.body.userId}' as userId,
-      //     id as pickupId,
-      //     '${req.body.transactionId}' as transactionId
-      //     from pickupEvents
-      //     where date = ${req.body.date} and time in (${hoursString})
-      //     AND NOT EXISTS (
-      //         SELECT 1
-      //         FROM pickupAttendees
-      //         WHERE userId = '${req.body.userId}' AND pickupId = pickupEvents.id
-      //     )
-      //     `)
-      //     result = await request.query(`
-      //         select e.*, (select count(a.userId) 
-      //         from pickupAttendees as a
-      //         where e.id=a.pickupId) attendeeCount 
-      //         from pickupEvents as e
-      //         where [date] = ${req.body.date}
-      //         and time in (${hoursString})
-      //         and (select count(a.userId) 
-      //         from pickupAttendees as a
-      //         where e.id=a.pickupId) = totalSlots
-      //     `)
-      //     await fullEmail(result.recordset)
+      let result = await request.query(`
+          INSERT into pickupAttendees (userId,pickupId,transactionId)
+          select '${req.body.userId}' as userId,
+          id as pickupId,
+          '${req.body.transactionId}' as transactionId
+          from pickupEvents
+          where date = ${req.body.date} and time in (${hoursString})
+          AND NOT EXISTS (
+              SELECT 1
+              FROM pickupAttendees
+              WHERE userId = '${req.body.userId}' AND pickupId = pickupEvents.id
+          )
+          `)
+          result = await request.query(`
+              select e.*, (select count(a.userId) 
+              from pickupAttendees as a
+              where e.id=a.pickupId) attendeeCount 
+              from pickupEvents as e
+              where [date] = ${req.body.date}
+              and time in (${hoursString})
+              and (select count(a.userId) 
+              from pickupAttendees as a
+              where e.id=a.pickupId) = totalSlots
+          `)
+          await fullEmail(result.recordset)
           // IF NOT EXISTS (SELECT 1 FROM users WHERE email = @email)
           // BEGIN
           // END
