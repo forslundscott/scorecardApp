@@ -2,6 +2,7 @@ const { Parser } = require('json2csv');
 const Color = require('color');
 const pool = require(`../db`)
 const sql = require('mssql'); 
+// import { flatten } from 'flat'
 function titleCase(str){
     try{
         let words = str.split(' ')
@@ -49,9 +50,10 @@ function getOrdinalNumber(number) {
 }
 async function exportToCSV(sqlRecordset) {
     try {
+    const { flatten } = await import('flat')
       // Convert query result to CSV format
       const parser = new Parser();
-      const csv = parser.parse(sqlRecordset).replace(/"/g, '');
+      const csv = parser.parse(sqlRecordset.map(item => flatten(item))).replace(/"/g, '');
       return csv;
     } catch (error) {
       throw error;

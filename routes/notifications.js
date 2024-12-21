@@ -63,13 +63,19 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
       });
     }
   });
-  router.get("/members", async (req, res) => {
+  router.get("/exportMembers", async (req, res) => {
     
   
     try {
-        const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
+      const listId = (await mailchimp.getListByName('Greater Lansing Open Soccer')).id
       const members = await mailchimp.fetchAllMembers(listId);
-      res.status(200).json({ total: members.length, members });
+      const csvData = await functions.exportToCSV(members);
+      // console.log(csvData)
+      // Set response headers for CSV download
+      res.setHeader('Content-disposition', `attachment; filename=members.csv`);
+      res.set('Content-Type', 'text/csv');
+      res.status(200).send(csvData);
+      // res.status(200).json({ total: members.length, members });
     } catch (error) {
       res.status(500).json({
         error: "Failed to fetch members",
