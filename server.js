@@ -12,6 +12,7 @@ const SessionStore = require('express-session-sequelize')(session.Store)
 const methodOverride = require('method-override')
 const initializePassport = require('./passport-config')
 const pool = require(`./db`)
+const sql = require('mssql');
 // const helmet = require('helmet');
 
 const sequelize = new Sequelize({
@@ -38,25 +39,29 @@ initializePassport(
     async email => {
             const request = pool.request()
             const result = await request
+            .input('email', sql.VarChar, email)
             .query(`select t1.firstName, t1.id, t1.email, t2.password 
             from users as t1
             LEFT JOIN credentials as t2 
             on t1.ID=t2.userID
-            where t1.email = '${email}'`)
+            where t1.email = @email`)
             return result
         },
     async id => {
             const request = pool.request()
+            console.log(id)
             var result = await request
+            .input('id', sql.Int, id)
             .query(`select firstName, id, email
             from users
-            where id = '${id}'`)
+            where id = @id`)
             const user = result.recordset[0]
             result = await request
+            // .input('id', sql.Int, id)
             .query(`select r.id, r.name
             from user_role as ur
             left join roles as r on ur.roleId=r.id
-            where ur.userId = '${id}'`)
+            where ur.userId = @id`)
             user.roles = result.recordset
             return user
         }
