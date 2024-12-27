@@ -2,9 +2,11 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const bcrypt = require('bcrypt')
 const passport = require('passport')
 const nodemailer = require('nodemailer');
 const pool = require(`../db`)
+const sql = require('mssql'); 
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
@@ -66,8 +68,8 @@ router.post(['/createProfile'], async (req,res)=>{
     // console.log(req.body);
     try {
         const emailExistsResult = await pool.request()
-
-            .query(`SELECT COUNT(*) AS count FROM users WHERE email = '${req.body.email}'`);
+            .input('email', sql.VarChar, req.body.email)
+            .query(`SELECT COUNT(*) AS count FROM users WHERE email = @email`);
         
         // If email already exists, respond with a message
         console.log(emailExistsResult.recordset[0].count)
@@ -77,6 +79,10 @@ router.post(['/createProfile'], async (req,res)=>{
         const hashedpassword = await bcrypt.hash(req.body.password, 10)
         const request = pool.request()
         const result = await request
+        .input('email', sql.VarChar, req.body.email)
+        .input('firstName', sql.VarChar, req.body.firstName)
+        .input('lastName', sql.VarChar, req.body.lastName)
+        .input('password', sql.VarChar, hashedpassword)
         .query(`
             DECLARE @tempTable table (
                 id int
@@ -85,10 +91,10 @@ router.post(['/createProfile'], async (req,res)=>{
             insert into users (firstName, lastName, email)
             OUTPUT inserted.id
             into @tempTable
-            values ('${req.body.firstName}', '${req.body.lastName}', '${req.body.email}')
+            values (@firstName, @lastName, @email)
             
             insert into credentials (userID,[password])
-            select id, '${hashedpassword}' from @tempTable
+            select id, @password from @tempTable
             COMMIT`)        
         res.redirect('/auth/login')
     }catch(err){
@@ -108,14 +114,18 @@ router.get(['/forgotPassword'], async (req,res)=>{
 router.post(['/forgotPassword'], async (req,res)=>{
     const { email } = req.body;
     const request = pool.request();
-  const userQuery = `select firstName, id, email, [password] 
+
+
+  try {
+    const result = await request
+    .input('email', sql.VarChar, email)
+    .query(
+        `select firstName, id, email, [password] 
                         from users as t1
                         LEFT JOIN credentials as t2 
                         on t1.ID=t2.userID
-                        where email = '${email}'`;
-
-  try {
-    const result = await request.query(userQuery);
+                        where email = @email`
+    );
     const user = result.recordset[0];
 
     if (!user) {
@@ -124,11 +134,15 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
     // Generate and save reset token
     const token = crypto.randomBytes(32).toString('hex');
-    const resetTokenQuery = `
-      INSERT INTO ResetTokens (userId, token) VALUES (${user.id}, '${token}')
-    `;
 
-    await request.query(resetTokenQuery);
+    await request
+    .input('id', sql.Int, user.id)
+    .input('token', sql.NVarChar(255), token)
+    .query(
+        `
+      INSERT INTO ResetTokens (userId, token) VALUES (@id, @token)
+    `
+    );
 
     // Send reset email
     const transporter = nodemailer.createTransport({
@@ -143,8 +157,8 @@ router.post(['/forgotPassword'], async (req,res)=>{
         debug: false,
         logger: true
     });
-
-    const resetLink = `${req.protocol}://${req.hostname}/auth/reset/${token}`;
+    console.log(req.headers.host)
+    const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     const mailOptions = {
       from: process.env.ORG_EMAIL,
       to: user.email,
@@ -186,11 +200,11 @@ router.post('/reset/:token', async (req, res, next) => {
             return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
         }
         // Use MSSQL to find reset token in the database
-        const request = pool.request();
-        const resetTokenQuery = `SELECT * FROM ResetTokens WHERE token = '${token}'`;
-  
+        const request = pool.request();  
     
-        const result = await request.query(resetTokenQuery);
+        const result = await request
+        .input('token', sql.NVarChar(255), token)
+        .query(`SELECT * FROM ResetTokens WHERE token = @token`);
         const resetToken = result.recordset[0];
     
         if (!resetToken) {
@@ -198,8 +212,11 @@ router.post('/reset/:token', async (req, res, next) => {
         }
     
         // Update user password and remove reset token
-        const userQuery = `SELECT * FROM Users WHERE id = ${resetToken.userId}`;
-        const userResult = await request.query(userQuery);
+        const userResult = await pool.request()
+        .input('userId', sql.Int, resetToken.userId)
+        .query(
+            `SELECT * FROM Users WHERE id = @userId`
+        );
         const user = userResult.recordset[0];
     
         if (!user) {
@@ -207,27 +224,28 @@ router.post('/reset/:token', async (req, res, next) => {
         }
         const hashedpassword = await bcrypt.hash(password, 10)
         const passwordExistsResult = await pool.request()
-
-        .query(`SELECT COUNT(*) AS count FROM credentials WHERE userID = ${user.ID}`);
+        .input('userId', sql.Int, user.ID)
+        .query(`SELECT COUNT(*) AS count FROM credentials WHERE userID = @userId`);
         // const updateUserQuery = ''
         if (passwordExistsResult.recordset[0].count > 0) {
             // update password if it exists
-            await request.query(`UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}`);
+            await pool.request()
+            .input('userId', sql.Int, user.ID)
+            .input('password', sql.NVarChar(255), hashedpassword)
+            .query(`UPDATE credentials SET password = @password WHERE userID = @userId`);
             // updateUserQuery = `UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}`;
         }else{
             // Insert password if one doesn't exist
-            await request.query(`insert into credentials (userID,[password])
-            Values('${user.ID}','${hashedpassword}')`);
+            await pool.request()
+            .input('userId', sql.Int, user.ID)
+            .input('password', sql.NVarChar(255), hashedpassword)
+            .query(`insert into credentials (userID,[password])
+            Values(@userId, @password)`);
         }
-        // const updateUserQuery = `
-        //     UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}
-        // `;
-    
-        // await request.query(updateUserQuery);
-        const removeResetTokenQuery = `DELETE FROM ResetTokens WHERE token = '${token}'`;
-        await request.query(removeResetTokenQuery);
+        await pool.request()
+        .input('token', sql.NVarChar(255), token)
+        .query(`DELETE FROM ResetTokens WHERE token = @token`);
         res.redirect('/')
-        //   res.json({ message: 'Password reset successfully' });
     } catch (error) {
         console.error('Error resetting password:', error);
     }
