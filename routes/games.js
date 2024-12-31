@@ -307,49 +307,70 @@ router.post(['/eventLog'], async (req,res,next)=>{
                  score: 0
              }
          }
- 
-         const request = pool.request()
          let result
          if(req.body.type == 'makecaptain'){
              console.log('cap')
-             result = await request.query(`update scorecard.dbo.teams set captain = '${req.body.playerId}' where id = '${req.body.teamName}'`)
-             // res.redirect('back')
+             result = await pool.request()
+             .input('playerId', sql.Int, req.body.playerId)
+             .input('teamName',sql.VarChar, req.body.teamName)
+             .query(`update scorecard.dbo.teams set captain = @playerId where id = @teamName`)
              res.json({ message: 'Reload', data: data })
          }else if(req.body.type == 'makekeeper'){
              console.log('keep')
-             result = await request.query(`update scorecard.dbo.teams set keeper = '${req.body.playerId}' where id = '${req.body.teamName}'`)            
-             // res.redirect('back')
+             result = await pool.request()
+             .input('playerId', sql.Int, req.body.playerId)
+             .input('teamName',sql.VarChar, req.body.teamName)
+             .query(`update scorecard.dbo.teams set keeper = @playerId where id = @teamName`)            
              res.json({ message: 'Reload', data: data })
          }else{
-             console.log(`${req.body.type == 'owngoal' ? 'myKeeper': req.body.type == 'goal' ? 'oppKeeper' : null}`)
-             result = await request.query(`insert into scorecard.dbo.eventLog (playerId, 
-                 teamName, realTime, periodTime, period, value, type, Event_ID, opponentKeeper, season, subseason) 
-             VALUES('${req.body.playerId}','${req.body.teamName}','${req.body.realTime}',
-             '${req.body.periodTime}','${req.body.period}','${req.body.value}',
-             '${req.body.type}','${req.body.Event_ID}',${req.body.type == 'owngoal' ? "'"+req.body.keeper+"'": req.body.type == 'goal' ? "'"+req.body.opponentKeeper+"'" : null},
-             '${req.body.season}','${req.body.subseason}')`)
+             result = await pool.request()
+             .input('playerId', sql.Int, req.body.playerId)
+             .input('teamName',sql.VarChar, req.body.teamName)
+             .input('realTime', sql.Int, req.body.realTime)
+             .input('periodTime',sql.Int,req.body.periodTime)
+             .input('period',sql.Int, req.body.period)
+             .input('value',sql.Int, req.body.value)
+             .input('type', sql.VarChar, req.body.type)
+             .input('eventId', sql.Int, req.body.Event_ID)
+             .input('opponentKeeper',sql.Int, req.body.type == 'owngoal' ? "'"+req.body.keeper+"'": req.body.type == 'goal' ? "'"+req.body.opponentKeeper+"'" : null)
+             .input('season',sql.VarChar,req.body.season)
+             .input('subseason',sql.VarChar,req.body.subseason)
+             .query(`insert into scorecard.dbo.eventLog (playerId, 
+                 teamName, realTime, 
+                 periodTime, period, 
+                 value, type, 
+                 Event_ID, opponentKeeper, 
+                 season, subseason) 
+             VALUES(@playerId,@teamName,@realTime,
+             @periodTime,@period,@value,
+             @type,@eventId,@opponentKeeper,
+             @season,@subseason)`)
              
-             result = await request.query(`
+             result = await pool.request()
+             .input('playerId', sql.Int, req.body.playerId)
+             .input('teamName',sql.VarChar, req.body.teamName)
+             .input('eventId', sql.Int, req.body.Event_ID)
+             .query(`
              DECLARE @Team1_ID VARCHAR(255);
              DECLARE @Team2_ID VARCHAR(255)
  
              SELECT @Team1_ID = Team1_ID, 
              @Team2_ID = Team2_ID
              FROM games
-             WHERE Event_ID = '${req.body.Event_ID}';
+             WHERE Event_ID = @eventId;
  
              Select * 
              from scorecard.dbo.rosterGameStats(
-                 '${req.body.teamName}',
-                 '${req.body.Event_ID}'
+                 @teamName,
+                 @eventId
                  ) 
-             where userId = '${req.body.playerId}'
+             where userId = @playerId
              UNION ALL
-             select * from [scorecard].[dbo].[subGameStats] ('${req.body.teamName}', '${req.body.Event_ID}')
-             where userId = '${req.body.playerId}'
+             select * from [scorecard].[dbo].[subGameStats] (@teamName, @eventId)
+             where userId = @playerId
  
-             SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,'${req.body.Event_ID}',@Team2_ID)
-             SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,'${req.body.Event_ID}',@Team1_ID)
+             SELECT score, @Team1_ID as teamName from scorecard.dbo.teamScore(@Team1_ID,@eventId,@Team2_ID)
+             SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,@eventId,@Team1_ID)
              `)
              try{
                  data.player = result.recordsets[0][0]
@@ -383,25 +404,24 @@ router.post(['/eventLog'], async (req,res,next)=>{
  })
  router.get(['/newGame'], async (req, res, next) => {
     try{
-        const request = pool.request()
-        
         var data = {
             page: `/newGame`,
             user: req.user
             
         }
-        var result = await request
+        var result = await pool.request()
         .query(`select top 1 seasonName from seasons where active = 1
         `)
             data.season = result.recordset[0].seasonName
-        result = await request
+        result = await pool.request()
         .query(`select seasonName from seasons where active = 1
         `)
         data.seasons = result.recordset
-        result = await request
+        result = await pool.request()
+        .input('season',sql.VarChar,data.season)
         .query(`SELECT * from league_season ls
             LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = '${data.season}'
+            where seasonId = @season
         `)
         // console.log(req)
         
@@ -415,8 +435,23 @@ router.post('/addGame', async (req, res, next) => {
     // Process form data here
     try{
         const formData = req.body;
-        const request = pool.request()
-        await request.query(`EXEC newGame '${formData.startDate}', '${formData.startTime}', '${formData.court}', '${formData.team1Id}', '${formData.team2Id}', ${formData.maxPeriods}, '${formData.seasonId}', '${formData.leagueId}'`)
+        await pool.request()
+        .input('startDate',sql.VarChar,formData.startDate)
+        .input('startTime',sql.VarChar,formData.startTime)
+        .input('court',sql.Int,formData.court)
+        .input('team1Id',sql.VarChar,formData.team1Id)
+        .input('team2Id',sql.VarChar,formData.team2Id)
+        .input('maxPeriods',sql.Int,formData.maxPeriods)
+        .input('seasonId',sql.VarChar,formData.seasonId)
+        .input('leagueId',sql.VarChar,formData.leagueId)
+        .query(`EXEC newGame @startDate
+            , @startTime
+            , @court
+            , @team1Id
+            , @team2Id
+            , @maxPeriods
+            , @seasonId
+            , @leagueId`)
         res.redirect(302,'/games')
     }catch(err){
         next(err)
