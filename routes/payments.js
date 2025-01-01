@@ -81,7 +81,7 @@ router.get('/venmoCheckout', async (req, res) => {
 router.post('/venmoCheckout', async (req, res) => {
 
   const { paymentMethodNonce, purchaseDetails, itemName, price } = req.body;
-  console.log(req.body)
+
   try {
     // Process the payment
     const result = await gateway.transaction.sale({
@@ -118,7 +118,7 @@ router.post('/venmoCheckout', async (req, res) => {
 });
 // Create payment intent route
 router.post('/create-payment-intent', async (req, res) => {
-    console.log(req.body)
+
 //   const { amount } = req.body || 50;
 
   try {
@@ -137,14 +137,12 @@ router.post('/create-payment-intent', async (req, res) => {
 });
 router.post('/successVenmo', async (req,res, next)=>{
   try{
-      // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
-      // console.log(session)
+
 
       const hoursArray = Array.isArray(req.body.hours) ? req.body.hours : [req.body.hours];
       const hoursString = hoursArray.join(',');
       const request = pool.request()
-      console.log(hoursString)
-      console.log(req.body)
+
       let result = await request.query(`
           INSERT into pickupAttendees (userId,pickupId,transactionId)
           select '${req.body.userId}' as userId,

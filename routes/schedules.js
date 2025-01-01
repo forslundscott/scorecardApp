@@ -88,7 +88,7 @@ router.get(['/new'], async (req, res, next) => {
 })
 router.post(['/new'], async (req, res, next) => {
     try{
-        console.log(req.body)
+
         const request = pool.request()
         var leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(req.body.sport, req.body.seasonId),parseInt(req.body.gamesPerTeam))
         var allRegularGames = []

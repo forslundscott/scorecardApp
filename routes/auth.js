@@ -14,15 +14,14 @@ router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
         console.log(req.session.cookie.returnTo)
         if (req.query.returnTo != undefined) {
-            // console.log('query');
+
             req.session.returnTo = req.query.returnTo;
         }else{
-            // console.log('header');
+
             req.session.returnTo = req.header('Referer')
-            // console.log(req.session.cookie.returnTo)
-            // console.log(req.session.returnTo)
+
         }
-        // await sequelize.sync({force: true})
+
         res.render('login.ejs')
     }catch(err){
         console.error('Error:', err)
@@ -31,7 +30,7 @@ router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
 router.post(['/login'], function(req, res, next) { passport.authenticate('local', function(err, user, info, status) {
     if (err) { return next(err) }
     try{
-        console.log(info)
+
         if (!user) { return res.render('login.ejs', {messages: info}) }
         req.session.passport = {}
         req.session.passport.user = user.id
@@ -65,14 +64,14 @@ router.get(['/createProfile'], async (req,res)=>{
 })
 
 router.post(['/createProfile'], async (req,res)=>{
-    // console.log(req.body);
+
     try {
         const emailExistsResult = await pool.request()
             .input('email', sql.VarChar, req.body.email)
             .query(`SELECT COUNT(*) AS count FROM users WHERE email = @email`);
         
         // If email already exists, respond with a message
-        console.log(emailExistsResult.recordset[0].count)
+
         if (emailExistsResult.recordset[0].count > 0) {
             return res.render('createProfile.ejs', {messages: {message: 'User with specified email already exists, Please use reset Password link.'}})
         }
@@ -102,7 +101,6 @@ router.post(['/createProfile'], async (req,res)=>{
         res.redirect('/auth/createProfile')
     }
     
-    // console.log(users)
 })
 router.get(['/forgotPassword'], async (req,res)=>{
     try{
@@ -157,7 +155,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
         debug: false,
         logger: true
     });
-    console.log(req.headers.host)
+
     const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     const mailOptions = {
       from: process.env.ORG_EMAIL,

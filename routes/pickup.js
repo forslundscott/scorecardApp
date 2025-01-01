@@ -26,7 +26,7 @@ router.get(['/new'], async (req, res, next) => {
 router.post('/add', async (req, res, next) => {
     // Process form data here
     try{
-        console.log(req.body)
+
         // Ensure pickupHours is an array
         const pickupHours = Array.isArray(req.body.pickupHours)
             ? req.body.pickupHours

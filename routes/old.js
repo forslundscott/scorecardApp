@@ -13,7 +13,6 @@ router.post(['/paidChanges'], async (req,res,next)=>{
         
         const request = pool.request()
         if(Object.keys(req.body).length >0){
-            console.log(req.body);
                     const result = await request
                     .query(`Update winners
                     Set paid =

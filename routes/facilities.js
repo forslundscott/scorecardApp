@@ -40,9 +40,8 @@ router.post('/add', async (req, res, next) => {
   });
 router.get('/', async (req,res, next)=>{
     try{
-        console.log(req.user)
+
         if (req.isAuthenticated()) {
-            // console.log(req.user)
         }
         var data = {
             

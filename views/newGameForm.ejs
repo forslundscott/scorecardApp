@@ -2,7 +2,6 @@
                 
     <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getLeagues(this.form)" required>
         <% for(var i=0; i< data.seasons.length; i++) {%>
-            <% console.log(data.seasons.length) %>
             <option value="<%= data.seasons[i].seasonName%>" <%= data.seasons[i].seasonName== data.season? 'selected' : ''%>><%= data.seasons[i].seasonName%></option>
         <% } %>
 

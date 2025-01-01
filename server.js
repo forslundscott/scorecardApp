@@ -49,7 +49,6 @@ initializePassport(
         },
     async id => {
             const request = pool.request()
-            console.log(id)
             var result = await request
             .input('id', sql.Int, id)
             .query(`select firstName, id, email
@@ -82,7 +81,10 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-
+app.use((req, res, next) => {
+    console.log(req.path)
+    next()
+  });
 // Helpers and Routes
 app.use('/users', require(`./routes/users`));
 app.use('/games', require(`./routes/games`));
@@ -115,6 +117,11 @@ app.use((req, res, next) => {
     res.render('doesNotExist.ejs')
   });
 app.use(require('./middleware/errorHandler'));
+
+// app._router.stack.forEach((middleware) => {
+//     console.log(middleware.name || 'anonymous middleware', middleware.route ? middleware.route.path : '');
+// });
+
 
 app.listen(process.env.APP_PORT, function(err){
     // if (err) console.log(err);

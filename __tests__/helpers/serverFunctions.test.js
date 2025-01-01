@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 const {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate} = require('../../helpers/functions')
 const { Parser } = require('json2csv');
 const pool = require('../../db');

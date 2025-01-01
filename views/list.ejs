@@ -203,7 +203,6 @@ Thank you and have a nice day!`
         <% } else if (data.page == 'user/newRole') { %>
                 <%- include(`newUserRole`,{data: data}); %>
         <% } else if (data.page == 'users/roles') { %>
-            <% console.log(data.list) %>
             <% for(var i=0; i< data.list.length; i++) {%>
                 <%- include(`userRole_item`,{data: data.list[i]}); %>
             <% } %>

@@ -5,7 +5,7 @@
 <body>
   
   <header class="header" >
-    <% console.log(data.page)%>
+
     <div id="pageName" class="headerText">
       <% if (data.page == 'games') { %>
        Games
@@ -31,7 +31,7 @@
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newPlayer" onclick="window.location.href = 'roster/newPlayer';" >New Player</button>
        <% } else if (data.page == 'users/details') { %>
-        <% console.log(data) %>
+
         <%= data.data.firstName %> <%= data.data.lastName %><%= data.data.firstName !== data.data.preferredName ? ` (${data.data.preferredName})`:`` %>
         <br>
         <%= data.data.email %>
@@ -102,7 +102,7 @@
          var currentPeriod = '<%= data.game.period  %>'
 
         </script>
-        <% console.log(data.teams)%>
+
         <!-- onclick="window.location.href='mailto:?bcc=test%40test&subject=GLOS%3A%20Gift%20Card%20Payment&body=This%20is%20a%20reminder%20to%20send%20gift%20card%20payments.'" -->
         <div class="triColumn textCenter">
           <form action="javascript:void(0);" style="height: 100%;">

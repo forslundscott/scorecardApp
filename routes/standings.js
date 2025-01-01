@@ -66,27 +66,13 @@ router.get('/', async (req,res, next)=>{
 });
 router.post('/', async (req, res, next) => {
     try{
-        // const request = pool.request()
-        // const result = await request
-        // .query(`DECLARE @league varchar(255)
-        // Set @league = '${req.params.league}'
-        // Execute ${req.params.type}Standings @league
-        // `)
-        // var data = {
-        //     page: `${req.originalUrl.split('/')[1]}`,
-        //     user: req.user
-        // }
-        // console.log(req.body)
         res.redirect(`/standings/${req.body.type}/${req.body.leagueId}`)
-        // res.render('index.ejs',{data: data})
+
     }catch(err){
         console.error('Error:', err)
     }
 })
-// Define a POST route for `/users`
-// router.post('/', (req, res) => {
-//   res.send('Create a new user');
-// });
+
 
 // Export the router so it can be used in other files
 module.exports = router;

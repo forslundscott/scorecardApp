@@ -93,7 +93,6 @@ const addUserToDatabase = async (userData) => {
 
     // Use preferredName if it exists; fallback to firstName otherwise
     const nameToUse = userData?.preferredName?.trim() || firstName;
-    // console.log(nameToUse)
     await request.input('firstName', sql.VarChar, firstName)
         .input('lastName', sql.VarChar, lastName)
         .input('preferredName', sql.VarChar, nameToUse)

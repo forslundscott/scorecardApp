@@ -6,16 +6,15 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.post(['/getLeagues'], async (req,res,next)=>{
     try{
-        // console.log(req.body)
         const request = pool.request()
         result = await request.query(`
             select * from leagues as l
             LEFT join league_season as ls on l.abbreviation=ls.leagueId
             where ls.seasonId = '${req.body.seasonId}'
         `)
-        // console.log(result.recordset)
+
         res.json({ message: 'Success', leagues: result.recordset })
-        // res.redirect('back')
+
     }catch(err){
         next(err)
     }

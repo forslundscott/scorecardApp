@@ -73,15 +73,11 @@ router.post('/:userId/teams/addTeam', async (req,res, next)=>{
             page: 'user/newRole',
             userId: req.params.userId
         }
-        console.log(req.body)
         const request = pool.request()
         const result = await request.query(`
             insert into user_team (userId,teamId)
             values (${req.params.userId},'${req.body.teamId}')
             `)
-            // console.log(result.recordsets[0])
-        
-
         res.redirect(302,`/users/${req.params.userId}/teams`)
     }catch(err){
         next(err)
