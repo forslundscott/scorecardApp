@@ -110,12 +110,10 @@ const addUserToDatabase = async (userData) => {
 };
 const getUser = async (userData) => {
     try{
-    const request = pool.request();
     const {email } = userData;
-
-    
-    request.input('email', sql.VarChar, email)
-    const result = await request.query(`
+    const result = await pool.request()
+    .input('email', sql.VarChar, email)
+    .query(`
             SELECT * from users
             where email = @email
         `);

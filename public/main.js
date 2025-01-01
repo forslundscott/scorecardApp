@@ -138,34 +138,12 @@ if(document.getElementById('timerForm')){
     
     if(document.getElementById('timerForm').querySelector('[name="timerState"]').value == 1){
         distance = distance - 1000;
-
-        if (distance < 0) {
-            
-            // if(navigator.platform !== 'IPhone'){
-            //     navigator.vibrate([200, 200])
-            // }
-            // // setTimeout(function(){document.getElementById("myAudio").play()}, 950)
-            // document.getElementById("myAudio").muted = false
-            // document.getElementById("myAudio").play()
-            
+        if (distance < 0) {   
             clearInterval(x);
-        //    alert(navigator.getAutoplayPolicy("mediaelement"))
-            // if(navigator.platform !== 'iPhone'){
-                // alert(navigator.platform);
                 playSoundAndWait('whistle.mp3')
                 async function playSoundAndWait(soundFilePath) {
-                    // var audio = new Audio(soundFilePath);
                     console.log(audio)
                     var form = document.getElementById('timerForm')
-                    // var statType = ele.value
-                    
-                        // form.querySelector('[name="realTime"]').value = Date.now()
-                        // // console.log(form.querySelector('[name="realTime"]').value)
-                        // form.querySelector('[name="value"]').value = val
-                        
-                        // form.querySelector('[name="period"]').value = xperiod
-                        // form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
-                        // form.querySelector('[name="type"]').value = ele.value
                         var formData = new FormData(form)
                     const response = await fetch('/games/periodEnd', {
                         method: 'POST',
@@ -181,24 +159,12 @@ if(document.getElementById('timerForm')){
                             
                             location.reload()
                         });
-                    
                         // Play the audio
                         audio.play();
                     }else{
                         location.reload()
                     }
-                }
-            // }else{
-            //     // var audio = new Audio()
-            //     // alert(audio.autoplay)
-            //     // audio.autoplay = true
-            //     audio.src = 'doubleBell.mp3'
-            //     audio.addEventListener('ended', function() {
-            //         location.reload()
-            //     });
-            // }
-            // location.reload()
-            
+                }            
         } else{
             var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
             var seconds = Math.floor((distance % (1000 * 60)) / 1000).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
@@ -206,43 +172,27 @@ if(document.getElementById('timerForm')){
         }
     }
   }, 1000);
-}
-  
+} 
   function timerStartStop(ele){
     var form = ele.form
     switch(true){
         case ele.form.querySelector('[name="timerState"]').value == 0 :
-            // // document.getElementById("myAudio").play()
-            // document.getElementById("myAudio").play().then(() => { // pause directly
-            //     audio.pause();
-            //     audio.currentTime = 0;
-            //   });
             ele.form.querySelector('[name="timerState"]').value= 1
-            // ele.innerText = 'Stop'
             break
         case ele.form.querySelector('[name="timerState"]').value == 1 :
             ele.form.querySelector('[name="timerState"]').value= 0
-            // ele.innerText = 'Start'
             break
-    }
-    
+    } 
   }
-
-
   async function statHandler(ele,xperiod,val = 1){
     console.log('testonclick')
     var form = ele.form
-    // var statType = ele.value
-    
         form.querySelector('[name="realTime"]').value = Date.now()
-        // console.log(form.querySelector('[name="realTime"]').value)
         form.querySelector('[name="value"]').value = val
-        
         form.querySelector('[name="period"]').value = xperiod
         form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
         form.querySelector('[name="type"]').value = ele.value
         var formData = new FormData(form)
-        // console.log(formData)
         try{
             const response = await fetch('/games/eventLog', {
                 method: 'POST',

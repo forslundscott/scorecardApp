@@ -37,8 +37,7 @@ const sessionStore = new SessionStore({
 initializePassport(
     passport, 
     async email => {
-            const request = pool.request()
-            const result = await request
+            const result = await pool.request()
             .input('email', sql.VarChar, email)
             .query(`select t1.firstName, t1.id, t1.email, t2.password 
             from users as t1
@@ -48,15 +47,14 @@ initializePassport(
             return result
         },
     async id => {
-            const request = pool.request()
-            var result = await request
+            var result = await pool.request()
             .input('id', sql.Int, id)
             .query(`select firstName, id, email
             from users
             where id = @id`)
             const user = result.recordset[0]
-            result = await request
-            // .input('id', sql.Int, id)
+            result = await pool.request()
+            .input('id', sql.Int, id)
             .query(`select r.id, r.name
             from user_role as ur
             left join roles as r on ur.roleId=r.id
