@@ -1,4 +1,3 @@
-// routes/users.js
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
@@ -68,7 +67,9 @@ router.post(['/createProfile'], async (req,res)=>{
     try {
         const emailExistsResult = await pool.request()
             .input('email', sql.VarChar, req.body.email)
-            .query(`SELECT COUNT(*) AS count FROM users WHERE email = @email`);
+            .query(`
+                SELECT COUNT(*) AS count FROM users WHERE email = @email
+                `);
         
         // If email already exists, respond with a message
 
@@ -76,8 +77,7 @@ router.post(['/createProfile'], async (req,res)=>{
             return res.render('createProfile.ejs', {messages: {message: 'User with specified email already exists, Please use reset Password link.'}})
         }
         const hashedpassword = await bcrypt.hash(req.body.password, 10)
-        const request = pool.request()
-        const result = await request
+        await pool.request()
         .input('email', sql.VarChar, req.body.email)
         .input('firstName', sql.VarChar, req.body.firstName)
         .input('lastName', sql.VarChar, req.body.lastName)
@@ -111,11 +111,8 @@ router.get(['/forgotPassword'], async (req,res)=>{
 })
 router.post(['/forgotPassword'], async (req,res)=>{
     const { email } = req.body;
-    const request = pool.request();
-
-
   try {
-    const result = await request
+    const result = await pool.request()
     .input('email', sql.VarChar, email)
     .query(
         `select firstName, id, email, [password] 
@@ -133,7 +130,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
     // Generate and save reset token
     const token = crypto.randomBytes(32).toString('hex');
 
-    await request
+    await pool.request()
     .input('id', sql.Int, user.id)
     .input('token', sql.NVarChar(255), token)
     .query(
@@ -198,11 +195,11 @@ router.post('/reset/:token', async (req, res, next) => {
             return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
         }
         // Use MSSQL to find reset token in the database
-        const request = pool.request();  
-    
-        const result = await request
+        const result = await pool.request()
         .input('token', sql.NVarChar(255), token)
-        .query(`SELECT * FROM ResetTokens WHERE token = @token`);
+        .query(`
+            SELECT * FROM ResetTokens WHERE token = @token
+            `);
         const resetToken = result.recordset[0];
     
         if (!resetToken) {
@@ -223,26 +220,34 @@ router.post('/reset/:token', async (req, res, next) => {
         const hashedpassword = await bcrypt.hash(password, 10)
         const passwordExistsResult = await pool.request()
         .input('userId', sql.Int, user.ID)
-        .query(`SELECT COUNT(*) AS count FROM credentials WHERE userID = @userId`);
-        // const updateUserQuery = ''
+        .query(`
+            SELECT COUNT(*) AS count FROM credentials WHERE userID = @userId
+            `);
         if (passwordExistsResult.recordset[0].count > 0) {
             // update password if it exists
             await pool.request()
             .input('userId', sql.Int, user.ID)
             .input('password', sql.NVarChar(255), hashedpassword)
-            .query(`UPDATE credentials SET password = @password WHERE userID = @userId`);
-            // updateUserQuery = `UPDATE credentials SET password = '${hashedpassword}' WHERE userID = ${user.ID}`;
+            .query(`
+                UPDATE credentials SET password = @password 
+                WHERE userID = @userId
+                `);
         }else{
             // Insert password if one doesn't exist
             await pool.request()
             .input('userId', sql.Int, user.ID)
             .input('password', sql.NVarChar(255), hashedpassword)
-            .query(`insert into credentials (userID,[password])
-            Values(@userId, @password)`);
+            .query(`
+                insert into credentials (userID,[password])
+                Values(@userId, @password)
+                `);
         }
         await pool.request()
         .input('token', sql.NVarChar(255), token)
-        .query(`DELETE FROM ResetTokens WHERE token = @token`);
+        .query(`
+            DELETE FROM ResetTokens 
+            WHERE token = @token
+            `);
         res.redirect('/')
     } catch (error) {
         console.error('Error resetting password:', error);
