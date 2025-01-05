@@ -47,7 +47,7 @@ initializePassport(
             return result
         },
     async id => {
-            var result = await pool.request()
+            let result = await pool.request()
             .input('id', sql.Int, id)
             .query(`select firstName, id, email
             from users

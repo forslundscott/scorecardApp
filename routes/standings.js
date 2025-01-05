@@ -29,7 +29,7 @@ router.get('/:type/:league', async (req, res, next) => {
         Set @league = '${req.params.league}'
         Execute ${req.params.type}Standings @league
         `)
-        var data = {
+        let data = {
             league: req.params.league,
             type: req.params.type,
             page: `${req.originalUrl.split('/')[1]}`,
@@ -53,7 +53,7 @@ router.get('/', async (req,res, next)=>{
             where s.active = 1
             )
         `)
-        var data = {
+        let data = {
             page: `${req.originalUrl.split('/')[1]}`,
             user: req.user,
             leagues: result.recordset

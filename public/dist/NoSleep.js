@@ -11,7 +11,7 @@
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
-/******/ 	var installedModules = {};
+/******/ 	let installedModules = {};
 /******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
@@ -21,7 +21,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 			return installedModules[moduleId].exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
+/******/ 		let module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
 /******/ 			l: false,
 /******/ 			exports: {}
@@ -68,16 +68,16 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 		if(mode & 1) value = __webpack_require__(value);
 /******/ 		if(mode & 8) return value;
 /******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
+/******/ 		let ns = Object.create(null);
 /******/ 		__webpack_require__.r(ns);
 /******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		if(mode & 2 && typeof value != 'string') for(let key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
 /******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
 /******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
+/******/ 		let getter = module && module.__esModule ?
 /******/ 			function getDefault() { return module['default']; } :
 /******/ 			function getModuleExports() { return module; };
 /******/ 		__webpack_require__.d(getter, 'a', getter);
@@ -102,36 +102,36 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+let _createClass = function () { function defineProperties(target, props) { for (let i = 0; i < props.length; i++) { let descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _require = __webpack_require__(1),
+let _require = __webpack_require__(1),
     webm = _require.webm,
     mp4 = _require.mp4;
 
 // Detect iOS browsers < version 10
 
 
-var oldIOS = function oldIOS() {
+let oldIOS = function oldIOS() {
   return typeof navigator !== "undefined" && parseFloat(("" + (/CPU.*OS ([0-9_]{3,4})[0-9_]{0,1}|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0, ""])[1]).replace("undefined", "3_2").replace("_", ".").replace("_", "")) < 10 && !window.MSStream;
 };
 
 // Detect native Wake Lock API support
-var nativeWakeLock = function nativeWakeLock() {
+let nativeWakeLock = function nativeWakeLock() {
   return "wakeLock" in navigator;
 };
 
-var NoSleep = function () {
+let NoSleep = function () {
   function NoSleep() {
-    var _this = this;
+    let _this = this;
 
     _classCallCheck(this, NoSleep);
 
     this.enabled = false;
     if (nativeWakeLock()) {
       this._wakeLock = null;
-      var handleVisibilityChange = function handleVisibilityChange() {
+      let handleVisibilityChange = function handleVisibilityChange() {
         if (_this._wakeLock !== null && document.visibilityState === "visible") {
           _this.enable();
         }
@@ -169,7 +169,7 @@ var NoSleep = function () {
   _createClass(NoSleep, [{
     key: "_addSourceToVideo",
     value: function _addSourceToVideo(element, type, dataURI) {
-      var source = document.createElement("source");
+      let source = document.createElement("source");
       source.src = dataURI;
       source.type = "video/" + type;
       element.appendChild(source);
@@ -177,7 +177,7 @@ var NoSleep = function () {
   }, {
     key: "enable",
     value: function enable() {
-      var _this2 = this;
+      let _this2 = this;
 
       if (nativeWakeLock()) {
         return navigator.wakeLock.request("screen").then(function (wakeLock) {
@@ -207,7 +207,7 @@ var NoSleep = function () {
         this.enabled = true;
         return Promise.resolve();
       } else {
-        var playPromise = this.noSleepVideo.play();
+        let playPromise = this.noSleepVideo.play();
         return playPromise.then(function (res) {
           _this2.enabled = true;
           return res;

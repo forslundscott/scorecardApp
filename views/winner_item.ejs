@@ -4,13 +4,13 @@
 </head>
 <body>
     <%
-        var emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
-        var emailBody = encodeURIComponent(`Hi ${winner.player}, 
+        let emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
+        let emailBody = encodeURIComponent(`Hi ${winner.player}, 
 
 This is a reminder to send your gift card fees to Dean. His Venmo and Cashapp are Dean Jong. Please respond to this email with a screenshot of the payment when you are done.  
 
 Thank you and have a nice day!`);
-        var bccAddress = encodeURIComponent(`${winner.email}`); 
+        let bccAddress = encodeURIComponent(`${winner.email}`); 
      %>
         <!-- <form class="listItem" action="" method="get"> -->
                

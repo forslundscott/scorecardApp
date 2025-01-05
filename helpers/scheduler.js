@@ -1,7 +1,7 @@
 // const functions = require('./helpers/functions');
 const BYE = 1
 const PLAYEVERYWEEK = 2
-var teamData = [
+let teamData = [
     ['CFC','CFC',5],
     ['FCF','FCF',4],
     ['FTK','FTK',3],
@@ -87,8 +87,8 @@ class match{
 }
 
 function moveToEnd(array,element){
-    var tempArray = [...array]
-    var splicedElement = tempArray.splice(tempArray.indexOf(element), 1)
+    let tempArray = [...array]
+    let splicedElement = tempArray.splice(tempArray.indexOf(element), 1)
     tempArray.push(splicedElement[0])
     return tempArray
 }
@@ -109,7 +109,7 @@ function makeLeague(teams,gamesPerTeam,teamsPerLeague,leagueId,subLeagueId,dayOf
         dayOfWeek: dayOfWeek
     }
     // console.log(leagueId&&subLeagueId)
-    for(var j=0;j<teamsPerLeague;j++){
+    for(let j=0;j<teamsPerLeague;j++){
         league.teams.push(teams[j])
         // teams.shift()
     }
@@ -123,15 +123,15 @@ function makeLeague(teams,gamesPerTeam,teamsPerLeague,leagueId,subLeagueId,dayOf
 }
 function leagueSplit(leagues,gamesPerTeam){
     // let teams = teams
-    var leagueList = []
-    for(var league of leagues){
+    let leagueList = []
+    for(let league of leagues){
         // console.log(league.leagueId)
-        var opponentCount = league.teams.length - 1
-        var leagueCount = Math.ceil(opponentCount/gamesPerTeam)
-        var teamsPerLeague = league.teams.length / leagueCount
-        var lrgLeaguesCount= ((teamsPerLeague) - Math.floor(teamsPerLeague))*leagueCount
+        let opponentCount = league.teams.length - 1
+        let leagueCount = Math.ceil(opponentCount/gamesPerTeam)
+        let teamsPerLeague = league.teams.length / leagueCount
+        let lrgLeaguesCount= ((teamsPerLeague) - Math.floor(teamsPerLeague))*leagueCount
         
-        for(var i=0;i<leagueCount;i++){
+        for(let i=0;i<leagueCount;i++){
             if(i<lrgLeaguesCount){
                 // Leagues with extra game
                 leagueList.push(makeLeague(league.teams,gamesPerTeam,Math.ceil(teamsPerLeague),league.leagueId,i+1,league.dayOfWeek))
@@ -144,14 +144,14 @@ function leagueSplit(leagues,gamesPerTeam){
 }
 
 function leagueSchedule(leagues,gamesPerTeam){
-    var subLeagues = leagueSplit(leagues,gamesPerTeam)
+    let subLeagues = leagueSplit(leagues,gamesPerTeam)
     // console.log(subLeagues)
     for(const subLeague of subLeagues){
-        for(var i=0;i<subLeague.totalRegularSeasonGames;i++){
+        for(let i=0;i<subLeague.totalRegularSeasonGames;i++){
             for(let j = 0; j< subLeague.possibleMatches.length;j++){
-                var match = subLeague.possibleMatches[j]
-                var minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
-                var avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
+                let match = subLeague.possibleMatches[j]
+                let minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                let avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
                     return accumulator + currentValue.gamesPlayed;
                 }, 0))/subLeague.teams.length
                 // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
@@ -189,11 +189,11 @@ function leagueSchedule(leagues,gamesPerTeam){
         // subLeague.teams.forEach(item =>{
         //     console.log(`${item.id }: ${item.gamesPlayed}`)
         // })
-        var playOffSchedule = []
-        var tempStr = ''
+        let playOffSchedule = []
+        let tempStr = ''
         // round 1
-        var firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
-        for(var i=0;i<firstRounGames;i++){
+        let firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
+        for(let i=0;i<firstRounGames;i++){
             // if(subLeague.teams.length%2===0){
                 // evens
                 if(i+1==Math.floor(subLeague.teams.length/2) && subLeague.teams.length%2===0){
@@ -239,7 +239,7 @@ function leagueSchedule(leagues,gamesPerTeam){
         }
         // round 2
         
-        for(var i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
+        for(let i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
             if(i==0){
                 tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Winner of ${subLeague.playoffMatches[0].gameNumber}`
                 subLeague.playoffMatches.push(
@@ -326,14 +326,14 @@ function leagueSchedule(leagues,gamesPerTeam){
 }
 
 function leagueScheduleOld(leagues,gamesPerTeam){
-    var subLeagues = leagueSplit(leagues,gamesPerTeam)
+    let subLeagues = leagueSplit(leagues,gamesPerTeam)
     // console.log(subLeagues)
     for(const subLeague of subLeagues){
-        for(var i=0;i<subLeague.totalRegularSeasonGames;i++){
+        for(let i=0;i<subLeague.totalRegularSeasonGames;i++){
             for(let j = 0; j< subLeague.possibleMatches.length;j++){
-                var match = subLeague.possibleMatches[j]
-                var minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
-                var avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
+                let match = subLeague.possibleMatches[j]
+                let minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                let avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
                     return accumulator + currentValue.gamesPlayed;
                 }, 0))/subLeague.teams.length
                 // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
@@ -371,11 +371,11 @@ function leagueScheduleOld(leagues,gamesPerTeam){
         // subLeague.teams.forEach(item =>{
         //     console.log(`${item.id }: ${item.gamesPlayed}`)
         // })
-        var playOffSchedule = []
-        var tempStr = ''
+        let playOffSchedule = []
+        let tempStr = ''
         // round 1
-        var firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
-        for(var i=0;i<firstRounGames;i++){
+        let firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
+        for(let i=0;i<firstRounGames;i++){
             // if(subLeague.teams.length%2===0){
                 // evens
                 if(i+1==Math.floor(subLeague.teams.length/2) && subLeague.teams.length%2===0){
@@ -421,7 +421,7 @@ function leagueScheduleOld(leagues,gamesPerTeam){
         }
         // round 2
         
-        for(var i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
+        for(let i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
             if(i==0){
                 tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Winner of ${subLeague.playoffMatches[0].gameNumber}`
                 subLeague.playoffMatches.push(
@@ -520,11 +520,11 @@ function compare( a, b ) {
 }
 
 function getMatches(teams){
-    var matchList = []
+    let matchList = []
     
-    for(var i=0;i<teams.length-1;i++){
-        for(var j=i+1;j<teams.length;j++){
-            var currentMatch = new match
+    for(let i=0;i<teams.length-1;i++){
+        for(let j=i+1;j<teams.length;j++){
+            let currentMatch = new match
             currentMatch.teams.push(teams[i])
             currentMatch.teams.push(teams[j])
             currentMatch.ids.push(teams[i].id)
@@ -537,10 +537,10 @@ function getMatches(teams){
     return matchList
 }
 // function getTeams(){
-//     var teamList = []
+//     let teamList = []
 //     for(const xteam of teamData){
 //         // if(teamRows[i].style.display !== 'none'){
-//             var currentTeam = new team
+//             let currentTeam = new team
 //             currentTeam.name = xteam[0]
 //             currentTeam.id = xteam[1]
 //             currentTeam.rating = Math.random()*5

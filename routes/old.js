@@ -40,7 +40,7 @@ router.post(['/paidChanges'], async (req,res,next)=>{
 })
 router.get(['/winners'], async (req,res, next)=>{
     try{
-        var data = {
+        let data = {
             page: req.route.path[0].replace('/',''),
             user: req.user
         }

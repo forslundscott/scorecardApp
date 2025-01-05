@@ -25,7 +25,7 @@ router.post(['/getTeams'], async (req,res,next)=>{
     try{
 
         const request = pool.request()
-        result = await request.query(`
+        let result = await request.query(`
         SELECT * 
         FROM teams
         WHERE league = '${req.body.leagueId}' 
@@ -42,7 +42,7 @@ router.post(['/addPlayer'], async (req,res,next)=>{
     try{
 
         const request = pool.request()
-        var result = await request.query(`select id from users
+        let result = await request.query(`select id from users
         where email = '${req.body.email}'`)
         if(!result.recordset[0]){
 
@@ -127,12 +127,12 @@ router.get(['/newTeam'], async (req, res, next) => {
     try{
         const request = pool.request()
         
-        var data = {
+        let data = {
             page: `/newTeam`,
             user: req.user
             
         }
-        var result = await request
+        let result = await request
         .query(`select top 1 seasonName from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
@@ -195,7 +195,7 @@ router.post('/addTeam', upload.single('teamLogo'), async (req, res, next) => {
 router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
     try{
         const request = pool.request()
-        var result = await request.query(`select id from users
+        let result = await request.query(`select id from users
         where email = '${req.body.email}'`)
         if(!result.recordset[0]){
             result = await request.query(`
@@ -256,13 +256,13 @@ router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
 router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'team/newPlayer',
             teamId: req.params.teamId
         }
         const request = pool.request()
-        var result = await request.query(`
+        let result = await request.query(`
             select season from teams
             where id = '${req.params.teamId}'
             `)
@@ -278,7 +278,7 @@ router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
 router.get('/:teamId/roster', async (req,res, next)=>{
     try{
         
-        var data = {
+        let data = {
             user: req.user,
             page: 'team/roster',
             userId: req.params.userId
@@ -302,7 +302,7 @@ router.get('/:teamId/roster', async (req,res, next)=>{
 router.post('/:teamId/editTeam', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'team/editTeam',
             teamId: req.params.teamId
@@ -327,12 +327,12 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
 router.get('/:teamId/editTeam', async (req,res, next)=>{
     try{
         // console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: '/editTeam'
         }
         const request = pool.request()
-        var result = await request.query(`
+        let result = await request.query(`
             SELECT * 
             from dbo.teams
             where id = '${req.params.teamId}'
@@ -361,7 +361,7 @@ router.get('/:teamId/editTeam', async (req,res, next)=>{
 router.get('/:teamId', async (req,res, next)=>{
     try{
         // console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'teams/details'
         }
@@ -386,7 +386,7 @@ router.get('/', async (req,res, next)=>{
         // if (req.isAuthenticated()) {
         //     // console.log(req.user)
         // }
-        var data = {
+        let data = {
             page: `teams`,
             user: req.user
         }

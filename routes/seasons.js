@@ -8,7 +8,7 @@ router.get(['/newSeason'], async (req, res, next) => {
     try{
         const request = pool.request()
         
-        var data = {
+        let data = {
             page: `/newSeason`,
             user: req.user
             
@@ -40,7 +40,7 @@ router.get('/', async (req,res, next)=>{
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
-        var data = {
+        let data = {
             
             page: 'seasons',
             user: req.user

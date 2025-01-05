@@ -9,7 +9,7 @@ router.get(['/new'], async (req, res, next) => {
     try{
 
         
-        var data = {
+        let data = {
             page: `/newPickup`,
             user: req.user
             
@@ -69,13 +69,13 @@ router.get('/register/:date', async (req,res, next)=>{
         // if (req.isAuthenticated()) {
         //     // console.log(req.user)
         // }
-        var data = {
+        let data = {
         }
         // console.log(req.originalUrl)
 
         const request = pool.request()
 
-        var result = await request.query(`
+        let result = await request.query(`
             select e.*, (select count(a.userId) 
             from pickupAttendees as a
             where e.id=a.pickupId) attendeeCount 
@@ -96,7 +96,7 @@ router.get('/', async (req,res, next)=>{
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
-        var data = {
+        let data = {
             
             page: 'pickup',
             user: req.user

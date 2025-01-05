@@ -16,7 +16,7 @@
                 <br><br>
             <select name="facilityId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getMax(this)" required>
                 <option value="" disabled selected>Facility</option>
-                <% for(var i=0; i< data.facilities.length; i++) {%>
+                <% for(let i=0; i< data.facilities.length; i++) {%>
                     <option value="<%= data.facilities[i].id%>"><%= data.facilities[i].name%></option>
                 <% } %>
             </select>
@@ -116,7 +116,7 @@
         const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York';
         const date = new Date(dateInput + 'T00:00:00'); // Midnight in the local timezone
         const unixMillis = date.getTime();
-        var formData = new FormData(form)
+        let formData = new FormData(form)
         formData.set('date', unixMillis)
         const response = await fetch('/pickup/add', {
         method: 'POST',

@@ -30,7 +30,7 @@
             
 
             <%# console.log(data) %>
-            <% for (var i=0; i<data.pickupEvents.length;i++) {%>
+            <% for (let i=0; i<data.pickupEvents.length;i++) {%>
             <label>
                 <input 
                 type="checkbox" 
@@ -68,8 +68,8 @@
             // paymentSubmit(form,event)
         }
         async function fillExistingUserInfo(emailElement){
-            var form = emailElement.form;
-            var formData = new FormData(form)
+            let form = emailElement.form;
+            let formData = new FormData(form)
             // console.log(formData)
             const response = await fetch('/games/checkEmail', {
                 method: 'POST',
@@ -107,8 +107,8 @@
             }
         }
         document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
-            var email = this.value;
-            var formData = new FormData(document.getElementById('newPlayerForm'))
+            let email = this.value;
+            let formData = new FormData(document.getElementById('newPlayerForm'))
             console.log(formData)
             const response = await fetch('/games/checkEmail', {
                 method: 'POST',

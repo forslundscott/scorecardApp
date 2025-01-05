@@ -42,12 +42,12 @@ router.get(['/newLeague'], async (req, res, next) => {
     try{
         const request = pool.request()
         
-        var data = {
+        let data = {
             page: `/newLeague`,
             user: req.user
             
         }
-        var result = await request
+        let result = await request
         .query(`select top 1 seasonName from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
@@ -68,7 +68,7 @@ router.get('/', async (req,res, next)=>{
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
-        var data = {
+        let data = {
             
             page: 'leagues',
             user: req.user

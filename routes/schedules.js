@@ -9,22 +9,22 @@ router.post('/exportSchedules', async (req, res, next) => {
     try{
         const request = pool.request()
         
-        // var result = await request
+        // let result = await request
         // .query(
         //     `select distinct leagueId from schedule_games
         //     where scheduleId = ${req.body.scheduleId}`
         // )
-        // var leagueArray = result.recordset
-        // for(var ileague of leagueArray){
-        //     var csvData = ''
+        // let leagueArray = result.recordset
+        // for(let ileague of leagueArray){
+        //     let csvData = ''
         //     result = await request
         //     .query(
         //         `select distinct CONVERT(DATE, startDate, 101) as ds, startDate from schedule_games
         //         where scheduleId = ${req.body.scheduleId} and leagueId = '${ileague.leagueId}'
         //         ORDER BY CONVERT(DATE, startDate, 101)`
         //     )
-        //     var dateArray = result.recordset
-        //     for(var idate of dateArray){
+        //     let dateArray = result.recordset
+        //     for(let idate of dateArray){
         //         result = await request
         //         .query(
         //             `select distinct CONVERT(DATE, startDate, 101) as ds, startDate from schedule_games
@@ -76,7 +76,7 @@ router.get(['/new'], async (req, res, next) => {
         // Execute ${req.params.type}Standings @league
         // `)
         console.log(req.originalUrl)
-        var data = {
+        let data = {
             page: `${req.originalUrl}`,
             user: req.user
         }
@@ -90,20 +90,20 @@ router.post(['/new'], async (req, res, next) => {
     try{
 
         const request = pool.request()
-        var leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(req.body.sport, req.body.seasonId),parseInt(req.body.gamesPerTeam))
-        var allRegularGames = []
-        var allGames = []
-        var allGameDays = []
-        var scheduleName = req.body.scheduleName !== '' ? req.body.scheduleName : `${req.body.seasonId} ${req.body.sport}`
-        var timeParts = req.body.firstGameTime.split(':')
-        var firstGameTime = (timeParts[0]*3600 + timeParts[1]*60)*1000
-        var dailyGameTimesCount = req.body.lastGameTime.split(':')[0]-req.body.firstGameTime.split(':')[0]+1
-        var totalFields = 4
-        var timeFieldList = []
-        for(var i=0;i<totalFields;i++){
+        let leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(req.body.sport, req.body.seasonId),parseInt(req.body.gamesPerTeam))
+        let allRegularGames = []
+        let allGames = []
+        let allGameDays = []
+        let scheduleName = req.body.scheduleName !== '' ? req.body.scheduleName : `${req.body.seasonId} ${req.body.sport}`
+        let timeParts = req.body.firstGameTime.split(':')
+        let firstGameTime = (timeParts[0]*3600 + timeParts[1]*60)*1000
+        let dailyGameTimesCount = req.body.lastGameTime.split(':')[0]-req.body.firstGameTime.split(':')[0]+1
+        let totalFields = 4
+        let timeFieldList = []
+        for(let i=0;i<totalFields;i++){
             // ((i)*1000*60*60)+firstGameTime
-            for(var j=0;j<dailyGameTimesCount;j++){
-                var timeFieldItem = {
+            for(let j=0;j<dailyGameTimesCount;j++){
+                let timeFieldItem = {
                     timeMs: ((j)*1000*60*60)+firstGameTime
                 }
                 timeFieldItem.fieldNumber = i+1
@@ -111,14 +111,14 @@ router.post(['/new'], async (req, res, next) => {
             }
         }
         // console.log(timeFieldList)
-        var seasonStartDate = new Date(req.body.seasonStartDate)
+        let seasonStartDate = new Date(req.body.seasonStartDate)
         seasonStartDate = new Date(`${seasonStartDate.toLocaleDateString('en-US', {
             timeZone: 'UTC',
             year: 'numeric',
             month: 'numeric',
             day: 'numeric'
           })}`)
-        var seasonEndDate = new Date(req.body.seasonEndDate)
+        let seasonEndDate = new Date(req.body.seasonEndDate)
         seasonEndDate = new Date(`${seasonEndDate.toLocaleDateString('en-US', {
             timeZone: 'UTC',
             year: 'numeric',
@@ -127,34 +127,34 @@ router.post(['/new'], async (req, res, next) => {
         })}`)
         // console.log(`${seasonStartDate.toLocaleDateString()} to ${seasonEndDate.toLocaleDateString()}`)
         // setting match days for all leagues
-        for(var league of leagueList){
-            var gameDays = playableDays(seasonStartDate.toLocaleDateString(),seasonEndDate.toLocaleDateString(),league.dayOfWeek)
-            var matchesPerPlayableDay = (league.scheduleMatches.length+league.playoffMatches.length)/gameDays.length
-            var daysWithExtraGame = Math.round((matchesPerPlayableDay%1)*gameDays.length)
-            var imatch = 0
+        for(let league of leagueList){
+            let gameDays = playableDays(seasonStartDate.toLocaleDateString(),seasonEndDate.toLocaleDateString(),league.dayOfWeek)
+            let matchesPerPlayableDay = (league.scheduleMatches.length+league.playoffMatches.length)/gameDays.length
+            let daysWithExtraGame = Math.round((matchesPerPlayableDay%1)*gameDays.length)
+            let imatch = 0
             
             // console.log(`${league.leagueId} ${league.playoffMatches.length} ${league.scheduleMatches.length} ${matchesPerPlayableDay} ${daysWithExtraGame} ${gameDays.length}`)
             // console.log(league.teams.length);
-            var allMatches = []
+            let allMatches = []
             allMatches = allMatches.concat(league.scheduleMatches,league.playoffMatches)
             // allMatches.push(league.scheduleMatches)
             // allMatches.push(league.playoffMatches)
-            // var copyAllMatches =[...allMatches]
+            // let copyAllMatches =[...allMatches]
             // console.log(`${allMatches.length} ${copyAllMatches.length}`)
             // console.log(allMatches)
             // console.log(league.scheduleMatches.length);;
-            for(var i=0;i<gameDays.length;i++){
+            for(let i=0;i<gameDays.length;i++){
                 if(!allGameDays.some(obj => obj.getTime() === gameDays[i].getTime())){
                     allGameDays.push(gameDays[i])
                 }
                 if(i<daysWithExtraGame){
-                    var numberOfMatches = Math.ceil(matchesPerPlayableDay)
+                    let numberOfMatches = Math.ceil(matchesPerPlayableDay)
                 }else{
                     // console.log('floor');
-                    var numberOfMatches = Math.floor(matchesPerPlayableDay)
+                    let numberOfMatches = Math.floor(matchesPerPlayableDay)
                 }
                 // console.log(`${league.leagueId} ${numberOfMatches} ${league.totalRegularSeasonGames} ${imatch} ${league.playoffs} ${league.teams.length}`)
-                for(var j=0;j<numberOfMatches;j++){
+                for(let j=0;j<numberOfMatches;j++){
                     const counts = {};
 
                     // Iterate through the array of objects
@@ -194,7 +194,7 @@ router.post(['/new'], async (req, res, next) => {
                     // console.log(`${minCount} ${minCountValues}`)
                     // console.log(minCountValues)
                     // console.log(`${j} ${daysWithExtraGame} ${matchesPerPlayableDay%1} ${numberOfMatches}`);
-                    var matchesNoDate = allMatches.filter(obj => obj.startDate === null)
+                    let matchesNoDate = allMatches.filter(obj => obj.startDate === null)
                     matchesNoDate.sort((a, b) => {
                         const aHasTBD = a.team1Id === 'TBD' || a.team2Id === 'TBD';
                         const bHasTBD = b.team1Id === 'TBD' || b.team2Id === 'TBD';
@@ -208,7 +208,7 @@ router.post(['/new'], async (req, res, next) => {
                             return 0;
                         }
                     });
-                    for(var k=0;k<matchesNoDate.length;k++){
+                    for(let k=0;k<matchesNoDate.length;k++){
                         // console.log(matchesNoDate[k].team1Id)
                         // console.log(counts)
                         if(matchesNoDate[k].team1Id==='TBD'||matchesNoDate[k].team2Id==='TBD'){
@@ -269,9 +269,9 @@ router.post(['/new'], async (req, res, next) => {
                 
             }
 
-            // for(var i=0;i<league.scheduleMatches;i++){
+            // for(let i=0;i<league.scheduleMatches;i++){
             //     // need to account for playoffs as well
-            //     var imatch = league.scheduleMatches(i)
+            //     let imatch = league.scheduleMatches(i)
 
 
             // }
@@ -282,22 +282,22 @@ router.post(['/new'], async (req, res, next) => {
         allGames.sort((a, b) => a.startDate - b.startDate)
         // console.log(allGameDays)
         // setting match times
-        for(var i=0;i< allGameDays.length;i++){
+        for(let i=0;i< allGameDays.length;i++){
             // console.log(`${i} ${allGameDays.length}`);
-            var currentGameDay = allGameDays[i]
+            let currentGameDay = allGameDays[i]
             // console.log(currentGameDay.getTime())
-            // for(var igame of allGames){
+            // for(let igame of allGames){
             //     console.log(igame);
             // }
             // console.log(allGames[1]);
-            var currentTimeFieldList = [...timeFieldList]
-            var currentDayMatches = allGames.filter(obj => obj.startDate.getTime() === currentGameDay.getTime())
+            let currentTimeFieldList = [...timeFieldList]
+            let currentDayMatches = allGames.filter(obj => obj.startDate.getTime() === currentGameDay.getTime())
             // console.log(timeFieldList)
-            var fieldNumber = 1
-            var maxFieldNumber = 4
-            var timeNumber = 0
-            // var firstHour = 6+12
-            for(var j=0;j< currentDayMatches.length;j++){
+            let fieldNumber = 1
+            let maxFieldNumber = 4
+            let timeNumber = 0
+            // let firstHour = 6+12
+            for(let j=0;j< currentDayMatches.length;j++){
                 // const counts = {};
 
                 // // Iterate through the array of objects
@@ -319,7 +319,7 @@ router.post(['/new'], async (req, res, next) => {
                 // const minCountValues = Object.values(counts).filter(count => count === minCount).length;
                 // console.log(`${minCount} ${minCountValues}`)
                 // console.log(minCountValues)
-                for(var k=0;k<currentTimeFieldList.length;k++){
+                for(let k=0;k<currentTimeFieldList.length;k++){
                     // console.log(array.reduce((minCount, obj) => {
                     //     // Count occurrences of the value in both properties
                     //     const count1 = obj.team1Id === value ? 1 : 0;
@@ -377,7 +377,7 @@ router.post(['/new'], async (req, res, next) => {
                 // }
             }
         }
-        // for(var i=0;i<allGames.length;i++){
+        // for(let i=0;i<allGames.length;i++){
         //     console.log(allGames[i])
         // }
         // console.log(allGameDays)
@@ -441,7 +441,7 @@ router.get(['/list'], async (req, res, next) => {
         .query(`select * from schedules
         `)
         console.log(req.originalUrl)
-        var data = {
+        let data = {
             page: `${req.originalUrl}`,
             user: req.user,
             list: result.recordsets[0]
@@ -460,7 +460,7 @@ router.post(['/list'], async (req, res, next) => {
         // where scheduleId = '${req.scheduleId}'
         // `)
         // console.log(req.originalUrl)
-        // var data = {
+        // let data = {
         //     page: `${req.originalUrl}`,
         //     user: req.user,
         //     list: result.recordsets[0]
@@ -472,23 +472,23 @@ router.post(['/list'], async (req, res, next) => {
     }
 })
 router.get(['/test'], async (req,res)=>{
-    // var data = {
+    // let data = {
     // // }
     const request = pool.request()
         // result = await request.query(`insert into schedules (season,sport,name)
         // values ('Indoor','Soccer', 'Indoor Soccer')`)
     //     data.teams = result.recordsets[0]
     //     // console.log(result.recordsets[0])
-    //     for(var iteam of data.teams){
+    //     for(let iteam of data.teams){
     //         result = await request.query(`exec conflictingTeams @teamId='${iteam.teamId}'`)
     //         iteam.conflictingTeams = result.recordsets[0].map(item => item.teamId)
     //         // console.log(iteam.conflictingTeams)
     //     }
-    var sportName = 'Soccer'
-    var leagueName = 'Indoor'
-    var leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(sportName, leagueName),8)
-    var allRegularGames = []
-    for(var league of leagueList){
+    let sportName = 'Soccer'
+    let leagueName = 'Indoor'
+    let leagueList = scheduler.leagueSchedule(await getLeaguesForScheduler(sportName, leagueName),8)
+    let allRegularGames = []
+    for(let league of leagueList){
         allRegularGames = allRegularGames.concat(league.scheduleMatches)
         // console.log(league.scheduleMatches)
         // console.log(league.scheduleMatches.map(obj => `('${obj.type}', '${obj.team1Id}', '${obj.team2Id}', '${obj.leagueId}', '${obj.subLeagueId}')`).join(','))
@@ -542,7 +542,7 @@ router.get(['/item/:scheduleId'], async (req, res, next) => {
         where scheduleId = '${req.params.scheduleId}'
         `)
         console.log(req.originalUrl)
-        var data = {
+        let data = {
             page: `${req.originalUrl}`,
             user: req.user,
             list: result.recordsets[0],
@@ -565,7 +565,7 @@ router.get('/', async (req,res, next)=>{
         // Set @league = '${req.params.league}'
         // Execute ${req.params.type}Standings @league
         // `)
-        var data = {
+        let data = {
             page: `${req.originalUrl.split('/')[1]}`,
             user: req.user
         }
@@ -579,11 +579,11 @@ router.get('/', async (req,res, next)=>{
 
 
 function playableDays(startDate,endDate,dayOfWeek){
-    // var totalDays = 1 + Math.round((d1-d0)/(24*3600*1000))
-    var firstGameDate = new Date(startDate)
-    var lastGameDate = new Date(endDate)
-    var msInWeek = 1000*60*60*24*7
-    var holidays = [new Date('May 24, 2024'),
+    // let totalDays = 1 + Math.round((d1-d0)/(24*3600*1000))
+    let firstGameDate = new Date(startDate)
+    let lastGameDate = new Date(endDate)
+    let msInWeek = 1000*60*60*24*7
+    let holidays = [new Date('May 24, 2024'),
         new Date('May 27, 2024'),
         new Date('July 4, 2024'),
         new Date('July 5, 2024'),
@@ -591,7 +591,7 @@ function playableDays(startDate,endDate,dayOfWeek){
         new Date('August 30, 2024'),
         new Date('September 2, 2024')
     ]
-    var gameDays = []
+    let gameDays = []
     // set first game date
     if(dayOfWeek< firstGameDate.getDay()){
         firstGameDate.setDate(firstGameDate.getDate()+7-(firstGameDate.getDay()-dayOfWeek))
@@ -605,17 +605,17 @@ function playableDays(startDate,endDate,dayOfWeek){
     }else{
         lastGameDate.setDate(lastGameDate.getDate()-(lastGameDate.getDay()-dayOfWeek))
     }
-    for(var i=0;i<((lastGameDate.getTime()-firstGameDate.getTime())/msInWeek)+1;i++){
-        var newDate = new Date(firstGameDate.getTime()+(i*msInWeek))
+    for(let i=0;i<((lastGameDate.getTime()-firstGameDate.getTime())/msInWeek)+1;i++){
+        let newDate = new Date(firstGameDate.getTime()+(i*msInWeek))
         // newDate.setDate(firstGameDate.getTime()+(i*msInWeek))
         // console.log(firstGameDate.getDate()+(i*7))
         if(!holidays.some(function (holiday) {return holiday.getTime() === newDate.getTime()})){
             gameDays.push(newDate)
         }
     }
-//     var holidaysDuringSeason = holidays.filter(date => 
+//     let holidaysDuringSeason = holidays.filter(date => 
 //         {
-//         var currentHoliday = new Date(date)
+//         let currentHoliday = new Date(date)
 //         return currentHoliday.getDay() === dayOfWeek 
 //         && currentHoliday >= firstGameDate 
 //         && currentHoliday <= lastGameDate
@@ -625,11 +625,11 @@ function playableDays(startDate,endDate,dayOfWeek){
     // return ((lastGameDate-firstGameDate)/msInWeek)+1 - holidaysDuringSeason
 }
 async function getTeamsForScheduler(xSport, xSeason){
-    var teams = []
+    let teams = []
     const request = pool.request()
         result = await request.query(`exec teamListForScheduler @sport='${xSport}', @season='${xSeason}'`)
         teams = result.recordsets[0]
-        for(var iteam of teams){
+        for(let iteam of teams){
             result = await request.query(`exec conflictingTeams @teamId='${iteam.teamId}'`)
             iteam.conflictingTeams = result.recordsets[0].map(item => item.teamId)
             iteam.gamesPlayed = 0
@@ -637,13 +637,13 @@ async function getTeamsForScheduler(xSport, xSeason){
         return teams
 }
 async function getLeaguesForScheduler(xSport, xSeason){
-    var teams = []
-    var leagues = []
-    var league = {}
+    let teams = []
+    let leagues = []
+    let league = {}
     const request = pool.request()
         result = await request.query(`exec teamListForScheduler @sport='${xSport}', @season='${xSeason}'`)
         teams = result.recordsets[0]
-        for(var iteam of teams){
+        for(let iteam of teams){
             result = await request.query(`exec conflictingTeams @teamId='${iteam.teamId}'`)
             iteam.conflictingTeams = result.recordsets[0].map(item => item.teamId)
             iteam.gamesPlayed = 0
@@ -669,7 +669,7 @@ async function getLeaguesForScheduler(xSport, xSeason){
                 leagues.push(league)
             }
         }
-        // for(var ileague of leagues){
+        // for(let ileague of leagues){
         //     console.log(ileague)
         // }
         return leagues

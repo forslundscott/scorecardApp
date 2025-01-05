@@ -10,7 +10,7 @@
         const form = document.getElementById('checkout-form');
   
             event.preventDefault();
-            var formData = new FormData(form)
+            let formData = new FormData(form)
             const response = await fetch('./payments/create-checkout-session', {
                 method: 'POST',
                 headers: {

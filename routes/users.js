@@ -38,7 +38,7 @@ router.post('/userSearch', async (req, res) => {
 router.get(['/newUser'], async (req, res, next) => {
     console.log('test')
     try{       
-        var data = {
+        let data = {
             page: `/newUser`,
             user: req.user
             
@@ -68,7 +68,7 @@ router.post('/addUser', async (req, res, next) => {
 router.post('/:userId/teams/addTeam', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'user/newRole',
             userId: req.params.userId
@@ -87,12 +87,12 @@ router.get('/:userId/teams/newTeam', async (req,res, next)=>{
     try{
         const request = pool.request()
         
-        var data = {
+        let data = {
             page: `user/newTeam`,
             user: req.user
             
         }
-        var result = await request
+        let result = await request
         .query(`select top 1 seasonName from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
@@ -118,7 +118,7 @@ router.get('/:userId/teams/newTeam', async (req,res, next)=>{
 router.get('/:userId/teams/:teamId', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'users/roles/role',
             userId: req.params.userId,
@@ -143,7 +143,7 @@ router.get('/:userId/teams/:teamId', async (req,res, next)=>{
 router.get('/:userId/teams', async (req,res, next)=>{
     try{
         console.log(`newtest ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'users/teams',
             userId: req.params.userId
@@ -167,7 +167,7 @@ router.get('/:userId/teams', async (req,res, next)=>{
 router.post('/:userId/roles/addRole', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'user/newRole',
             userId: req.params.userId
@@ -187,7 +187,7 @@ router.post('/:userId/roles/addRole', async (req,res, next)=>{
 router.get('/:userId/roles/newRole', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'user/newRole',
             userId: req.params.userId
@@ -213,7 +213,7 @@ router.get('/:userId/roles/newRole', async (req,res, next)=>{
 router.get('/:userId/roles/:roleId', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'users/roles/role',
             userId: req.params.userId,
@@ -238,7 +238,7 @@ router.get('/:userId/roles/:roleId', async (req,res, next)=>{
 router.get('/:userId/roles', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'users/roles',
             userId: req.params.userId
@@ -262,7 +262,7 @@ router.get('/:userId/roles', async (req,res, next)=>{
 router.post('/:userId/editUser', async (req,res, next)=>{
     try{
         console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'user/editUser',
             userId: req.params.userId
@@ -289,7 +289,7 @@ router.post('/:userId/editUser', async (req,res, next)=>{
 router.get('/:userId/editUser', async (req,res, next)=>{
     try{
         // console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: '/editUser'
         }
@@ -310,7 +310,7 @@ router.get('/:userId/editUser', async (req,res, next)=>{
 router.get('/:userId', async (req,res, next)=>{
     try{
         // console.log(`test ${req.params.userId}`)
-        var data = {
+        let data = {
             user: req.user,
             page: 'users/details'
         }
@@ -331,7 +331,7 @@ router.get('/:userId', async (req,res, next)=>{
 
 router.get('/', async (req,res, next)=>{
     try{
-        var data = {
+        let data = {
             page: 'users',
             user: req.user
         }

@@ -10,7 +10,7 @@ const processingStatus = {};
 router.post('/updateGameInfo', async (req, res, next) => {
     // Process form data here
         try{
-            // var data = {
+            // let data = {
             // }
             const formData = req.body;    
             result = await pool.request()
@@ -87,7 +87,7 @@ router.post('/updateGameInfo', async (req, res, next) => {
 router.post('/gameInfo', async (req, res, next) => {
     // Process form data here
     try{
-        var data = {
+        let data = {
         }
         const formData = req.body;
         result = await pool.request()
@@ -158,7 +158,7 @@ router.post('/playerSearch', async (req, res) => {
 });
 router.get(['/readyForUpload'], async (req,res, next)=>{
     try{
-        var data = {
+        let data = {
             teams: [],
             page: req.route.path[0].replace('/',''),
             user: req.user
@@ -172,7 +172,7 @@ router.get(['/readyForUpload'], async (req,res, next)=>{
 })
 router.get(['/completedGames'], async (req,res, next)=>{
     try{
-        var data = {
+        let data = {
             teams: [],
             page: req.route.path[0].replace('/',''),
             user: req.user
@@ -198,7 +198,7 @@ router.get(['/completedGames'], async (req,res, next)=>{
 })
 router.get(['/rescheduleGames'], async (req,res, next)=>{
     try{
-        var data = {
+        let data = {
             teams: [],
             page: req.route.path[0].replace('/',''),
             user: req.user
@@ -293,7 +293,7 @@ router.get(['/timer'], async (req,res,next)=>{
 })
 router.post(['/eventLog'], async (req,res,next)=>{
     try{ 
-         var data = {
+         let data = {
              page: req.route.path[0].replace('/',''),
              team1: {
                  score: 0
@@ -397,12 +397,12 @@ router.post(['/eventLog'], async (req,res,next)=>{
  })
  router.get(['/newGame'], async (req, res, next) => {
     try{
-        var data = {
+        let data = {
             page: `/newGame`,
             user: req.user
             
         }
-        var result = await pool.request()
+        let result = await pool.request()
         .query(`select top 1 seasonName from seasons where active = 1
         `)
             data.season = result.recordset[0].seasonName
@@ -621,7 +621,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
                 , [timerState] = @timerState 
                 WHERE event_Id = @eventId`)
         }
-        var data = {
+        let data = {
             teams: [team1,
                 team2
             ],
@@ -640,7 +640,7 @@ router.get('/', async (req,res, next)=>{
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
-        var data = {
+        let data = {
             teams: [],
             page: 'games',
             user: req.user
