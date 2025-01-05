@@ -1,7 +1,7 @@
 const audio = new Audio()
-
+let gameInfo
 if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || sessionStorage.gameInfo == null) {
-    let gameInfo = {
+    gameInfo = {
         period: 1,
         time: '15:00',
         timerButtonState: 'Start',
@@ -14,7 +14,6 @@ if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || se
 }
 
 window.addEventListener('beforeunload', (event) => {
-
     sessionStorage.setItem('gameInfo',JSON.stringify(gameInfo))
   });
 class Game {
@@ -677,13 +676,13 @@ function closeFloating(){
             eles[i].classList.replace('block', 'hidden')
         }
     }
-    let eles = document.getElementsByClassName('floating')
+    eles = document.getElementsByClassName('floating')
     if(eles.length > 0){
         for(i=eles.length-1;i>-1;i--){
             eles[i].classList.remove('floating')
         }
     }
-    let eles = document.getElementsByClassName('floatingPopupForm')
+    eles = document.getElementsByClassName('floatingPopupForm')
     
     if(eles.length > 0){
         for(i=eles.length-1;i>-1;i--){
@@ -691,7 +690,7 @@ function closeFloating(){
             eles[i].style.display = 'none'
         }
     }
-    let eles = document.getElementsByClassName('popupBackground')
+    eles = document.getElementsByClassName('popupBackground')
     
     if(eles.length > 0){
         for(i=eles.length-1;i>-1;i--){
@@ -893,7 +892,7 @@ async function getTeams(xform){
                     });
                     break
                 case 'newGameForm':
-                    let team1 = xform.querySelector('[name="team1Id"]');
+                    team1 = xform.querySelector('[name="team1Id"]');
                     let team2 = xform.querySelector('[name="team2Id"]');
                     team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
                     team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
