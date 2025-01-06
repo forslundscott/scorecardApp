@@ -13,7 +13,6 @@ const methodOverride = require('method-override')
 const initializePassport = require('./passport-config')
 const pool = require(`./db`)
 const sql = require('mssql');
-// const helmet = require('helmet');
 
 const sequelize = new Sequelize({
     dialect: 'mssql',
@@ -116,11 +115,9 @@ app.use((req, res, next) => {
   });
 app.use(require('./middleware/errorHandler'));
 
-// app._router.stack.forEach((middleware) => {
-//     console.log(middleware.name || 'anonymous middleware', middleware.route ? middleware.route.path : '');
-// });
+
 
 
 app.listen(process.env.APP_PORT, function(err){
-    // if (err) console.log(err);
+    
  })

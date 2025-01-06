@@ -16,53 +16,11 @@ if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || se
 window.addEventListener('beforeunload', (event) => {
     sessionStorage.setItem('gameInfo',JSON.stringify(gameInfo))
   });
-class Game {
-    constructor(){
-        this.id = ''
-        this.homeTeam = ''
-        this.awayTeam = ''
-        this.period = 1
-        this.clockTime = ''
-        this.log = []
-    }
-}
-class Team {
-    constructor(){
-        this.id = ''
-        this.name = ''
-        this.keeper = ''
-        this.players = []
-        this.log = []
-    }
-}
-class Player {
-    constructor(){
-        this.id = ''
-        this.firstName = ''
-        this.lastName = ''
-        this.gender = ''
-        this.log = []
-    }
-}
-class GameEvent {
-    constructor(){
-        this.timeStamp = new Date(Date()).toISOString()
-        this.period = GameInfo.period
-        this.gameId = ''
-        this.teamId = ''
-        this.playerId = ''
-        this.type = ''
-        this.value = 0
-        this.clockTime = ''
-    }
-}
-
 
 document.addEventListener('DOMContentLoaded', function () {
     const eles = document.getElementsByClassName('dragColumn')
     
-    for(let i=0;i<eles.length;i++){
-        const ele = eles[i]
+    for(let ele of eles){
         setDragScroll(ele)
     }
 });
@@ -133,7 +91,7 @@ if(document.getElementById('timerForm')){
                     console.log(audio)
                     let form = document.getElementById('timerForm')
                         let formData = new FormData(form)
-                    const response = await fetch('/games/periodEnd', {
+                    await fetch('/games/periodEnd', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -162,7 +120,6 @@ if(document.getElementById('timerForm')){
   }, 1000);
 } 
   function timerStartStop(ele){
-    let form = ele.form
     switch(true){
         case ele.form.querySelector('[name="timerState"]').value == 0 :
             ele.form.querySelector('[name="timerState"]').value= 1
@@ -219,7 +176,6 @@ function handleMouseDown(ele, e) {
   isLong = false;                                   // longpress status reset
   target = this;                                    // store this as target element
   longTID = setTimeout(longPress, 500, ele, e); // create a new timer for this click
-  return
 };
 
 function handleMouseUp(e) {
@@ -244,7 +200,6 @@ function longPress(ele,e) {
     eles[1].classList.replace('hidden','block')
     document.getElementById('floatingBackground').classList.remove('hidden')
     isLong = true;
-    return
 }
 function handleLongPress(e){
     if(isLong){
@@ -274,7 +229,6 @@ function toggleSearchUser(){
         searchForm.style.display = ''
     }else{
         searchForm.style.display = 'none'
-        document.getElementById('userSearchField').value
         document.getElementById('userSearchResults').innerHTML = ''
     }
     
@@ -285,7 +239,6 @@ function toggleSearchPlayer(){
         searchForm.style.display = ''
     }else{
         searchForm.style.display = 'none'
-        document.getElementById('playerSearchField').value
         document.getElementById('playerSearchResults').innerHTML = ''
     }
     
@@ -293,7 +246,6 @@ function toggleSearchPlayer(){
 async function userSearch(xForm,event){
 
         event.preventDefault();
-        const query = document.getElementById('userSearchField').value;
         try {
 
             let formData = new FormData(xForm)
@@ -340,7 +292,6 @@ async function userSearch(xForm,event){
 async function playerSearch(xForm,event){
 
     event.preventDefault();
-    const query = document.getElementById('playerSearchField').value;
     try {
 
         let formData = new FormData(xForm)
@@ -404,15 +355,11 @@ function togglePaidCheckbox() {
     }
 }
 function selectPlayer(xform){
+    let newPlayerForm
     if(window.location.href.includes('activeGame')){
-        let newPlayerForm = document.getElementById('newPlayerForm')
-        newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
-        newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
-        newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
-        newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
-        newPlayerForm.querySelector('[name="waiver"]').checked = true
+        newPlayerForm = document.getElementById('newPlayerForm')
     }else if(window.location.href.includes('roster/newPlayer')){
-        let newPlayerForm = document.getElementById('newRosterPlayerForm')
+        newPlayerForm = document.getElementById('newRosterPlayerForm')
     }
         newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
         newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
@@ -542,7 +489,6 @@ async function updateGameData(xele){
         if (response.redirected) {
             window.location.href = response.url;
         }else{
-            const responseData = await response.json();
             console.log(response);
             location.reload()
         }
@@ -662,8 +608,8 @@ if((rect.left>=e.clientX<=rect.right)&&(rect.top>=e.clientY<=rect.bottom)){
 }
 function closeForm(){
     let forms = document.getElementsByClassName('popupForm')
-    for(i=0;i<forms.length;i++){
-        forms[i].style.display = 'none'
+    for(let form of forms){
+        form.style.display = 'none'
     }
     document.getElementById('formBackground').style.display = 'none'
     document.getElementById('teamFormBackground').style.display = 'none'
@@ -672,20 +618,20 @@ function closeForm(){
 function closeFloating(){
     let eles = document.getElementsByClassName('floatingActionButtons block')
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
+        for(let i =eles.length-1;i>-1;i--){
             eles[i].classList.replace('block', 'hidden')
         }
     }
     eles = document.getElementsByClassName('floating')
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
+        for(let i=eles.length-1;i>-1;i--){
             eles[i].classList.remove('floating')
         }
     }
     eles = document.getElementsByClassName('floatingPopupForm')
     
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
+        for(let i=eles.length-1;i>-1;i--){
             clearForm(eles[i])
             eles[i].style.display = 'none'
         }
@@ -693,7 +639,7 @@ function closeFloating(){
     eles = document.getElementsByClassName('popupBackground')
     
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
+        for(let i=eles.length-1;i>-1;i--){
             eles[i].style.display = 'none'
         }
     }
@@ -703,9 +649,9 @@ function closeFloating(){
 }
 function clearForm(form) {
     let inputs = form.getElementsByTagName('input');
-    for (let i = 0; i < inputs.length; i++) {
-        if (inputs[i].type !== 'hidden') {
-            inputs[i].value = '';
+    for (let input of inputs) {
+        if (input.type !== 'hidden') {
+            input.value = '';
         }
     }
 }
@@ -746,58 +692,6 @@ function convertUnixTimeToMMDD(unixTime) {
         console.error('Error:', error);
     }
   }
-  async function fetchHandler(event){
-    event.preventDefault()
-    let form = event.target.form
-    
-    let formData = new FormData(form)
-    
-    try{
-        const response = await fetch(`${form.action}`, {
-            method: `${form.method}`,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            console.log(response);
-          } else {
-            console.log(response)
-            console.error('Form submission failed');
-          }
-    }catch(error){
-        console.error('Error:', error);
-    }
-    
-    console.log(event.target.form)
-  }
-  async function gameFormSubmit(event){
-    event.preventDefault()
-    let form = event.target.form
-    
-    let formData = new FormData(form)
-    
-    try{
-        const response = await fetch(`${form.action}`, {
-            method: `${form.method}`,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            console.log(response);
-          } else {
-            console.log(response)
-            console.error('Form submission failed');
-          }
-    }catch(error){
-        console.error('Error:', error);
-    }
-    
-    console.log(event.target.form)
-  }
   function getOrdinalNumber(number) {
     // Convert the input to a number if it's a string
     const num = typeof number === 'string' ? parseInt(number, 10) : number;
@@ -837,7 +731,6 @@ function handleVisibilityChange() {
 }
 
 document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
-    let email = this.value;
     let formData = new FormData(document.getElementById('newPlayerForm'))
     console.log(formData)
     const response = await fetch('/games/checkEmail', {

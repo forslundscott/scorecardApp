@@ -10,10 +10,9 @@ const processingStatus = {};
 router.post('/updateGameInfo', async (req, res, next) => {
     // Process form data here
         try{
-            // let data = {
-            // }
+
             const formData = req.body;    
-            result = await pool.request()
+            await pool.request()
             .input('team1Id', sql.VarChar, formData.Team1_ID)
             .input('team2Id', sql.VarChar, formData.Team2_ID)
             .input('scoreKeeperId', sql.VarChar, formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID)
@@ -28,7 +27,7 @@ router.post('/updateGameInfo', async (req, res, next) => {
             where Event_ID = @eventId
             `)
             if(formData.gameCancel){
-                result = await pool.request()
+                await pool.request()
                 .input('eventId', sql.Int, formData.Event_ID)
                 .query(`
                 DECLARE @teamName NVARCHAR(255)
@@ -63,7 +62,7 @@ router.post('/updateGameInfo', async (req, res, next) => {
                 `)
                 res.redirect(302,'/games')
             }else{
-                result = await pool.request()
+                await pool.request()
                 .input('eventId', sql.Int, formData.Event_ID)
                 .query(`
                     DECLARE @teamName NVARCHAR(255)
@@ -90,7 +89,7 @@ router.post('/gameInfo', async (req, res, next) => {
         let data = {
         }
         const formData = req.body;
-        result = await pool.request()
+        let result = await pool.request()
         .input('eventId', sql.Int, formData.Event_ID)
         .query(`
         select * 
@@ -119,7 +118,7 @@ router.post('/gameInfo', async (req, res, next) => {
   });
 router.post(['/checkEmail'], async (req,res,next)=>{
     try{
-        result = await pool.request()
+        let result = await pool.request()
         .input('email', sql.VarChar, req.body.email)
         .query(`select * from users
         where email = @email`)
@@ -305,20 +304,20 @@ router.post(['/eventLog'], async (req,res,next)=>{
          let result
          if(req.body.type == 'makecaptain'){
              console.log('cap')
-             result = await pool.request()
+             await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .query(`update scorecard.dbo.teams set captain = @playerId where id = @teamName`)
              res.json({ message: 'Reload', data: data })
          }else if(req.body.type == 'makekeeper'){
              console.log('keep')
-             result = await pool.request()
+             await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .query(`update scorecard.dbo.teams set keeper = @playerId where id = @teamName`)            
              res.json({ message: 'Reload', data: data })
          }else{
-             result = await pool.request()
+             await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .input('realTime', sql.BigInt, req.body.realTime)
@@ -596,8 +595,8 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
         result = await pool.request()
         .input('eventId', sql.Int, eventResult.Event_ID)
         .query(`EXEC [scorecard].[dbo].[getActiveGameData] @eventId`)
-        team1 = result.recordsets[0][0]
-            team2 = result.recordsets[1][0]
+            let team1 = result.recordsets[0][0]
+            let team2 = result.recordsets[1][0]
             team1.players = result.recordsets[2]
             team2.players = result.recordsets[3]
             if(result.recordsets[4].length == 0){

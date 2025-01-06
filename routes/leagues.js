@@ -7,7 +7,7 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 router.post(['/getLeagues'], async (req,res,next)=>{
     try{
         const request = pool.request()
-        result = await request.query(`
+        let result = await request.query(`
             select * from leagues as l
             LEFT join league_season as ls on l.abbreviation=ls.leagueId
             where ls.seasonId = '${req.body.seasonId}'

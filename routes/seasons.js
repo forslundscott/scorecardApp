@@ -6,8 +6,6 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.get(['/newSeason'], async (req, res, next) => {
     try{
-        const request = pool.request()
-        
         let data = {
             page: `/newSeason`,
             user: req.user

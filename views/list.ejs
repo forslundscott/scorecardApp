@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
-<body>
-    
-     
-    
     <% if (data.page.includes('activeGame')) { %>
         <% if (team.id !== 'TBD' && team.players.length > 0) { %>
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
-    <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? "height: calc(100% - 10vh)"  : "" %>">
+    <div class="fielderColumn dragColumn" <%= data.page.includes('activeGame') ? 'style="height: calc(100% - 10vh)"' : '' %>>
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(let i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
@@ -116,17 +108,8 @@
                 <% } %>
             <% }else { %>
                 <form action="/standings" method="post" class="textCenter">
-                    <!-- <select name="seasonId" id="seasonId" required>
-                        <option value="" disabled selected hidden>Season</option>
-                        <option value="S2024">Spring 2024</option>
-                        <option value="Ind">Indoor</option>
-                    </select> -->
                     <select name="leagueId" id="leagueId" class="primaryStyle" style="font-size: 100%;" required>
                         <option value="" disabled selected hidden>League</option>
-                        <!-- <option value="MOI">MOI</option>
-                        <option value="PCI">PCI</option>
-                        <option value="OCI">OCI</option>
-                        <option value="SCI">SCI</option> -->
                         <% for(let i=0; i< data.leagues.length; i++) {%>
                             <option value="<%= data.leagues[i].abbreviation%>"><%= data.leagues[i].shortName%></option>
                         <% } %>
@@ -220,11 +203,9 @@ Thank you and have a nice day!`
                 <%- include(`userTeam_item`,{data: data.list[i]}); %>
             <% } %>    
         <% } else if (data.page == 'users') { %>
-            <%- include('userSearchForm',{user: data.users[i], display: ''}); %>
+            <%- include('userSearchForm'); %>
             <%# for(let i=0; i< data.users.length; i++) {%>
                     <%# include('user_item',{user: data.users[i]}); %>
             <%# } %>
         <% } %>
     </div>
-</body>
-</html>

@@ -7,8 +7,6 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.get(['/new'], async (req, res, next) => {
     try{
-        const request = pool.request()
-        
         let data = {
             page: `/newFacility`,
             user: req.user
@@ -40,9 +38,6 @@ router.post('/add', async (req, res, next) => {
   });
 router.get('/', async (req,res, next)=>{
     try{
-
-        if (req.isAuthenticated()) {
-        }
         let data = {
             
             page: 'facilities',
