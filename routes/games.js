@@ -232,9 +232,11 @@ router.get(['/timer'], async (req,res,next)=>{
             WHERE event_Id = @eventId`)
             res.redirect('/games/readyforupload')
         }else if(req.query.timerState == 2){
+            console.log('test1')
             const result = await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`select * from winningTeam(@eventId)`)
+            console.log('test2')
             if(result.recordset[0].length==1){
                 await pool.request()
                 .input('eventId', sql.Int, req.query.Event_ID)
@@ -244,16 +246,17 @@ router.get(['/timer'], async (req,res,next)=>{
                 from winningTeamContact(@teamName)
                 where giftCards = 1`)
             }  
+            console.log('test3')
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`UPDATE [scorecard].[dbo].[games] 
             set [Status] = 1 
             WHERE event_Id = @eventId`)
+            console.log('test4')
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
-            .query(`DECLARE @eventId varchar(max)
-                    set @eventId = @eventId
-                    EXEC recordTeamResults
+            .query(`
+                EXEC recordTeamResults
                     @eventId`)
             res.redirect('/games')
         } else {
@@ -641,7 +644,6 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
-        console.log(data.teams[0].players)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)
