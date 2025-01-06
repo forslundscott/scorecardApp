@@ -546,7 +546,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
                 union all
                 Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team1Id
                 and eventId = @eventId
-        )
+                )
 
             Select * 
             from [scorecard].[dbo].[teams] 
@@ -561,23 +561,35 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
         if(result.recordsets[0].length == 0){
 
             await pool.request()
+            .input('eventId', sql.Int, eventResult.Event_ID)
             .input('team1Id', sql.VarChar, eventResult.Team1_ID)
             .query(`
             update teams
             set keeper = (Select top 1 userId 
-            from [scorecard].[dbo].[user_team] 
-            where teamid =@team1Id)
+            from (Select userId 
+                from [scorecard].[dbo].[user_team] 
+                where teamid =@team1Id
+                union all
+                Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team1Id
+                and eventId = @eventId
+                ) as t1)
             where id = @team1Id
             `)
         }
         if(result.recordsets[1].length == 0){
             await pool.request()
+            .input('eventId', sql.Int, eventResult.Event_ID)
             .input('team2Id', sql.VarChar, eventResult.Team2_ID)
             .query(`
             update teams
             set keeper = (Select top 1 userId 
-            from [scorecard].[dbo].[user_team] 
-            where teamid =@team2Id)
+            from (Select userId 
+                from [scorecard].[dbo].[user_team] 
+                where teamid =@team2Id
+                union all
+                Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team2Id
+                and eventId = @eventId
+        ) as t2)
             where id = @team2Id
             `)
         }
@@ -630,6 +642,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
+        console.log(data.teams[0].players)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)

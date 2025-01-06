@@ -879,9 +879,11 @@ async function getTeams(xform){
         if (response.ok) {
             const results = await response.json();
             console.log(xform.id)
+            let team1
+            let team2
             switch(xform.id){
                 case 'newUserTeamForm':
-                    let team1 = xform.querySelector('[name="teamId"]');
+                    team1 = xform.querySelector('[name="teamId"]');
                     team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
                     results.teams.forEach(team => {
                         let option = document.createElement('option');
@@ -893,7 +895,7 @@ async function getTeams(xform){
                     break
                 case 'newGameForm':
                     team1 = xform.querySelector('[name="team1Id"]');
-                    let team2 = xform.querySelector('[name="team2Id"]');
+                    team2 = xform.querySelector('[name="team2Id"]');
                     team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
                     team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
                     results.teams.forEach(team => {
