@@ -544,7 +544,7 @@ async function exportStandings(xtype,xleague){
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        body: new URLSearchParams({queryString: sqlString, fileName: `${xleague}_${xtype}_standings`}).toString(),
+        body: new URLSearchParams({queryString: sqlString, fileName: `${xleague}_${xtype}_standings`, league: xleague, type: xtype}).toString(),
       });
       if (response.ok) {
         const blob = await response.blob();
@@ -568,16 +568,12 @@ async function exportStandings(xtype,xleague){
       }
 }
 async function exportSchedule(xscheduleID){
-    let sqlString = `SELECT type,startDate,startTime,fieldId,team1Id,team2Id, scorekeeperId, leagueId, subLeagueId
-    FROM schedule_games
-    where scheduleId = '${xscheduleID}'`
-    console.log(sqlString)
     const response = await fetch('/schedules/exportSchedules', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        body: new URLSearchParams({queryString: sqlString, fileName: 'data', scheduleId: xscheduleID}).toString(),
+        body: new URLSearchParams({scheduleId: xscheduleID}).toString(),
       });
       if (response.ok) {
         const blob = await response.blob();

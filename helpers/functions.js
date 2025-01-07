@@ -131,4 +131,13 @@ const formatDate = (timestamp) => {
         return undefined
     }
   };
-module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate}
+const fileNameSanitizer = (fileName) => {
+    try{
+        fileName = fileName.replace(/[^a-z0-9_-]/gi, '')
+        fileName = fileName.slice(0,251) + '.csv'
+        return fileName
+    }catch(err){
+        return 'export.csv'
+    }
+}
+module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer}

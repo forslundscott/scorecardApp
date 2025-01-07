@@ -2,39 +2,15 @@
 const express = require('express');
 const router = express.Router();
 const pool = require(`../db`)
+const sql = require('mssql');
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated } = require('../middleware/authMiddleware')
 const scheduler = require('../helpers/scheduler');
 router.post('/exportSchedules', async (req, res, next) => {
     try{
         const request = pool.request()
-        
-        // let result = await request
-        // .query(
-        //     `select distinct leagueId from schedule_games
-        //     where scheduleId = ${req.body.scheduleId}`
-        // )
-        // let leagueArray = result.recordset
-        // for(let ileague of leagueArray){
-        //     let csvData = ''
-        //     result = await request
-        //     .query(
-        //         `select distinct CONVERT(DATE, startDate, 101) as ds, startDate from schedule_games
-        //         where scheduleId = ${req.body.scheduleId} and leagueId = '${ileague.leagueId}'
-        //         ORDER BY CONVERT(DATE, startDate, 101)`
-        //     )
-        //     let dateArray = result.recordset
-        //     for(let idate of dateArray){
-        //         result = await request
-        //         .query(
-        //             `select distinct CONVERT(DATE, startDate, 101) as ds, startDate from schedule_games
-        //             where scheduleId = ${req.body.scheduleId} and leagueId = '${ileague.leagueId}'
-        //             ORDER BY CONVERT(DATE, startDate, 101)`
-        //         )
-        //         csvData = `${csvData}\n\n${(await functions.exportToCSV(result.recordset))}`
-        //     }
-        // }
-        result = await request
+        let result = await request
+        .input('scheduleId',sql.Int,req.body.scheduleId)
         .query(`SELECT startDate as Date
         ,startTime as Time
         ,fieldId as Field
@@ -55,7 +31,7 @@ router.post('/exportSchedules', async (req, res, next) => {
                 FROM schedule_games
                 LEFT JOIN teams as t1 on schedule_games.team1Id=t1.id and schedule_games.leagueId=t1.league
                 LEFT JOIN teams as t2 on schedule_games.team2Id=t2.id and schedule_games.leagueId=t2.league
-            where scheduleId = ${req.body.scheduleId}
+            where scheduleId = @scheduleId
             ORDER by weekday, startUnixTime, fieldId`)
         const csvData = await functions.exportToCSV(result.recordset);
         console.log(csvData)
