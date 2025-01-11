@@ -11,8 +11,6 @@ function initialize(passport, getUserByEmail, getUserById){
                 return done(null, false, {message: 'No user with that email'})
             }
             const user = result.recordset[0]
-            // console.log(password)
-            // console.log(user.password)
             try {
                 if(await bcrypt.compare(password, user.password)){
                     return done(null, user)
@@ -31,8 +29,8 @@ function initialize(passport, getUserByEmail, getUserById){
     authenticateUser))
     passport.serializeUser((user, done) => done(null, user.id))
     passport.deserializeUser(async (id, done) => {
-        const result = await getUserById(id)
-        const user = result.recordset[0]
+        const user = await getUserById(id)
+        // const user = result
         return done(null, user)
     })
 }

@@ -21,8 +21,8 @@
             <div class="playerName" style="font-size: 175%;">
             </div>
         </div>
-        <% var options = ['Goal','Assist','Save','Own Goal','Yellow Card','Red Card'] %>
-        <% for(var i=0; i< options.length; i++) {%>
+        <% let options = ['Goal','Assist','Save','Own Goal','Yellow Card','Red Card'] %>
+        <% for(let i=0; i< options.length; i++) {%>
             <div class="statButton">
                 <button class="floatingActionButtons floatAbove hidden itemFormat primaryStyle primaryBorder" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="statHandler(this, currentPeriod )">+1</button>
                 <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="<%= options[i].toLowerCase().replace(' ','') %>" onclick="if(!isLong){statHandler(this, currentPeriod)}" onmousedown="handleMouseDown(this,event)" onmouseup="handleMouseUp(event)" ontouchstart="handleMouseDown(this,event)" ontouchend="handleMouseUp(event)"><%= options[i] %></button>                    

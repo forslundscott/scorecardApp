@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/GLOSLogo.png">
+    <title>Stripe Payment</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            /* background-color: #f9f9f9; */
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            background-color: #6772e5;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h2>Payment Form</h2>
+    <div class="container">
+        <!-- <h2>Stripe Payment Form</h2>
+        <form id="payment-form">
+            <label for="amount">Amount (USD):</label>
+            <input type="number" name="amount" id="amount" min="1" step="1" value="5000" required />
+            <div id="card-element">
+                
+            </div>
+            <button id="submit" disabled>Pay</button>
+        </form> -->
+        <p id="payment-result"></p>
+        <div id="paypal-button-container" style="text-align: center;"></div>
+    </div>
+    
+    
+    <script
+    src="https://www.paypal.com/sdk/js?client-id=test&buyer-country=US&currency=USD&components=buttons&enable-funding=venmo,paylater,card"
+    data-sdk-integration-source="developer-studio"
+></script>
+    <script src="/paypal.js"></script>
+    <script src="/main.js"></script>
+</body>
+</html>

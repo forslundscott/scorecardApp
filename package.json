@@ -4,7 +4,7 @@
   "description": "Simplifies sport score keeping",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "nodemon server.js",
     "dataDownload": "downloadSEData.js"
   },
@@ -23,6 +23,7 @@
     "@mailchimp/mailchimp_transactional": "^1.0.59",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
+    "braintree": "^3.26.0",
     "crypto": "^1.0.1",
     "debug": "^4.3.7",
     "dotenv": "^16.3.1",
@@ -31,6 +32,7 @@
     "express-flash": "^0.0.2",
     "express-session": "^1.17.3",
     "express-session-sequelize": "^2.3.0",
+    "flat": "^6.0.1",
     "helmet": "^8.0.0",
     "json2csv": "^6.0.0-alpha.2",
     "method-override": "^3.0.0",
@@ -42,6 +44,10 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "sequelize": "^6.37.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "stripe": "^17.4.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

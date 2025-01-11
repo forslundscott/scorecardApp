@@ -31,8 +31,8 @@ pool.connect().then(async () => {
   });
   async function roleSetter() {
     try{
-        const request = pool.request();
-        const result = await request.query(`
+        const result = await pool.request()
+        .query(`
         SELECT name, id
         FROM roles
         `);

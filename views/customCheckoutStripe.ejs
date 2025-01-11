@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Stripe Checkout</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    /* Add some basic styles */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #payment-form {
+      width: 300px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Checkout</h2>
+  <form id="payment-form">
+    <div id="card-element">
+      <!-- A Stripe Element will be inserted here. -->
+    </div>
+    <button id="submit" type="submit">Pay $50</button>
+    <p id="error-message"></p>
+  </form>
+
+  <script>
+    // Create a Stripe client
+    const stripe = Stripe('your_stripe_public_key'); // Use your public key
+    let elements;
+
+    // Set up Stripe.js and Elements to use in checkout form
+    const setupElements = async () => {
+      const clientSecret = await fetch('/api/payments/create-payment-intent', {
+        method: 'POST',
+      }).then((res) => res.json());
+
+      elements = stripe.elements({
+        clientSecret: clientSecret.clientSecret,
+      });
+
+      // Create an instance of the card Element
+      const card = elements.create('payment');
+      card.mount('#card-element');
+    };
+
+    setupElements();
+
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      // Create a payment method and confirm the payment
+      const { error, paymentIntent } = await stripe.confirmCardPayment(
+        clientSecret.clientSecret,
+        {
+          payment_method: {
+            card: elements.getElement('card'),
+            billing_details: {
+              name: 'Customer Name',  // Customize with the customer name
+            },
+          },
+        }
+      );
+
+      if (error) {
+        document.getElementById('error-message').textContent = error.message;
+      } else if (paymentIntent.status === 'succeeded') {
+        alert('Payment Successful!');
+      }
+    });
+  </script>
+
+</body>
+</html>

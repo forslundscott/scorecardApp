@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/GLOSLogo.png">
+    <title>Pickup Soccer Registration</title>
+</head>
+<body style="text-align: center;">
+    
+    <header>
+        <h1>Pickup Futsal Signup</h1>
+    </header>
+    <br>
+    <main>
+        <img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
+        <br><br>
+        <form action="/api/payments/checkout" method="get" onsubmit="return handleSubmit(this,event)">
+            <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
+            <br><br>
+
+            <input type="email" id="email" name="email" placeholder="Email" onblur="fillExistingUserInfo(this)" required>
+            <br>
+            <input type="text" name="firstName" placeholder="First Name" required>
+            <input type="text" name="lastName" placeholder="Last Name" required>
+            <br>
+            
+            <br>
+            
+
+            <%# console.log(data) %>
+            <% for (let i=0; i<data.pickupEvents.length;i++) {%>
+            <label>
+                <input 
+                type="checkbox" 
+                name="hour" 
+                value="<%= data.pickupEvents[i].time %>" 
+                <%= data.pickupEvents[i].attendeeCount >= data.pickupEvents[i].totalSlots ? 'disabled' : '' %>> 
+                <%= functions.millisecondsToTimeString(data.pickupEvents[i].time) %> <%= data.pickupEvents[i].attendeeCount >= data.pickupEvents[i].totalSlots ? ' (Closed)' : '' %>
+            </label>
+            <br>
+            <% } %>
+            <br>
+            <button type="submit" class="primaryBorder" style="border-width: thin;">Sign Up</button>
+        </form>
+    </main>
+    <br>
+    <footer>
+        <p>&copy; 2024 GLOS</p>
+    </footer>
+    <script>
+        
+        function validateCheckboxes(form) {
+            const checkboxes = form.querySelectorAll('input[name="hour"]');
+            for (const checkbox of checkboxes) {
+                if (checkbox.checked) {
+                    return true; // At least one checkbox is checked
+                }
+            }
+            alert("Please select at least one option.");
+            return false; // No checkbox is checked
+        }
+        function handleSubmit(form,event) {
+            if (!validateCheckboxes(form)) {
+                return false; 
+            }
+            // paymentSubmit(form,event)
+        }
+        async function fillExistingUserInfo(emailElement){
+            let form = emailElement.form;
+            let formData = new FormData(form)
+            // console.log(formData)
+            const response = await fetch('/games/checkEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(formData).toString()
+            })
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData)
+                if(responseData.user){
+                    form.querySelector('[name="firstName"]').value = responseData.user.firstName
+                    form.querySelector('[name="lastName"]').value = responseData.user.lastName
+                    if(form.querySelector('[name="preferredName"]').value && responseData.user.preferredName){
+                        form.querySelector('[name="preferredName"]').value = responseData.user.preferredName
+                    }
+                    if(form.querySelector('[name="waiver"]').value){
+                        form.querySelector('[name="waiver"]').checked = true
+                    }
+                }else{
+                    form.querySelector('[name="firstName"]').value = ''
+                    form.querySelector('[name="lastName"]').value = ''
+                    if(form.querySelector('[name="preferredName"]').value){
+                        form.querySelector('[name="preferredName"]').value = ''
+                    }
+                    if(form.querySelector('[name="waiver"]').value){
+                        form.querySelector('[name="waiver"]').checked = false
+                    }
+                }
+                // location.reload()
+            } else {
+                console.error('Form submission failed');
+                // Handle error response
+            }
+        }
+        document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
+            let email = this.value;
+            let formData = new FormData(document.getElementById('newPlayerForm'))
+            console.log(formData)
+            const response = await fetch('/games/checkEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(formData).toString()
+            })
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData)
+                if(responseData.user){
+                    this.form.querySelector('[name="firstName"]').value = responseData.user.firstName
+                    this.form.querySelector('[name="lastName"]').value = responseData.user.lastName
+                    this.form.querySelector('[name="preferredName"]').value = responseData.user.preferredName
+                    this.form.querySelector('[name="waiver"]').checked = true
+                }else{
+                    this.form.querySelector('[name="firstName"]').value = ''
+                    this.form.querySelector('[name="lastName"]').value = ''
+                    this.form.querySelector('[name="preferredName"]').value = ''
+                    this.form.querySelector('[name="waiver"]').checked = false
+                }
+                // location.reload()
+            } else {
+                console.error('Form submission failed');
+                // Handle error response
+            }
+        });
+    </script>
+    
+    <script src="/main.js"></script>
+</body>
+</html>
