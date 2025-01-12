@@ -5,21 +5,18 @@ const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const pool = require(`../db`)
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
-const storage = multer.memoryStorage();
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // Limit file size to 2MB
-  fileFilter: (req, file, cb) => {
-    const isPng = file.mimetype === 'image/png';
-    if (isPng) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PNG images are allowed'));
-    }
-  },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
+// upload limit
+const uploadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // 10 per IP
 });
 router.post(['/getTeams'], async (req,res,next)=>{
     try{
@@ -155,30 +152,13 @@ router.get(['/newTeam'], async (req, res, next) => {
         console.error('Error:', err)
     }
 })
-router.post('/addTeam', upload.single('teamLogo'), async (req, res, next) => {
-    // Process form data here
-    try{
-            // Validate the image file further with Sharp
-        const metadata = await sharp(req.file.buffer).metadata();
-        if (metadata.format !== 'png') {
-        throw new Error('File is not a valid PNG image');
-        }
-
-        // Resize and optimize the PNG image
-        const processedImage = await sharp(req.file.buffer)
-        .resize(800, 800, { fit: sharp.fit.inside, withoutEnlargement: true })
-        .png({ quality: 90 }) // Compress PNG with quality setting
-        .toBuffer();
-
-        // Save the processed image to disk
+router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res, next) => {
+    try{ 
         const outputDir = path.join(__dirname, '../public/images');
-        if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir);
-        }
         const filename = `${req.body.abbreviation}.png`;
-        const outputPath = path.join(outputDir, filename);
-        fs.writeFileSync(outputPath, processedImage);
-        const formData = req.body;
+        await functions.pngUpload(req.file.buffer, filename, outputDir)
+
+        // Add team to database
         const request = pool.request()
         await request.query(`
             IF NOT EXISTS (SELECT 1 FROM teams WHERE id = '${req.body.abbreviation}')
