@@ -173,7 +173,7 @@ async function pngUpload (fileBuffer, filename, outputDir) {
         fs.mkdirSync(outputDir);
     }
     const outputPath = path.join(outputDir, sanitizeFilename(filename));
-    fs.writeFileSync(outputPath, processedImage);
+    fs.writeFileSync(outputPath, processedImage, { mode: 0o644 });
     return outputPath //for debugging
 }
 const fileUpload = () => {
