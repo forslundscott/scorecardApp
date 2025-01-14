@@ -135,6 +135,54 @@ router.post('/create-payment-intent', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+router.post('/successCash', async (req,res, next)=>{
+  try{
+
+
+      const hoursArray = Array.isArray(req.body.hours) ? req.body.hours : [req.body.hours];
+      const hoursString = hoursArray.join(',');
+      const request = pool.request()
+
+      let result = await request.query(`
+          INSERT into pickupAttendees (userId,pickupId,transactionId,gateway)
+          select '${req.body.userId}' as userId,
+          id as pickupId,
+          'cash' as transactionId,
+          'cash' as gateway
+          from pickupEvents
+          where date = ${req.body.date} and time in (${hoursString})
+          AND NOT EXISTS (
+              SELECT 1
+              FROM pickupAttendees
+              WHERE userId = '${req.body.userId}' AND pickupId = pickupEvents.id
+          )
+          `)
+          result = await request.query(`
+              select e.*, (select count(a.userId) 
+              from pickupAttendees as a
+              where e.id=a.pickupId) attendeeCount 
+              from pickupEvents as e
+              where [date] = ${req.body.date}
+              and time in (${hoursString})
+              and (select count(a.userId) 
+              from pickupAttendees as a
+              where e.id=a.pickupId) = totalSlots
+          `)
+          await fullEmail(result.recordset)
+          // IF NOT EXISTS (SELECT 1 FROM users WHERE email = @email)
+          // BEGIN
+          // END
+      // await request.query(`
+      //     INSERT into pickupAttendees (userId,pickupId,transactionId)
+      //     VALUES()
+      // `)
+      console.log(result.recordset)
+      res.render('paymentSuccess.ejs');
+      
+  }catch(err){
+      next(err)
+  }
+});
 router.post('/successVenmo', async (req,res, next)=>{
   try{
 
@@ -144,10 +192,11 @@ router.post('/successVenmo', async (req,res, next)=>{
       const request = pool.request()
 
       let result = await request.query(`
-          INSERT into pickupAttendees (userId,pickupId,transactionId)
+          INSERT into pickupAttendees (userId,pickupId,transactionId,gateway)
           select '${req.body.userId}' as userId,
           id as pickupId,
-          '${req.body.transactionId}' as transactionId
+          '${req.body.transactionId}' as transactionId,
+          'BrainTree' as gateway
           from pickupEvents
           where date = ${req.body.date} and time in (${hoursString})
           AND NOT EXISTS (
@@ -281,15 +330,15 @@ router.get('/cancel', async (req,res, next)=>{
         next(err)
     }
 });
-router.get('/', async (req,res, next)=>{
-    try{
-        const stripePublicKey = process.env.STRIPE_LIVE_PUBLISHABLE_KEY
-        res.render('checkoutForm.ejs', { stripePublicKey });
+// router.get('/', async (req,res, next)=>{
+//     try{
+//         const stripePublicKey = process.env.STRIPE_LIVE_PUBLISHABLE_KEY
+//         res.render('checkoutForm.ejs', { stripePublicKey });
         
-    }catch(err){
-        next(err)
-    }
-});
+//     }catch(err){
+//         next(err)
+//     }
+// });
 router.post('/create-checkout-session', async (req, res) => {
     const { email } = req.body;
     console.log(`${req.body.hour}`)

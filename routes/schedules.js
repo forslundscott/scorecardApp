@@ -1,11 +1,80 @@
 // routes/users.js
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const csvParser = require('csv-parser');
+const fs = require('fs');
+const path = require('path');
 const pool = require(`../db`)
 const sql = require('mssql');
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated } = require('../middleware/authMiddleware')
 const scheduler = require('../helpers/scheduler');
+
+const upload = multer({
+    dest: 'uploads/', // Temporary folder for uploaded files
+  });
+
+router.get('/sampleUpload', (req, res, next) => {
+    const sampleFilePath = path.join(__dirname, '..', 'public', 'scheduleSample.csv');
+    res.download(sampleFilePath, 'scheduleSample.csv', (err) => {
+        if (err) {
+        console.error('Error sending file:', err);
+        res.status(500).send('Error downloading file');
+        }
+    });
+})
+router.post('/upload', upload.single('file'), (req, res, next) => {
+    const filePath = req.file.path;
+  
+    // Array to hold parsed data
+    const records = [];
+  
+    // Parse the CSV file
+    fs.createReadStream(filePath)
+      .pipe(csvParser())
+      .on('data', (row) => {
+        records.push(row); // Add each row to the records array
+      })
+      .on('end', async () => {
+        // Insert data into the database (replace with your DB logic)
+        for (const record of records) {
+            await pool.request()
+                .input('startDate',sql.VarChar,record.startDate)
+                .input('startTime',sql.VarChar,record.startTime)
+                .input('court',sql.VarChar,record.court)
+                .input('team1Id',sql.VarChar,record.team1Id)
+                .input('team2Id',sql.VarChar,record.team2Id)
+                .input('maxPeriods',sql.Int,record.maxPeriods)
+                .input('seasonId',sql.VarChar,record.seasonId)
+                .input('leagueId',sql.VarChar,record.leagueId)
+                .query(`EXEC newGame @startDate
+                    , @startTime
+                    , @court
+                    , @team1Id
+                    , @team2Id
+                    , @maxPeriods
+                    , @seasonId
+                    , @leagueId`)
+        }
+        try {
+          // Example: Log records to console
+          console.log('Parsed Records:', records);
+  
+          // Clean up the uploaded file
+          fs.unlinkSync(filePath);
+  
+          res.send('CSV file processed and data imported!');
+        } catch (error) {
+          console.error('Error processing file:', error);
+          res.status(500).send('Error processing file');
+        }
+      })
+      .on('error', (error) => {
+        console.error('Error reading file:', error);
+        res.status(500).send('Error reading file');
+      });
+  });
 router.post('/exportSchedules', async (req, res, next) => {
     try{
         const request = pool.request()
@@ -542,7 +611,7 @@ router.get('/', async (req,res, next)=>{
         // Execute ${req.params.type}Standings @league
         // `)
         let data = {
-            page: `${req.originalUrl.split('/')[1]}`,
+            page: `schedules`,
             user: req.user
         }
         
