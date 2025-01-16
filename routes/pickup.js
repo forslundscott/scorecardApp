@@ -1,6 +1,7 @@
 // routes/users.js
 const express = require('express');
 const router = express.Router();
+const sql = require('mssql');
 const pool = require(`../db`)
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
@@ -90,6 +91,50 @@ router.get('/register/:date', async (req,res, next)=>{
         next(err)
     }
 });
+router.get('/:unixDate/:unixTime', async (req,res, next)=>{
+    try{
+        console.log(req.user)
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'pickupItem',
+            user: req.user
+        }
+        const result = await pool.request()
+        .query(`select * from pickupEvents as pe
+            left join facilities as f on pe.facilityId=f.id
+            order by date
+        `)
+        data.list = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/:pickupId', async (req,res, next)=>{
+    try{
+        console.log(req.user)
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'pickupItem',
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('pickupId', sql.Int, req.params.pickupId)
+        .query(`SELECT * from pickupAttendees
+            where pickupId = @pickupId
+        `)
+        data.list = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
 router.get('/', async (req,res, next)=>{
     try{
         console.log(req.user)
@@ -101,8 +146,14 @@ router.get('/', async (req,res, next)=>{
             page: 'pickup',
             user: req.user
         }
-        const request = pool.request()
-        const result = await request.query(`select * from pickupEvents as pe
+        const result = await pool.request()
+        .query(`select 
+            pe.id,
+            pe.[date], 
+            pe.facilityId, 
+            pe.active, 
+            f.address, 
+            f.name from pickupEvents as pe
             left join facilities as f on pe.facilityId=f.id
             order by date
         `)
