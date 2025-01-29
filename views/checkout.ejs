@@ -37,8 +37,36 @@
   <button id="venmo-test-button">
     Test
   </button>
-
+  <button id="cashButton" class="primaryBorder primaryStyle" onclick="cashPayment()">
+    Pay by Cash On-site
+  </button>
   <script>
+    async function cashPayment(){
+            let formData = new URLSearchParams()
+            formData.append('itemName','<%= description %>')
+            formData.append('itemPrice','<%= price %>')
+            formData.append('transactionId', 'cash')
+            formData.append('hours','<%= hours %>')
+            formData.append('date','<%= date %>')
+            formData.append('userId','<%= userId %>')
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/api/payments/successCash';
+
+            // Add data to the form
+            for (const [key, value] of formData.entries()) {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            }
+
+            // Append the form to the body and submit it
+            document.body.appendChild(form);
+            form.submit();
+    }
     // Initialize Braintree client
     braintree.client.create({
       authorization: '<%= clientToken %>',  // Inject the client token into your template
@@ -110,6 +138,20 @@
         };
         // Handle the Venmo payment button click
         document.getElementById('venmo-button').addEventListener('click', () => {
+          function isSupportedBrowser() {
+              const userAgent = navigator.userAgent;
+              const isChrome = /Chrome/.test(userAgent) && !/Edge|Edg/.test(userAgent); // Exclude Edge
+              const isFirefox = /Firefox/.test(userAgent);
+              const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent); // Exclude Chrome on Safari
+
+              return isChrome || isFirefox || isSafari;
+          }
+
+          // Check browser and show alert for unsupported browsers
+          if (!isSupportedBrowser()) {
+              alert('Please use Google Chrome, Mozilla Firefox, or Safari to pay by Venmo.');
+              return
+          }
           venmoInstance.tokenize((err, payload) => {
             if (err) {
               console.error('Error tokenizing payment method:', err);

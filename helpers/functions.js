@@ -1,8 +1,20 @@
 const { Parser } = require('json2csv');
 const Color = require('color');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
+// const ClamScan = require('clamscan');
+const sanitizeFilename = require('sanitize-filename')
 const pool = require(`../db`)
 const sql = require('mssql'); 
 // import { flatten } from 'flat'
+// const clam = new ClamScan({
+//     clamdscan: {
+//         socket: '/var/run/clamd/clamd.sock', // Update with actual socket path
+//     },
+//     debug_mode: false,
+//     remove_infected: false, 
+// });
 function titleCase(str){
     try{
         let words = str.split(' ')
@@ -131,6 +143,7 @@ const formatDate = (timestamp) => {
         return undefined
     }
   };
+//   change to using sanitize-filename
 const fileNameSanitizer = (fileName) => {
     try{
         fileName = fileName.replace(/[^a-z0-9_-]/gi, '')
@@ -140,4 +153,30 @@ const fileNameSanitizer = (fileName) => {
         return 'export.csv'
     }
 }
-module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer}
+async function pngUpload (fileBuffer, filename, outputDir) {
+
+
+    // verify file type
+    const metadata = await sharp(fileBuffer).metadata();
+    if (metadata.format !== 'png') {
+        throw new Error('File is not a valid PNG image');
+    }
+
+    // Resize image
+    const processedImage = await sharp(fileBuffer)
+    .resize(800, 800, { fit: sharp.fit.inside, withoutEnlargement: true })
+    .png({ quality: 90 })
+    .toBuffer();
+
+    // Save image
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir);
+    }
+    const outputPath = path.join(outputDir, sanitizeFilename(filename));
+    fs.writeFileSync(outputPath, processedImage, { mode: 0o644 });
+    return outputPath //for debugging
+}
+const fileUpload = () => {
+
+}
+module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer,pngUpload}

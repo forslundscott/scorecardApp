@@ -3,7 +3,8 @@
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
-    <div class="fielderColumn dragColumn" <%= data.page.includes('activeGame') ? 'style="height: calc(100% - 10vh)"' : '' %>>
+    <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? 'height: calc(100% - 10vh)' : '' %>">
+
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
             <% for(let i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
@@ -30,8 +31,19 @@
             <% } %>
         <% } else if (data.page == 'schedules') { %>
             <div class="textCenter">
-                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
-                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/list'">Existing</button>
+                <!-- <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
+                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/list'">Existing</button> -->
+                <form action="/schedules/upload" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".csv" />
+                    <br>
+                    <button type="submit" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;">Upload Schedule</button>
+                  </form>
+                  <a href="/schedules/sampleUpload"><button type="button">Download Sample CSV</button></a>
+                <!-- <span>
+                    <input type="file" name="file" accept=".csv" />
+                    <br>
+                    <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/upload'">Upload</button>
+                </span> -->
             </div>
         <% } else if (data.page.startsWith('/schedules/item/')) { %>
             <% for(let i=0; i< data.list.length; i++) {%>

@@ -34,6 +34,36 @@ router.post('/exportStandings', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+router.get('/site/:type/:league', async (req, res, next) => {
+    try{
+        console.log('test')
+        const procedureMap = {
+            keeper: 'keeperStandings',
+            individual: 'individualStandings',
+            team: 'teamStandings',
+          };
+          const procedureName = procedureMap[req.params.type.toLowerCase()];
+          // Verifying the procedure value was set
+          if (!procedureName) {
+              return res.status(400).send('Invalid standings type');
+          }
+        const result = await pool.request()
+        .input('league', sql.VarChar, req.params.league)
+        .execute(procedureName)
+        console.log(result)
+        let data = {
+            league: req.params.league,
+            type: req.params.type,
+            page: `standingsSite`,
+            list: result.recordsets[0],
+            user: req.user
+        }
+        
+        res.render('standingsSite.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 router.get('/:type/:league', async (req, res, next) => {
     try{
         // console.log(req.params)
