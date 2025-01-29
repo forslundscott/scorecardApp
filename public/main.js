@@ -1,105 +1,34 @@
-// const { data } = require("cheerio/lib/api/attributes");
-
 const audio = new Audio()
-var eventLog = [
-
-]
-function sendGameData(){
-    
-}
+let gameInfo
 if(sessionStorage.gameInfo == 'undefined' || sessionStorage.gameInfo == '' || sessionStorage.gameInfo == null) {
-    var gameInfo = {
+    gameInfo = {
         period: 1,
         time: '15:00',
         timerButtonState: 'Start',
         touchTime: Date.now()
     }
-    // document.getElementById('gameTimer').innerHTML = gameInfo.time
-    // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
-    // document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
+
 }else {
     gameInfo = JSON.parse(sessionStorage.gameInfo)
-    // document.getElementById('gameTimer').innerHTML = gameInfo.time
-    // document.getElementById('period').innerHTML = `Period ${gameInfo.period} of 3`
-    // document.getElementById('timerButton').innerHTML = gameInfo.timerButtonState
+
 }
 
 window.addEventListener('beforeunload', (event) => {
-    // gameInfo.time = document.getElementById('gameTimer').innerHTML
-    // gameInfo.timerButtonState = document.getElementById('timerButton').innerHTML
     sessionStorage.setItem('gameInfo',JSON.stringify(gameInfo))
   });
-class Game {
-    constructor(){
-        this.id = ''
-        this.homeTeam = ''
-        this.awayTeam = ''
-        this.period = 1
-        this.clockTime = ''
-        this.log = []
-    }
-}
-class Team {
-    constructor(){
-        this.id = ''
-        this.name = ''
-        this.keeper = ''
-        this.players = []
-        this.log = []
-    }
-}
-class Player {
-    constructor(){
-        this.id = ''
-        this.firstName = ''
-        this.lastName = ''
-        this.gender = ''
-        this.log = []
-    }
-}
-class GameEvent {
-    constructor(){
-        this.timeStamp = new Date(Date()).toISOString()
-        this.period = GameInfo.period
-        this.gameId = ''
-        this.teamId = ''
-        this.playerId = ''
-        this.type = ''
-        this.value = 0
-        this.clockTime = ''
-    }
-}
-
 
 document.addEventListener('DOMContentLoaded', function () {
     const eles = document.getElementsByClassName('dragColumn')
     
-    for(var i=0;i<eles.length;i++){
-        const ele = eles[i]
+    for(let ele of eles){
         setDragScroll(ele)
     }
 });
 
 document.addEventListener('click', function enableAudio() {
-    // alert(navigator.platform)
     document.removeEventListener('click', enableAudio, false);
     audio.autoplay= true;
-    // audio.muted = false
-    // console.log(navigator)
-    // if(navigator.platform !== 'IPhone'){
-    //     navigator.vibrate(200)
-    // }
-    
 }, false);
-
-// document.addEventListener('visibilitychange', async () => {
-//     if (screenLock !== null && document.visibilityState === 'visible') {
-//       screenLock = await navigator.wakeLock.request('screen');
-//     }
-//   });
-// document.addEventListener('touchstart', function () {
-//     gameInfo.touchTime = Date.now()
-// })
 function setDragScroll(ele){
     ele.style.cursor = 'grab';
 
@@ -147,44 +76,22 @@ function setDragScroll(ele){
     ele.addEventListener('mousedown', mouseDownHandler);
     ele.addEventListener('ontouchstart', mouseDownHandler);
 }
-// var distance = Number(gameInfo.time.split(':')[0]) * 60 * 1000 + Number(gameInfo.time.split(':')[1]) * 1000;
+
 if(document.getElementById('timerForm')){
-    var distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
-    var x = setInterval(async function() {
+    let distance = Number(document.getElementById('timerForm').querySelector('[name="timerTime"]').value)
+    let x = setInterval(async function() {
     ;
     
     if(document.getElementById('timerForm').querySelector('[name="timerState"]').value == 1){
         distance = distance - 1000;
-
-        if (distance < 0) {
-            
-            // if(navigator.platform !== 'IPhone'){
-            //     navigator.vibrate([200, 200])
-            // }
-            // // setTimeout(function(){document.getElementById("myAudio").play()}, 950)
-            // document.getElementById("myAudio").muted = false
-            // document.getElementById("myAudio").play()
-            
+        if (distance < 0) {   
             clearInterval(x);
-        //    alert(navigator.getAutoplayPolicy("mediaelement"))
-            // if(navigator.platform !== 'iPhone'){
-                // alert(navigator.platform);
                 playSoundAndWait('whistle.mp3')
                 async function playSoundAndWait(soundFilePath) {
-                    // var audio = new Audio(soundFilePath);
                     console.log(audio)
-                    var form = document.getElementById('timerForm')
-                    // var statType = ele.value
-                    
-                        // form.querySelector('[name="realTime"]').value = Date.now()
-                        // // console.log(form.querySelector('[name="realTime"]').value)
-                        // form.querySelector('[name="value"]').value = val
-                        
-                        // form.querySelector('[name="period"]').value = xperiod
-                        // form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
-                        // form.querySelector('[name="type"]').value = ele.value
-                        var formData = new FormData(form)
-                    const response = await fetch('/periodEnd', {
+                    let form = document.getElementById('timerForm')
+                        let formData = new FormData(form)
+                    await fetch('/games/periodEnd', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -198,70 +105,41 @@ if(document.getElementById('timerForm')){
                             
                             location.reload()
                         });
-                    
                         // Play the audio
                         audio.play();
                     }else{
                         location.reload()
                     }
-                }
-            // }else{
-            //     // var audio = new Audio()
-            //     // alert(audio.autoplay)
-            //     // audio.autoplay = true
-            //     audio.src = 'doubleBell.mp3'
-            //     audio.addEventListener('ended', function() {
-            //         location.reload()
-            //     });
-            // }
-            // location.reload()
-            
+                }            
         } else{
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
             document.getElementById("gameTimer").innerHTML = minutes + ":" + seconds;
         }
     }
   }, 1000);
-}
-  
+} 
   function timerStartStop(ele){
-    var form = ele.form
     switch(true){
         case ele.form.querySelector('[name="timerState"]').value == 0 :
-            // // document.getElementById("myAudio").play()
-            // document.getElementById("myAudio").play().then(() => { // pause directly
-            //     audio.pause();
-            //     audio.currentTime = 0;
-            //   });
             ele.form.querySelector('[name="timerState"]').value= 1
-            // ele.innerText = 'Stop'
             break
         case ele.form.querySelector('[name="timerState"]').value == 1 :
             ele.form.querySelector('[name="timerState"]').value= 0
-            // ele.innerText = 'Start'
             break
-    }
-    
+    } 
   }
-
-
   async function statHandler(ele,xperiod,val = 1){
     console.log('testonclick')
-    var form = ele.form
-    // var statType = ele.value
-    
+    let form = ele.form
         form.querySelector('[name="realTime"]').value = Date.now()
-        // console.log(form.querySelector('[name="realTime"]').value)
         form.querySelector('[name="value"]').value = val
-        
         form.querySelector('[name="period"]').value = xperiod
         form.querySelector('[name="periodTime"]').value = document.getElementById('gameTimer').innerText
         form.querySelector('[name="type"]').value = ele.value
-        var formData = new FormData(form)
-        // console.log(formData)
+        let formData = new FormData(form)
         try{
-            const response = await fetch('/eventLog', {
+            const response = await fetch('/games/eventLog', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -275,7 +153,6 @@ if(document.getElementById('timerForm')){
                         location.reload()
                         break
                     default:
-                        // console.log(responseData.data.player.userId + responseData.data.player.Team)
                         document.getElementById(responseData.data.player.userId + responseData.data.player.teamId).getElementsByClassName('goals')[0].innerHTML = 'G: ' + responseData.data.player.goals
                         document.getElementById(responseData.data.player.userId + responseData.data.player.teamId).getElementsByClassName('assists')[0].innerHTML = 'A: ' + responseData.data.player.assists
                         document.getElementById(responseData.data.player.userId + responseData.data.player.teamId).getElementsByClassName('saves')[0].innerHTML = 'Sv: ' + responseData.data.player.saves
@@ -285,31 +162,23 @@ if(document.getElementById('timerForm')){
                 }
             } else {
                 console.error('Form submission failed');
-                // Handle error response
             }
         }catch(error){
             console.error('Error:', error);
         }
   }
-  // mouseup need to be monitored on a "global" element or we might miss it if
-// we move outside the original element.
-var isDown = false,
+let isDown = false,
 isLong = false,
 target,                                         // which element was clicked
 longTID;
 function handleMouseDown(ele, e) {
-    console.log('mouse down')
-//   this.innerHTML = "Mouse down...";
   isDown = true;                                    // button status (any button here)
   isLong = false;                                   // longpress status reset
   target = this;                                    // store this as target element
-//   clearTimeout(longTID);                            // clear any running timers
   longTID = setTimeout(longPress, 500, ele, e); // create a new timer for this click
-  return
 };
 
 function handleMouseUp(e) {
-    // console.log(ele1.form)
   if (isDown && isLong) {                           // if a long press, cancel
     isDown = false;                                 // clear in any case
     e.preventDefault();                             // and ignore this event
@@ -320,108 +189,31 @@ function handleMouseUp(e) {
       clearTimeout(longTID);                        // clear timer to avoid false longpress
       isDown = false;
       console.log('Normal up')
-    //   target.innerHTML = "Normal up";               // for clicked element
       target = null;
   }
 };
 
 function longPress(ele,e) {
-    var eles = ele.parentElement.getElementsByClassName('floatingActionButtons')
+    let eles = ele.parentElement.getElementsByClassName('floatingActionButtons')
     ele.parentElement.classList.add('floating')
     eles[0].classList.replace('hidden','block')
     eles[1].classList.replace('hidden','block')
-    // ele.attributes.removeNamedItem('ontouchstart')
     document.getElementById('floatingBackground').classList.remove('hidden')
-  isLong = true;
-  console.log('Long Press')
-//   e.preventDefault()
-  return
-//   this.innerHTML = "Long press";
-  // throw custom event or call code for long press
+    isLong = true;
 }
 function handleLongPress(e){
     if(isLong){
-        // e.preventDefault()
         return false
     }
 }
-async function addPreviousSub(xform){
-    var teamForm = document.getElementById('teamForm')
-    // var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
-    // if(teamForm.style.display == 'none'){
-        // var color = xform.querySelector('[name="color"]').value
-        // teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="team"]').value
-        // teamForm.style.display = ''
-        // teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        // teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
-        // teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
-        // teamForm.getElementsByClassName('formLogo')[0].src = `images/${xform.querySelector('[name="team"]').value}.png`
-        // while(pastSubsDropdown.options.length>1){
-        //     pastSubsDropdown.remove(1)
-        // }
-        var formData = new FormData(teamForm)
-        console.log(formData)
-        const response = await fetch('/addPastSub', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            // const responseData = await response.json();
-            var selectedOption = pastSubsDropdown.options[selectElement.selectedIndex];
-  
-            if (selectedOption) {
-                var selectedIndex = selectedOption.index;
-                pastSubsDropdown.selectedIndex = 0
-                pastSubsDropdown.remove(selectedIndex);
-                
-                // Update selection if necessary
-                // if (selectedIndex < selectElement.options.length) {
-                // selectElement.options[selectedIndex].selected = true;
-                // } else if (selectElement.options.length > 0) {
-                // selectElement.options[selectElement.options.length - 1].selected = true;
-                // }
-            } else {
-                console.log("No option is selected");
-            }
-            // if(responseData.subs){
-            //     responseData.subs.forEach(function(sub){
-            //         var option = document.createElement('option')
-            //         option.text = sub.firstName + ' ' + sub.lastName
-            //         option.value = sub.id
-            //         pastSubsDropdown.add(option)
-            //     })
-            // }
-            console.log(responseData.message);
-            location.reload()
-          } else {
-            console.error('Form submission failed');
-            // Handle error response
-          }
-        console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
 
-        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
-    // }else{
-    //     teamForm.style.display = 'none'
-    // }
-    // if(document.getElementById('formBackground').style.display == 'none'){
-    //     document.getElementById('formBackground').style.display = ''
-    // }else{
-    //     document.getElementById('formBackground').style.display = 'none'
-    // }
-}
 function toggleAddPlayer(xform){
     if(document.getElementById('newPlayerForm').style.display == 'none'){
-        // var color = xform.querySelector('[name="color"]').value
         document.getElementById('newPlayerForm').style.display = ''
         document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
         document.getElementById('newPlayerForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         document.getElementById('newPlayerForm').querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
-        document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
-        
-        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
+        document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="team"]').value}.png`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
     }
@@ -432,55 +224,49 @@ function toggleAddPlayer(xform){
     }
 }
 function toggleSearchUser(){
-    var searchForm = document.getElementById('userSearchContainer')
+    let searchForm = document.getElementById('userSearchContainer')
     if(searchForm.style.display == 'none'){
-        // var color = xform.querySelector('[name="color"]').value
         searchForm.style.display = ''
-        // searchForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        // searchForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
-        // searchForm.querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
-        // searchForm.src = `images/${xform.querySelector('[name="team"]').value}.png`
-        
-        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         searchForm.style.display = 'none'
-        document.getElementById('userSearchField').value
         document.getElementById('userSearchResults').innerHTML = ''
     }
-    // if(document.getElementById('teamFormBackground').style.display == 'none'){
-    //     document.getElementById('teamFormBackground').style.display = ''
-    // }else{
-    //     document.getElementById('teamFormBackground').style.display = 'none'
-    // }
+    
+}
+function toggleSearchPlayer(){
+    let searchForm = document.getElementById('playerSearchContainer')
+    if(searchForm.style.display == 'none'){
+        searchForm.style.display = ''
+    }else{
+        searchForm.style.display = 'none'
+        document.getElementById('playerSearchResults').innerHTML = ''
+    }
+    
 }
 async function userSearch(xForm,event){
-    // document.getElementById('userSearchForm').addEventListener('submit', async function (event) {
+
         event.preventDefault();
-        const query = document.getElementById('userSearchField').value;
         try {
-            // const response = await fetch(`/userSearch?query=${query}`);
-            var formData = new FormData(xForm)
-            const response = await fetch(`/userSearch`, {
+
+            let formData = new FormData(xForm)
+            const response = await fetch(`/users/userSearch`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                   },
                 body: new URLSearchParams(formData).toString(),
               });
-            // const results = await response.json();
+
             
             if (response.ok) {
                 const results = await response.json();
                 const resultsList = document.getElementById('userSearchResults');
                 resultsList.innerHTML = '';
+                console.log(window.location.pathname)
                 results.forEach(user => {
                     const userCard = `
-                        <form class="" action="" method="post">
-                            <input type="hidden" name="email" value="${user.email}">
-                            <input type="hidden" name="firstName" value="${user.firstName}">
-                            <input type="hidden" name="lastName" value="${user.lastName}">
-                            <input type="hidden" name="preferredName" value="${user.preferredName}">
-                            <button type="button" class="playerButton" name="type" value="game" onclick="selectUser(this.form)">
+                        <form class="" action="/${window.location.pathname.replace(/\//g, '')}/${user.ID}" method="get">
+                            <button type="submit" class="playerButton">
                             <div class="itemFormat primaryStyle primaryBorder">
                                 <div class="playerTag">
                                     <div class="playerName" style="text-align: center;">
@@ -493,26 +279,64 @@ async function userSearch(xForm,event){
                     `
                     resultsList.innerHTML += userCard
             });
-                // if(responseData.subs){
-                //     responseData.subs.forEach(function(sub){
-                //         var option = document.createElement('option')
-                //         option.text = sub.firstName + ' ' + sub.lastName
-                //         option.value = sub.ID
-                //         pastSubsDropdown.add(option)
-                //     })
-                // }
-                // console.log(responseData.message);
-                // location.reload()
               } else {
                 console.error('Form submission failed');
-                // Handle error response
               }
             
             
         } catch (error) {
             console.error('Error fetching results:', error);
         }
-    // });
+
+}
+async function playerSearch(xForm,event){
+
+    event.preventDefault();
+    try {
+
+        let formData = new FormData(xForm)
+        const response = await fetch(`/games/playerSearch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+
+        
+        if (response.ok) {
+            const results = await response.json();
+            const resultsList = document.getElementById('playerSearchResults');
+            resultsList.innerHTML = '';
+            results.forEach(user => {
+                const userCard = `
+                    <form class="" action="" method="post">
+                        <input type="hidden" name="email" value="${user.email}">
+                        <input type="hidden" name="firstName" value="${user.firstName}">
+                        <input type="hidden" name="lastName" value="${user.lastName}">
+                        <input type="hidden" name="preferredName" value="${user.preferredName}">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="selectPlayer(this.form)">
+                        <div class="itemFormat primaryStyle primaryBorder">
+                            <div class="playerTag">
+                                <div class="playerName" style="text-align: center;">
+                                    ${user.firstName} ${user.lastName} - ${user.preferredName} - ${user.email}
+                                </div>
+                            </div>                
+                        </div>
+                        </button>
+                    </form>
+                `
+                resultsList.innerHTML += userCard
+        });
+          } else {
+            console.error('Form submission failed');
+          }
+        
+        
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+
 }
 function togglePaidCheckbox() {
     const checkboxContainer = document.getElementById('paidContainer');
@@ -527,12 +351,26 @@ function togglePaidCheckbox() {
                 checkboxContainer.style.display = 'none';
                 document.getElementById('paid').required = false
             }
-            // document.getElementById('paid').required = !document.getElementById('paid');
         }
     }
 }
+function selectPlayer(xform){
+    let newPlayerForm
+    if(window.location.href.includes('activeGame')){
+        newPlayerForm = document.getElementById('newPlayerForm')
+    }else if(window.location.href.includes('roster/newPlayer')){
+        newPlayerForm = document.getElementById('newRosterPlayerForm')
+    }
+        newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
+        newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
+        newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
+        newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
+    
+    toggleSearchPlayer()
+}
 function selectUser(xform){
-    // const searchForm = document.getElementById('userSearchForm')
+
     const newPlayerForm = document.getElementById('newPlayerForm')
     newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
     newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
@@ -542,61 +380,28 @@ function selectUser(xform){
     toggleSearchUser()
 }
 async function toggleTeamForm(xform){
-    var teamForm = document.getElementById('teamForm')
-    // var pastSubsDropdown = teamForm.querySelector('[name="existingSubs"]')
+    let teamForm = document.getElementById('teamForm')
     if(document.getElementById('formBackground').style.display == 'none'){
         document.getElementById('formBackground').style.display = ''
     }else{
         document.getElementById('formBackground').style.display = 'none'
     }
     if(teamForm.style.display == 'none'){
-        // var color = xform.querySelector('[name="color"]').value
         teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="teamName"]').value
         teamForm.style.display = ''
         teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
         teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
-        teamForm.getElementsByClassName('formLogo')[0].src = `images/${xform.querySelector('[name="team"]').value}.png`
-        // while(pastSubsDropdown.options.length>1){
-        //     pastSubsDropdown.remove(1)
-        // }
-        // var formData = new FormData(teamForm)
-        // const response = await fetch('/getPastSubs', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/x-www-form-urlencoded',
-        //       },
-        //     body: new URLSearchParams(formData).toString(),
-        //   });
-        //   if (response.ok) {
-        //     const responseData = await response.json();
-        //     if(responseData.subs){
-        //         responseData.subs.forEach(function(sub){
-        //             var option = document.createElement('option')
-        //             option.text = sub.firstName + ' ' + sub.lastName
-        //             option.value = sub.ID
-        //             pastSubsDropdown.add(option)
-        //         })
-        //     }
-        //     console.log(responseData.message);
-        //     // location.reload()
-        //   } else {
-        //     console.error('Form submission failed');
-        //     // Handle error response
-        //   }
+        teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="team"]').value}.png`
         console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
-
-        // document.getElementById('newPlayerForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
     }else{
         teamForm.style.display = 'none'
     }
-    
 }
 async function toggleGameInfoForm(xform){
-    
     try{
-        var formData = new FormData(xform)
-        const response = await fetch('/gameInfo', {
+        let formData = new FormData(xform)
+        const response = await fetch('/games/gameInfo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -606,14 +411,10 @@ async function toggleGameInfoForm(xform){
           if (response.ok) {
             const responseData = await response.json();
             console.log(responseData.data);
-            // location.reload()
-            // Handle successful response, update UI, etc.
             if(document.getElementById('gameInfoForm').style.display == 'none'){
-                // team1Select.innerHTML = ''
-                // team2Select.innerHTML = ''
-                var team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
-                var team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
-                var scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
+                let team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
+                let team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
+                let scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
                 console.log(responseData.data.game.period)
                 document.getElementById('gameInfoForm').querySelector('[name="period"]').value=responseData.data.game.period
                 while (team1Select.options.length > 1) {
@@ -626,7 +427,7 @@ async function toggleGameInfoForm(xform){
                     scoreKeeperSelect.remove(1);
                 }
                 responseData.data.teams.forEach(function(xoption) {
-                    var option = document.createElement("option");
+                    let option = document.createElement("option");
                     option.text = xoption.id;
                     option.value = xoption.id;
                     team1Select.add(option);
@@ -636,7 +437,7 @@ async function toggleGameInfoForm(xform){
                     team2Select.add(option);
                   })
                   responseData.data.scoreKeepers.forEach(function(xoption) {
-                    var option = document.createElement("option");
+                    let option = document.createElement("option");
                     option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
                     option.value = xoption.userId;
                     scoreKeeperSelect.add(option);
@@ -648,19 +449,10 @@ async function toggleGameInfoForm(xform){
                     scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
                   }
                 
-                // var color = xform.querySelector('[name="color"]').value
+
                 document.getElementById('gameInfoForm').style.display = ''
                 document.getElementById('gameInfoForm').querySelector('[name="Event_ID"]').value = responseData.data.game.Event_ID
-                // var gameUnixTime = new Date(Number(responseData.data.game.startUnixTime))
-                // console.log(typeof responseData.data.game.startUnixTime)
-                // console.log(`${gameUnixTime.getFullYear()}-${gameUnixTime.getMonth()+1}-${gameUnixTime.getDate()}`)
-                // console.log(responseData.data.game.Start_Time)
-                // document.getElementById('gameInfoForm').querySelector('[name="startDate"]').value = `${gameUnixTime.getFullYear()}-${gameUnixTime.getMonth()+1<10?`0${gameUnixTime.getMonth()+1}`:gameUnixTime.getMonth()+1}-${gameUnixTime.getDate()<10? `0${gameUnixTime.getDate()}`:gameUnixTime.getDate()}`
-                // document.getElementById('gameInfoForm').querySelector('[name="startTime"]').value = `${String(gameUnixTime.getHours()).padStart(2, '0')}:${String(gameUnixTime.getMinutes()).padStart(2, '0')}`
-                // document.getElementById('newPlayerLogo').src = `images/${xform.querySelector('[name="team"]').value}.png`
-                
-                // document.getElementById('gameInfoForm').style.backgroundImage = `linear-gradient(135deg, ${color}  ${color =='White' ? '40%, #ddd 50%, ' + color + ' 60%'  : '.5%, White 50%, ' + color + ' 99.5%'})`
-            }else{
+             }else{
                 document.getElementById('gameInfoForm').style.display = 'none'
             }
             if(document.getElementById('formBackground').style.display == 'none'){
@@ -670,16 +462,14 @@ async function toggleGameInfoForm(xform){
             }
           } else {
             console.error('Form submission failed');
-            // Handle error response
           }
     }catch(error){
         console.error('Error:', error);
-    }
-    
+    } 
 }
 async function updateGameData(xele){
-    var xform = xele.form
-    var formData = new FormData(xform)
+    let xform = xele.form
+    let formData = new FormData(xform)
     console.log(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value)
     if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 'TBD'){
       xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
@@ -687,7 +477,7 @@ async function updateGameData(xele){
         return
     }
     xform.querySelector('[name="Team1_ID"]').setCustomValidity('')
-    const response = await fetch('/updateGameInfo', {
+    const response = await fetch('/games/updateGameInfo', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -699,20 +489,16 @@ async function updateGameData(xele){
         if (response.redirected) {
             window.location.href = response.url;
         }else{
-            const responseData = await response.json();
             console.log(response);
             location.reload()
         }
         
       } else {
         console.error('Form submission failed');
-        // Handle error response
       }
-    // return false
-    // alert('Team1 cannot match Team2')
 }
 function toggleEventForm(ele){
-    var xform = ele.form
+    let xform = ele.form
     if(document.getElementById('eventForm').style.display == 'none'){
         document.getElementById('eventForm').style.display = ''
         document.getElementById('eventForm').querySelector('[name="playerId"]').value = xform.querySelector('[name="playerId"]').value
@@ -736,7 +522,7 @@ function toggleEventForm(ele){
     }
 }
 function toggleForm(formName){
-    var xform = document.getElementById(formName)
+    let xform = document.getElementById(formName)
     if(xform.style.display == 'none'){
         xform.style.display = ''
     }else{
@@ -751,14 +537,14 @@ function toggleForm(formName){
     }
 }
 async function exportStandings(xtype,xleague){
-    var sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
+    let sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
     console.log(sqlString)
-    const response = await fetch('/exportStandings', {
+    const response = await fetch('/standings/exportStandings', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        body: new URLSearchParams({queryString: sqlString, fileName: `${xleague}_${xtype}_standings`}).toString(),
+        body: new URLSearchParams({queryString: sqlString, fileName: `${xleague}_${xtype}_standings`, league: xleague, type: xtype}).toString(),
       });
       if (response.ok) {
         const blob = await response.blob();
@@ -779,20 +565,15 @@ async function exportStandings(xtype,xleague){
         }
       } else {
         console.error('CSV export failed');
-        // Handle error response
       }
 }
 async function exportSchedule(xscheduleID){
-    var sqlString = `SELECT type,startDate,startTime,fieldId,team1Id,team2Id, scorekeeperId, leagueId, subLeagueId
-    FROM schedule_games
-    where scheduleId = '${xscheduleID}'`
-    console.log(sqlString)
-    const response = await fetch('/exportSchedules', {
+    const response = await fetch('/schedules/exportSchedules', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        body: new URLSearchParams({queryString: sqlString, fileName: 'data', scheduleId: xscheduleID}).toString(),
+        body: new URLSearchParams({scheduleId: xscheduleID}).toString(),
       });
       if (response.ok) {
         const blob = await response.blob();
@@ -813,56 +594,48 @@ async function exportSchedule(xscheduleID){
         }
       } else {
         console.error('CSV export failed');
-        // Handle error response
       }
 }
 function touchMoveHandler(e,ele){
-    var rect = ele.getBoundingClientRect()
+    let rect = ele.getBoundingClientRect()
 if((rect.left>=e.clientX<=rect.right)&&(rect.top>=e.clientY<=rect.bottom)){
     ele.style.background = 'red'
 }
 }
 function closeForm(){
-    var forms = document.getElementsByClassName('popupForm')
-    for(i=0;i<forms.length;i++){
-        forms[i].style.display = 'none'
+    let forms = document.getElementsByClassName('popupForm')
+    for(let form of forms){
+        form.style.display = 'none'
     }
     document.getElementById('formBackground').style.display = 'none'
-    // change below to close all floating backrounds
     document.getElementById('teamFormBackground').style.display = 'none'
     closeFloating()
 }
 function closeFloating(){
-    var eles = document.getElementsByClassName('floatingActionButtons block')
-    
+    let eles = document.getElementsByClassName('floatingActionButtons block')
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
-            // console.log(eles)
+        for(let i =eles.length-1;i>-1;i--){
             eles[i].classList.replace('block', 'hidden')
         }
     }
-    var eles = document.getElementsByClassName('floating')
-    
+    eles = document.getElementsByClassName('floating')
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
-            // console.log(eles)
+        for(let i=eles.length-1;i>-1;i--){
             eles[i].classList.remove('floating')
         }
     }
-    var eles = document.getElementsByClassName('floatingPopupForm')
+    eles = document.getElementsByClassName('floatingPopupForm')
     
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
-            // console.log(eles)
+        for(let i=eles.length-1;i>-1;i--){
             clearForm(eles[i])
             eles[i].style.display = 'none'
         }
     }
-    var eles = document.getElementsByClassName('popupBackground')
+    eles = document.getElementsByClassName('popupBackground')
     
     if(eles.length > 0){
-        for(i=eles.length-1;i>-1;i--){
-            // console.log(eles)
+        for(let i=eles.length-1;i>-1;i--){
             eles[i].style.display = 'none'
         }
     }
@@ -871,11 +644,10 @@ function closeFloating(){
     }
 }
 function clearForm(form) {
-    // var form = document.getElementById(formId);
-    var inputs = form.getElementsByTagName('input');
-    for (var i = 0; i < inputs.length; i++) {
-        if (inputs[i].type !== 'hidden') {
-            inputs[i].value = '';
+    let inputs = form.getElementsByTagName('input');
+    for (let input of inputs) {
+        if (input.type !== 'hidden') {
+            input.value = '';
         }
     }
 }
@@ -893,12 +665,12 @@ function convertUnixTimeToMMDD(unixTime) {
     return mmddFormat;
   }  
   async function switchSides(ele){
-    var form = ele.form
+    let form = ele.form
     
-    var formData = new FormData(form)
+    let formData = new FormData(form)
     console.log(formData)
     try{
-        const response = await fetch('/switchSides', {
+        const response = await fetch('/games/switchSides', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -909,74 +681,12 @@ function convertUnixTimeToMMDD(unixTime) {
             const responseData = await response.json();
             console.log(responseData.data);
             location.reload()
-            // Handle successful response, update UI, etc.
           } else {
             console.error('Form submission failed');
-            // Handle error response
           }
     }catch(error){
         console.error('Error:', error);
     }
-  }
-  async function fetchHandler(event){
-    event.preventDefault()
-    var form = event.target.form
-    
-    var formData = new FormData(form)
-    
-    try{
-        const response = await fetch(`${form.action}`, {
-            method: `${form.method}`,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            // const responseData = await response.json();
-            console.log(response);
-            // location.reload()
-            // Handle successful response, update UI, etc.
-          } else {
-            console.log(response)
-            console.error('Form submission failed');
-            // Handle error response
-          }
-    }catch(error){
-        console.error('Error:', error);
-    }
-    
-    console.log(event.target.form)
-  }
-  async function gameFormSubmit(event){
-    event.preventDefault()
-    var form = event.target.form
-    
-    var formData = new FormData(form)
-    
-    try{
-        const response = await fetch(`${form.action}`, {
-            method: `${form.method}`,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-            body: new URLSearchParams(formData).toString(),
-          });
-          if (response.ok) {
-            // const responseData = await response.json();
-            console.log(response);
-            // location.reload()
-            // Handle successful response, update UI, etc.
-          } else {
-            console.log(response)
-            console.error('Form submission failed');
-            // Handle error response
-          }
-    }catch(error){
-        console.error('Error:', error);
-    }
-    
-    console.log(event.target.form)
   }
   function getOrdinalNumber(number) {
     // Convert the input to a number if it's a string
@@ -1009,7 +719,7 @@ function convertUnixTimeToMMDD(unixTime) {
     }
 }
 function handleVisibilityChange() {
-    // console.log(window.location.pathname.indexOf('activeGame'))
+
     if (document.visibilityState === 'visible' && window.location.pathname.indexOf('activeGame') !== -1) {
         // Page is visible, refresh the page
         window.location.reload(true);
@@ -1017,10 +727,9 @@ function handleVisibilityChange() {
 }
 
 document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
-    var email = this.value;
-    var formData = new FormData(document.getElementById('newPlayerForm'))
+    let formData = new FormData(document.getElementById('newPlayerForm'))
     console.log(formData)
-    const response = await fetch('/checkEmail', {
+    const response = await fetch('/games/checkEmail', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -1041,12 +750,110 @@ document.getElementById('newPlayerForm').querySelector('[name="email"]').addEven
             this.form.querySelector('[name="preferredName"]').value = ''
             this.form.querySelector('[name="waiver"]').checked = false
         }
-        // location.reload()
       } else {
         console.error('Form submission failed');
-        // Handle error response
       }
 });
+async function getTeams(xform){
+    try {
+
+        let formData = new FormData(xform)
+        const response = await fetch(`/teams/getTeams`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams(formData).toString()
+          });
+        if (response.ok) {
+            const results = await response.json();
+            console.log(xform.id)
+            let team1
+            let team2
+            switch(xform.id){
+                case 'newUserTeamForm':
+                    team1 = xform.querySelector('[name="teamId"]');
+                    team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+                    results.teams.forEach(team => {
+                        let option = document.createElement('option');
+                        option.value = team.id;
+                        option.text = team.id;
+                        team1.appendChild(option);
+                        
+                    });
+                    break
+                case 'newGameForm':
+                    team1 = xform.querySelector('[name="team1Id"]');
+                    team2 = xform.querySelector('[name="team2Id"]');
+                    team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+                    team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
+                    results.teams.forEach(team => {
+                        let option1 = document.createElement('option');
+                        option1.value = team.id;
+                        option1.text = team.id;
+                        team1.appendChild(option1);
+                        
+                        let option2 = document.createElement('option');
+                        option2.value = team.id;
+                        option2.text = team.id;
+                        team2.appendChild(option2);
+                        
+                    });
+                    break
+                default:
+                    break
+            }
+          } else {
+            console.error('Form submission failed');
+          }
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+}
+async function getLeagues(xform){
+    try {
+        let formData = new FormData(xform)
+        const response = await fetch(`/leagues/getLeagues`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams(formData).toString()
+          });
+        if (response.ok) {
+            const results = await response.json();
+            let league1 = xform.querySelector('[name="leagueId"]');
+            league1.innerHTML = '<option value="" disabled selected>League</option>';
+            results.leagues.forEach(league => {
+                let option1 = document.createElement('option');
+                option1.value = league.leagueId;
+                option1.text = league.name;
+                league1.appendChild(option1);
+            });
+          } else {
+            console.error('Form submission failed');
+          }
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+}
+async function paymentSubmit(form,event) {
+            event.preventDefault();
+            let formData = new FormData(form)
+            const response = await fetch('/api/payments/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(formData).toString(),
+            })
+
+
+
+        const { url } = await response.json();
+        window.location.href = url; // Redirect to Stripe Checkout
+
+}
 
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

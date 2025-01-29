@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+
+    <div id="playerSearchContainer" class="floatingPopupForm primaryStyle primaryBorder" style="display: none; text-align: center;">
+        <div>
+            <form id="playerSearchForm" class="primaryStyle primaryBorder" style=" text-align: center;" onsubmit="playerSearch(this,event)">
+                    <div class="playerName">
+                        User Search
+                    </div>
+                    <br>
+                    <div class="textCenter" style="height: 15vh;"><img src="/GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
+                    <br>
+                    <input type="text" id="playerSearchField" name="playerSearchValue" placeholder="Search..." required>
+                    <br>
+                    <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Search</button>
+                    <!-- <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser(this.form)">Back</button> -->
+            </form>
+        </div>
+        <div id="playerSearchContent" style="height: 20vh;">
+            <div id="playerSearchResults" class="singleColumn dragColumn fielderColumn">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

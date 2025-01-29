@@ -17,11 +17,11 @@
     <div class="triColumn textCenter" ><img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo" onclick="toggleForm('managementForm')"></div>
     <div class="triColumn textCenter">
       <% if (data.user == undefined) { %>
-        <form action="/login" method="get" class="navButton">
+        <form action="/auth/login" method="get" class="navButton">
           <button type="submit" class="navButton">Log In</button>
         </form>
       <% } else { %>
-        <form action="logout?_method=DELETE" method="POST" class="navButton">
+        <form action="/auth/logout?_method=DELETE" method="POST" class="navButton">
           <button type="submit" class="navButton">Log Out</button>
         </form>
       <% } %>

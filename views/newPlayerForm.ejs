@@ -4,15 +4,15 @@
 </head>
 <body>
     <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="newPlayerForm" class="floatingPopupForm primaryStyle primaryBorder" action="addPlayer" method="post" style="display: none; text-align: center;">
+    <form id="newPlayerForm" class="floatingPopupForm primaryStyle primaryBorder" action="/teams/addPlayer" method="post" style="display: none; text-align: center;">
         <!-- <div class="playerTag itemFormat"> -->
             <div class="playerName">
                 Add New Player
             </div>
             <br>
-            <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
+            <div class="textCenter" style="height: 15vh;"><img src="/GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
             <br>
-            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser()">Search For Existing</button>
+            <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchPlayer()">Search For Existing</button>
             <br>
             <input type="email" name="email" value="" placeholder="Email" required>
             <br>

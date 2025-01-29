@@ -1,7 +1,7 @@
 // const functions = require('./helpers/functions');
 const BYE = 1
 const PLAYEVERYWEEK = 2
-var teamData = [
+let teamData = [
     ['CFC','CFC',5],
     ['FCF','FCF',4],
     ['FTK','FTK',3],
@@ -87,8 +87,8 @@ class match{
 }
 
 function moveToEnd(array,element){
-    var tempArray = [...array]
-    var splicedElement = tempArray.splice(tempArray.indexOf(element), 1)
+    let tempArray = [...array]
+    let splicedElement = tempArray.splice(tempArray.indexOf(element), 1)
     tempArray.push(splicedElement[0])
     return tempArray
 }
@@ -109,7 +109,7 @@ function makeLeague(teams,gamesPerTeam,teamsPerLeague,leagueId,subLeagueId,dayOf
         dayOfWeek: dayOfWeek
     }
     // console.log(leagueId&&subLeagueId)
-    for(var j=0;j<teamsPerLeague;j++){
+    for(let j=0;j<teamsPerLeague;j++){
         league.teams.push(teams[j])
         // teams.shift()
     }
@@ -123,15 +123,15 @@ function makeLeague(teams,gamesPerTeam,teamsPerLeague,leagueId,subLeagueId,dayOf
 }
 function leagueSplit(leagues,gamesPerTeam){
     // let teams = teams
-    var leagueList = []
-    for(var league of leagues){
+    let leagueList = []
+    for(let league of leagues){
         // console.log(league.leagueId)
-        var opponentCount = league.teams.length - 1
-        var leagueCount = Math.ceil(opponentCount/gamesPerTeam)
-        var teamsPerLeague = league.teams.length / leagueCount
-        var lrgLeaguesCount= ((teamsPerLeague) - Math.floor(teamsPerLeague))*leagueCount
+        let opponentCount = league.teams.length - 1
+        let leagueCount = Math.ceil(opponentCount/gamesPerTeam)
+        let teamsPerLeague = league.teams.length / leagueCount
+        let lrgLeaguesCount= ((teamsPerLeague) - Math.floor(teamsPerLeague))*leagueCount
         
-        for(var i=0;i<leagueCount;i++){
+        for(let i=0;i<leagueCount;i++){
             if(i<lrgLeaguesCount){
                 // Leagues with extra game
                 leagueList.push(makeLeague(league.teams,gamesPerTeam,Math.ceil(teamsPerLeague),league.leagueId,i+1,league.dayOfWeek))
@@ -144,14 +144,14 @@ function leagueSplit(leagues,gamesPerTeam){
 }
 
 function leagueSchedule(leagues,gamesPerTeam){
-    var subLeagues = leagueSplit(leagues,gamesPerTeam)
+    let subLeagues = leagueSplit(leagues,gamesPerTeam)
     // console.log(subLeagues)
     for(const subLeague of subLeagues){
-        for(var i=0;i<subLeague.totalRegularSeasonGames;i++){
+        for(let i=0;i<subLeague.totalRegularSeasonGames;i++){
             for(let j = 0; j< subLeague.possibleMatches.length;j++){
-                var match = subLeague.possibleMatches[j]
-                var minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
-                var avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
+                let match = subLeague.possibleMatches[j]
+                let minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                let avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
                     return accumulator + currentValue.gamesPlayed;
                 }, 0))/subLeague.teams.length
                 // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
@@ -189,11 +189,11 @@ function leagueSchedule(leagues,gamesPerTeam){
         // subLeague.teams.forEach(item =>{
         //     console.log(`${item.id }: ${item.gamesPlayed}`)
         // })
-        var playOffSchedule = []
-        var tempStr = ''
+        let playOffSchedule = []
+        let tempStr = ''
         // round 1
-        var firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
-        for(var i=0;i<firstRounGames;i++){
+        let firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
+        for(let i=0;i<firstRounGames;i++){
             // if(subLeague.teams.length%2===0){
                 // evens
                 if(i+1==Math.floor(subLeague.teams.length/2) && subLeague.teams.length%2===0){
@@ -239,7 +239,189 @@ function leagueSchedule(leagues,gamesPerTeam){
         }
         // round 2
         
-        for(var i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
+        for(let i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
+            if(i==0){
+                tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Winner of ${subLeague.playoffMatches[0].gameNumber}`
+                subLeague.playoffMatches.push(
+                    {gameNumber: subLeague.playoffMatches.length+1,
+                        type: 'P', 
+                        team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                        Team1Ranking: 1, 
+                        Team2Ranking: `Winner of ${subLeague.playoffMatches[0].gameNumber}`}
+                )
+                playOffSchedule.push(tempStr)
+                // console.log(tempStr)
+            // }else if(i+1==firstRounGames && subLeague.teams.length%2!==0){
+            //     tempStr = `Game ${subLeague.teams.length}: ${subLeague.teams[subLeague.teams.length-1].id} vs Loser of ${playOffSchedule[playOffSchedule.length-2]}`
+            //     playOffSchedule.push(tempStr)
+            //     console.log(tempStr)
+            }else if(i+1==firstRounGames){
+                if(subLeague.teams.length%2===0){
+                    // even
+                    tempStr = `Game ${subLeague.teams.length}: ${subLeague.teams[subLeague.teams.length-1].id} vs Loser of ${subLeague.playoffMatches[subLeague.playoffMatches.length-2].gameNumber}`
+                    subLeague.playoffMatches.push(
+                        {gameNumber: subLeague.teams.length,
+                            type: 'P', 
+                            team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                            Team1Ranking: subLeague.teams.length, 
+                            Team2Ranking: `Loser of ${subLeague.playoffMatches[firstRounGames-2].gameNumber}`}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }else{
+                    // odd
+                    tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Loser of ${subLeague.playoffMatches[subLeague.playoffMatches.length-1].gameNumber}`
+                    subLeague.playoffMatches.push(
+                        {gameNumber: subLeague.playoffMatches.length+1,
+                            type: 'P', 
+                            team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                            Team1Ranking: 1, 
+                            Team2Ranking: `Loser of ${subLeague.playoffMatches[subLeague.playoffMatches.length-1].gameNumber}`}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }
+            }else{
+                tempStr = `Game ${subLeague.playoffMatches.length+1}: Winner of ${subLeague.playoffMatches[i].gameNumber} vs Loser of ${subLeague.playoffMatches[i-1].gameNumber}`
+                // console.log(`Game ${i+1}:`)
+                subLeague.playoffMatches.push(
+                    {gameNumber: subLeague.playoffMatches.length+1,
+                        type: 'P', 
+                        team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                        Team1Ranking: `Winner of ${subLeague.playoffMatches[i].gameNumber}`, 
+                        Team2Ranking: `Loser of ${subLeague.playoffMatches[i-1].gameNumber}`}
+                )
+                playOffSchedule.push(tempStr)
+                // console.log(tempStr)
+            }
+        }
+        // console.log(subLeague.playoffMatches)
+    }
+    // console.log(subLeagues[1])
+    return subLeagues
+}
+
+function leagueScheduleOld(leagues,gamesPerTeam){
+    let subLeagues = leagueSplit(leagues,gamesPerTeam)
+    // console.log(subLeagues)
+    for(const subLeague of subLeagues){
+        for(let i=0;i<subLeague.totalRegularSeasonGames;i++){
+            for(let j = 0; j< subLeague.possibleMatches.length;j++){
+                let match = subLeague.possibleMatches[j]
+                let minGamesPlayed = Math.min(...subLeague.teams.map(obj => obj.gamesPlayed))
+                let avGamesPlayed = (subLeague.teams.reduce((accumulator, currentValue) => {
+                    return accumulator + currentValue.gamesPlayed;
+                }, 0))/subLeague.teams.length
+                // the following ensures that neither team has already played their max number of games and makes sure at least one team has played the least number of games so far
+                if(match.teams[0].gamesPlayed!= subLeague.regularSeasonGamesPerTeam 
+                    && match.teams[1].gamesPlayed!= subLeague.regularSeasonGamesPerTeam 
+                    && !(match.teams[0].gamesPlayed>minGamesPlayed && match.teams[1].gamesPlayed>minGamesPlayed)
+                    && !(avGamesPlayed<((match.teams[0].gamesPlayed + match.teams[1].gamesPlayed)/2))
+                ){
+                    // if(subLeague.leagueId ==='OCO2'){
+                    //     console.log(`${minGamesPlayed} ${match.teams[0].id}: ${match.teams[0].gamesPlayed} ${match.teams[1].id}: ${match.teams[1].gamesPlayed} ${(match.teams[0].gamesPlayed + match.teams[1].gamesPlayed)/2} ${avGamesPlayed}`)}
+                    match.teams[0].gamesPlayed +=1
+                    match.teams[1].gamesPlayed +=1
+                    // console.log({team1Id: match.teams[0].id,team2Id: match.teams[1].id})
+                    subLeague.scheduleMatches.push(
+                        {gameNumber: subLeague.scheduleMatches.length +1
+                            ,type: 'R'
+                            ,team1Id: match.teams[0].id
+                            ,team2Id: match.teams[1].id
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null
+                            ,Team1Ranking: null 
+                            ,Team2Ranking: null
+                        }
+                    )
+                    subLeague.possibleMatches = moveToEnd(subLeague.possibleMatches,match)
+                    break
+                }
+                // if playoffs subtract 2 from games/team
+            }
+        }
+        // console.log(subLeague.teams);
+        // subLeague.teams.forEach(item =>{
+        //     console.log(`${item.id }: ${item.gamesPlayed}`)
+        // })
+        let playOffSchedule = []
+        let tempStr = ''
+        // round 1
+        let firstRounGames = Math.floor(subLeague.totalPlayoffGames/2)
+        for(let i=0;i<firstRounGames;i++){
+            // if(subLeague.teams.length%2===0){
+                // evens
+                if(i+1==Math.floor(subLeague.teams.length/2) && subLeague.teams.length%2===0){
+                    tempStr = `Game ${Math.floor(subLeague.teams.length/2)}: ${subLeague.teams[0].id} vs ${subLeague.teams[subLeague.teams.length-1].id}`
+                    subLeague.playoffMatches.push(
+                        {gameNumber: Math.floor(subLeague.teams.length/2),
+                        type: 'P', 
+                        team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                        Team1Ranking: 1, 
+                        Team2Ranking: subLeague.teams.length}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }else{
+                    tempStr = `Game ${i+1}: ${subLeague.teams[(2*i)+1].id} vs ${subLeague.teams[(2*i)+2].id}`
+                    // console.log(`Game ${i+1}:`)
+                    subLeague.playoffMatches.push(
+                        {gameNumber: i+1,
+                            type: 'P', 
+                            team1Id: 'TBD'
+                            ,team2Id: 'TBD'
+                            ,leagueId: subLeague.leagueId
+                            ,subLeagueId: subLeague.subLeagueId
+                            ,dayOfWeek: subLeague.dayOfWeek
+                            ,startDate: null
+                            ,startTime: null,
+                            Team1Ranking: (2*i)+2, 
+                            Team2Ranking: (2*i)+3}
+                    )
+                    playOffSchedule.push(tempStr)
+                    // console.log(tempStr)
+                }
+            // }else{
+            //     // odds
+                
+            // }
+        }
+        // round 2
+        
+        for(let i=0;i<subLeague.totalPlayoffGames - firstRounGames;i++){
             if(i==0){
                 tempStr = `Game ${subLeague.playoffMatches.length+1}: ${subLeague.teams[0].id} vs Winner of ${subLeague.playoffMatches[0].gameNumber}`
                 subLeague.playoffMatches.push(
@@ -327,8 +509,6 @@ function leagueSchedule(leagues,gamesPerTeam){
 
 
 
-
-
 function compare( a, b ) {
     if ( a.matchDelta < b.matchDelta ){
       return -1;
@@ -340,11 +520,11 @@ function compare( a, b ) {
 }
 
 function getMatches(teams){
-    var matchList = []
+    let matchList = []
     
-    for(var i=0;i<teams.length-1;i++){
-        for(var j=i+1;j<teams.length;j++){
-            var currentMatch = new match
+    for(let i=0;i<teams.length-1;i++){
+        for(let j=i+1;j<teams.length;j++){
+            let currentMatch = new match
             currentMatch.teams.push(teams[i])
             currentMatch.teams.push(teams[j])
             currentMatch.ids.push(teams[i].id)
@@ -357,10 +537,10 @@ function getMatches(teams){
     return matchList
 }
 // function getTeams(){
-//     var teamList = []
+//     let teamList = []
 //     for(const xteam of teamData){
 //         // if(teamRows[i].style.display !== 'none'){
-//             var currentTeam = new team
+//             let currentTeam = new team
 //             currentTeam.name = xteam[0]
 //             currentTeam.id = xteam[1]
 //             currentTeam.rating = Math.random()*5

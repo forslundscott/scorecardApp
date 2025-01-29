@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Standings</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>League Standings</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <% if (data.type === 'team') { %>
+                    <th>Team</th>
+                    <th>Points</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Draws</th>
+                    <th>Goals For</th>
+                    <th>Goals Against</th>
+                    <th>Goal Differential</th>
+
+                <% } %>
+                <% if (data.type === 'individual') { %>
+                    <th>Player</th>
+                    <th>Points</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>Own Goals</th>
+                <% } %>
+                <% if (data.type === 'keeper') { %>
+                    <th>Player</th>
+                    <th>Weighted Saves</th>
+                    <th>Saves</th>
+                    <th>Save Percentage</th>
+                <% } %>
+                <th>Games Played</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.list.forEach(item => { %>
+                <tr>
+                    <td><%= item.Rank %></td>
+                    <% if (data.type === 'team') { %>
+                        <td><%= item.shortName %></td>
+                        <td><%= item.points %></td>
+                        <td><%= item.wins %></td>
+                        <td><%= item.losses %></td>
+                        <td><%= item.ties %></td>
+                        <td><%= item.goalsFor %></td>
+                        <td><%= item.goalsAgainst %></td>
+                        <td><%= item.goalDifferential %></td>
+                    <% } %>
+                    <% if (data.type === 'individual') { %>
+                        <td><%= item.Player %></td>
+                        <td><%= item.points %></td>
+                        <td><%= item.goals %></td>
+                        <td><%= item.assists %></td>
+                        <td><%= item.ownGoals %></td>
+                    <% } %>
+                    <% if (data.type === 'keeper') { %>
+                        <td><%= item.Player %></td>
+                        <td><%= item.weightedSaves.toFixed(2) %></td>
+                        <td><%= item.saves %></td>
+                        <td><%= (item.savePercentage * 100).toFixed(2) %>%</td>
+                    <% } %>
+                    <td><%= item.gamesPlayed %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</body>
+</html>

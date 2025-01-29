@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <form class="listItem" action="" method="get">
+        <button class="playerButton" name="type" value="season" onclick="" style="height: 100%;">
+            <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick;">
+                <div style="width: 100%;">
+                    <div class="playerName" style="text-align: center;">
+                        <%= season.seasonName %>
+                    </div>
+                </div>
+                <div style="width: 100%; height: 100%; text-align: center;" onclick="">
+                    <%= season.active == 1 ? 'Active' : 'Inactive' %>
+                </div>
+                <!-- <div class="playerName" style="text-align: center;">  
+                    <%#team.captain %> (C)
+                </div>                   -->
+            </div>
+        </button>
+    </form>
+</body>
+</html>

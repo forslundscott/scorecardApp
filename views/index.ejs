@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <link rel="preload" href="/styles.css" as="style" />
     <link rel="stylesheet" href="/styles.css">
     <link rel="icon" href="/GLOSLogo.png">
     <title>Scorecard</title>
@@ -13,7 +14,7 @@
     <script src="/dist/NoSleep.min.js"></script>    
     <script>
         // import NoSleep from 'nosleep.js';
-        var noSleep = new NoSleep();
+        let noSleep = new NoSleep();
 
         // document.addEventListener('touchend', function enableNoSleep() {
             
@@ -25,7 +26,7 @@
             // alert(navigator.platform)
             document.removeEventListener('click', enableNoSleep, false);
             noSleep.enable();
-            // console.log(navigator)
+
             // if(navigator.platform !== 'IPhone'){
             //     navigator.vibrate(200)
             // }
@@ -34,21 +35,20 @@
     </script>  
         <%- include('header', {data: data}); %>
         
-        <div id="innerBody"  style= "<%= data.page == 'activeGame' ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
+        <div id="innerBody"  style= "<%= data.page.includes('activeGame') ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
             <div id="content">
                 <%- include('bodyColumns',{data: data}); %>
             </div>
         </div>
         <%- include('footer', {data: data}); %>
         <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>
-        <%# if (data.page == 'activeGame') { %>
             <%- include('newPlayerForm'); %>
             <%- include('teamForm'); %>
             <%- include('eventForm'); %> 
             <%#- include('timerForm'); %> 
             <%- include('gameInfoForm'); %>
-            <%- include('userSearchForm'); %>
-        <%# } %>
+            <%- include('playerSearchForm'); %>
+            <%#- include('userSearchForm'); %>
         <%- include('managementForm'); %>
         
         <script src="/main.js"></script>

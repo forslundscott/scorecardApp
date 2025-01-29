@@ -3,7 +3,6 @@
 <head>
 </head>
 <body>
-    <%# console.log(team) %>
         <form class="listItem" action="javascript:void(0);" id="<%= player.userId + team.id %>" style="width: 96%;float: <%=side %>;">
             <input type="hidden" name="playerId" value="<%= player.userId %>">
             <input type="hidden" name="teamName" value="<%= team.id %>">
@@ -26,6 +25,15 @@
                             <%= player.lastName[0] + "." %>
                             <%= player.userId == team.keeper ? '(K)' : '' %>
                             <%= player.userId == team.captain ? '(C)' : '' %>
+                            <% if (player.rostered === 0) { %>
+                                <% if (player.subCount == 2) { %>
+                                  <span style="color:yellow">$$$</span>
+                                <% } else if (player.subCount > 2) { %>
+                                  <span style="color:red">$$$</span>
+                                <% } %>
+                              <% } %>
+                              
+                              
                         </div>
                         <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
                     </div>

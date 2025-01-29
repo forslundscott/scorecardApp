@@ -1,36 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
-<body>
-    
-     
-    
-    <% if (data.page == 'activeGame') { %>
-        <% if (team.id !== 'TBD') { %>
+    <% if (data.page.includes('activeGame')) { %>
+        <% if (team.id !== 'TBD' && team.players.length > 0) { %>
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
-    <div class="fielderColumn dragColumn" style="<%= data.page == 'activeGame' ? "height: calc(100% - 10vh)"  : "" %>">
+    <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? 'height: calc(100% - 10vh)' : '' %>">
+
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
-            <% for(var i=0; i< data.games.length; i++) {%>
+            <% for(let i=0; i< data.games.length; i++) {%>
                 <%- include('game_item',{game: data.games[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'teams') { %>
+            <% for(let i=0; i< data.teams.length; i++) {%>
+                <%- include('team_item',{team: data.teams[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'seasons') { %>
+            <% for(let i=0; i< data.seasons.length; i++) {%>
+                <%- include('season_item',{season: data.seasons[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'facilities') { %>
+            <% for(let i=0; i< data.list.length; i++) {%>
+                <%- include('facility_item',{item: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'pickup') { %>
+            <% for(let i=0; i< data.list.length; i++) {%>
+                <%- include('pickup_item',{item: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'leagues') { %>
+            <% for(let i=0; i< data.leagues.length; i++) {%>
+                <%- include('league_item',{league: data.leagues[i]}); %>
             <% } %>
         <% } else if (data.page == 'schedules') { %>
             <div class="textCenter">
-                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
-                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/list'">Existing</button>
+                <!-- <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/new'">New</button>
+                <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/list'">Existing</button> -->
+                <form action="/schedules/upload" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" accept=".csv" />
+                    <br>
+                    <button type="submit" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;">Upload Schedule</button>
+                  </form>
+                  <a href="/schedules/sampleUpload"><button type="button">Download Sample CSV</button></a>
+                <!-- <span>
+                    <input type="file" name="file" accept=".csv" />
+                    <br>
+                    <button type="button" class="primaryBorder primaryStyle" style="font-size: 150%; border-width: thin;" onclick="window.location.href='/schedules/upload'">Upload</button>
+                </span> -->
             </div>
         <% } else if (data.page.startsWith('/schedules/item/')) { %>
-            <% for(var i=0; i< data.list.length; i++) {%>
+            <% for(let i=0; i< data.list.length; i++) {%>
                 <%- include(`scheduleGame_item`,{game: data.list[i]}); %>
             <% } %>
         <% } else if (data.page == '/schedules/list') { %>
-            <% for(var i=0; i< data.list.length; i++) {%>
+            <% for(let i=0; i< data.list.length; i++) {%>
                 <%- include(`schedule_item`,{item: data.list[i]}); %>
             <% } %>
         <% } else if (data.page == '/schedules/new') { %>
-            <form action="<%= data.page %>" method="post" class="textCenter">
+            <form action="/<%= data.page %>" method="post" class="textCenter">
                 
                 <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" required>
                     <option value="" disabled selected hidden>Season</option>
@@ -71,25 +95,34 @@
                 <br>
                 <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Generate</button>
             </form>
+        <% } else if (data.page == '/newGame') { %>
+            <%- include(`newGameForm`,{data: data}); %>
+        <% } else if (data.page == '/newTeam') { %>
+            <%- include(`newTeamForm`,{data: data}); %>
+        <% } else if (data.page == '/newUser') { %>
+            <%- include(`newUserForm`,{data: data}); %>
+        <% } else if (data.page == '/editUser') { %>
+            <%- include(`editUserForm`,{data: data}); %>
+        <% } else if (data.page == '/editTeam') { %>
+            <%- include(`editTeamForm`,{data: data}); %>
+        <% } else if (data.page == '/newSeason') { %>
+            <%- include(`newSeasonForm`,{data: data}); %>
+        <% } else if (data.page == '/newFacility') { %>
+            <%- include(`newFacilityForm`,{data: data}); %>
+        <% } else if (data.page == '/newPickup') { %>
+            <%- include(`newPickupForm`,{data: data}); %>
+        <% } else if (data.page == '/newLeague') { %>
+            <%- include(`newLeagueForm`,{data: data}); %>
         <% } else if (data.page == 'standings') { %>
             <% if (data.hasOwnProperty('list')) { %>
-                <% for(var i=0; i< data.list.length; i++) {%>
+                <% for(let i=0; i< data.list.length; i++) {%>
                     <%- include(`${data.type}Standings_item`,{item: data.list[i]}); %>
                 <% } %>
             <% }else { %>
                 <form action="/standings" method="post" class="textCenter">
-                    <!-- <select name="seasonId" id="seasonId" required>
-                        <option value="" disabled selected hidden>Season</option>
-                        <option value="S2024">Spring 2024</option>
-                        <option value="Ind">Indoor</option>
-                    </select> -->
                     <select name="leagueId" id="leagueId" class="primaryStyle" style="font-size: 100%;" required>
                         <option value="" disabled selected hidden>League</option>
-                        <!-- <option value="MOI">MOI</option>
-                        <option value="PCI">PCI</option>
-                        <option value="OCI">OCI</option>
-                        <option value="SCI">SCI</option> -->
-                        <% for(var i=0; i< data.leagues.length; i++) {%>
+                        <% for(let i=0; i< data.leagues.length; i++) {%>
                             <option value="<%= data.leagues[i].abbreviation%>"><%= data.leagues[i].shortName%></option>
                         <% } %>
                     </select>
@@ -105,14 +138,14 @@
                 </form>
             <% } %>
         <% } else if (data.page == 'winners') { %>
-            <% var url = ''; %>
-            <form action="/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
-                <% for(var i=0; i< data.winners.length; i++) {%>
-                    <%# console.log(`${data.winners[i].Event_ID}-${data.winners[i].paid}`) %>
+            <% let url = ''; %>
+            <form action="/old/paidChanges" id="paidForm" method="post" enctype="application/x-www-form-urlencoded">
+                <% for(let i=0; i< data.winners.length; i++) {%>
+                    
                     <% if (data.winners[i].paid == 'false') { %>
-                        <% var url = url + data.winners[i].email %>
+                        <% let url = url + data.winners[i].email %>
                         <% if (i < data.winners.length - 1) { %>
-                            <% var url = url + ',' %>
+                            <% let url = url + ',' %>
                         <% } %>      
                     <% } %>
                                       
@@ -121,8 +154,8 @@
                 <% } %>
             </form>
             <script>
-                var emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
-                var emailBody = encodeURIComponent(`Hi All, 
+                let emailSubject = encodeURIComponent(`GLOS: Gift Card Payment`);
+                let emailBody = encodeURIComponent(`Hi All, 
 
 
 This is a reminder to send your gift card fees to Dean. His Venmo and Cashapp are Dean Jong. Please respond to this email with a screenshot of the payment when you are done. 
@@ -132,33 +165,59 @@ Also if you missed the payment for the prior week they are due by the next game.
 
 Thank you and have a nice day!`
                 );
-                var bccAddress = encodeURIComponent(`<%= url %>`);
+                let bccAddress = encodeURIComponent(`<%= url %>`);
                 function openMailtoLink() {
                     // Replace 'email@example.com' with the desired email address
                     // window.location.href = 'test.com'
                     window.location.href = `mailto:?bcc=${bccAddress}&subject=${emailSubject}&body=${emailBody}`;
                 }
-                var testvar = document.getElementById('emailAllButton')
-                console.log(testvar);
+                let testlet = document.getElementById('emailAllButton')
+              
                 testvar.onclick = openMailtoLink
-                console.log(testvar);
+                
                 // document.getElementById('emailAllButton').onclick = function(){
                 //     window.location.href = url
                 // }
             </script>
-        <% } else if (data.page == 'activeGame') { %>
+        <% } else if (data.page.includes('activeGame')) { %>
             
-            <% for(var i=0; i< team.players.length; i++) {%>
+            <% for(let i=0; i< team.players.length; i++) {%>
                 <% if (team.players[i].userId !== team.keeper) { %>
                     <%- include('player_item',{player: team.players[i], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
                 <% } %>
             <% } %>
-        <% } else if (data.page == 'users') { %>
-        
-            <% for(var i=0; i< data.users.length; i++) {%>
-                    <%- include('user_item',{user: data.users[i]}); %>
+        <% } else if (data.page == 'users/details') { %>
+            <%- include('userDetails',{data: data}); %>
+        <% } else if (data.page == 'teams/details') { %>
+            <%- include('teamDetails',{data: data}); %>
+            <%# for(let i=0; i< data.users.length; i++) {%>
+                    <%# include('user_item',{user: data.users[i]}); %>
+            <%# } %>
+        <% } else if (data.page == 'team/newPlayer') { %>
+            <%- include(`newRosterPlayerForm`,{data: data}); %>
+        <% } else if (data.page == 'user/newRole') { %>
+                <%- include(`newUserRole`,{data: data}); %>
+        <% } else if (data.page == 'users/roles') { %>
+            <% for(let i=0; i< data.list.length; i++) {%>
+                <%- include(`userRole_item`,{data: data.list[i]}); %>
             <% } %>
+        <% } else if (data.page == 'team/roster') { %>
+            
+            <% for(let i=0; i< data.list.length; i++) {%>
+                <%- include(`teamRoster_item`,{data: data.list[i]}); %>
+            <% } %>
+        <% } else if (data.page == 'user/newTeam') { %>
+            <%- include(`newUserTeam`,{data: data}); %>
+        <% } else if (data.page == 'users/teams') { %>
+            <%# console.log(data.list) %>
+            <% for(let i=0; i< data.list.length; i++) {%>
+                <%# console.log(data.list[i]) %>
+                <%- include(`userTeam_item`,{data: data.list[i]}); %>
+            <% } %>    
+        <% } else if (data.page == 'users') { %>
+            <%- include('userSearchForm'); %>
+            <%# for(let i=0; i< data.users.length; i++) {%>
+                    <%# include('user_item',{user: data.users[i]}); %>
+            <%# } %>
         <% } %>
     </div>
-</body>
-</html>

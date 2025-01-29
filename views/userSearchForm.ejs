@@ -1,48 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
-<body>
-    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <div id="userSearchContainer" class="floatingPopupForm primaryStyle primaryBorder" style="display: none; text-align: center;">
-        <div>
-            <form id="userSearchForm" class="primaryStyle primaryBorder" style=" text-align: center;" onsubmit="userSearch(this,event)">
-                <!-- <div class="playerTag itemFormat"> -->
-                    <div class="playerName">
-                        User Search
-                    </div>
-                    <br>
-                    <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
-                    <br>
+    <div id="userSearchContainer" class=" primaryStyle" style="display: ''; text-align: center; height: 100%;">
+        <div style="height: 15%;">
+            <form id="userSearchForm" class="primaryStyle" style=" text-align: center;" onsubmit="userSearch(this,event)">
+                    
                     <input type="text" id="userSearchField" name="userSearchValue" placeholder="Search..." required>
                     <br>
                     <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Search</button>
                     <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser(this.form)">Back</button>
-                    <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->
-                <!-- </div> -->
-                
             </form>
         </div>
-        <div id="userSearchContent" style="height: 20vh;">
+        <div id="userSearchContent" style="height: 85%;">
             <div id="userSearchResults" class="singleColumn dragColumn fielderColumn">
-                <!-- <form  action="" method="post">
-                    <input type="hidden" name="email" value="test">
-                    <input type="hidden" name="firstName" value="test">
-                    <input type="hidden" name="lastName" value="test">
-                    <input type="hidden" name="preferredName" value="test">
-                    <button type="button" class="playerButton" name="type" value="game" onclick="">
-                    <div class="itemFormat primaryStyle primaryBorder">
-                        <div class="playerTag">
-                            <div class="playerName" style="text-align: center;">
-                                Scott Forslund - Scott - forslund.scott@gmail.com
-                            </div>
-                        </div>                
-                    </div>
-                    </button>
-                </form> -->
             </div>
-            <!-- <ul class="primaryStyle" id="userSearchResults"></ul>      -->
         </div>
     </div>
-</body>
-</html>
