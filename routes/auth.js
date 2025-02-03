@@ -11,16 +11,6 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
-        console.log(req.session.cookie.returnTo)
-        if (req.query.returnTo != undefined) {
-
-            req.session.returnTo = req.query.returnTo;
-        }else{
-
-            req.session.returnTo = req.header('Referer')
-
-        }
-
         res.render('login.ejs')
     }catch(err){
         console.error('Error:', err)

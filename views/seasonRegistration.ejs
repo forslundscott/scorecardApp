@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Season Registration</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body style="text-align: center;">
+    <h1>Season Registration</h1>
+    <form action="">
+        <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
+        <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
+        <br>
+        <br>
+        <input type="email" name="email" placeholder="Email" value="<%= data.userAttributes.email ? data.userAttributes.email : ''  %>" required>
+        <input type="tel" name="phone" placeholder="Phone Number" value="<%= data.userAttributes.phone ? data.userAttributes.phone : ''  %>" required>
+        <br>
+        <br>
+        <label for="dob">Date of Birth:</label>
+        <input type="date" name="dob" value="<%= data.userAttributes.dob ? data.userAttributes.dob : ''  %>" required>
+        <br>
+        <br>
+        <label for="gender">Gender:</label>
+        <br>
+
+        <input type="radio" name="gender" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="">Male</label>
+        <br>
+        <input type="radio" name="gender" value="female" <%= data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'female' ? 'checked' : ''  %>><label for="">Female</label>
+        <br>
+        <input type="radio" name="gender" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="">Unspecified</label>
+        <br>
+        <br>
+        <label for="skill">Rate your Skill Level:</label>
+        <select name="skill" id="" required>
+            <option value="1" <%= data.userAttributes.skill === '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
+            <option value="2" <%= data.userAttributes.skill === '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
+            <option value="3" <%= !['1', '2', '4', '5'].includes(data.userAttributes.skill) ? 'selected' : ''  %>>3 - I used to play back in the day</option>
+            <option value="4" <%= data.userAttributes.skill === '4' ? 'selected' : ''  %>>4 - I play regularly</option>
+            <option value="5" <%= data.userAttributes.skill === '5' ? 'selected' : ''  %>>5 - I live for soccer</option>
+        </select>
+        <br><br>
+        <label for="discounted">Are you a student, teacher, first responder, or member of the military?:</label>
+        <br>
+        <br>
+        
+        <input type="radio" name="discounted" value="yes" <%= data.userAttributes.discounted && data.userAttributes.discounted.toLowerCase() === 'yes' ? 'checked' : ''  %> required><label for="">Yes</label>
+        <br>
+        <input type="radio" name="discounted" value="no" <%= !data.userAttributes.discounted || data.userAttributes.discounted.toLowerCase() !== 'yes' ? 'checked' : ''  %>><label for="">No</label>
+        <br>
+        <br>
+        <label for="">Leagues & Teams:</label>
+        <br>
+        <br>
+        <input type="checkbox" name="MOI" id=""><label for="MOI">Men's</label>
+        <select name="teamName" id="">
+            <option value="FA">Free Agent</option>
+            <option value="HON">Honey We Shrank the Ball</option>
+        </select>
+        <br>
+        <input type="checkbox" name="PCI" id=""><label for="PCI">Premier Coed</label>
+        <select name="teamName" id="">
+            <option value="FA">Free Agent</option>
+            <option value="HON">Honey We Shrank the Ball</option>
+        </select>
+        <br>
+        <input type="checkbox" name="OCI" id=""><label for="OCI">Open</label>
+        <select name="teamName" id="">
+            <option value="FA">Free Agent</option>
+            <option value="HON">Honey We Shrank the Ball</option>
+        </select>
+        <br>
+        <input type="checkbox" name="SCI" id=""><label for="SCI">Social</label>
+        <select name="teamName" id="">
+            <option value="FA">Free Agent</option>
+            <option value="HON">Honey We Shrank the Ball</option>
+        </select>
+        <br>
+        <br>
+        <label for="">Shirt Size: </label>
+        <select name="shirtSize" id="" required>
+            <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
+            <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
+            <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
+            <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
+            <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
+        </select>
+        <br>
+        <br>
+        <label for="">Emergency Contact:</label>
+        <br>
+        <br>
+        <input type="text" name="emergencyContactFirstName" placeholder="First Name" value="<%= data.userAttributes.emergencyContactFirstName ? data.userAttributes.emergencyContactFirstName : ''  %>" required>
+        <input type="text" name="emergencyContactLastName" placeholder="Last Name" value="<%= data.userAttributes.emergencyContactLastName ? data.userAttributes.emergencyContactLastName : ''  %>" required>
+        <br>
+        <br>
+
+        <input type="tel" name="emergencyContactPhone" placeholder="Phone Number" value="<%= data.userAttributes.emergencyContactPhone ? data.userAttributes.emergencyContactPhone : ''  %>" required>
+
+        <input type="text" name="emergencyContactRelationship" placeholder="Relationship" value="<%= data.userAttributes.emergencyContactRelationship ? data.userAttributes.emergencyContactRelationship : ''  %>" required>
+        <br>
+        <br>
+        <label for="">Do you have any allergies or medical conditions we should be aware of?</label>
+        <br>
+        <br>
+        <input type="text" name="allergies" placeholder="List Allergies">
+        <input type="text" name="medicalConditions" placeholder="List Medical Conditions">
+        <br><br>
+        <a target="_blank" href="https://envoroot.com/player-resources/waiver/">Waiver</a>
+        <br><br>
+        <input type="checkbox" name="waiver" id="" required><label for="waiver" >I have read and agree to the terms of the wavier.</label>
+        <br>
+        <br>
+        <button>Register</button>
+    </form>
+</body>
+</html>

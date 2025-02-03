@@ -3,6 +3,7 @@ function checkAuthenticated(req, res, next) {
         if (req.isAuthenticated()) {
             return next()
         }
+        req.session.returnTo = req.originalUrl
         res.redirect('/auth/login')
     }catch(err){
         console.error('Error:', err)
