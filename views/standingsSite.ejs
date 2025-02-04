@@ -20,39 +20,70 @@
         th {
             background-color: #f4f4f4;
         }
+        .tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+.tooltip:hover::after,
+.tooltip:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip:focus::after {
+  visibility: visible;
+}
+
     </style>
 </head>
 <body>
-    <h1>League Standings</h1>
     <table>
         <thead>
             <tr>
-                <th>Rank</th>
+                <th class="tooltip" data-tooltip="Rank">#</th>
                 <% if (data.type === 'team') { %>
-                    <th>Team</th>
-                    <th>Points</th>
-                    <th>Wins</th>
-                    <th>Losses</th>
-                    <th>Draws</th>
-                    <th>Goals For</th>
-                    <th>Goals Against</th>
-                    <th>Goal Differential</th>
+                    <th class="tooltip" data-tooltip="Team Name">Name</th>
+                    <th class="tooltip" data-tooltip="Points">P</th>
+                    <th class="tooltip" data-tooltip="Wins">W</th>
+                    <th class="tooltip" data-tooltip="Losses">L</th>
+                    <th class="tooltip" data-tooltip="Draws">D</th>
+                    <th class="tooltip" data-tooltip="Goals For">GF</th>
+                    <th class="tooltip" data-tooltip="Goals Against">GA</th>
+                    <th class="tooltip" data-tooltip="GD">GD</th>
 
                 <% } %>
                 <% if (data.type === 'individual') { %>
-                    <th>Player</th>
-                    <th>Points</th>
-                    <th>Goals</th>
-                    <th>Assists</th>
-                    <th>Own Goals</th>
+                    <th class="tooltip" data-tooltip="Player Name">Name</th>
+                    <th class="tooltip" data-tooltip="Points">P</th>
+                    <th class="tooltip" data-tooltip="Goals">G</th>
+                    <th class="tooltip" data-tooltip="Assists">A</th>
+                    <th class="tooltip" data-tooltip="Own Goals">OG</th>
                 <% } %>
                 <% if (data.type === 'keeper') { %>
-                    <th>Player</th>
-                    <th>Weighted Saves</th>
-                    <th>Saves</th>
-                    <th>Save Percentage</th>
+                    <th class="tooltip" data-tooltip="Keeper Name">Name</th>
+                    <th class="tooltip" data-tooltip="Weighted Saves">WS</th>
+                    <th class="tooltip" data-tooltip="Saves">S</th>
+                    <th class="tooltip" data-tooltip="Save Percentage">S%</th>
                 <% } %>
-                <th>Games Played</th>
+                <th class="tooltip" data-tooltip="Games Played">GP</th>
             </tr>
         </thead>
         <tbody>
