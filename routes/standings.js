@@ -93,7 +93,7 @@ router.get('/', async (req,res, next)=>{
         .query(`select shortName, abbreviation from leagues
             where abbreviation in (
             select ls.leagueId from league_season as ls
-            left join seasons as s on ls.seasonId=s.seasonName
+            left join seasons as s on ls.seasonId=s.seasonId
             where s.active = 1
             )
         `)

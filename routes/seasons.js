@@ -35,13 +35,15 @@ router.post('/addSeason', async (req, res, next) => {
         next(err)
     }
   });
-router.post(['/:seasonId/register'], async (req, res, next) => {
+router.post(['/:seasonId/registration'], async (req, res, next) => {
     try{
         let data = {
             page: `/season/register`,
             user: req.user
             
         }
+        console.log(req.body)
+        res.redirect(`/seasons/${req.params.seasonId}/registration`);
         // res.render('seasonRegistration.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -58,30 +60,34 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
         const result = await pool.request()
         .input('userId', sql.Int, data.user.id)
         .query(`
-            DECLARE @cols NVARCHAR(MAX), @query NVARCHAR(MAX)
-
-            SELECT @cols = STRING_AGG(QUOTENAME(attributeName), ',')
-            FROM (SELECT DISTINCT attributeName FROM userAttributes) AS attr;
-
-            SET @query = '
-            WITH PivotedAttributes AS (
-                SELECT userId, ' + @cols + '
-                FROM (
-                    SELECT ua.userId, ua.attributeName, ua.attributeValue
-                    FROM userAttributes ua
-                ) AS src
-                PIVOT (
-                    MAX(attributeValue) FOR attributeName IN (' + @cols + ')
-                ) AS pvt
-            )
-            SELECT u.ID, u.email, u.firstName, u.lastName, u.preferredName, ' + @cols + '
-            FROM users u
-            LEFT JOIN PivotedAttributes pa ON u.ID = pa.userId
-            WHERE u.ID = @userId;';
-
-            EXEC sp_executesql @query, N'@userId INT', @userId;
-
+            SELECT * from users
+            WHERE ID = @userId;
             `)
+        // .query(`
+        //     DECLARE @cols NVARCHAR(MAX), @query NVARCHAR(MAX)
+
+        //     SELECT @cols = STRING_AGG(QUOTENAME(attributeName), ',')
+        //     FROM (SELECT DISTINCT attributeName FROM userAttributes) AS attr;
+
+        //     SET @query = '
+        //     WITH PivotedAttributes AS (
+        //         SELECT userId, ' + @cols + '
+        //         FROM (
+        //             SELECT ua.userId, ua.attributeName, ua.attributeValue
+        //             FROM userAttributes ua
+        //         ) AS src
+        //         PIVOT (
+        //             MAX(attributeValue) FOR attributeName IN (' + @cols + ')
+        //         ) AS pvt
+        //     )
+        //     SELECT u.ID, u.email, u.firstName, u.lastName, u.preferredName, ' + @cols + '
+        //     FROM users u
+        //     LEFT JOIN PivotedAttributes pa ON u.ID = pa.userId
+        //     WHERE u.ID = @userId;';
+
+        //     EXEC sp_executesql @query, N'@userId INT', @userId;
+
+        //     `)
             console.log(result.recordset)
             data.userAttributes = result.recordset[0]
         res.render('seasonRegistration.ejs',{data: data})

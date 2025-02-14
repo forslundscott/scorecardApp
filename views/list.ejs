@@ -167,17 +167,10 @@ Thank you and have a nice day!`
                 );
                 let bccAddress = encodeURIComponent(`<%= url %>`);
                 function openMailtoLink() {
-                    // Replace 'email@example.com' with the desired email address
-                    // window.location.href = 'test.com'
                     window.location.href = `mailto:?bcc=${bccAddress}&subject=${emailSubject}&body=${emailBody}`;
                 }
                 let testlet = document.getElementById('emailAllButton')
-              
                 testvar.onclick = openMailtoLink
-                
-                // document.getElementById('emailAllButton').onclick = function(){
-                //     window.location.href = url
-                // }
             </script>
         <% } else if (data.page.includes('activeGame')) { %>
             
@@ -190,9 +183,6 @@ Thank you and have a nice day!`
             <%- include('userDetails',{data: data}); %>
         <% } else if (data.page == 'teams/details') { %>
             <%- include('teamDetails',{data: data}); %>
-            <%# for(let i=0; i< data.users.length; i++) {%>
-                    <%# include('user_item',{user: data.users[i]}); %>
-            <%# } %>
         <% } else if (data.page == 'team/newPlayer') { %>
             <%- include(`newRosterPlayerForm`,{data: data}); %>
         <% } else if (data.page == 'user/newRole') { %>
@@ -209,15 +199,11 @@ Thank you and have a nice day!`
         <% } else if (data.page == 'user/newTeam') { %>
             <%- include(`newUserTeam`,{data: data}); %>
         <% } else if (data.page == 'users/teams') { %>
-            <%# console.log(data.list) %>
             <% for(let i=0; i< data.list.length; i++) {%>
-                <%# console.log(data.list[i]) %>
                 <%- include(`userTeam_item`,{data: data.list[i]}); %>
             <% } %>    
         <% } else if (data.page == 'users') { %>
             <%- include('userSearchForm'); %>
-            <%# for(let i=0; i< data.users.length; i++) {%>
-                    <%# include('user_item',{user: data.users[i]}); %>
-            <%# } %>
+
         <% } %>
     </div>

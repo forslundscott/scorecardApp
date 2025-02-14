@@ -88,7 +88,6 @@ if(document.getElementById('timerForm')){
             clearInterval(x);
                 playSoundAndWait('whistle.mp3')
                 async function playSoundAndWait(soundFilePath) {
-                    console.log(audio)
                     let form = document.getElementById('timerForm')
                         let formData = new FormData(form)
                     await fetch('/games/periodEnd', {
@@ -130,7 +129,6 @@ if(document.getElementById('timerForm')){
     } 
   }
   async function statHandler(ele,xperiod,val = 1){
-    console.log('testonclick')
     let form = ele.form
         form.querySelector('[name="realTime"]').value = Date.now()
         form.querySelector('[name="value"]').value = val
@@ -188,7 +186,6 @@ function handleMouseUp(e) {
   if (isDown) {                                     // if we came from down status:
       clearTimeout(longTID);                        // clear timer to avoid false longpress
       isDown = false;
-      console.log('Normal up')
       target = null;
   }
 };
@@ -210,8 +207,8 @@ function handleLongPress(e){
 function toggleAddPlayer(xform){
     if(document.getElementById('newPlayerForm').style.display == 'none'){
         document.getElementById('newPlayerForm').style.display = ''
-        document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        document.getElementById('newPlayerForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        document.getElementById('newPlayerForm').querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
+        document.getElementById('newPlayerForm').querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
         document.getElementById('newPlayerForm').querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
         document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="team"]').value}.png`
     }else{
@@ -262,7 +259,6 @@ async function userSearch(xForm,event){
                 const results = await response.json();
                 const resultsList = document.getElementById('userSearchResults');
                 resultsList.innerHTML = '';
-                console.log(window.location.pathname)
                 results.forEach(user => {
                     const userCard = `
                         <form class="" action="/${window.location.pathname.replace(/\//g, '')}/${user.ID}" method="get">
@@ -389,11 +385,10 @@ async function toggleTeamForm(xform){
     if(teamForm.style.display == 'none'){
         teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="teamName"]').value
         teamForm.style.display = ''
-        teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        teamForm.querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
+        teamForm.querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
         teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="team"]').value}.png`
-        console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
     }else{
         teamForm.style.display = 'none'
     }
@@ -410,12 +405,10 @@ async function toggleGameInfoForm(xform){
           });
           if (response.ok) {
             const responseData = await response.json();
-            console.log(responseData.data);
             if(document.getElementById('gameInfoForm').style.display == 'none'){
                 let team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
                 let team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
                 let scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
-                console.log(responseData.data.game.period)
                 document.getElementById('gameInfoForm').querySelector('[name="period"]').value=responseData.data.game.period
                 while (team1Select.options.length > 1) {
                     team1Select.remove(1);
@@ -445,7 +438,6 @@ async function toggleGameInfoForm(xform){
                   team1Select.value = responseData.data.game.Team1_ID
                   team2Select.value = responseData.data.game.Team2_ID
                   if(responseData.data.game.scoreKeeperId !== null){
-                    console.log(responseData.data.game.scoreKeeperId)
                     scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
                   }
                 
@@ -470,7 +462,6 @@ async function toggleGameInfoForm(xform){
 async function updateGameData(xele){
     let xform = xele.form
     let formData = new FormData(xform)
-    console.log(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value)
     if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 'TBD'){
       xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
         xform.querySelector('[name="Team1_ID"]').reportValidity()
@@ -514,10 +505,8 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').style.display = 'none'
     }
     if(document.getElementById('formBackground').style.display == 'none'){
-        console.log('visible');
         document.getElementById('formBackground').style.display = ''
     }else{
-        console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
 }
@@ -529,16 +518,13 @@ function toggleForm(formName){
         xform.style.display = 'none'
     }
     if(document.getElementById('formBackground').style.display == 'none'){
-        console.log('visible');
         document.getElementById('formBackground').style.display = ''
     }else{
-        console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
 }
 async function exportStandings(xtype,xleague){
     let sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
-    console.log(sqlString)
     const response = await fetch('/standings/exportStandings', {
         method: 'POST',
         headers: {
@@ -668,7 +654,6 @@ function convertUnixTimeToMMDD(unixTime) {
     let form = ele.form
     
     let formData = new FormData(form)
-    console.log(formData)
     try{
         const response = await fetch('/games/switchSides', {
             method: 'POST',
@@ -679,7 +664,6 @@ function convertUnixTimeToMMDD(unixTime) {
           });
           if (response.ok) {
             const responseData = await response.json();
-            console.log(responseData.data);
             location.reload()
           } else {
             console.error('Form submission failed');
@@ -728,7 +712,6 @@ function handleVisibilityChange() {
 
 document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
     let formData = new FormData(document.getElementById('newPlayerForm'))
-    console.log(formData)
     const response = await fetch('/games/checkEmail', {
         method: 'POST',
         headers: {
@@ -738,7 +721,6 @@ document.getElementById('newPlayerForm').querySelector('[name="email"]').addEven
     })
     if (response.ok) {
         const responseData = await response.json();
-        console.log(responseData)
         if(responseData.user){
             this.form.querySelector('[name="firstName"]').value = responseData.user.firstName
             this.form.querySelector('[name="lastName"]').value = responseData.user.lastName
@@ -767,7 +749,6 @@ async function getTeams(xform){
           });
         if (response.ok) {
             const results = await response.json();
-            console.log(xform.id)
             let team1
             let team2
             switch(xform.id){
@@ -847,12 +828,8 @@ async function paymentSubmit(form,event) {
                 },
                 body: new URLSearchParams(formData).toString(),
             })
-
-
-
         const { url } = await response.json();
         window.location.href = url; // Redirect to Stripe Checkout
-
 }
 
 // Event listener for visibility change

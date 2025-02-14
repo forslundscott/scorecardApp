@@ -124,7 +124,6 @@ router.post(['/checkEmail'], async (req,res,next)=>{
         where email = @email`)
   
         res.json({ message: 'Success', user: result.recordset[0] })
-        // res.redirect('back')
     }catch(err){
         next(err)
     }
@@ -232,11 +231,9 @@ router.get(['/timer'], async (req,res,next)=>{
             WHERE event_Id = @eventId`)
             res.redirect('/games/readyforupload')
         }else if(req.query.timerState == 2){
-            console.log('test1')
             const result = await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`select * from winningTeam(@eventId)`)
-            console.log('test2')
             if(result.recordset[0].length==1){
                 await pool.request()
                 .input('eventId', sql.Int, req.query.Event_ID)
@@ -246,13 +243,11 @@ router.get(['/timer'], async (req,res,next)=>{
                 from winningTeamContact(@teamName)
                 where giftCards = 1`)
             }  
-            console.log('test3')
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`UPDATE [scorecard].[dbo].[games] 
             set [Status] = 1 
             WHERE event_Id = @eventId`)
-            console.log('test4')
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`
@@ -306,14 +301,12 @@ router.post(['/eventLog'], async (req,res,next)=>{
          }
          let result
          if(req.body.type == 'makecaptain'){
-             console.log('cap')
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .query(`update scorecard.dbo.teams set captain = @playerId where id = @teamName`)
              res.json({ message: 'Reload', data: data })
          }else if(req.body.type == 'makekeeper'){
-             console.log('keep')
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
@@ -405,21 +398,20 @@ router.post(['/eventLog'], async (req,res,next)=>{
             
         }
         let result = await pool.request()
-        .query(`select top 1 seasonName from seasons where active = 1
+        .query(`select top 1 * from seasons where active = 1
+            and not seasonName = 'Test Season'
         `)
-            data.season = result.recordset[0].seasonName
+            data.season = result.recordset[0]
         result = await pool.request()
-        .query(`select seasonName from seasons where active = 1
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
         result = await pool.request()
-        .input('season',sql.VarChar,data.season)
+        .input('seasonId',sql.Int,data.season.seasonId)
         .query(`SELECT * from league_season ls
             LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = @season
+            where seasonId = @seasonId
         `)
-        // console.log(req)
-        
         data.leagues = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -477,7 +469,6 @@ router.post('/periodEnd', async (req, res, next) => {
             .input('eventId', sql.Int, req.body.Event_ID)
             .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = @eventId`)
             game = result.recordset[0]
-            console.log(req.query)
             if(game.period===req.body.period){
                 if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
                     if(game.period<game.maxPeriods){
@@ -512,10 +503,6 @@ router.post('/periodEnd', async (req, res, next) => {
 router.get(['/activeGame/:eventId'], async (req,res,next)=>{
     try {
         let game
-        // console.log(await pool.request()
-        // .input('eventId', sql.Int, req.params.eventId)
-        // .query(`select period from games
-        //     where Event_ID = @eventId`))
         let eventResult = await pool.request()
         .input('eventId', sql.Int, req.params.eventId)
         .query(`
@@ -613,8 +600,6 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
                 team2.score = result.recordsets[5][0].score
             }
             game = result.recordsets[6][0]
-            // team1.priorSubs = result.recordsets[7]
-            // team2.priorSubs = result.recordsets[8]
         if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
             if(game.period<game.maxPeriods){
                 game.period=game.period +1

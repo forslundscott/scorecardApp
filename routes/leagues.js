@@ -48,15 +48,14 @@ router.get(['/newLeague'], async (req, res, next) => {
             
         }
         let result = await request
-        .query(`select top 1 seasonName from seasons where active = 1
+        .query(`select top 1 * from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
-            data.season = result.recordset[0].seasonName
+            data.season = result.recordset[0]
         result = await request
-        .query(`select seasonName from seasons where active = 1
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
-        console.log(data)
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -64,7 +63,6 @@ router.get(['/newLeague'], async (req, res, next) => {
 })
 router.get('/', async (req,res, next)=>{
     try{
-        console.log(req.user)
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
@@ -76,7 +74,7 @@ router.get('/', async (req,res, next)=>{
         const request = pool.request()
         const result = await request.query(`select * from leagues as l
             left join league_season as ls on l.abbreviation=ls.leagueId
-            where seasonId in (select seasonName from seasons where active = 1)
+            where seasonId in (select seasonId from seasons where active = 1)
         `)
         data.leagues = result.recordset
         res.render('index.ejs',{data: data}) 

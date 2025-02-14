@@ -1,22 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
-<body>
-    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
-    <form id="newSeasonForm" class="textCenter" action="/seasons/addSeason" method="post" style="display: ''; text-align: center;">
-        <!-- <div class="playerTag itemFormat"> -->
-            
-            <input type="text" name="seasonName" value="" placeholder="Season Name" required>
-            <br>
-            
-            <br>
-            <label for="active" class="primaryStyle">Active Season?</label> <input type="checkbox" name="active" >
-            <br>
-            <br>
-            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Season</button>
-            <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->
-        <!-- </div> -->
-    </form>
-</body>
-</html>
+<form id="newSeasonForm" class="textCenter" action="/seasons/addSeason" method="post" style="display: ''; text-align: center;">
+    <input type="text" name="seasonName" value="" placeholder="Season Name" required>
+        <br><br>
+    <label for="active" class="primaryStyle">Active Season?</label> <input type="checkbox" name="active" >
+        <br><br>
+    <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Season</button>
+</form>

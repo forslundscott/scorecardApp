@@ -13,17 +13,8 @@
 <body>
     <script src="/dist/NoSleep.min.js"></script>    
     <script>
-        // import NoSleep from 'nosleep.js';
         let noSleep = new NoSleep();
-
-        // document.addEventListener('touchend', function enableNoSleep() {
-            
-        //     // document.removeEventListener('touchend', enableNoSleep, false);
-        //     noSleep.enable();
-        //     alert(noSleep.enabled)
-        // }, false);
         document.addEventListener('click', function enableNoSleep() {
-            // alert(navigator.platform)
             document.removeEventListener('click', enableNoSleep, false);
             noSleep.enable();
 
@@ -49,7 +40,7 @@
             <%- include('gameInfoForm'); %>
             <%- include('playerSearchForm'); %>
             <%#- include('userSearchForm'); %>
-        <%- include('managementForm'); %>
+            <%- include('managementForm'); %>
         
         <script src="/main.js"></script>
         

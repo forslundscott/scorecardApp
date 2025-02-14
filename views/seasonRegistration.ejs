@@ -20,11 +20,20 @@
         th {
             background-color: #f4f4f4;
         }
+        .container {
+
+display: flex;
+
+justify-content: center;
+
+align-items: center;
+
+}
     </style>
 </head>
 <body style="text-align: center;">
     <h1>Season Registration</h1>
-    <form action="">
+    <form action="" method="post">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
         <br>
@@ -119,8 +128,23 @@
         <label for="">Do you have any allergies or medical conditions we should be aware of?</label>
         <br>
         <br>
-        <input type="text" name="allergies" placeholder="List Allergies">
-        <input type="text" name="medicalConditions" placeholder="List Medical Conditions">
+        <!-- <input type="text" name="allergies" placeholder="List Allergies"> -->
+        <div class="container">
+            <div class="section">
+                <h3>Allergies</h3>
+                <div id="allergy-list">
+                    <input type="text" class="allergy-input" name="allergy[]" placeholder="Enter an allergy">
+                </div>
+            </div>
+            <div class="section">
+                <h3>Medical Conditions</h3>
+                <div id="medical-list">
+                    <input type="text" class="medical-input" name="medical[]" placeholder="Enter a medical condition">
+                </div>
+            </div>
+        </div>
+
+        <!-- <input type="text" name="medicalConditions" placeholder="List Medical Conditions"> -->
         <br><br>
         <a target="_blank" href="https://envoroot.com/player-resources/waiver/">Waiver</a>
         <br><br>
