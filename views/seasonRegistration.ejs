@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/GLOSLogo.png">
     <title>Season Registration</title>
+    
     <style>
         table {
             width: 100%;
@@ -32,8 +34,10 @@ align-items: center;
     </style>
 </head>
 <body style="text-align: center;">
-    <h1>Season Registration</h1>
-    <form action="" method="post">
+    <img height="200vh" src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
+    <h1><%= data.season.seasonName %> Registration</h1>
+    
+    <form id="individualSeasonRegistrationForm" action="" method="post" onsubmit="handlePlayerRegistrationSubmit(this)">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
         <br>
@@ -43,7 +47,7 @@ align-items: center;
         <br>
         <br>
         <label for="dob">Date of Birth:</label>
-        <input type="date" name="dob" value="<%= data.userAttributes.dob ? data.userAttributes.dob : ''  %>" required>
+        <input type="date" name="dob" value="<%= data.userAttributes.dob ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : ''  %>" required>
         <br>
         <br>
         <label for="gender">Gender:</label>
@@ -57,50 +61,38 @@ align-items: center;
         <br>
         <br>
         <label for="skill">Rate your Skill Level:</label>
+        <% console.log(data.userAttributes.skill) %>
         <select name="skill" id="" required>
-            <option value="1" <%= data.userAttributes.skill === '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
-            <option value="2" <%= data.userAttributes.skill === '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
-            <option value="3" <%= !['1', '2', '4', '5'].includes(data.userAttributes.skill) ? 'selected' : ''  %>>3 - I used to play back in the day</option>
-            <option value="4" <%= data.userAttributes.skill === '4' ? 'selected' : ''  %>>4 - I play regularly</option>
-            <option value="5" <%= data.userAttributes.skill === '5' ? 'selected' : ''  %>>5 - I live for soccer</option>
+            <option value="1" <%= data.userAttributes.skill == '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
+            <option value="2" <%= data.userAttributes.skill == '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
+            <option value="3" <%= !['1', '2', '4', '5', 1, 2, 4, 5].includes(data.userAttributes.skill) ? 'selected' : ''  %>>3 - I used to play back in the day</option>
+            <option value="4" <%= data.userAttributes.skill == '4' ? 'selected' : ''  %>>4 - I play regularly</option>
+            <option value="5" <%= data.userAttributes.skill == '5' ? 'selected' : ''  %>>5 - I live for soccer</option>
         </select>
         <br><br>
         <label for="discounted">Are you a student, teacher, first responder, or member of the military?:</label>
         <br>
         <br>
         
-        <input type="radio" name="discounted" value="yes" <%= data.userAttributes.discounted && data.userAttributes.discounted.toLowerCase() === 'yes' ? 'checked' : ''  %> required><label for="">Yes</label>
+        <input type="radio" name="discounted" value="1" <%= data.userAttributes.discounted && data.userAttributes.discounted === 1 ? 'checked' : ''  %> required><label for="">Yes</label>
         <br>
-        <input type="radio" name="discounted" value="no" <%= !data.userAttributes.discounted || data.userAttributes.discounted.toLowerCase() !== 'yes' ? 'checked' : ''  %>><label for="">No</label>
+        <input type="radio" name="discounted" value="0" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== 1 ? 'checked' : ''  %>><label for="">No</label>
         <br>
         <br>
         <label for="">Leagues & Teams:</label>
         <br>
         <br>
-        <input type="checkbox" name="MOI" id=""><label for="MOI">Men's</label>
-        <select name="teamName" id="">
-            <option value="FA">Free Agent</option>
-            <option value="HON">Honey We Shrank the Ball</option>
-        </select>
+        <% for(let league of data.leagues){ %>
+            <input type="checkbox" name="leagueId_<%= league.abbreviation %>" id=""><label for="leagueId_<%= league.abbreviation %>"><%= league.shortName %></label>
+            <select name="<%=league.abbreviation %>_teamId" id="">
+                <option value="FA">Free Agent</option>
+                <% for(let team of league.teams) { %>
+                    <option value="<%= team.id %>"><%= team.shortName %></option>
+                <% } %>
+            </select>
         <br>
-        <input type="checkbox" name="PCI" id=""><label for="PCI">Premier Coed</label>
-        <select name="teamName" id="">
-            <option value="FA">Free Agent</option>
-            <option value="HON">Honey We Shrank the Ball</option>
-        </select>
-        <br>
-        <input type="checkbox" name="OCI" id=""><label for="OCI">Open</label>
-        <select name="teamName" id="">
-            <option value="FA">Free Agent</option>
-            <option value="HON">Honey We Shrank the Ball</option>
-        </select>
-        <br>
-        <input type="checkbox" name="SCI" id=""><label for="SCI">Social</label>
-        <select name="teamName" id="">
-            <option value="FA">Free Agent</option>
-            <option value="HON">Honey We Shrank the Ball</option>
-        </select>
-        <br>
+        <% } %>
+        
         <br>
         <label for="">Shirt Size: </label>
         <select name="shirtSize" id="" required>
@@ -129,17 +121,24 @@ align-items: center;
         <br>
         <br>
         <!-- <input type="text" name="allergies" placeholder="List Allergies"> -->
+         <% console.log(data.userAttributes.allergies) %>
         <div class="container">
             <div class="section">
                 <h3>Allergies</h3>
                 <div id="allergy-list">
-                    <input type="text" class="allergy-input" name="allergy[]" placeholder="Enter an allergy">
+                    <% for(let allergy of data.userAttributes.allergies){ %>
+                        <br>
+                        <input type="text" class="allergy-input" name="allergies[]" value="<%= allergy %>" placeholder="Enter an allergy">
+                    <% } %>
                 </div>
             </div>
             <div class="section">
                 <h3>Medical Conditions</h3>
                 <div id="medical-list">
-                    <input type="text" class="medical-input" name="medical[]" placeholder="Enter a medical condition">
+                    <% for(let condition of data.userAttributes.medicalConditions){ %>
+                        <br>
+                        <input type="text" class="medical-input" name="medicalConditions[]" value="<%= condition %>" placeholder="Enter a medical condition">
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -153,5 +152,84 @@ align-items: center;
         <br>
         <button>Register</button>
     </form>
+    <script>
+        document.addEventListener("input", function(event) {
+        if (event.target.classList.contains("allergy-input")) {
+            handleDynamicInputs("allergy-list", "allergy-input", "allergies[]", "Enter an allergy");
+        } else if (event.target.classList.contains("medical-input")) {
+            handleDynamicInputs("medical-list", "medical-input", "medicalConditions[]", "Enter a medical condition");
+        }
+    });
+
+    function handleDynamicInputs(listId, inputClass, inputName, placeholderText) {
+        let list = document.getElementById(listId);
+        let inputs = list.querySelectorAll(`.${inputClass}`);
+        
+        // Count blank inputs
+        let blankInputs = Array.from(inputs).filter(input => input.value.trim() === "");
+        
+        // If more than one blank input, remove the last one
+        if (blankInputs.length > 1) {
+            list.removeChild(blankInputs[blankInputs.length - 1].previousSibling); // Remove <br>
+            list.removeChild(blankInputs[blankInputs.length - 1]); // Remove input
+            return;
+        }
+
+        // If the last input has a value, add a new one
+        let lastInput = inputs[inputs.length - 1];
+        if (lastInput.value.trim() !== "") {
+            let newBr = document.createElement("br");
+            let newInput = document.createElement("input");
+            newInput.type = "text";
+            newInput.name = inputName;
+            newInput.placeholder = placeholderText;
+            newInput.classList.add(inputClass);
+
+            list.appendChild(newBr);
+            list.appendChild(newInput);
+        }
+    }
+  
+document.querySelectorAll('input[type="tel"]').forEach(input => {
+  input.addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+    if (value.length > 3) value = value.replace(/^(\d{3})/, "$1-");
+    if (value.length > 6) value = value.replace(/^(\d{3})-(\d{3})/, "$1-$2-");
+    e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
+  });
+});
+document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
+    // Check if at least one checkbox is selected
+    const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
+    
+    if (checkboxes.length === 0) {
+      alert('Please select at least one league!');
+      event.preventDefault(); // Prevent form submission
+    }
+  });
+
+        // function handlePlayerRegistrationSubmit(form){
+
+        //     if(document.getElementById('eventForm').style.display == 'none'){
+        //         document.getElementById('eventForm').style.display = ''
+        //         document.getElementById('eventForm').querySelector('[name="playerId"]').value = form.querySelector('[name="playerId"]').value
+        //         document.getElementById('eventForm').querySelector('[name="teamName"]').value = form.querySelector('[name="teamName"]').value
+        //         document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = form.querySelector('[name="Event_ID"]').value
+        //         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = form.querySelector('[name="playerName"]').value
+        //         document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('playerItem')[0].style.backgroundImage
+        //         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = form.querySelector('[name="opponentKeeper"]').value
+        //         document.getElementById('eventForm').querySelector('[name="keeper"]').value = form.querySelector('[name="keeper"]').value
+        //         document.getElementById('eventForm').querySelector('[name="season"]').value = form.querySelector('[name="season"]').value
+        //         document.getElementById('eventForm').querySelector('[name="subseason"]').value = form.querySelector('[name="subseason"]').value
+        //     }else{
+        //         document.getElementById('eventForm').style.display = 'none'
+        //     }
+        //     if(document.getElementById('formBackground').style.display == 'none'){
+        //         document.getElementById('formBackground').style.display = ''
+        //     }else{
+        //         document.getElementById('formBackground').style.display = 'none'
+        //     }
+        // }
+    </script>
 </body>
 </html>

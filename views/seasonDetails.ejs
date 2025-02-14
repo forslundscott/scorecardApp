@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+
+    <div class=" primaryStyle" style="display: ''; text-align: center; height: 100%;">
+        <div class="statButton" style="width: calc(100%/3);">
+            <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/registration';" >Register</button>                    
+        </div>
+        <% if (data.user?.roles?.some(role => ['admin', 'Manager'].includes(role.name))) { %>
+        <div class="statButton" style="width: calc(100%/3);">
+            <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/registrations';" >Registrations</button>                    
+        </div>
+        <% } %>
+    </div>
+</body>
+</html>

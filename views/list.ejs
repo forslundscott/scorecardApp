@@ -181,6 +181,8 @@ Thank you and have a nice day!`
             <% } %>
         <% } else if (data.page == 'users/details') { %>
             <%- include('userDetails',{data: data}); %>
+        <% } else if (data.page == 'season/details') { %>
+            <%- include('seasonDetails',{data: data}); %>
         <% } else if (data.page == 'teams/details') { %>
             <%- include('teamDetails',{data: data}); %>
         <% } else if (data.page == 'team/newPlayer') { %>

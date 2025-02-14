@@ -1,4 +1,3 @@
-// routes/users.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -32,9 +31,7 @@ router.post(['/getTeams'], async (req,res,next)=>{
         WHERE league = @leagueId
         AND seasonId = @seasonId;
         `)
-        // console.log(result.recordset)
         res.json({ message: 'Success', teams: result.recordset })
-        // res.redirect('back')
     }catch(err){
         next(err)
     }
@@ -98,8 +95,7 @@ router.post(['/addPlayer'], async (req,res,next)=>{
               where userId = 'undefined'
             `)
         }
-        // console.log(result.recordset[0])
-        // await request.query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
+    
         res.redirect('back')
     }catch(err){
         next(err)
@@ -129,10 +125,8 @@ router.get(['/newTeam'], async (req, res, next) => {
             LEFT join leagues l on ls.leagueId=l.abbreviation
             where seasonId = @seasonId
         `)
-        // console.log(req)
         
         data.leagues = result.recordset
-        console.log(data)
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -142,7 +136,6 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
     try{ 
         const outputDir = path.join(__dirname, '../public/images');
         const filename = `${req.body.abbreviation}.png`;
-        console.log(req.file && req.file.buffer)
         if(req.file && req.file.buffer) {
             await functions.pngUpload(req.file.buffer, filename, outputDir)
         }
@@ -207,9 +200,7 @@ router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
             ,@teamId
             ,@seasonId
         `)
-        console.log()
         res.redirect(`/teams/${req.params.teamId}/roster`)
-        // res.redirect('back')
     }catch(err){
         next(err)
     }
@@ -252,9 +243,7 @@ router.get('/:teamId/roster', async (req,res, next)=>{
             LEFT join users as u on ut.userId=u.ID
             left join teams as t on ut.teamId=t.id
             where teamId = @teamId
-            `)
-            // console.log(result.recordsets[0])
-        
+            `)        
         data.list = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -263,14 +252,11 @@ router.get('/:teamId/roster', async (req,res, next)=>{
 });
 router.post('/:teamId/editTeam', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'team/editTeam',
             teamId: req.params.teamId
-        }
-        // console.log(req)
-        
+        }     
         await pool.request()
         .input('fullName', sql.VarChar, req.body.fullName)
         .input('shortName', sql.VarChar, req.body.shortName)
@@ -297,7 +283,6 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
 });
 router.get('/:teamId/editTeam', async (req,res, next)=>{
     try{
-        // console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: '/editTeam'
@@ -322,8 +307,6 @@ router.get('/:teamId/editTeam', async (req,res, next)=>{
             LEFT join leagues l on ls.leagueId=l.abbreviation
             where seasonId = @seasonId
         `)
-        // console.log(req)
-        
         data.leagues = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -359,8 +342,6 @@ router.get('/', async (req,res, next)=>{
             page: `teams`,
             user: req.user
         }
-        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
-        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
         const result = await pool.request()
         .query(`
             select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor 

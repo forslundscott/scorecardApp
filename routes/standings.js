@@ -24,7 +24,6 @@ router.post('/exportStandings', async (req, res, next) => {
         .execute(procedureName)
         const csvData = await functions.exportToCSV(result.recordset);
         // Set response headers for CSV download
-        console.log('test filename')
         let fileName = functions.fileNameSanitizer(`${req.body.league}_${req.body.type}_standings`)
         fileName = fileName.slice(0,251) + '.csv'
         res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
@@ -36,7 +35,6 @@ router.post('/exportStandings', async (req, res, next) => {
 })
 router.get('/site/:type/:league', async (req, res, next) => {
     try{
-        console.log('test')
         const procedureMap = {
             keeper: 'keeperStandings',
             individual: 'individualStandings',
@@ -50,7 +48,6 @@ router.get('/site/:type/:league', async (req, res, next) => {
         const result = await pool.request()
         .input('league', sql.VarChar, req.params.league)
         .execute(procedureName)
-        console.log(result)
         let data = {
             league: req.params.league,
             type: req.params.type,
@@ -66,7 +63,6 @@ router.get('/site/:type/:league', async (req, res, next) => {
 })
 router.get('/:type/:league', async (req, res, next) => {
     try{
-        // console.log(req.params)
         const request = pool.request()
         const result = await request
         .query(`DECLARE @league varchar(255)
