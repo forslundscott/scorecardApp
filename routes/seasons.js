@@ -140,6 +140,49 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
         console.error('Error:', err)
     }
 })
+router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, next) => {
+    try{
+        let data = {
+            page: `/season/registrations`,
+            user: req.user
+            
+        }
+        let result = await pool.request()
+        .input('userId', sql.Int, data.user.id)
+        .input('seasonId', sql.Int, req.params.seasonId)
+        .query(`
+
+            select * 
+            from league_season as ls 
+            left join leagues as l 
+                on ls.leagueId = l.abbreviation
+            where ls.seasonId = @seasonId
+            and not exists (
+                select 1 
+                from seasonRegistration_leagueTeam as srl 
+                where srl.userId = @userId 
+                    and srl.leagueId = ls.leagueId
+            );
+            
+            select * from seasons
+            where seasonId = @seasonId;
+            
+            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName, u.firstName, u.lastName
+            from seasonRegistration_leagueTeam as srl
+            left join leagues as l on srl.leagueId = l.abbreviation
+            left join teams as t on srl.teamId = t.id
+            left join users as u on srl.userId = u.id
+            where srl.seasonId = @seasonId
+            `)
+            data.leagues = result.recordsets[0]
+            data.season = result.recordsets[1][0]
+            data.leaguesAlreadyRegistered = result.recordsets[2]
+            console.log(data)
+        res.render('registrationsSite.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
 router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next) => {
     try{
         let data = {
@@ -164,13 +207,22 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
                 where srl.userId = @userId 
                     and srl.leagueId = ls.leagueId
             );
+            
             select * from seasons
-            where seasonId = @seasonId
+            where seasonId = @seasonId;
+            
+            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
+            from seasonRegistration_leagueTeam as srl
+            left join leagues as l on srl.leagueId = l.abbreviation
+            left join teams as t on srl.teamId = t.id
+            where srl.seasonId = @seasonId and srl.userId = @userId
             `)
             
             data.userAttributes = result.recordsets[0][0]
             data.leagues = result.recordsets[1]
             data.season = result.recordsets[2][0]
+            data.leaguesAlreadyRegistered = result.recordsets[3]
+            console.log(data.leaguesAlreadyRegistered)
             data.userAttributes.allergies = data.userAttributes.allergies.split(',').map(allergy => allergy.trim())
             data.userAttributes.medicalConditions = data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
             // console.log(data.userAttributes.allergies.split(',').map(allergy => allergy.trim()))
