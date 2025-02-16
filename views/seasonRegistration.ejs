@@ -37,7 +37,7 @@ align-items: center;
     <img height="200vh" src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
     <h1><%= data.season.seasonName %> Registration</h1>
     
-    <form id="individualSeasonRegistrationForm" action="" method="post" onsubmit="handlePlayerRegistrationSubmit(this)">
+    <form id="individualSeasonRegistrationForm" action="" method="post">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
         <br>
@@ -53,11 +53,11 @@ align-items: center;
         <label for="gender">Gender:</label>
         <br>
 
-        <input type="radio" name="gender" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="">Male</label>
+        <input type="radio" name="gender" id="gender_male" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="gender_male">Male</label>
         <br>
-        <input type="radio" name="gender" value="female" <%= data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'female' ? 'checked' : ''  %>><label for="">Female</label>
+        <input type="radio" name="gender" id="gender_female" value="female" <%= data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'female' ? 'checked' : ''  %>><label for="gender_female">Female</label>
         <br>
-        <input type="radio" name="gender" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="">Unspecified</label>
+        <input type="radio" name="gender" id="gender_unspecified" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="gender_unspecified">Unspecified</label>
         <br>
         <br>
         <label for="skill">Rate your Skill Level:</label>
@@ -74,16 +74,16 @@ align-items: center;
         <br>
         <br>
         
-        <input type="radio" name="discounted" value="1" <%= data.userAttributes.discounted && data.userAttributes.discounted === 1 ? 'checked' : ''  %> required><label for="">Yes</label>
+        <input type="radio" name="discounted" id="discounted_yes" value="1" <%= data.userAttributes.discounted && data.userAttributes.discounted === 1 ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
-        <input type="radio" name="discounted" value="0" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== 1 ? 'checked' : ''  %>><label for="">No</label>
+        <input type="radio" name="discounted" id="discounted_no" value="0" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== 1 ? 'checked' : ''  %>><label for="discounted_no">No</label>
         <br>
         <br>
         <label for="">Leagues & Teams:</label>
         <br>
         <br>
         <% for(let league of data.leagues){ %>
-            <input type="checkbox" name="leagueId_<%= league.abbreviation %>" id=""><label for="leagueId_<%= league.abbreviation %>"><%= league.shortName %></label>
+            <input type="checkbox" name="leagueId_<%= league.abbreviation %>" id="leagueId_<%= league.abbreviation %>"><label for="leagueId_<%= league.abbreviation %>"><%= league.shortName %></label>
             <select name="<%=league.abbreviation %>_teamId" id="">
                 <option value="FA">Free Agent</option>
                 <% for(let team of league.teams) { %>
@@ -147,7 +147,7 @@ align-items: center;
         <br><br>
         <a target="_blank" href="https://envoroot.com/player-resources/waiver/">Waiver</a>
         <br><br>
-        <input type="checkbox" name="waiver" id="" required><label for="waiver" >I have read and agree to the terms of the wavier.</label>
+        <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the wavier.</label>
         <br>
         <br>
         <button>Register</button>
@@ -208,28 +208,18 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
     }
   });
 
-        // function handlePlayerRegistrationSubmit(form){
+//   async function handlePlayerRegistrationSubmit(form, event) {
+//     let formData = new FormData(form)
+//     console.log(formData);
+//     await fetch('registration', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded',
+//         },
+//         body: new URLSearchParams(formData).toString(),
+//     });
 
-        //     if(document.getElementById('eventForm').style.display == 'none'){
-        //         document.getElementById('eventForm').style.display = ''
-        //         document.getElementById('eventForm').querySelector('[name="playerId"]').value = form.querySelector('[name="playerId"]').value
-        //         document.getElementById('eventForm').querySelector('[name="teamName"]').value = form.querySelector('[name="teamName"]').value
-        //         document.getElementById('eventForm').querySelector('[name="Event_ID"]').value = form.querySelector('[name="Event_ID"]').value
-        //         document.getElementById('eventForm').getElementsByClassName('playerName')[0].innerHTML = form.querySelector('[name="playerName"]').value
-        //         document.getElementById('eventForm').getElementsByClassName('playerName')[0].parentElement.style.backgroundImage = ele.getElementsByClassName('playerItem')[0].style.backgroundImage
-        //         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = form.querySelector('[name="opponentKeeper"]').value
-        //         document.getElementById('eventForm').querySelector('[name="keeper"]').value = form.querySelector('[name="keeper"]').value
-        //         document.getElementById('eventForm').querySelector('[name="season"]').value = form.querySelector('[name="season"]').value
-        //         document.getElementById('eventForm').querySelector('[name="subseason"]').value = form.querySelector('[name="subseason"]').value
-        //     }else{
-        //         document.getElementById('eventForm').style.display = 'none'
-        //     }
-        //     if(document.getElementById('formBackground').style.display == 'none'){
-        //         document.getElementById('formBackground').style.display = ''
-        //     }else{
-        //         document.getElementById('formBackground').style.display = 'none'
-        //     }
-        // }
+//     }
     </script>
 </body>
 </html>

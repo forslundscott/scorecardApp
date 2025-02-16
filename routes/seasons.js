@@ -42,7 +42,61 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
             user: req.user
             
         }
-        console.log(req.body)
+        // const filteredKeys = Object.keys(req.body).filter(key => key.includes('leagueId'));
+        // console.log(filteredKeys)
+
+        let leaguesTeams = [];
+
+    Object.keys(req.body).forEach(key => {
+        if (key.includes('leagueId_')) {
+            let remainingKey = key.replace('leagueId_', ''); // Remove 'leagueId_'
+            
+            // Find another key that contains the remaining part
+            let matchingKey = Object.keys(req.body).find(k => k.includes(remainingKey) && k !== key);
+
+            if (matchingKey) {
+                leaguesTeams.push({
+                    leagueId: remainingKey,
+                    teamId: req.body[matchingKey]
+                });
+            }
+        }
+    });
+    const transaction = new sql.Transaction(pool);
+
+        // Begin the transaction
+        await transaction.begin();
+    const result = await new sql.Request(transaction)
+            .input('seasonId', sql.Int, req.params.seasonId)
+            .input('userId', sql.Int, req.user.id)
+            .input('registrationTime', sql.BigInt, Date.now())
+            .query(`
+                INSERT INTO seasonRegistrations (seasonId, registrationTime, userId)
+                OUTPUT INSERTED.registrationId
+                VALUES (@seasonId, @registrationTime, @userId)
+            `);
+
+        const registrationId = result.recordset[0].registrationId;
+
+        console.log('Registration inserted, registrationId:', registrationId);
+
+
+        for (const item of leaguesTeams) {
+            await new sql.Request(transaction)
+                .input('registrationId', sql.Int, registrationId)
+                .input('userId', sql.Int, req.user.id)
+                .input('leagueId', sql.VarChar, item.leagueId)
+                .input('teamId', sql.VarChar, item.teamId)
+                .input('seasonId', sql.Int, req.params.seasonId)
+                .query(`
+                    INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId)
+                    VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId)
+                `);
+        }
+
+
+        await transaction.commit()
+
         await pool.request()
         .input('userId', sql.Int, req.user.id)
         .input('firstName', sql.VarChar, req.body.firstName)
@@ -80,7 +134,6 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
             medicalConditions = @medicalConditions
             where ID = @userId
             `)
-        console.log(req.body)
 
         res.redirect(`/seasons/${req.params.seasonId}/registration`);
     }catch(err){
@@ -100,9 +153,17 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
         .query(`
             SELECT * from users
             WHERE ID = @userId;
-            select * from league_season as ls 
-            left join leagues as l on ls.leagueId=l.abbreviation
-            where seasonId = @seasonId
+            select * 
+            from league_season as ls 
+            left join leagues as l 
+                on ls.leagueId = l.abbreviation
+            where ls.seasonId = @seasonId
+            and not exists (
+                select 1 
+                from seasonRegistration_leagueTeam as srl 
+                where srl.userId = @userId 
+                    and srl.leagueId = ls.leagueId
+            );
             select * from seasons
             where seasonId = @seasonId
             `)
