@@ -7,6 +7,8 @@ const path = require('path');
 const sanitizeFilename = require('sanitize-filename')
 const pool = require(`../db`)
 const sql = require('mssql'); 
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 // import { flatten } from 'flat'
 // const clam = new ClamScan({
 //     clamdscan: {
@@ -176,7 +178,31 @@ async function pngUpload (fileBuffer, filename, outputDir) {
     fs.writeFileSync(outputPath, processedImage, { mode: 0o644 });
     return outputPath //for debugging
 }
-const fileUpload = () => {
-
-}
-module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer,pngUpload}
+async function createCheckoutSession({ email, hours, date, origin, referer, priceId, userId }) {
+    try {
+        
+        // Create Stripe Checkout session
+        const session = await stripe.checkout.sessions.create({
+            line_items: [
+                {
+                    price: priceId,
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            mode: 'payment',
+            metadata: {
+                hours: `${hours}`,
+                userId: `${userId}`,
+                date: `${date}`,
+            },
+            success_url: `${origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}`,
+        });
+  
+        return session;
+    } catch (error) {
+        throw new Error(error.message);
+    }
+  }
+module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer,pngUpload,createCheckoutSession}

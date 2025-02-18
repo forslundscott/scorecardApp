@@ -818,10 +818,11 @@ async function getLeagues(xform){
         console.error('Error fetching results:', error);
     }
 }
-async function paymentSubmit(form,event) {
+async function paymentSubmit(form,event,path) {
             event.preventDefault();
+            console.log(path)
             let formData = new FormData(form)
-            const response = await fetch('/api/payments/create-checkout-session', {
+            const response = await fetch(`/api/payments/${path}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

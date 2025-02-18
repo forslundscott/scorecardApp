@@ -65,7 +65,7 @@
             if (!validateCheckboxes(form)) {
                 return false; 
             }
-            paymentSubmit(form,event)
+            paymentSubmit(form,event, 'pickupCheckoutSession')
         }
         async function fillExistingUserInfo(emailElement){
             let form = emailElement.form;

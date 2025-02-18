@@ -92,14 +92,11 @@ align-items: center;
             </select>
         <br>
         <% } %>
-        
-        <% console.log(data.leaguesAlreadyRegistered) %>
         <% if (data.leaguesAlreadyRegistered.length !== 0) { %>
             <br>
             <label for="">Already Registered:</label>
             <br><br>
             <% for(let league of data.leaguesAlreadyRegistered){ %>
-                <% console.log(league) %>
                 <input type="text" disabled value="<%= league.leagueShortName %>">
                 <input type="text" disabled value="<%= league.teamShortName %>">
                 <br>

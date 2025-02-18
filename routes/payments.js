@@ -10,6 +10,35 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
+// async function createCheckoutSession({ email, hours, date, origin, referer, priceId, userId }) {
+//   try {
+      
+//       // Create Stripe Checkout session
+//       const session = await stripe.checkout.sessions.create({
+//           line_items: [
+//               {
+//                   price: priceId,
+//                   quantity: 1,
+//               },
+//           ],
+//           customer_email: email,
+//           mode: 'payment',
+//           metadata: {
+//               hours: `${hours}`,
+//               userId: `${userId}`,
+//               date: `${date}`,
+//           },
+//           success_url: `${origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+//           cancel_url: `${origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}`,
+//       });
+
+//       return session;
+//   } catch (error) {
+//       throw new Error(error.message);
+//   }
+// }
+
+
 router.get('/checkout', async (req, res) => {
     try {
       let description = ''
@@ -339,51 +368,85 @@ router.get('/cancel', async (req,res, next)=>{
 //         next(err)
 //     }
 // });
+router.post('/individualSeasonCheckoutSession', async (req, res) => {
+  const { email } = req.body;
+  const referer = req.get('Referer')
+  try {
+      let priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_1LEAGUE;
+      if (Array.isArray(req.body.hour)) {
+        switch(req.body.hour.length){
+          case 2:
+            priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_2LEAGUE
+            break
+          case 3:
+            priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_3LEAGUE
+            break
+          case 4:
+            priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_4LEAGUE
+            break
+        }
+      }
+      await functions.addUserToDatabase(req.body);
+      const user = await functions.getUser(req.body)
+      const session = await functions.createCheckoutSession({
+        email,
+        hours: req.body.hour,
+        date: req.body.date,
+        origin: req.headers.origin,
+        referer,
+        priceId,
+        userId: user.ID
+    });
+      res.json({ url: session.url });
+  } catch (error) {
+    console.log(error)
+      res.status(500).json({ error: error.message });
+  }
+});
+router.post('/pickupCheckoutSession', async (req, res) => {
+  const { email } = req.body;
+  const referer = req.get('Referer')
+  try {
+      let priceId = process.env.STRIPE_PICKUP_PRICE_1HR;
+      if (Array.isArray(req.body.hour) && req.body.hour.length === 2) {
+          priceId = process.env.STRIPE_PICKUP_PRICE_2HR;
+      }
+      await functions.addUserToDatabase(req.body);
+      const user = await functions.getUser(req.body)
+      const session = await functions.createCheckoutSession({
+        email,
+        hours: req.body.hour,
+        date: req.body.date,
+        origin: req.headers.origin,
+        referer,
+        priceId,
+        userId: user.ID
+    });
+      res.json({ url: session.url });
+  } catch (error) {
+    console.log(error)
+      res.status(500).json({ error: error.message });
+  }
+});
 router.post('/create-checkout-session', async (req, res) => {
     const { email } = req.body;
-    console.log(`${req.body.hour}`)
     const referer = req.get('Referer')
     try {
-        let priceId = ''
-        if(Array.isArray(req.body.hour))
-        {
-          if(req.body.hour.length == 2){
-            priceId = process.env.STRIPE_PICKUP_PRICE_2HR
-          }else{
-            priceId = process.env.STRIPE_PICKUP_PRICE_1HR
-          }
-        }else{
-          priceId = process.env.STRIPE_PICKUP_PRICE_1HR
+        let priceId = process.env.STRIPE_PICKUP_PRICE_1HR;
+        if (Array.isArray(req.body.hour) && req.body.hour.length === 2) {
+            priceId = process.env.STRIPE_PICKUP_PRICE_2HR;
         }
-        // console.log(JSON.stringify(req.body.hour))
         await functions.addUserToDatabase(req.body);
         const user = await functions.getUser(req.body)
-        console.log('user')
-        const session = await stripe.checkout.sessions.create({
-            line_items: [
-                {
-                    // price_data: {
-                    //     currency: currency,
-                    //     product_data: {
-                    //         name: 'Sample Product',
-                    //     },
-                    //     unit_amount: amount,
-                    // },
-                    price: priceId,
-                    quantity: 1,
-                },
-            ],
-            customer_email: email,
-            mode: 'payment', // For one-time payments
-            metadata: {
-                hours: `${req.body.hour}`,
-                userId: `${user.ID}`,
-                date: `${req.body.date}`
-              },
-            success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}` ,
-        });
-        console.log('session')
+        const session = await functions.createCheckoutSession({
+          email,
+          hours: req.body.hour,
+          date: req.body.date,
+          origin: req.headers.origin,
+          referer,
+          priceId,
+          userId: user.ID
+      });
         res.json({ url: session.url });
     } catch (error) {
       console.log(error)
