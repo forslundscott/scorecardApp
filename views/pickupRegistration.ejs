@@ -16,7 +16,7 @@
     <main>
         <img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
         <br><br>
-        <form action="/api/payments/checkout" method="get" onsubmit="return handleSubmit(this,event)">
+        <form action="/api/payments/confirmation" method="get" onsubmit="return handleSubmit(this,event)">
             <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
             <br><br>
 
@@ -65,7 +65,7 @@
             if (!validateCheckboxes(form)) {
                 return false; 
             }
-            // paymentSubmit(form,event)
+            paymentSubmit(form,event)
         }
         async function fillExistingUserInfo(emailElement){
             let form = emailElement.form;

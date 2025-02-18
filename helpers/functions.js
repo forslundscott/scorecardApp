@@ -102,7 +102,7 @@ const addUserToDatabase = async (userData) => {
     try{
         const request = pool.request();
     const { firstName, lastName, email } = userData;
-
+        // console.log(userData)
     // Use preferredName if it exists; fallback to firstName otherwise
     const nameToUse = userData?.preferredName?.trim() || firstName;
     await request.input('firstName', sql.VarChar, firstName)

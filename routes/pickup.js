@@ -85,8 +85,8 @@ router.get('/register/:date', async (req,res, next)=>{
         `)
         // const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
         data.pickupEvents = result.recordset
-        // res.render('pickupRegistration.ejs',{data: data}) 
-        res.render('venmoPickupRegistration.ejs',{data: data})
+        res.render('pickupRegistration.ejs',{data: data}) 
+        // res.render('venmoPickupRegistration.ejs',{data: data})
     }catch(err){
         next(err)
     }

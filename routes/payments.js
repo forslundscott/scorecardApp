@@ -8,7 +8,7 @@ const functions = require('../helpers/functions')
 const gateway = require('../config/braintreeConfig');
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
-const stripe = Stripe(process.env.STRIPE_TEST_SECRET_KEY);
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 router.get('/checkout', async (req, res) => {
     try {
@@ -48,7 +48,7 @@ router.get('/checkout', async (req, res) => {
   });
   router.get('/config', (req, res) => {
     res.send({
-      publishableKey: process.env.STRIPE_TEST_PUBLISHABLE_KEY,
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
     });
   });
   router.get('/test', async (req, res) => {
@@ -347,25 +347,27 @@ router.post('/create-checkout-session', async (req, res) => {
         let priceId = ''
         if(Array.isArray(req.body.hour))
         {
-            switch(req.body.hour.length){
-                case 1:
-                    priceId = 'price_1QVIctFGzuNCeWURECfArCPl' 
-                    break
-                case 2:
-                    priceId = 'price_1QVIcqFGzuNCeWURgegdgjJv'
-                    break
-                default:
-                    priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
-                    break
-
+          if(req.body.hour.length == 2){
+            if(process.env.NODE_ENV === 'production'){
+              priceId = 'price_1QVIcqFGzuNCeWURgegdgjJv'
+            }else{
+              priceId = 'price_1QRQzpFGzuNCeWUR7QZ81kCi'
             }
-        }else{
+          }else if(process.env.NODE_ENV === 'production'){
             priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
+          }else{
+            priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7'
+            
+          }
+        }else if(process.env.NODE_ENV === 'production'){
+          priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
+        }else{
+          priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7'
         }
-        console.log(JSON.stringify(req.body.hour))
+        // console.log(JSON.stringify(req.body.hour))
         await functions.addUserToDatabase(req.body);
         const user = await functions.getUser(req.body)
-        console.log(user)
+        console.log('user')
         const session = await stripe.checkout.sessions.create({
             line_items: [
                 {
@@ -390,9 +392,10 @@ router.post('/create-checkout-session', async (req, res) => {
             success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}` ,
         });
-        console.log(session)
+        console.log('session')
         res.json({ url: session.url });
     } catch (error) {
+      console.log(error)
         res.status(500).json({ error: error.message });
     }
 });

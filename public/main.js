@@ -828,6 +828,7 @@ async function paymentSubmit(form,event) {
                 },
                 body: new URLSearchParams(formData).toString(),
             })
+            console.log('test')
         const { url } = await response.json();
         window.location.href = url; // Redirect to Stripe Checkout
 }
