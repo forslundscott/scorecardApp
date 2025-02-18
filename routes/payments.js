@@ -348,21 +348,12 @@ router.post('/create-checkout-session', async (req, res) => {
         if(Array.isArray(req.body.hour))
         {
           if(req.body.hour.length == 2){
-            if(process.env.NODE_ENV === 'production'){
-              priceId = 'price_1QVIcqFGzuNCeWURgegdgjJv'
-            }else{
-              priceId = 'price_1QRQzpFGzuNCeWUR7QZ81kCi'
-            }
-          }else if(process.env.NODE_ENV === 'production'){
-            priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
+            priceId = process.env.STRIPE_PICKUP_PRICE_2HR
           }else{
-            priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7'
-            
+            priceId = process.env.STRIPE_PICKUP_PRICE_1HR
           }
-        }else if(process.env.NODE_ENV === 'production'){
-          priceId = 'price_1QVIctFGzuNCeWURECfArCPl'
         }else{
-          priceId = 'price_1QUd2eFGzuNCeWURN3Qsmgq7'
+          priceId = process.env.STRIPE_PICKUP_PRICE_1HR
         }
         // console.log(JSON.stringify(req.body.hour))
         await functions.addUserToDatabase(req.body);
