@@ -7,6 +7,14 @@
     <title>Season Registration</title>
     
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Poppins", Sans-serif;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -24,18 +32,44 @@
         }
         .container {
 
-display: flex;
+        display: flex;
 
-justify-content: center;
+        justify-content: center;
 
-align-items: center;
+        align-items: center;
 
-}
+        }
+        #registerButton {
+            background-color: #ceff00;
+            font-size: 3vh;
+            border-width: medium;
+            border-color: black;
+            font-weight: 500;
+            border-style: solid;
+            color: black;
+            padding: 5px 40px 5px 40px;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #ceff00; /* Change to your preferred color */
+        }
+        ::selection {
+            background: #ceff00; 
+            color: #121212; 
+        }
+        
+        /* input::selection, textarea::selection {
+            background: #ceff00;
+            color: #121212;
+        } */
+
     </style>
 </head>
-<body style="text-align: center;">
-    <img height="200vh" src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
-    <h1><%= data.season.seasonName %> Registration</h1>
+<body style="text-align: center; width: 100%;" >
+    <div style="background-image: linear-gradient(180deg, #CEFF00 0%, #4E6100 100%); width: 100%;">
+         <img height="200vh" src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
+        <h1 style="color: #f4f4f4;"><%= data.season.seasonName %> Registration</h1>
+    </div>
+   
     
     <form id="individualSeasonRegistrationForm" action="" method="post">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
@@ -47,7 +81,8 @@ align-items: center;
         <br>
         <br>
         <label for="dob">Date of Birth:</label>
-        <input type="date" name="dob" value="<%= data.userAttributes.dob ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : ''  %>" required>
+        <% console.log(data.userAttributes.dob) %>
+        <input type="date" name="dob" value="<%= (data.userAttributes.dob && data.userAttributes.dob !== '' && data.userAttributes.dob !== 0) ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : '' %>" required>
         <br>
         <br>
         <label for="gender">Gender:</label>
@@ -61,7 +96,6 @@ align-items: center;
         <br>
         <br>
         <label for="skill">Rate your Skill Level:</label>
-        <% console.log(data.userAttributes.skill) %>
         <select name="skill" id="" required>
             <option value="1" <%= data.userAttributes.skill == '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
             <option value="2" <%= data.userAttributes.skill == '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
@@ -130,25 +164,32 @@ align-items: center;
         <label for="">Do you have any allergies or medical conditions we should be aware of?</label>
         <br>
         <br>
-        <!-- <input type="text" name="allergies" placeholder="List Allergies"> -->
-         <% console.log(data.userAttributes.allergies) %>
+
         <div class="container">
             <div class="section">
                 <h3>Allergies</h3>
                 <div id="allergy-list">
                     <% for(let allergy of data.userAttributes.allergies){ %>
-                        <br>
-                        <input type="text" class="allergy-input" name="allergies[]" value="<%= allergy %>" placeholder="Enter an allergy">
+                        <% if(allergy !== ''){ %>
+                            <br>
+                            <input type="text" class="allergy-input" name="allergies[]" value="<%= allergy %>" placeholder="Enter an allergy">
+                        <% } %>
                     <% } %>
+                    <br>
+                    <input type="text" class="allergy-input" name="allergies[]" placeholder="Enter an allergy">
                 </div>
             </div>
             <div class="section">
                 <h3>Medical Conditions</h3>
                 <div id="medical-list">
                     <% for(let condition of data.userAttributes.medicalConditions){ %>
-                        <br>
-                        <input type="text" class="medical-input" name="medicalConditions[]" value="<%= condition %>" placeholder="Enter a medical condition">
+                        <% if(condition !== ''){ %>
+                            <br>
+                            <input type="text" class="medical-input" name="medicalConditions[]" value="<%= condition %>" placeholder="Enter a medical condition">
+                        <% } %>
                     <% } %>
+                    <br>
+                    <input type="text" class="medical-input" name="medicalConditions[]" placeholder="Enter a medical condition">
                 </div>
             </div>
         </div>
@@ -160,7 +201,7 @@ align-items: center;
         <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the wavier.</label>
         <br>
         <br>
-        <button>Register</button>
+        <button style="background-color: #ceff00;" id="registerButton">Register</button>
     </form>
     <script>
         document.addEventListener("input", function(event) {

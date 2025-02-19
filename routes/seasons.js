@@ -23,11 +23,12 @@ router.post('/addSeason', async (req, res, next) => {
         await pool.request()
         .input('seasonName',sql.VarChar, req.body.seasonName)
         .input('active', sql.Bit, req.body.active ? 1 : 0)
+        .input('registrationOpen', sql.Bit, req.body.registrationOpen ? 1 : 0)
         .query(`
             IF NOT EXISTS (SELECT 1 FROM seasons WHERE seasonName = @seasonName)
             BEGIN
-                insert into seasons (seasonName, active)
-                values (@seasonName, @active)
+                insert into seasons (seasonName, active, registrationOpen)
+                values (@seasonName, @active, @registrationOpen)
             END
             `)
         res.redirect(302,'/seasons')
@@ -219,12 +220,19 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             `)
             
             data.userAttributes = result.recordsets[0][0]
+            data.userAttributes.dob = Number(data.userAttributes.dob)
             data.leagues = result.recordsets[1]
             data.season = result.recordsets[2][0]
             data.leaguesAlreadyRegistered = result.recordsets[3]
             console.log(data.leaguesAlreadyRegistered)
-            data.userAttributes.allergies = data.userAttributes.allergies.split(',').map(allergy => allergy.trim())
-            data.userAttributes.medicalConditions = data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
+            data.userAttributes.allergies = data.userAttributes.allergies
+            ? data.userAttributes.allergies.split(',').map(allergy => allergy.trim())
+            : [];
+            data.userAttributes.medicalConditions = data.userAttributes.medicalConditions
+            ? data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
+            : [];
+            console.log(data.userAttributes)
+            // data.userAttributes.medicalConditions = data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
             // console.log(data.userAttributes.allergies.split(',').map(allergy => allergy.trim()))
             for(let league of data.leagues){
                 result = await pool.request()

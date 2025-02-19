@@ -1,7 +1,9 @@
 <form id="newSeasonForm" class="textCenter" action="/seasons/addSeason" method="post" style="display: ''; text-align: center;">
     <input type="text" name="seasonName" value="" placeholder="Season Name" required>
         <br><br>
-    <label for="active" class="primaryStyle">Active Season?</label> <input type="checkbox" name="active" >
+    <label for="active" class="primaryStyle">Active Season?</label> <input type="checkbox" name="active" id="active" checked>
+    <br><br>
+    <label for="registrationOpen" class="primaryStyle">Registration Open?</label> <input type="checkbox" name="registrationOpen" id="registrationOpen" checked>
         <br><br>
     <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Season</button>
 </form>
