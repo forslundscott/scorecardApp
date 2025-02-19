@@ -178,26 +178,22 @@ async function pngUpload (fileBuffer, filename, outputDir) {
     fs.writeFileSync(outputPath, processedImage, { mode: 0o644 });
     return outputPath //for debugging
 }
-async function createCheckoutSession({ email, hours, date, origin, referer, priceId, userId }) {
+async function createCheckoutSession({ metadata }) {
     try {
-        
+        console.log(metadata.priceId)
         // Create Stripe Checkout session
         const session = await stripe.checkout.sessions.create({
             line_items: [
                 {
-                    price: priceId,
-                    quantity: 1,
+                    price: metadata.priceId,
+                    quantity: metadata.quantity,
                 },
             ],
-            customer_email: email,
+            customer_email: metadata.email,
             mode: 'payment',
-            metadata: {
-                hours: `${hours}`,
-                userId: `${userId}`,
-                date: `${date}`,
-            },
-            success_url: `${origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}`,
+            metadata: metadata,
+            success_url: metadata.success_url,
+            cancel_url: metadata.cancel_url,
         });
   
         return session;

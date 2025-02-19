@@ -71,7 +71,7 @@
     </div>
    
     
-    <form id="individualSeasonRegistrationForm" action="" method="post">
+    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
         <br>

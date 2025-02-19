@@ -369,33 +369,51 @@ router.get('/cancel', async (req,res, next)=>{
 //     }
 // });
 router.post('/individualSeasonCheckoutSession', async (req, res) => {
-  const { email } = req.body;
-  const referer = req.get('Referer')
+  const metadata = {
+    email: req.body.email,
+    priceId: 'price_1QRdBOFGzuNCeWURG6JFGgYi',
+    success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer')}`
+  }
   try {
-      let priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_1LEAGUE;
-      if (Array.isArray(req.body.hour)) {
-        switch(req.body.hour.length){
-          case 2:
-            priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_2LEAGUE
-            break
-          case 3:
-            priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_3LEAGUE
-            break
-          case 4:
-            priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_4LEAGUE
-            break
+    let leaguesTeams = [];
+
+    Object.keys(req.body).forEach(key => {
+        if (key.includes('leagueId_')) {
+            let remainingKey = key.replace('leagueId_', ''); // Remove 'leagueId_'
+            
+            // Find another key that contains the remaining part
+            let matchingKey = Object.keys(req.body).find(k => k.includes(remainingKey) && k !== key);
+
+            if (matchingKey) {
+                leaguesTeams.push({
+                    leagueId: remainingKey,
+                    teamId: req.body[matchingKey]
+                });
+            }
         }
-      }
+    });
+    metadata.quantity = leaguesTeams.length
+
+      // let priceId = 'price_1QRdBOFGzuNCeWURG6JFGgYi';
+      // if (Array.isArray(req.body.hour)) {
+      //   switch(req.body.hour.length){
+      //     case 2:
+      //       priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_2LEAGUE
+      //       break
+      //     case 3:
+      //       priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_3LEAGUE
+      //       break
+      //     case 4:
+      //       priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_4LEAGUE
+      //       break
+      //   }
+      // }
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
+      metadata.userId = user.ID
       const session = await functions.createCheckoutSession({
-        email,
-        hours: req.body.hour,
-        date: req.body.date,
-        origin: req.headers.origin,
-        referer,
-        priceId,
-        userId: user.ID
+        metadata
     });
       res.json({ url: session.url });
   } catch (error) {
@@ -404,23 +422,27 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
   }
 });
 router.post('/pickupCheckoutSession', async (req, res) => {
-  const { email } = req.body;
-  const referer = req.get('Referer')
+
+  const metadata = {
+    email: req.body.email,
+    hours: req.body.hour,
+    date: req.body.date,
+    success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer')}`,
+    quantity: 1
+  }
+  
   try {
-      let priceId = process.env.STRIPE_PICKUP_PRICE_1HR;
-      if (Array.isArray(req.body.hour) && req.body.hour.length === 2) {
-          priceId = process.env.STRIPE_PICKUP_PRICE_2HR;
+      metadata.priceId = process.env.STRIPE_PICKUP_PRICE_1HR;
+      if (Array.isArray(metadata.hours) && metadata.hours.length === 2) {
+          metadata.priceId = process.env.STRIPE_PICKUP_PRICE_2HR;
       }
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
+      metadata.userId = user.ID
+      console.log(metadata)
       const session = await functions.createCheckoutSession({
-        email,
-        hours: req.body.hour,
-        date: req.body.date,
-        origin: req.headers.origin,
-        referer,
-        priceId,
-        userId: user.ID
+        metadata
     });
       res.json({ url: session.url });
   } catch (error) {
