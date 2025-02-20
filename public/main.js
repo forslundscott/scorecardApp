@@ -820,7 +820,7 @@ async function getLeagues(xform){
 }
 async function paymentSubmit(form,event,path) {
             event.preventDefault();
-            console.log(path)
+            console.log('paysubmit')
             let formData = new FormData(form)
             const response = await fetch(`/api/payments/${path}`, {
                 method: 'POST',

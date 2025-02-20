@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require(`../db`)
 const sql = require('mssql'); 
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
@@ -37,12 +39,20 @@ router.post('/addSeason', async (req, res, next) => {
     }
   });
 router.post(['/:seasonId/registration'], async (req, res, next) => {
-    try{
-        let data = {
-            page: `/season/register`,
+    let data = {
+            body: req.body,
+            path: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
             user: req.user
-            
         }
+    
+    try{
+        // need to add transaction id from stripe session
+        
+        const session = await stripe.checkout.sessions.retrieve(req.body.sessionId)
+        
+        // throw new Error('test')
+        data.metadata = session.metadata
+        console.log(data)
         // const filteredKeys = Object.keys(req.body).filter(key => key.includes('leagueId'));
         // console.log(filteredKeys)
 
@@ -64,21 +74,24 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
         }
     });
     const transaction = new sql.Transaction(pool);
-
+    data.leaguesTeams = leaguesTeams
         // Begin the transaction
         await transaction.begin();
     const result = await new sql.Request(transaction)
             .input('seasonId', sql.Int, req.params.seasonId)
             .input('userId', sql.Int, req.user.id)
             .input('registrationTime', sql.BigInt, Date.now())
+            .input('sessionId', sql.VarChar, session.payment_intent)
+            .input('gateway', sql.VarChar, 'Stripe')
+            .input('test', sql.Bit, !session.livemode)
             .query(`
-                INSERT INTO seasonRegistrations (seasonId, registrationTime, userId)
+                INSERT INTO seasonRegistrations (seasonId, registrationTime, userId, transactionId, gateway, test)
                 OUTPUT INSERTED.registrationId
-                VALUES (@seasonId, @registrationTime, @userId)
+                VALUES (@seasonId, @registrationTime, @userId, @transactionId, @gateway, @test)
             `);
 
         const registrationId = result.recordset[0].registrationId;
-
+        data.registrationId = registrationId
         console.log('Registration inserted, registrationId:', registrationId);
 
 
@@ -89,9 +102,10 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
                 .input('leagueId', sql.VarChar, item.leagueId)
                 .input('teamId', sql.VarChar, item.teamId)
                 .input('seasonId', sql.Int, req.params.seasonId)
+                .input('test', sql.Bit, !session.livemode)
                 .query(`
-                    INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId)
-                    VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId)
+                    INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test)
+                    VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test)
                 `);
         }
 
@@ -138,6 +152,8 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
 
         res.redirect(`/seasons/${req.params.seasonId}/registration`);
     }catch(err){
+        // console.log(req)
+        functions.failedQuery(data,err)
         console.error('Error:', err)
     }
 })
@@ -145,8 +161,8 @@ router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, nex
     try{
         let data = {
             page: `/season/registrations`,
-            user: req.user
-            
+            user: req.user,
+            seasonId: req.params.seasonId
         }
         let result = await pool.request()
         .input('userId', sql.Int, data.user.id)
@@ -188,7 +204,8 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
     try{
         let data = {
             page: `/season/register`,
-            user: req.user
+            user: req.user,
+            seasonId: req.params.seasonId
             
         }
         let result = await pool.request()

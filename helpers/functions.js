@@ -180,7 +180,12 @@ async function pngUpload (fileBuffer, filename, outputDir) {
 }
 async function createCheckoutSession({ metadata }) {
     try {
-        console.log(metadata.priceId)
+        
+        // console.log(await stripe.prices.list({ active: true }))
+        const product = await stripe.products.search({
+            query: `name:'6 Game Season'`,
+        })
+        console.log(product.data[0].default_price)
         // Create Stripe Checkout session
         const session = await stripe.checkout.sessions.create({
             line_items: [
@@ -198,7 +203,36 @@ async function createCheckoutSession({ metadata }) {
   
         return session;
     } catch (error) {
+        // failedQuery(metadata,error)
         throw new Error(error.message);
     }
   }
-module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer,pngUpload,createCheckoutSession}
+async function failedQuery(data,errorMessage) {
+    console.log('test')
+    const filePath = path.join(process.cwd(), "failed_inserts.json");
+    console.log(filePath)
+    const failedEntry = {
+        timestamp: new Date().toISOString(),
+        data,
+        error_message: errorMessage,
+      };
+    
+      let failedData = [];
+      if (fs.existsSync(filePath)) {
+        try {
+          const rawData = fs.readFileSync(filePath);
+          failedData = JSON.parse(rawData);
+        } catch (fileError) {
+          console.error("Error reading failed inserts file:", fileError);
+        }
+      }
+    
+      failedData.push(failedEntry);
+    
+      try {
+        fs.writeFileSync(filePath, JSON.stringify(failedData, null, 2));
+      } catch (fileError) {
+        console.error("Error writing to failed inserts file:", fileError);
+      }
+}
+module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer,pngUpload,createCheckoutSession,failedQuery}

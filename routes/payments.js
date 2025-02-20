@@ -82,10 +82,12 @@ router.get('/checkout', async (req, res) => {
   });
   router.get('/test', async (req, res) => {
     try {
+      throw new Error("This is a test error")
     //   const result = await gateway.clientToken.generate({});
     //   res.render('braintreeDropIn.ejs', { clientToken: result.clientToken });
-    res.render('customCheckoutStripe.ejs')
+    // res.render('customCheckoutStripe.ejs')
     } catch (error) {
+      functions.failedQuery({test: 'test'} ,error)
       console.error('Error generating client token:', error);
       res.status(500).send('Error generating client token');
     }
@@ -262,46 +264,52 @@ router.post('/successVenmo', async (req,res, next)=>{
 });
 router.get('/success', async (req,res, next)=>{
     try{
-        const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
-        console.log(session)
-
-        const hoursArray = Array.isArray(session.metadata.hours) ? session.metadata.hours : [session.metadata.hours];
-        const hoursString = hoursArray.join(',');
-        const request = pool.request()
-        
-        let result = await request.query(`
-            INSERT into pickupAttendees (userId,pickupId,transactionId)
-            select '${session.metadata.userId}' as userId,
-            id as pickupId,
-            '${session.payment_intent}' as transactionId
-            from pickupEvents
-            where date = ${session.metadata.date} and time in (${hoursString})
-            AND NOT EXISTS (
-                SELECT 1
-                FROM pickupAttendees
-                WHERE userId = '${session.metadata.userId}' AND pickupId = pickupEvents.id
-            )
-            `)
-            result = await request.query(`
-                select e.*, (select count(a.userId) 
-                from pickupAttendees as a
-                where e.id=a.pickupId) attendeeCount 
-                from pickupEvents as e
-                where [date] = ${session.metadata.date}
-                and time in (${hoursString})
-                and (select count(a.userId) 
-                from pickupAttendees as a
-                where e.id=a.pickupId) = totalSlots
-            `)
-            await fullEmail(result.recordset)
-            // IF NOT EXISTS (SELECT 1 FROM users WHERE email = @email)
-            // BEGIN
-            // END
-        // await request.query(`
+      const session = await stripe.checkout.sessions.retrieve(req.query.sessionId)
+        fetch(`${req.protocol}://${req.get('host')}/seasons/${session.metadata.seasonId}/registration`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ sessionId: req.query.sessionId }).toString(),
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Payment processed successfully:', data);
+          })
+          .catch(error => {
+            console.error('Error processing payment:', error);
+          });
+        // this is all for pickup. Move to another route
+        // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
+        // console.log(session)
+        // const hoursArray = Array.isArray(session.metadata.hours) ? session.metadata.hours : [session.metadata.hours];
+        // const hoursString = hoursArray.join(',');
+        // const request = pool.request()        
+        // let result = await request.query(`
         //     INSERT into pickupAttendees (userId,pickupId,transactionId)
-        //     VALUES()
-        // `)
-        console.log(result.recordset)
+        //     select '${session.metadata.userId}' as userId,
+        //     id as pickupId,
+        //     '${session.payment_intent}' as transactionId
+        //     from pickupEvents
+        //     where date = ${session.metadata.date} and time in (${hoursString})
+        //     AND NOT EXISTS (
+        //         SELECT 1
+        //         FROM pickupAttendees
+        //         WHERE userId = '${session.metadata.userId}' AND pickupId = pickupEvents.id
+        //     )
+        //     `)
+        //     result = await request.query(`
+        //         select e.*, (select count(a.userId) 
+        //         from pickupAttendees as a
+        //         where e.id=a.pickupId) attendeeCount 
+        //         from pickupEvents as e
+        //         where [date] = ${session.metadata.date}
+        //         and time in (${hoursString})
+        //         and (select count(a.userId) 
+        //         from pickupAttendees as a
+        //         where e.id=a.pickupId) = totalSlots
+        //     `)
+        //     await fullEmail(result.recordset)
+            
+        // console.log(result.recordset)
         res.render('paymentSuccess.ejs');
         
     }catch(err){
@@ -369,13 +377,25 @@ router.get('/cancel', async (req,res, next)=>{
 //     }
 // });
 router.post('/individualSeasonCheckoutSession', async (req, res) => {
-  const metadata = {
-    email: req.body.email,
-    priceId: 'price_1QRdBOFGzuNCeWURG6JFGgYi',
-    success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer')}`
-  }
+  
   try {
+    const transformedBody = Object.fromEntries(
+      Object.entries(req.body).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value.join(", ") : value,
+      ])
+    );
+    const product = await stripe.products.search({
+        query: `name:'6 Game Season'`,
+    })
+    const metadata = {
+      type: 'individualSeasonCheckout',
+      priceId: product.data[0].default_price,
+      success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer')}`,
+      ...transformedBody
+    }
+    // console.log(product.data[0].default_price)
     let leaguesTeams = [];
 
     Object.keys(req.body).forEach(key => {
@@ -394,7 +414,8 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
         }
     });
     metadata.quantity = leaguesTeams.length
-
+    metadata.leaguesTeams = JSON.stringify(leaguesTeams)
+    console.log(metadata)
       // let priceId = 'price_1QRdBOFGzuNCeWURG6JFGgYi';
       // if (Array.isArray(req.body.hour)) {
       //   switch(req.body.hour.length){
@@ -415,6 +436,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
       const session = await functions.createCheckoutSession({
         metadata
     });
+    console.log('checkout')
       res.json({ url: session.url });
   } catch (error) {
     console.log(error)

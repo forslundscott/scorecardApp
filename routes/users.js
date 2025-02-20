@@ -44,7 +44,7 @@ router.get(['/newUser'], async (req, res, next) => {
 })
 router.post('/addUser', async (req, res, next) => {
     try{
-        await addUserToDatabase(req.body);
+        await functions.addUserToDatabase(req.body);
         res.redirect(302,'/games')
     }catch(err){
         next(err)

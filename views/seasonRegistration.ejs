@@ -72,6 +72,7 @@
    
     
     <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post">
+        <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
         <br>
@@ -257,8 +258,14 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
       alert('Please select at least one league!');
       event.preventDefault(); // Prevent form submission
     }
+    handleSubmit(this,event)
   });
-
+  function handleSubmit(form,event) {
+            // if (!validateCheckboxes(form)) {
+            //     return false; 
+            // }
+            paymentSubmit(form,event, 'individualSeasonCheckoutSession')
+        }
 //   async function handlePlayerRegistrationSubmit(form, event) {
 //     let formData = new FormData(form)
 //     console.log(formData);
@@ -272,5 +279,6 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
 
 //     }
     </script>
+    <script src="/main.js"></script>
 </body>
 </html>

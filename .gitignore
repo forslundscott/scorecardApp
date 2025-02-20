@@ -2,6 +2,8 @@
 .env
 node_modules
 images/profile-images/*
+failed_inserts.json
+
 
 #keeps
 !images/profile-images/.gitkeep
