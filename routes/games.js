@@ -16,6 +16,9 @@ router.post('/updateGameInfo', async (req, res, next) => {
             .input('team1Id', sql.VarChar, formData.Team1_ID)
             .input('team2Id', sql.VarChar, formData.Team2_ID)
             .input('scoreKeeperId', sql.VarChar, formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID)
+            .input('monitorId', sql.VarChar, formData.monitorId == 'TBD'? null : formData.monitorId)
+            .input('referee1Id', sql.VarChar, formData.ref1Id == 'TBD'? null : formData.ref1Id)
+            .input('referee2Id', sql.VarChar, formData.ref2Id == 'TBD'? null : formData.ref2Id)
             .input('period', sql.Int, formData.period)
             .input('eventId', sql.Int, formData.Event_ID)
             .query(`
@@ -23,6 +26,9 @@ router.post('/updateGameInfo', async (req, res, next) => {
             set Team1_ID = @team1Id,
             Team2_ID = @team2Id,
             scoreKeeperId = @scoreKeeperId,
+            monitorId = @monitorId,
+            referee1Id = @referee1Id,
+            referee2Id = @referee2Id,
             period = @period
             where Event_ID = @eventId
             `)
@@ -107,10 +113,26 @@ router.post('/gameInfo', async (req, res, next) => {
         FROM [user_role]
         left join users on user_role.userId=users.ID
         where roleId in (select id from roles where name in ('scorekeeper'))
-        order by preferredName`)
+        order by preferredName
+
+        SELECT userId,roleId,firstName,lastName, preferredName
+        FROM [user_role]
+        left join users on user_role.userId=users.ID
+        where roleId in (select id from roles where name in ('monitor'))
+        order by preferredName
+
+        SELECT userId,roleId,firstName,lastName, preferredName
+        FROM [user_role]
+        left join users on user_role.userId=users.ID
+        where roleId in (select id from roles where name in ('referee'))
+        order by preferredName
+        
+        `)
         data.game = result.recordsets[0][0]
         data.teams = result.recordsets[1]
         data.scoreKeepers = result.recordsets[2]
+        data.monitors = result.recordsets[3]
+        data.referees = result.recordsets[4]
         res.json({ message: 'Form submitted successfully!', data: data });
     }catch(err){
         next(err)
@@ -629,6 +651,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
+        console.log(game)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)

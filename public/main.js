@@ -409,6 +409,9 @@ async function toggleGameInfoForm(xform){
                 let team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
                 let team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
                 let scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
+                let monitorSelect = document.getElementById('gameInfoForm').querySelector('[name="monitorId"]')
+                let ref1Select = document.getElementById('gameInfoForm').querySelector('[name="ref1Id"]')
+                let ref2Select = document.getElementById('gameInfoForm').querySelector('[name="ref2Id"]')
                 document.getElementById('gameInfoForm').querySelector('[name="period"]').value=responseData.data.game.period
                 while (team1Select.options.length > 1) {
                     team1Select.remove(1);
@@ -418,6 +421,15 @@ async function toggleGameInfoForm(xform){
                 }
                 while (scoreKeeperSelect.options.length > 1) {
                     scoreKeeperSelect.remove(1);
+                }
+                while (monitorSelect.options.length > 1) {
+                    monitorSelect.remove(1);
+                }
+                while (ref1Select.options.length > 1) {
+                    ref1Select.remove(1);
+                }
+                while (ref2Select.options.length > 1) {
+                    ref2Select.remove(1);
                 }
                 responseData.data.teams.forEach(function(xoption) {
                     let option = document.createElement("option");
@@ -435,10 +447,41 @@ async function toggleGameInfoForm(xform){
                     option.value = xoption.userId;
                     scoreKeeperSelect.add(option);
                   })
+                  responseData.data.monitors.forEach(function(xoption) {
+                    let option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                    option.value = xoption.userId;
+                    monitorSelect.add(option);
+                  })
+                  responseData.data.referees.forEach(function(xoption) {
+                    let option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                    option.value = xoption.userId;
+                    ref1Select.add(option);
+                    option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                    option.value = xoption.userId;
+                    ref2Select.add(option);
+                  })
+                //   responseData.data.referees.forEach(function(xoption) {
+                //     let option = document.createElement("option");
+                //     option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                //     option.value = xoption.userId;
+                //     ref2Select.add(option);
+                //   })
                   team1Select.value = responseData.data.game.Team1_ID
                   team2Select.value = responseData.data.game.Team2_ID
                   if(responseData.data.game.scoreKeeperId !== null){
                     scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
+                  }
+                  if(responseData.data.game.monitorId !== null){
+                    monitorSelect.value = responseData.data.game.monitorId
+                  }
+                  if(responseData.data.game.referee1Id !== null){
+                    ref1Select.value = responseData.data.game.referee1Id
+                  }
+                  if(responseData.data.game.referee2Id !== null){
+                    ref2Select.value = responseData.data.game.referee2Id
                   }
                 
 
@@ -462,12 +505,20 @@ async function toggleGameInfoForm(xform){
 async function updateGameData(xele){
     let xform = xele.form
     let formData = new FormData(xform)
+    console.log(formData)
     if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 'TBD'){
       xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
         xform.querySelector('[name="Team1_ID"]').reportValidity()
         return
     }
+    console.log([formData.get('scoreKeeper_ID'), formData.get('monitorId'), formData.get('ref1Id'), formData.get('ref2Id')])
+    if(hasDuplicate([formData.get('scoreKeeper_ID'), formData.get('monitorId'), formData.get('ref1Id'), formData.get('ref2Id')])){
+        xform.querySelector('[name="scoreKeeper_ID"]').setCustomValidity('Crew members cannot hold multiple roles in the same game.')
+          xform.querySelector('[name="scoreKeeper_ID"]').reportValidity()
+          return
+      }
     xform.querySelector('[name="Team1_ID"]').setCustomValidity('')
+    xform.querySelector('[name="scoreKeeper_ID"]').setCustomValidity('')
     const response = await fetch('/games/updateGameInfo', {
         method: 'POST',
         headers: {
@@ -833,6 +884,16 @@ async function paymentSubmit(form,event,path) {
         const { url } = await response.json();
         window.location.href = url; // Redirect to Stripe Checkout
 }
-
+function hasDuplicate(values) {
+    console.log(values)
+    console.log(values.length)
+    const filteredValues = values.filter(val => val !== 'TBD'); // Remove 'TBD' values
+    console.log(filteredValues)
+    console.log(filteredValues.length)
+    const uniqueValues = new Set(filteredValues);
+    console.log(uniqueValues)
+    console.log(uniqueValues.length)
+    return uniqueValues.size < filteredValues.length; // Check for duplicates
+}
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

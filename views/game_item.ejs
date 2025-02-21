@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-        <form class="listItem" action="/games/activeGame/<%= game.Event_ID %>" method="get">
+        <form class="" action="/games/activeGame/<%= game.Event_ID %>" method="get">
             <!-- <input type="hidden" name="Team1_ID" value="<%# game.Team1_ID %>">
             <input type="hidden" name="Team2_ID" value="<%# game.Team2_ID %>"> -->
             <!-- <input type="hidden" name="Event_ID" value="<%# game.Event_ID %>"> -->
@@ -39,9 +39,31 @@
             </div> 
             <div class="playerTag">
                 <div class="playerName" style="text-align: center;">
-                    <%= game.scoreKeeper == null ? 'TBD' : game.scoreKeeper %>
+                    SK: <%= game.scoreKeeper == null ? 'TBD' : game.scoreKeeper %>
                 </div>
-            </div>                   
+            </div>   
+            <% console.log(game) %>
+            <% if (game.monitor) { %>
+                <div class="playerTag">
+                    <div class="playerName" style="text-align: center;">
+                        Mon: <%= game.monitor == null ? 'TBD' : game.monitor %>
+                    </div>
+                </div> 
+            <% } %>       
+            <% if (game.referee1) { %>         
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    Ref 1: <%= game.referee1 == null ? 'TBD' : game.referee1 %>
+                </div>
+            </div> 
+            <% } %> 
+            <% if (game.referee2) { %> 
+            <div class="playerTag">
+                <div class="playerName" style="text-align: center;">
+                    Ref 2: <%= game.referee2 == null ? 'TBD' : game.referee2 %>
+                </div>
+            </div> 
+            <% } %> 
         </div>
         </button>
     </form>
