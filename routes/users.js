@@ -114,7 +114,7 @@ router.get('/:userId/teams', async (req,res, next)=>{
         const result = await pool.request()
         .input('userId', sql.Int, req.params.userId)
         .query(`
-            select userId, preferredName,lastName, teamId, t.fullName
+            select userId, preferredName,lastName, ut.teamId, t.fullName
             from user_team as ut 
             LEFT join users as u on ut.userId=u.ID
             left join teams as t on ut.teamId=t.id
