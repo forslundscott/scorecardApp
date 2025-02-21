@@ -118,8 +118,8 @@
         <br>
         <br>
         <% for(let league of data.leagues){ %>
-            <input type="checkbox" name="leagueId_<%= league.abbreviation %>" id="leagueId_<%= league.abbreviation %>"><label for="leagueId_<%= league.abbreviation %>"><%= league.shortName %></label>
-            <select name="<%=league.abbreviation %>_teamId" id="">
+            <input type="checkbox" name="leagueId_<%= league.leagueId %>" id="leagueId_<%= league.leagueId %>"><label for="leagueId_<%= league.leagueId %>"><%= league.shortName %></label>
+            <select name="<%=league.leagueId %>_teamId" id="">
                 <option value="FA">Free Agent</option>
                 <% for(let team of league.teams) { %>
                     <option value="<%= team.id %>"><%= team.shortName %></option>

@@ -8,8 +8,9 @@ router.post(['/getLeagues'], async (req,res,next)=>{
     try{
         const request = pool.request()
         let result = await request.query(`
-            select * from leagues as l
-            LEFT join league_season as ls on l.abbreviation=ls.leagueId
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+            from leagues as l
+            LEFT join league_season as ls on l.leagueId=ls.leagueId
             where ls.seasonId = '${req.body.seasonId}'
         `)
 
@@ -72,8 +73,10 @@ router.get('/', async (req,res, next)=>{
             user: req.user
         }
         const request = pool.request()
-        const result = await request.query(`select * from leagues as l
-            left join league_season as ls on l.abbreviation=ls.leagueId
+        const result = await request.query(`
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+             from leagues as l
+            left join league_season as ls on l.leagueId=ls.leagueId
             where seasonId in (select seasonId from seasons where active = 1)
         `)
         data.leagues = result.recordset

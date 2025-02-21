@@ -169,10 +169,10 @@ router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, nex
         .input('seasonId', sql.Int, req.params.seasonId)
         .query(`
 
-            select * 
+            select ls.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
             from league_season as ls 
             left join leagues as l 
-                on ls.leagueId = l.abbreviation
+                on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
             and not exists (
                 select 1 
@@ -186,7 +186,7 @@ router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, nex
             
             select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName, u.firstName, u.lastName
             from seasonRegistration_leagueTeam as srl
-            left join leagues as l on srl.leagueId = l.abbreviation
+            left join leagues as l on srl.leagueId = l.leagueId
             left join teams as t on srl.teamId = t.id
             left join users as u on srl.userId = u.id
             where srl.seasonId = @seasonId
@@ -214,10 +214,11 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
         .query(`
             SELECT * from users
             WHERE ID = @userId;
-            select * 
+
+            select ls.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
             from league_season as ls 
             left join leagues as l 
-                on ls.leagueId = l.abbreviation
+                on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
             and not exists (
                 select 1 
@@ -231,11 +232,11 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             
             select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
             from seasonRegistration_leagueTeam as srl
-            left join leagues as l on srl.leagueId = l.abbreviation
+            left join leagues as l on srl.leagueId = l.leagueId
             left join teams as t on srl.teamId = t.id
             where srl.seasonId = @seasonId and srl.userId = @userId
             `)
-            
+            console.log('testing123')
             data.userAttributes = result.recordsets[0][0]
             data.userAttributes.dob = Number(data.userAttributes.dob)
             data.leagues = result.recordsets[1]
@@ -248,16 +249,17 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             data.userAttributes.medicalConditions = data.userAttributes.medicalConditions
             ? data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
             : [];
-            console.log(data.userAttributes)
+            console.log(data.leagues)
             // data.userAttributes.medicalConditions = data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
             // console.log(data.userAttributes.allergies.split(',').map(allergy => allergy.trim()))
             for(let league of data.leagues){
+                console.log(league.leagueId)
                 result = await pool.request()
-                .input('leagueId', sql.VarChar, league.leagueId)
+                .input('leagueId', sql.VarChar, `${league.leagueId}`)
                 .input('seasonId', sql.Int, req.params.seasonId)
                 .query(`
                     select * from teams
-                    where league = @leagueId and seasonId = @seasonId
+                    where leagueId = @leagueId and seasonId = @seasonId
                     `)
                 league.teams = result.recordset
             }

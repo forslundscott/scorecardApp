@@ -104,11 +104,12 @@ router.post('/gameInfo', async (req, res, next) => {
 
         SELECT id 
         from teams
-        where league in (
-            select league 
+        where leagueId in (
+            select leagueId 
             from games
             where Event_ID = @eventId
             )
+
         SELECT userId,roleId,firstName,lastName, preferredName
         FROM [user_role]
         left join users on user_role.userId=users.ID
@@ -197,19 +198,22 @@ router.get(['/completedGames'], async (req,res, next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
-        const result = await pool.request().query(`SELECT t1.*, 
-                                                t2.color as Team1Color, 
-                                                t3.color as Team2Color,
-                                                t4.color as LeagueColor,
-                                                t5.preferredName as scoreKeeper
-                                                FROM [scorecard].[dbo].[games] t1 
-                                                left join teams as t2 
-                                                on t1.Team1_ID=t2.id and t1.season=t2.season
-                                                left join teams as t3 
-                                                on t1.Team2_ID=t3.id and t1.season=t3.season
-                                                LEFT join leagues as t4 on t1.league=t4.abbreviation
-                                                LEFT join users as t5 on t1.scoreKeeperId=t5.ID
-                                                where t1.[Status]=2`)
+        const result = await pool.request()
+        .query(`
+            SELECT t1.*, 
+            t2.color as Team1Color, 
+            t3.color as Team2Color,
+            t4.color as LeagueColor,
+            t5.preferredName as scoreKeeper
+            FROM [scorecard].[dbo].[games] t1 
+            left join teams as t2 
+            on t1.Team1_ID=t2.id and t1.season=t2.seasonId
+            left join teams as t3 
+            on t1.Team2_ID=t3.id and t1.season=t3.seasonId
+            LEFT join leagues as t4 on t1.leagueId=t4.leagueId
+            LEFT join users as t5 on t1.scoreKeeperId=t5.ID
+            where t1.[Status]=2
+            `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -223,19 +227,21 @@ router.get(['/rescheduleGames'], async (req,res, next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
-        const result = await pool.request().query(`SELECT t1.*, 
-                                                t2.color as Team1Color, 
-                                                t3.color as Team2Color,
-                                                t4.color as LeagueColor,
-                                                t5.preferredName as scoreKeeper
-                                                FROM [scorecard].[dbo].[games] t1 
-                                                left join teams as t2 
-                                                on t1.Team1_ID=t2.id and t1.season=t2.season
-                                                left join teams as t3 
-                                                on t1.Team2_ID=t3.id and t1.season=t3.season
-                                                LEFT join leagues as t4 on t1.league=t4.abbreviation
-                                                LEFT join users as t5 on t1.scoreKeeperId=t5.ID
-                                                where t1.[Status]=3`)
+        const result = await pool.request().query(`
+            SELECT t1.*, 
+            t2.color as Team1Color, 
+            t3.color as Team2Color,
+            t4.color as LeagueColor,
+            t5.preferredName as scoreKeeper
+            FROM [scorecard].[dbo].[games] t1 
+            left join teams as t2 
+            on t1.Team1_ID=t2.id and t1.season=t2.seasonId
+            left join teams as t3 
+            on t1.Team2_ID=t3.id and t1.season=t3.seasonId
+            LEFT join leagues as t4 on t1.leagueId=t4.leagueId
+            LEFT join users as t5 on t1.scoreKeeperId=t5.ID
+            where t1.[Status]=3
+        `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -430,8 +436,9 @@ router.post(['/eventLog'], async (req,res,next)=>{
         data.seasons = result.recordset
         result = await pool.request()
         .input('seasonId',sql.Int,data.season.seasonId)
-        .query(`SELECT * from league_season ls
-            LEFT join leagues l on ls.leagueId=l.abbreviation
+        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            from league_season ls
+            LEFT join leagues l on ls.leagueId=l.leagueId
             where seasonId = @seasonId
         `)
         data.leagues = result.recordset

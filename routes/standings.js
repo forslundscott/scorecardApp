@@ -84,10 +84,11 @@ router.get('/:type/:league', async (req, res, next) => {
 })
 router.get('/', async (req,res, next)=>{
     try{
+        console.log('test standings')
         const request = pool.request()
         const result = await request
-        .query(`select shortName, abbreviation from leagues
-            where abbreviation in (
+        .query(`select shortName, abbreviation, leagueId from leagues
+            where leagueId in (
             select ls.leagueId from league_season as ls
             left join seasons as s on ls.seasonId=s.seasonId
             where s.active = 1
