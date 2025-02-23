@@ -658,7 +658,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
-        console.log(game)
+        console.log(data)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)
