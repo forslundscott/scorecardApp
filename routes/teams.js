@@ -26,11 +26,12 @@ router.post(['/getTeams'], async (req,res,next)=>{
         .input('leagueId', sql.VarChar, req.body.leagueId)
         .input('seasonId', sql.VarChar, req.body.seasonId)
         .query(`
-        SELECT * 
-        FROM teams
-        WHERE league = @leagueId
-        AND seasonId = @seasonId;
+        select slt.seasonId, slt.leagueId, t.fullName,t.shortName,t.color,t.keeper,t.captain, t.abbreviation, t.teamId from seasonleagueteam slt
+        left join teams as t on slt.teamId=t.teamId
+        WHERE slt.leagueId = @leagueId
+        AND slt.seasonId = @seasonId;
         `)
+        console.log(result.recordset)
         res.json({ message: 'Success', teams: result.recordset })
     }catch(err){
         next(err)
@@ -142,8 +143,7 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
         }
 
         // Add team to database
-        const request = pool.request()
-        await request
+        await pool.request()
         .input('abbreviation', sql.VarChar, req.body.abbreviation)
         .input('teamName', sql.VarChar, req.body.teamName)
         .input('leagueId', sql.VarChar, req.body.leagueId)
@@ -152,8 +152,16 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
         .query(`
             IF NOT EXISTS (SELECT 1 FROM teams WHERE id = @abbreviation)
             BEGIN
-                INSERT INTO teams (id, fullName, shortName, league, seasonId, abbreviation, color)
-                VALUES (@abbreviation, @teamName, @teamName, @leagueId, @seasonId, @abbreviation, @color)
+                DECLARE @teamId INT;
+
+                INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color)
+                VALUES (@abbreviation, @teamName, @teamName, @leagueId, @seasonId, @abbreviation, @color);
+
+                SET @teamId = SCOPE_IDENTITY();
+
+                insert into seasonLeagueTeam (seasonId, leagueId, teamId)
+                values(@seasonId,@leagueId,@teamId);
+
             END
             `)
         res.redirect(302,'/teams')

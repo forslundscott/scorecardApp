@@ -5,14 +5,14 @@
 <body>
     <form class="listItem" action="" method="get">
         <button class="playerButton" name="type" value="team" onclick="" style="height: 100%;">
-            <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick; border-color: <%-league.color%>; ">
+            <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick; border-color: <%-league.leagueColor%>; ">
                 <div style="width: 100%;">
                     <div class="playerName" style="text-align: center;">
-                        <%= league.shortName %>
+                        <%= league.leagueShortName %>
                     </div>
                 </div>
                 <div class="playerName" style="text-align: center;">  
-                    <%= league.abbreviation %>
+                    <%= league.leagueAbbreviation %>
                 </div>                  
             </div>
         </button>

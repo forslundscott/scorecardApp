@@ -808,8 +808,8 @@ async function getTeams(xform){
                     team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
                     results.teams.forEach(team => {
                         let option = document.createElement('option');
-                        option.value = team.id;
-                        option.text = team.id;
+                        option.value = team.teamId;
+                        option.text = team.abbreviation;
                         team1.appendChild(option);
                         
                     });
@@ -821,13 +821,13 @@ async function getTeams(xform){
                     team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
                     results.teams.forEach(team => {
                         let option1 = document.createElement('option');
-                        option1.value = team.id;
-                        option1.text = team.id;
+                        option1.value = team.teamId;
+                        option1.text = team.abbreviation;
                         team1.appendChild(option1);
                         
                         let option2 = document.createElement('option');
-                        option2.value = team.id;
-                        option2.text = team.id;
+                        option2.value = team.teamId;
+                        option2.text = team.abbreviation;
                         team2.appendChild(option2);
                         
                     });
@@ -859,7 +859,7 @@ async function getLeagues(xform){
             results.leagues.forEach(league => {
                 let option1 = document.createElement('option');
                 option1.value = league.leagueId;
-                option1.text = league.name;
+                option1.text = league.leagueName;
                 league1.appendChild(option1);
             });
           } else {

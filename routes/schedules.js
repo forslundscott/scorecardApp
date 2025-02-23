@@ -574,7 +574,7 @@ router.get(['/test'], async (req,res)=>{
         -- You can handle the error as needed, e.g., raise an error, log it, etc.
         THROW;
     END CATCH;`)
-        // console.log(await getLeaguesForScheduler('Soccer', 'Indoor'))
+
     res.status(204).send()
 })  
 router.get(['/item/:scheduleId'], async (req, res, next) => {

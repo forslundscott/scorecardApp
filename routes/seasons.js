@@ -169,7 +169,7 @@ router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, nex
         .input('seasonId', sql.Int, req.params.seasonId)
         .query(`
 
-            select ls.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
             from league_season as ls 
             left join leagues as l 
                 on ls.leagueId = l.leagueId
@@ -215,7 +215,7 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             SELECT * from users
             WHERE ID = @userId;
 
-            select ls.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
             from league_season as ls 
             left join leagues as l 
                 on ls.leagueId = l.leagueId

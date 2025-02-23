@@ -68,7 +68,11 @@
         <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="newLeague" onclick="window.location.href = '/leagues/newLeague';" >New League</button>
        <% } else if (data.page == 'standings') { %>
         <% if (data.hasOwnProperty('list')) { %>
-        <%= data.league %> Standings
+          <%= data.season.seasonName %>
+          <br>
+        <%= data.league.name %>
+        <br>
+        <%= data.type %> Standings
           <br>
           <button style="font-size: 100%;" class="itemFormat primaryStyle primaryBorder" name="type" value="exportCSV" onclick="exportStandings('<%= data.type%>', '<%=data.league%>')" >Export to CSV</button>
         <% }else { %>

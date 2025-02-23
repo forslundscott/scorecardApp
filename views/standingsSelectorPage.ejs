@@ -1,0 +1,23 @@
+<form action="/standings" method="post" class="textCenter">
+    <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getLeagues(this.form)" required>
+
+        <% for(let i=0; i< data.seasons.length; i++) {%>
+            <option value="<%= data.seasons[i].seasonId%>" <%= data.seasons[i].seasonId== data.season.seasonId? 'selected' : ''%>><%= data.seasons[i].seasonName%></option>
+        <% } %>
+    </select>
+    <select name="leagueId" id="leagueId" class="primaryStyle" style="font-size: 100%;" required>
+        <option value="" disabled selected hidden>League</option>
+        <% for(let i=0; i< data.leagues.length; i++) {%>
+            <option value="<%= data.leagues[i].leagueId%>"><%= data.leagues[i].leagueShortName%></option>
+        <% } %>
+    </select>
+    <select name="type" id="type" class="primaryStyle" style="font-size: 100%;" required>
+        <option value="" disabled selected hidden>Type</option>
+        <option value="team">Team</option>
+        <option value="individual">Individual</option>
+        <option value="keeper">Keeper</option>
+    </select>
+    <br>
+    <br>
+    <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">GO</button>
+</form>
