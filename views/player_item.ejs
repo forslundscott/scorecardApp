@@ -4,9 +4,9 @@
 </head>
 <body>
     <% console.log(player) %>
-        <form class="listItem" action="javascript:void(0);" id="<%= player.userId + team.id %>" style="width: 96%;float: <%=side %>;">
+        <form class="listItem" action="javascript:void(0);" id="<%= player.userId + team.teamId %>" style="width: 96%;float: <%=side %>;">
             <input type="hidden" name="playerId" value="<%= player.userId %>">
-            <input type="hidden" name="teamName" value="<%= team.id %>">
+            <input type="hidden" name="teamName" value="<%= team.teamId %>">
             <input type="hidden" name="realTime" value="">
             <input type="hidden" name="periodTime" value="">
             <input type="hidden" name="period" value="">

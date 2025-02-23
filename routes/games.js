@@ -333,13 +333,13 @@ router.post(['/eventLog'], async (req,res,next)=>{
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
-             .query(`update scorecard.dbo.teams set captain = @playerId where id = @teamName`)
+             .query(`update scorecard.dbo.teams set captain = @playerId where teamId = @teamName`)
              res.json({ message: 'Reload', data: data })
          }else if(req.body.type == 'makekeeper'){
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
-             .query(`update scorecard.dbo.teams set keeper = @playerId where id = @teamName`)            
+             .query(`update scorecard.dbo.teams set keeper = @playerId where teamId = @teamName`)            
              res.json({ message: 'Reload', data: data })
          }else{
              await pool.request()
@@ -369,6 +369,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .input('eventId', sql.Int, req.body.Event_ID)
+             .input('seasonId',sql.VarChar,req.body.season)
              .query(`
              DECLARE @Team1_ID VARCHAR(255);
              DECLARE @Team2_ID VARCHAR(255)
@@ -381,7 +382,8 @@ router.post(['/eventLog'], async (req,res,next)=>{
              Select * 
              from scorecard.dbo.rosterGameStats(
                  @teamName,
-                 @eventId
+                 @eventId,
+                 @seasonId
                  ) 
              where userId = @playerId
              UNION ALL
@@ -393,6 +395,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              `)
              try{
                  data.player = result.recordsets[0][0]
+                 console.log(data.player)
                  data.team1.team = result.recordsets[1][0].teamName
                  data.team2.team = result.recordsets[2][0].teamName
                  if(result.recordsets[1].length == 0){
@@ -688,6 +691,7 @@ router.get('/', async (req,res, next)=>{
         const result = await pool.request()
         .query(`Select * from gamesList() order by startUnixTime, location `)
         data.games = result.recordset
+        console.log(data.games)
         res.render('index.ejs',{data: data}) 
     }catch(err){
         next(err)

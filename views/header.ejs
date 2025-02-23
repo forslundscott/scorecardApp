@@ -97,7 +97,7 @@
             <div style="float: left; width: 100%; height: 100%;" onclick="toggleTeamForm(this.parentElement)">
               <img src="/images/<%=data.teams[0].abbreviation%>.png" alt="<%=data.teams[0].abbreviation%> Logo" class="headerTopRow">
               <div style="float: left; width: 83%;"><%= data.teams[0].abbreviation %></div>
-              <div style="float: left; width: 17%;" id="<%= data.teams[0].id + "Score" %>"><%= data.teams[0].score %></div>
+              <div style="float: left; width: 17%;" id="<%= data.teams[0].teamId + "Score" %>"><%= data.teams[0].score %></div>
             </div>
           </form>
         </div>
@@ -145,7 +145,7 @@
             <div style="float: right; width: 100%; height: 100%;" onclick="toggleTeamForm(this.parentElement)">
               <img src="/images/<%=data.teams[1].abbreviation%>.png" alt="<%=data.teams[1].abbreviation%> Logo" class="headerTopRow">
               <div style="float: right; width: 83%;"><%= data.teams[1].abbreviation %></div>
-              <div style="float: right; width: 17%;" id="<%= data.teams[1].id + "Score" %>"><%= data.teams[1].score %></div>
+              <div style="float: right; width: 17%;" id="<%= data.teams[1].teamId + "Score" %>"><%= data.teams[1].score %></div>
             </div>
           </form>
         </div>
