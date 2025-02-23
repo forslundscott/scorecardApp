@@ -555,12 +555,17 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
         .input('team1Id', sql.VarChar, eventResult.Team1_ID)
         .input('team2Id', sql.VarChar, eventResult.Team2_ID)
         .query(`
+            declare @seasonId int;
+
+            select top 1 @seasonId = season from games where event_id = @eventId
+
             Select * 
             from [scorecard].[dbo].[teams] 
             where id =@team1Id 
             and keeper in (Select userId 
                 from [scorecard].[dbo].[user_team] 
                 where teamid =@team1Id
+                and seasonId = @seasonId
                 union all
                 Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team1Id
                 and eventId = @eventId
@@ -572,6 +577,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             and keeper in (Select userId 
                 from [scorecard].[dbo].[user_team] 
                 where teamid =@team2Id
+                and seasonId = @seasonId
                 union all
                 Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team2Id
                 and eventId = @eventId
@@ -629,6 +635,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
                 team2.score = result.recordsets[5][0].score
             }
             game = result.recordsets[6][0]
+            console.log(team1.players)
         if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
             if(game.period<game.maxPeriods){
                 game.period=game.period +1
@@ -658,7 +665,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
-        console.log(data)
+        // console.log(data)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)

@@ -67,6 +67,7 @@ router.post(['/addPlayer'], async (req,res,next)=>{
             `)
         }
         if(req.body.playerType == 'Rostered'){
+            console.log('rostered')
              await pool.request()
             .input('email', sql.VarChar, req.body.email)
             .input('teamId', sql.VarChar, req.body.teamId)
