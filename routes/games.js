@@ -102,9 +102,10 @@ router.post('/gameInfo', async (req, res, next) => {
         from games 
         where Event_ID = @eventId
 
-        SELECT id 
-        from teams
-        where leagueId in (
+        SELECT t.teamId, t.abbreviation  
+        from teams as t
+        left join seasonleagueteam as slt on t.teamId=slt.teamId
+        where slt.leagueId in (
             select leagueId 
             from games
             where Event_ID = @eventId

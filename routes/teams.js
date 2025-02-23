@@ -26,7 +26,8 @@ router.post(['/getTeams'], async (req,res,next)=>{
         .input('leagueId', sql.VarChar, req.body.leagueId)
         .input('seasonId', sql.VarChar, req.body.seasonId)
         .query(`
-        select slt.seasonId, slt.leagueId, t.fullName,t.shortName,t.color,t.keeper,t.captain, t.abbreviation, t.teamId from seasonleagueteam slt
+        select slt.seasonId, slt.leagueId, t.fullName,t.shortName,t.color,t.keeper,t.captain, t.abbreviation, t.teamId 
+        from seasonleagueteam slt
         left join teams as t on slt.teamId=t.teamId
         WHERE slt.leagueId = @leagueId
         AND slt.seasonId = @seasonId;
@@ -50,7 +51,7 @@ router.post(['/addPlayer'], async (req,res,next)=>{
             .input('lastName', sql.VarChar, req.body.lastName)
             .input('preferredName', sql.VarChar, req.body.preferredName == '' ? req.body.firstName : req.body.preferredName)
             .input('email', sql.VarChar, req.body.email)
-            .input('sport', sql.VarChar, req.body.sport)
+            .input('sport', sql.VarChar, req.body.sport ?? 'soccer')
             .input('rating', sql.Decimal(10,3), 3)
             .query(`            
             EXECUTE  [dbo].[insert_user] 

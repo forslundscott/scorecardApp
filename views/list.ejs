@@ -1,5 +1,5 @@
     <% if (data.page.includes('activeGame')) { %>
-        <% if (team.id !== 'TBD' && team.players.length > 0) { %>
+        <% if (team.teamId !== 1000000024 && team.players.length > 0) { %>
             <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)] ? team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)]: team.players[0], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>

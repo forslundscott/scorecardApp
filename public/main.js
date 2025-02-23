@@ -431,14 +431,16 @@ async function toggleGameInfoForm(xform){
                 while (ref2Select.options.length > 1) {
                     ref2Select.remove(1);
                 }
+                // console.log(responseData.data)
                 responseData.data.teams.forEach(function(xoption) {
+                    console.log(xoption.teamId)
                     let option = document.createElement("option");
-                    option.text = xoption.id;
-                    option.value = xoption.id;
+                    option.text = xoption.abbreviation;
+                    option.value = xoption.teamId;
                     team1Select.add(option);
                     option = document.createElement("option");
-                    option.text = xoption.id;
-                    option.value = xoption.id;
+                    option.text = xoption.abbreviation;
+                    option.value = xoption.teamId;
                     team2Select.add(option);
                   })
                   responseData.data.scoreKeepers.forEach(function(xoption) {
@@ -506,7 +508,8 @@ async function updateGameData(xele){
     let xform = xele.form
     let formData = new FormData(xform)
     console.log(formData)
-    if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 'TBD'){
+    // 1000000024 is teamId for TBD
+    if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 1000000024){ 
       xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
         xform.querySelector('[name="Team1_ID"]').reportValidity()
         return
