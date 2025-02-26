@@ -13,12 +13,13 @@ function checkAuthenticated(req, res, next) {
 function checkNotAuthenticated(req, res, next) {
     try{
         if (req.isAuthenticated()) {
-            if (req.hostname.startsWith('app.')) {
-                const mainDomain = req.get('host').replace(/^app\./, '');
-                // return res.redirect(301, `${req.protocol}://${mainDomain}${req.originalUrl}`);
-                return res.redirect(301,'https://envoroot.com/')
-            }
-            return res.redirect('/')
+            // if (req.hostname.startsWith('app.')) {
+            //     const redirectUrl = req.originalUrl || 'https://envoroot.com'
+            //     // return res.redirect(301, `${req.protocol}://${mainDomain}${req.originalUrl}`);
+            //     return res.redirect(301, redirectUrl)
+            // }
+            const redirectUrl = req.originalUrl || req.hostname.startsWith('app.') ? `https://envoroot.com/`:'/'
+            return res.redirect(redirectUrl)
         }
         next()
     }catch(err){

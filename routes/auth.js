@@ -24,7 +24,8 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
         if (!user) { return res.render('login.ejs', {messages: info}) }
         req.session.passport = {}
         req.session.passport.user = user.id
-        const redirectUrl = req.session.returnTo || `${req.protocol}://${req.get('host').replace(/^app\./, '')}`;
+        console.log(`${req.protocol}://${req.get('host').replace(/^app\./, '')}`)
+        const redirectUrl = req.session.returnTo || req.hostname.startsWith('app.') ? `https://envoroot.com/`:'/';
         delete req.session.returnTo;
         // res.json({ url: redirectUrl })
         res.redirect(redirectUrl);
