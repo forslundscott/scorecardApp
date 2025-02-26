@@ -129,6 +129,7 @@ router.get('/:seasonId/:type/:league', async (req, res, next) => {
         .input('seasonId', sql.Int, req.params.seasonId) 
         .execute(procedureName)
         data.list = result.recordsets[0]
+        console.log(data.list)
         result = await pool.request()
         .input('seasonId', sql.Int, req.params.seasonId) 
         .query(`

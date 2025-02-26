@@ -260,18 +260,19 @@ router.get(['/timer'], async (req,res,next)=>{
             WHERE event_Id = @eventId`)
             res.redirect('/games/readyforupload')
         }else if(req.query.timerState == 2){
-            const result = await pool.request()
-            .input('eventId', sql.Int, req.query.Event_ID)
-            .query(`select * from winningTeam(@eventId)`)
-            if(result.recordset[0].length==1){
-                await pool.request()
-                .input('eventId', sql.Int, req.query.Event_ID)
-                .input('teamName',sql.VarChar,result.recordset[0].teamName)
-                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
-                select top 1 Teamid,fullName,shortName,color,captain,player,email, @eventId as Event_ID, 'false' 
-                from winningTeamContact(@teamName)
-                where giftCards = 1`)
-            }  
+            // not needed anymore
+            // const result = await pool.request()
+            // .input('eventId', sql.Int, req.query.Event_ID)
+            // .query(`select * from winningTeam(@eventId)`)
+            // if(result.recordset[0].length==1){
+            //     await pool.request()
+            //     .input('eventId', sql.Int, req.query.Event_ID)
+            //     .input('teamName',sql.VarChar,result.recordset[0].teamName)
+            //     .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
+            //     select top 1 Teamid,fullName,shortName,color,captain,player,email, @eventId as Event_ID, 'false' 
+            //     from winningTeamContact(@teamName)
+            //     where giftCards = 1`)
+            // }  
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`UPDATE [scorecard].[dbo].[games] 
@@ -351,7 +352,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              .input('value',sql.Int, req.body.value)
              .input('type', sql.VarChar, req.body.type)
              .input('eventId', sql.VarChar, req.body.Event_ID)
-             .input('opponentKeeper',sql.VarChar, req.body.type == 'owngoal' ? "'"+req.body.keeper+"'": req.body.type == 'goal' ? "'"+req.body.opponentKeeper+"'" : null)
+             .input('opponentKeeper',sql.VarChar, req.body.type == 'owngoal' ? req.body.keeper: req.body.type == 'goal' ? req.body.opponentKeeper : null)
              .input('season',sql.VarChar,req.body.season)
              .input('subseason',sql.VarChar,req.body.subseason)
              .query(`insert into scorecard.dbo.eventLog (playerId, 
