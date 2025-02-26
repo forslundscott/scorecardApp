@@ -13,6 +13,11 @@ function checkAuthenticated(req, res, next) {
 function checkNotAuthenticated(req, res, next) {
     try{
         if (req.isAuthenticated()) {
+            if (req.hostname.startsWith('app.')) {
+                const mainDomain = req.get('host').replace(/^app\./, '');
+                // return res.redirect(301, `${req.protocol}://${mainDomain}${req.originalUrl}`);
+                return res.redirect(301,'https://envoroot.com/')
+            }
             return res.redirect('/')
         }
         next()

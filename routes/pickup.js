@@ -163,10 +163,5 @@ router.get('/', async (req,res, next)=>{
         next(err)
     }
 });
-// Define a POST route for `/users`
-// router.post('/', (req, res) => {
-//   res.send('Create a new user');
-// });
 
-// Export the router so it can be used in other files
 module.exports = router;

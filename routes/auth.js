@@ -11,6 +11,7 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
+        console.log(req.get('host'))
         res.render('login.ejs')
     }catch(err){
         console.error('Error:', err)
@@ -23,8 +24,9 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
         if (!user) { return res.render('login.ejs', {messages: info}) }
         req.session.passport = {}
         req.session.passport.user = user.id
-        const redirectUrl = req.session.returnTo || '/';
+        const redirectUrl = req.session.returnTo || `${req.protocol}://${req.get('host').replace(/^app\./, '')}`;
         delete req.session.returnTo;
+        // res.json({ url: redirectUrl })
         res.redirect(redirectUrl);
     }catch(err){
         console.error('Error:', err)
@@ -145,7 +147,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
     const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     const mailOptions = {
-      from: process.env.ORG_EMAIL,
+      from: `"Greater Lansing Open Soccer (GLOS)" <${process.env.ORG_EMAIL}>`,
       to: user.email,
       subject: 'Password Reset',
       text: `Click the following link to reset your password: ${resetLink}`,

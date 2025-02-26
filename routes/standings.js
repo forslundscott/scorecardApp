@@ -69,6 +69,7 @@ router.get('/site/:seasonId/:type/:league', async (req, res, next) => {
             user: req.user
         }
     try{
+        console.log(req.hostname)
         const procedureMap = {
             keeper: 'keeperStandings',
             individual: 'individualStandings',

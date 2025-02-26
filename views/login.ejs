@@ -35,7 +35,7 @@
         </style>
     </head>    
         <body>
-            <form id="newPlayerForm" class=" primaryStyle" action="/auth/login" method="post" style="text-align: center; ">
+            <form id="loginForm" class=" primaryStyle" action="/auth/login" method="post" style="text-align: center; ">
                     <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
                         Login
                     </div>
@@ -58,5 +58,23 @@
                     <br>
                     <button type="button" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;" onclick="window.location.href='/auth/createProfile'">Create Profile</button>
             </form>
+            <script>
+            //     document.getElementById('loginForm').addEventListener('submit', function(event) {
+            //         handleSubmit(this,event)
+            //     });
+            // async function handleSubmit(form,event) {
+            //     event.preventDefault();
+            //         let formData = new FormData(form)
+            //         const response = await fetch(`/auth/login`, {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/x-www-form-urlencoded',
+            //             },
+            //             body: new URLSearchParams(formData).toString(),
+            //         })
+            //     const { url } = await response.json();
+            //     window.location.href = url; // Redirect after login
+            // }
+            </script>
         </body>
 </html>

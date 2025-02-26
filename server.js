@@ -13,6 +13,16 @@ const methodOverride = require('method-override')
 const initializePassport = require('./passport-config')
 const pool = require(`./db`)
 const sql = require('mssql');
+const cors = require('cors');
+
+const corsOptions = {
+  origin: ['http://app.localhost.com:3000','http://localhost.com:3000','https://envoroot.com','https://app.envoroot.com'], // Allow the app subdomain
+  methods: ['GET', 'POST', 'OPTIONS'], // List allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
+  credentials: true, // Allow credentials if needed
+};
+
+app.use(cors(corsOptions));
 
 const sequelize = new Sequelize({
     dialect: 'mssql',
