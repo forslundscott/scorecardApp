@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: Sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             background-image: url('/silverBackground.jpg');
                 background-size: cover;
                 background-position: center;
@@ -62,6 +62,39 @@
             color: #121212; 
         }
         
+        .color-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-btn {
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 100px;
+  }
+
+  .dropdown-menu div {
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .red { background: #ff0000; }
+  .green { background: #00ff00; }
+  .blue { background: #0000ff; }
+
+  .dropdown-menu div:hover {
+    opacity: 0.8;
+  }
         /* input::selection, textarea::selection {
             background: #ceff00;
             color: #121212;
@@ -71,12 +104,12 @@
 </head>
 <body style="text-align: center; width: 100%;" >
     <div style="background-image: linear-gradient(180deg, #CEFF00 0%, #4E6100 100%); width: 100%;">
-         <img height="200vh" src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
-        <h1 style="color: #f4f4f4;"><%= data.season.seasonName %> Registration</h1>
+         <img style="padding: 12px 0 0 0;" height="200vh" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" onclick="window.location.href='https://envoroot.com/'">
+        <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;"><%= data.season.seasonName %> Registration</h1>
     </div>
    
     
-    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post">
+    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;">
         <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
@@ -86,12 +119,12 @@
         <input type="tel" name="phone" placeholder="Phone Number" value="<%= data.userAttributes.phone ? data.userAttributes.phone : ''  %>" required>
         <br>
         <br>
-        <label for="dob">Date of Birth:</label>
+        <label for="dob"><b>Date of Birth:</b></label>
         <% console.log(data.userAttributes.dob) %>
         <input type="date" name="dob" value="<%= (data.userAttributes.dob && data.userAttributes.dob !== '' && data.userAttributes.dob !== 0) ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : '' %>" required>
         <br>
         <br>
-        <label for="gender">Gender:</label>
+        <label for="gender"><b>Gender:</b></label>
         <br>
 
         <input type="radio" name="gender" id="gender_male" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="gender_male">Male</label>
@@ -101,7 +134,7 @@
         <input type="radio" name="gender" id="gender_unspecified" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="gender_unspecified">Unspecified</label>
         <br>
         <br>
-        <label for="skill">Rate your Skill Level:</label>
+        <label for="skill"><b>Rate your Experience Level:</b></label>
         <select name="skill" id="" required>
             <option value="1" <%= data.userAttributes.skill == '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
             <option value="2" <%= data.userAttributes.skill == '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
@@ -110,31 +143,41 @@
             <option value="5" <%= data.userAttributes.skill == '5' ? 'selected' : ''  %>>5 - I live for soccer</option>
         </select>
         <br><br>
-        <label for="discounted">Are you a student, teacher, first responder, or member of the military?:</label>
+        <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
         <br>
         <br>
         
         <input type="radio" name="discounted" id="discounted_yes" value="1" <%= data.userAttributes.discounted && data.userAttributes.discounted === 1 ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
         <input type="radio" name="discounted" id="discounted_no" value="0" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== 1 ? 'checked' : ''  %>><label for="discounted_no">No</label>
-        <br>
-        <br>
-        <label for="">Leagues & Teams:</label>
+        <br><br><br>
+        <label for=""><b>Leagues & Teams:</b></label>
         <br>
         <br>
         <% for(let league of data.leagues){ %>
-            <input type="checkbox" name="leagueId_<%= league.leagueId %>" id="leagueId_<%= league.leagueId %>"><label for="leagueId_<%= league.leagueId %>"><%= league.shortName %></label>
-            <select name="<%=league.leagueId %>_teamId" id="">
+            <input 
+                type="checkbox" 
+                name="leagueId_<%= league.leagueId %>" 
+                id="leagueId_<%= league.leagueId %>"
+                onchange="leagueSelect(this)"
+            >
+            <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %></label>
+            <select name="<%=league.leagueId %>_teamId" id="<%=league.leagueId %>_teamId" style="display: none;">
                 <option value="FA">Free Agent</option>
                 <% for(let team of league.teams) { %>
                     <option value="<%= team.id %>"><%= team.shortName %></option>
                 <% } %>
             </select>
+            <select name="<%=league.leagueId %>_division" id="<%=league.leagueId %>_division" style="display: none;">
+                <option value="upper">Upper</option>
+                <option value="lower">Lower</option>
+                <option value="either" selected>Either</option>
+            </select>
         <br>
         <% } %>
         <% if (data.leaguesAlreadyRegistered.length !== 0) { %>
             <br>
-            <label for="">Already Registered:</label>
+            <label for=""><b>Already Registered:</b></label>
             <br><br>
             <% for(let league of data.leaguesAlreadyRegistered){ %>
                 <input type="text" disabled value="<%= league.leagueShortName %>">
@@ -143,8 +186,8 @@
             <% } %>
             
         <% } %>
-        <br>
-        <label for="">Shirt Size: </label>
+        <br><br>
+        <label for=""><b>Shirt Size: </b></label>
         <select name="shirtSize" id="" required>
             <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
             <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
@@ -152,9 +195,38 @@
             <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
             <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
         </select>
+        <br><br><br>
+        <!-- <select id="color" name="color">
+            <option value="#00FF00" style="background-color: #00FF00;">Lime</option>
+            <option value="#da70d6" style="background-color: #da70d6;">Orchid</option>
+            <option value="#FF69B4" style="background-color: #FF69B4;">Pink</option>
+            <option value="#0F52BA" style="background-color: #0F52BA;">Pink</option>
+          </select>
+          <br> -->
+          <label for="discounted"><b>Are you a keeper?</b></label>
         <br>
         <br>
-        <label for="">Emergency Contact:</label>
+        
+        <input type="radio" name="keeper" id="keeper_yes" value="1" onchange="keeperChange()" required><label for="keeper_yes">Yes</label>
+        <br>
+        <input type="radio" name="keeper" id="keeper_no" value="0" onchange="keeperChange()" ><label for="keeper_no">No</label>
+        <br><br><br>
+          <input type="text" name="keeperShirtColor" id="keeperShirtColor" value="" hidden >
+          <div id="keeperColorContainer" style="display: none;">
+              <label for=""><b>Keeper Shirt Color: </b></label>
+              <div class="color-dropdown">
+                <div class="dropdown-btn" onclick="toggleDropdown()">Click to Select</div>
+                <div class="dropdown-menu">
+                  <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
+                  <div class="green" style="background-color: #da70d6;" onclick="selectColor('#da70d6','Orchid')">Orchid</div>
+                  <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
+                  <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
+                </div>
+              </div>
+            <br><br><br>  
+          </div>
+        
+        <label for=""><b>Emergency Contact:</b></label>
         <br>
         <br>
         <input type="text" name="emergencyContactFirstName" placeholder="First Name" value="<%= data.userAttributes.emergencyContactFirstName ? data.userAttributes.emergencyContactFirstName : ''  %>" required>
@@ -165,11 +237,10 @@
         <input type="tel" name="emergencyContactPhone" placeholder="Phone Number" value="<%= data.userAttributes.emergencyContactPhone ? data.userAttributes.emergencyContactPhone : ''  %>" required>
 
         <input type="text" name="emergencyContactRelationship" placeholder="Relationship" value="<%= data.userAttributes.emergencyContactRelationship ? data.userAttributes.emergencyContactRelationship : ''  %>" required>
+        <br><br><br>
+        <label for=""><b>Do you have any allergies or medical conditions we should be aware of?</b></label>
         <br>
-        <br>
-        <label for="">Do you have any allergies or medical conditions we should be aware of?</label>
-        <br>
-        <br>
+        <!-- <br> -->
 
         <div class="container">
             <div class="section">
@@ -202,12 +273,16 @@
 
         <!-- <input type="text" name="medicalConditions" placeholder="List Medical Conditions"> -->
         <br><br>
-        <a target="_blank" href="https://envoroot.com/player-resources/waiver/">Waiver</a>
+        <a target="_blank" href="https://envoroot.com/player-resources/waiver/">GLOS Waiver</a>
+        <br>
+        <a target="_blank" href="https://envoroot.com/player-resources/rules/">GLOS Rules & Regulations</a>
         <br><br>
-        <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the wavier.</label>
+        <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the GLOS Wavier.</label>
+        <br>
+        <input type="checkbox" name="rules" id="rules" required><label for="rules" >I have read and agree to the terms of the GLOS Rules and Regulations.</label>
         <br>
         <br>
-        <button style="background-color: #ceff00;" id="registerButton">Register</button>
+        <button style="background-color: #ceff00;" id="registerButton">Continue To Payment</button>
     </form>
     <script>
         document.addEventListener("input", function(event) {
@@ -283,6 +358,32 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
 //     });
 
 //     }
+        function leagueSelect(ele){
+            // console.log(document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`))
+            document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).style.display = ele.checked ? "" : "none"
+            document.getElementById(`${ele.id.replace('leagueId_','')}_division`).style.display = ele.checked ? "" : "none"
+        }
+        function toggleDropdown() {
+            document.querySelector(".dropdown-menu").style.display = 
+            document.querySelector(".dropdown-menu").style.display === "block" ? "none" : "block";
+        }
+
+        function selectColor(color,name) {
+            document.querySelector(".dropdown-btn").textContent = name;
+            document.getElementById("keeperShirtColor").value = name
+            document.querySelector(".dropdown-btn").style.backgroundColor = color
+            document.querySelector(".dropdown-menu").style.display = "none";
+        }
+        function keeperChange() {
+            const conditionalDiv = document.getElementById('keeperColorContainer');
+            if (document.getElementById('keeper_yes').checked) {
+                document.getElementById('keeperColorContainer').style.display = 'block';
+                document.getElementById('keeperShirtColor').setAttribute('required', '')
+            } else {
+                document.getElementById('keeperColorContainer').style.display = 'none';
+                document.getElementById('keeperShirtColor').removeAttribute('required')
+            }
+        }
     </script>
     <script src="/main.js"></script>
 </body>

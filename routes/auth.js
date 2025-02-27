@@ -137,7 +137,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
         host: 'smtp.gmail.com',
         port: 587,
         service: 'gmail',
-        secure: false,
+        secure: true,
         auth: {
            user: process.env.ORG_EMAIL,
            pass: process.env.ORG_EMAIL_PASSWORD
@@ -148,10 +148,20 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
     const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     const mailOptions = {
-      from: `"Greater Lansing Open Soccer (GLOS)" <${process.env.ORG_EMAIL}>`,
+      from: `Scott Forslund <${process.env.ORG_EMAIL}>`,
       to: user.email,
-      subject: 'Password Reset',
-      text: `Click the following link to reset your password: ${resetLink}`,
+      subject: 'GLOS Account Password Reset',
+      text: `Hello,
+
+  We received a request to reset your password for your GLOS account. You can reset your password by clicking the link below:
+
+  ${resetLink}
+
+  If you didn’t request a password reset, please let us know.
+
+  Regards,
+  The GLOS Team
+      `,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
