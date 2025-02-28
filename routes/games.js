@@ -185,7 +185,7 @@ router.get(['/readyForUpload'], async (req,res, next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
-        const result = await pool.request().query(`SELECT * from dbo.gamesreadytoupload()`)
+        const result = await pool.request().query(`Select * from gamesList(1) order by startUnixTime, location `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -201,19 +201,7 @@ router.get(['/completedGames'], async (req,res, next)=>{
         }
         const result = await pool.request()
         .query(`
-            SELECT t1.*, 
-            t2.color as Team1Color, 
-            t3.color as Team2Color,
-            t4.color as LeagueColor,
-            t5.preferredName as scoreKeeper
-            FROM [scorecard].[dbo].[games] t1 
-            left join teams as t2 
-            on t1.Team1_ID=t2.id and t1.season=t2.seasonId
-            left join teams as t3 
-            on t1.Team2_ID=t3.id and t1.season=t3.seasonId
-            LEFT join leagues as t4 on t1.leagueId=t4.leagueId
-            LEFT join users as t5 on t1.scoreKeeperId=t5.ID
-            where t1.[Status]=2
+            Select * from gamesList(2) order by startUnixTime, location 
             `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
@@ -690,7 +678,7 @@ router.get('/', async (req,res, next)=>{
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
         // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
         const result = await pool.request()
-        .query(`Select * from gamesList() order by startUnixTime, location `)
+        .query(`Select * from gamesList(0) order by startUnixTime, location `)
         data.games = result.recordset
         console.log(data.games)
         res.render('index.ejs',{data: data}) 

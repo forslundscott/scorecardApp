@@ -311,6 +311,8 @@ async function playerSearch(xForm,event){
                         <input type="hidden" name="firstName" value="${user.firstName}">
                         <input type="hidden" name="lastName" value="${user.lastName}">
                         <input type="hidden" name="preferredName" value="${user.preferredName}">
+                        <input type="hidden" name="shirtSize" value="${user.shirtSize}">
+                        <input type="hidden" name="discounted" value="${user.discounted}">
                         <button type="button" class="playerButton" name="type" value="game" onclick="selectPlayer(this.form)">
                         <div class="itemFormat primaryStyle primaryBorder">
                             <div class="playerTag">
@@ -352,16 +354,23 @@ function togglePaidCheckbox() {
 }
 function selectPlayer(xform){
     let newPlayerForm
+    console.log(window.location.href)
     if(window.location.href.includes('activeGame')){
         newPlayerForm = document.getElementById('newPlayerForm')
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
     }else if(window.location.href.includes('roster/newPlayer')){
         newPlayerForm = document.getElementById('newRosterPlayerForm')
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
+    }else if(window.location.href.includes('registration/team')){
+        newPlayerForm = document.getElementById('newPlayerFormTeamRegistration')
+        newPlayerForm.querySelector('[name="shirtSize"]').value = xform.querySelector('[name="shirtSize"]').value
+        newPlayerForm.querySelector('[name="discounted"]').value = xform.querySelector('[name="discounted"]').value
     }
         newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
         newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
         newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
         newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
-        newPlayerForm.querySelector('[name="waiver"]').checked = true
+        // newPlayerForm.querySelector('[name="waiver"]').checked = true
     
     toggleSearchPlayer()
 }
@@ -564,17 +573,17 @@ function toggleEventForm(ele){
         document.getElementById('formBackground').style.display = 'none'
     }
 }
-function toggleForm(formName){
-    let xform = document.getElementById(formName)
-    if(xform.style.display == 'none'){
-        xform.style.display = ''
+function toggleForm(form,background){
+
+    if(form.style.display == 'none'){
+        form.style.display = ''
     }else{
-        xform.style.display = 'none'
+        form.style.display = 'none'
     }
-    if(document.getElementById('formBackground').style.display == 'none'){
-        document.getElementById('formBackground').style.display = ''
+    if(background.style.display == 'none'){
+        background.style.display = ''
     }else{
-        document.getElementById('formBackground').style.display = 'none'
+        background.style.display = 'none'
     }
 }
 async function exportStandings(xtype,xleague){

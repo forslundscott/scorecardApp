@@ -1,0 +1,107 @@
+:root {
+  /* --primaryColor: #009688; */
+  --primaryColor: #cccccc;
+  --primaryFontColor: #000000;
+  --secondaryColor: #000000;
+  --secondaryFontColor: #cccccc;
+  --shinySilver: linear-gradient(135deg, #919191 10%, white 50%, #919191 90%);
+  --scrollWidth: 15px;
+  --buttonHieght: 10vh
+}
+.hidden{
+  display: none;
+}
+.popupForm{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  /* height: 23vh; */
+  z-index: 3;
+  /* display: flex;
+  flex-direction: column;
+  align-items: center; */
+}
+.floatingPopupForm{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  background-color: #cccccc;
+  z-index: 4;
+
+}
+#formBackground{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:2;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
+}
+#formBackgroundSite{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:2;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
+}
+#floatingBackground{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:4;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
+}
+.popupBackground{
+  width:100%;
+  height:100%;
+  left:0;/*IE*/
+  top:0;
+  text-align:center;
+  z-index:4;
+  position:fixed;
+  background-color:#000000;
+  opacity: 60%;
+}
+/* #registerButton {
+
+  font-size: 3vh;
+
+  padding: 5px 40px 5px 40px;
+} */
+.formButton{
+  font-size: 3vh;
+
+  padding: 5px 40px 5px 40px;
+}
+.buttonStyle {
+  background-color: #ceff00;
+
+  border-width: medium;
+  border-color: black;
+  font-weight: 500;
+  border-style: solid;
+  color: black;
+
+}
+.primaryBorder{
+  /* border-radius: 2vh; */
+  border: var(--primaryFontColor);
+  border-width: thick;
+  border-style: solid;
+  box-sizing: border-box;
+}

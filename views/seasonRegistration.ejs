@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/siteStyles.css">
     <link rel="icon" href="/GLOSLogo.png">
     <title>Season Registration</title>
     
@@ -44,7 +45,7 @@
         align-items: center;
 
         }
-        #registerButton {
+        /* #registerButton {
             background-color: #ceff00;
             font-size: 3vh;
             border-width: medium;
@@ -53,7 +54,7 @@
             border-style: solid;
             color: black;
             padding: 5px 40px 5px 40px;
-        }
+        } */
         input:focus, textarea:focus, select:focus {
             outline: 2px solid #ceff00; /* Change to your preferred color */
         }
@@ -109,7 +110,7 @@
     </div>
    
     
-    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;">
+    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
         <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
@@ -163,15 +164,17 @@
             >
             <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %></label>
             <select name="<%=league.leagueId %>_teamId" id="<%=league.leagueId %>_teamId" style="display: none;">
+                <option value="" disabled selected>Team Name (Captain Name)</option>
                 <option value="FA">Free Agent</option>
                 <% for(let team of league.teams) { %>
-                    <option value="<%= team.id %>"><%= team.shortName %></option>
+                    <option value="<%= team.teamId %>"><%= team.teamShortName %> (<%= team.captainPreferredName %> <%= team.captainLastName %>)</option>
                 <% } %>
             </select>
             <select name="<%=league.leagueId %>_division" id="<%=league.leagueId %>_division" style="display: none;">
+                <option value="" disabled selected>Division</option>
                 <option value="upper">Upper</option>
                 <option value="lower">Lower</option>
-                <option value="either" selected>Either</option>
+                <option value="either">Either</option>
             </select>
         <br>
         <% } %>
@@ -282,7 +285,9 @@
         <input type="checkbox" name="rules" id="rules" required><label for="rules" >I have read and agree to the terms of the GLOS Rules and Regulations.</label>
         <br>
         <br>
-        <button style="background-color: #ceff00;" id="registerButton">Continue To Payment</button>
+        <button type="button" class="buttonStyle formButton" onclick="history.back()">Back</button>
+
+        <button class="buttonStyle formButton" id="registerButton">Continue To Payment</button>
     </form>
     <script>
         document.addEventListener("input", function(event) {

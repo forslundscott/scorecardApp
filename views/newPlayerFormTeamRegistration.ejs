@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+</head>
+<body>
+    <%# include('list_item',{player: data.keeper, type: 'keeper', team: team}); %>
+    <form id="newPlayerFormTeamRegistration" class="popupForm floatingPopupForm primaryBorder" action="/teams/addPlayer" method="post" style="display: none; text-align: center;">
+        <!-- <div class="playerTag itemFormat"> -->
+            <div class="playerName">
+                Add New Player
+            </div>
+            <br>
+            <!-- <div class="textCenter" style="height: 15vh;"> -->
+                <img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="newPlayerLogo" style="height: 15vh;">
+            <!-- </div> -->
+            <br>
+            <button type="button" class="primaryStyle primaryBorder buttonStyle" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchPlayer()">Search For Existing</button>
+            <br>
+            <input type="text" name="shirtSize" value="" hidden>
+            <input type="text" name="discounted" value="" hidden>
+            <input type="email" name="email" value="" placeholder="Email" required>
+            <br>
+            <input type="text" name="firstName" value="" placeholder="First Name" required>
+            <br>
+            <input type="text" name="lastName" value="" placeholder="Last Name" required>
+            <br>
+            <input type="text" name="preferredName" value="" placeholder="Preferred Name (Optional)">
+            <br>
+            <button type="submit" class="primaryStyle primaryBorder buttonStyle" style="font-weight: bold; width: auto; height: 5vh;">Add Player</button>
+            <!-- <button type="button" onclick="this.parentElement.style.display = 'none'">Cancel</button> -->
+        <!-- </div> -->
+    </form>
+</body>
+</html>
