@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/GLOSLogo.png">
     <link rel="stylesheet" href="/siteStyles.css">
-    <title>Season Registration</title>
+    <title>Team Registration</title>
     
     <style>
         table {
@@ -138,14 +138,15 @@
     </div>
    
     
-    <form id="teamSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
+    <form id="teamSeasonRegistrationForm" action="" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
         <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
-        <input type="text" name="teamFullName" placeholder="Team Full Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
-        <input type="text" name="teamShortName" placeholder="Team Short Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
+        <input type="hidden" name="teamId" id="" >
+        <input type="text" name="teamFullName" placeholder="Team Full Name" value="" required>
+        <input type="text" name="teamShortName" placeholder="Team Short Name" value="" required>
         <br>
         <br>
-        <input type="text" name="teamAbbreviation" placeholder="Team Abbreviation" value="<%= data.userAttributes.email ? data.userAttributes.email : ''  %>" required>
-        <input type="tel" name="phone" placeholder="Phone Number" value="<%= data.userAttributes.phone ? data.userAttributes.phone : ''  %>" required>
+        <input type="text" name="teamAbbreviation" placeholder="Team Abbreviation" value="" required>
+        <input type="tel" name="phone" placeholder="Phone Number" value="" required>
         <br>
         <br>
         
@@ -180,9 +181,23 @@
         </select>
         <!-- <input type="text" name="medicalConditions" placeholder="List Medical Conditions"> -->
         <br><br>
-        <input type="text" name="teamShirtColor1" id="teamShirtColor1" value="" hidden>
-              <label for=""><b>Team Shirt Color 1: </b></label>
-              <div class="color-dropdown">
+        <!-- <input type="text" name="teamShirtColor1" id="teamShirtColor1" value="" hidden> -->
+              <label for="teamShirtColor1"><b>Team Shirt Color 1: </b></label>
+              <select name="" id="teamShirtColor1" onchange="colorSelect(this)" required>
+                <option value="" disabled selected>Shirt Color</option>
+                <option value="Black">Black</option>
+                <option value="Blue">Blue</option>
+                <option value="Brown">Brown</option>
+                <option value="Green">Green</option>
+                <option value="LightBlue">Light Blue</option>
+                <option value="Orange">Orange</option>
+                <option value="Red">Red</option>
+                <option value="Pink">Pink</option>
+                <option value="Purple">Purple</option>
+                <option value="White">White</option>
+                <option value="Yellow">Yellow</option>
+              </select>
+              <!-- <div class="color-dropdown">
                 <div class="dropdown-btn" onclick="toggleDropdown(this)">Click to Select</div>
                 <div class="dropdown-menu">
                   <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
@@ -190,11 +205,25 @@
                   <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
                   <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
                 </div>
-              </div>
+              </div> -->
               <br>
-              <input type="text" name="teamShirtColor2" id="teamShirtColor2" value="" hidden>
-              <label for=""><b>Team Shirt Color 2: </b></label>
-              <div class="color-dropdown">
+              <!-- <input type="text" name="teamShirtColor2" id="teamShirtColor2" value="" hidden> -->
+              <label for="teamShirtColor2"><b>Team Shirt Color 2: </b></label>
+              <select name="" id="teamShirtColor2" onchange="colorSelect(this)" required>
+                <option value="" disabled selected>Shirt Color</option>
+                <option value="Black">Black</option>
+                <option value="Blue">Blue</option>
+                <option value="Brown">Brown</option>
+                <option value="Green">Green</option>
+                <option value="LightBlue">Light Blue</option>
+                <option value="Orange">Orange</option>
+                <option value="Red">Red</option>
+                <option value="Pink">Pink</option>
+                <option value="Purple">Purple</option>
+                <option value="White">White</option>
+                <option value="Yellow">Yellow</option>
+              </select>
+              <!-- <div class="color-dropdown">
                 <div class="dropdown-btn" onclick="toggleDropdown(this)">Click to Select</div>
                 <div class="dropdown-menu">
                   <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
@@ -202,11 +231,25 @@
                   <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
                   <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
                 </div>
-              </div>
+              </div> -->
               <br>
-              <input type="text" name="teamShirtColor3" id="teamShirtColor3" value="" hidden>
-              <label for=""><b>Team Shirt Color 3: </b></label>
-              <div class="color-dropdown">
+              <!-- <input type="text" name="teamShirtColor3" id="teamShirtColor3" value="" hidden> -->
+              <label for="teamShirtColor3"><b>Team Shirt Color 3: </b></label>
+              <select name="" id="teamShirtColor3" onchange="colorSelect(this)" required>
+                <option value="" disabled selected>Shirt Color</option>
+                <option value="Black">Black</option>
+                <option value="Blue">Blue</option>
+                <option value="Brown">Brown</option>
+                <option value="Green">Green</option>
+                <option value="LightBlue">Light Blue</option>
+                <option value="Orange">Orange</option>
+                <option value="Red">Red</option>
+                <option value="Pink">Pink</option>
+                <option value="Purple">Purple</option>
+                <option value="White">White</option>
+                <option value="Yellow">Yellow</option>
+              </select>
+              <!-- <div class="color-dropdown">
                 <div class="dropdown-btn" onclick="toggleDropdown(this)">Click to Select</div>
                 <div class="dropdown-menu">
                   <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
@@ -214,10 +257,10 @@
                   <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
                   <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
                 </div>
-              </div>
+              </div> -->
             <br><br><br>  
-            <label for=""><b>Roster: </b></label>
-            <br>
+            <label for=""><h2><b>Roster: </b></h2></label>
+            <!-- <br> -->
             <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('newPlayerFormTeamRegistration'),document.getElementById('formBackground'))">Add Player</button>
             <table>
                 <thead>
@@ -250,34 +293,48 @@
                             <br><br>
                             <button class="buttonStyle">Select All</button>
                         </th>
+                        <th>
+                            Remove
+                        </th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="rosterList">
                     <tr>
                         <td>
-                            <input type="text">
+                            <input type="text" name="email" value="<%= data.userAttributes.email%>" disabled required>
                         </td>
                         <td>
-                            <input type="text">
+                            <input type="text" name="firstName" value="<%= data.userAttributes.firstName%>" disabled required>
                         </td>
                         <td>
-                            <input type="text" name="" id="">
+                            <input type="text" name="lastName" value="<%= data.userAttributes.lastName%>" disabled required>
                         </td>
                         <td>
-                            <select name="" id=""></select>
+                            <select name="shirtSize" id="" required>
+                                <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
+                                <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
+                                <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
+                                <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
+                                <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
+                            </select>
                         </td>
                         <td>
-                            <input type="radio">
+                            <input name="captain" type="radio" checked required>
                         </td>
                         <td>
-                            <input type="radio">
+                            <input name="keeper" type="radio">
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <% console.log(data.userAttributes) %>
+                            <input name="discounted" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %>>
                         </td>
                         <td>
-                            <input type="checkbox">
+                            <input name="payNow" type="checkbox" checked disabled>
                         </td>
+                        <td>
+                            <button name="remove" style="color: gray;" disabled>X</button>
+                        </td>
+                        <input type="hidden" class="userId" value="<%= data.userAttributes.ID%>">
                     </tr>
                 </tbody>
             </table>
@@ -331,16 +388,16 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
     e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
   });
 });
-document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
-    // Check if at least one checkbox is selected
-    const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
+// document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
+//     // Check if at least one checkbox is selected
+//     const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
     
-    if (checkboxes.length === 0) {
-      alert('Please select at least one league!');
-      event.preventDefault(); // Prevent form submission
-    }
-    handleSubmit(this,event)
-  });
+//     if (checkboxes.length === 0) {
+//       alert('Please select at least one league!');
+//       event.preventDefault(); // Prevent form submission
+//     }
+//     handleSubmit(this,event)
+//   });
   function handleSubmit(form,event) {
             // if (!validateCheckboxes(form)) {
             //     return false; 
@@ -397,6 +454,75 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
             }else{
                 form.style.display = 'none'
             }
+        }
+        async function addPlayerToRosterList(form){
+                    console.log(form)
+            let formData = new FormData(form)
+            console.log(formData)
+            try{
+                const response = await fetch('/teams/addPlayerToDatabase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(formData).toString(),
+                });
+                if (response.ok) {
+                    // console.log(await response.json())
+                    const responseData = await response.json();
+                    const existingUsers = document.getElementById("rosterList").querySelectorAll(".userId");
+                    for (const user of existingUsers) {
+                        if (user.value == responseData.data.ID) {
+                            alert("User already exists!");
+                            // closeForm()
+                            return;
+                        }
+                    }
+                    const newRow = document.createElement("tr");
+                    newRow.innerHTML = `
+                        <td><input type="text" value="${responseData.data.email}" disabled></td>
+                        <td><input type="text" value="${responseData.data.firstName}" disabled></td>
+                        <td><input type="text" value="${responseData.data.lastName}" disabled></td>
+                        <td>
+                            <select name="${responseData.data.ID}_shirtSize" required>
+                                <option value="S">Small</option>
+                                <option value="M">Medium</option>
+                                <option value="L" selected>Large</option>
+                                <option value="XL">X-Large</option>
+                                <option value="XXL">XX-Large</option>
+                            </select>
+                        </td>
+                        <td><input name="captain" type="radio" value="${responseData.data.ID}"></td>
+                        <td><input name="keeper" type="radio" value="${responseData.data.ID}"></td>
+                        <td><input name="${responseData.data.ID}_discounted" type="checkbox"></td>
+                        <td><input name="${responseData.data.ID}_payNow" type="checkbox"></td>
+                        <td><button style="color: red;" name="${responseData.data.ID}_remove" onclick="">X</button></td>
+                        <input type="hidden" class="userId" value="${responseData.data.ID}">
+                    `;
+                    document.getElementById("rosterList").appendChild(newRow)
+                    closeForm()
+                    // location.reload()
+                } else {
+                    console.error('Form submission failed');
+                }
+            }catch(error){
+                console.error('Error:', error);
+            }
+        }
+        function colorSelect(el){
+            el.style.backgroundColor=el.value
+            const bgColor = window.getComputedStyle(el).backgroundColor;
+            const hexColor = bgColor.match(/\d+/g).map(Number)
+            .reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '#');
+            console.log(hexColor)
+            el.style.color = getContrastColor(hexColor);
+        }
+        function getContrastColor(bgColor) {
+            const r = parseInt(bgColor.substr(1, 2), 16);
+            const g = parseInt(bgColor.substr(3, 2), 16);
+            const b = parseInt(bgColor.substr(5, 2), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000; 
+            return brightness > 128 ? 'black' : 'white';
         }
     </script>
     <script src="/main.js"></script>

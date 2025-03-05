@@ -313,7 +313,7 @@ async function playerSearch(xForm,event){
                         <input type="hidden" name="preferredName" value="${user.preferredName}">
                         <input type="hidden" name="shirtSize" value="${user.shirtSize}">
                         <input type="hidden" name="discounted" value="${user.discounted}">
-                        <button type="button" class="playerButton" name="type" value="game" onclick="selectPlayer(this.form)">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="addPlayerToRosterList(this.form)">
                         <div class="itemFormat primaryStyle primaryBorder">
                             <div class="playerTag">
                                 <div class="playerName" style="text-align: center;">
@@ -657,7 +657,10 @@ function closeForm(){
         form.style.display = 'none'
     }
     document.getElementById('formBackground').style.display = 'none'
-    document.getElementById('teamFormBackground').style.display = 'none'
+    if(document.getElementById('teamFormBackground')){
+        document.getElementById('teamFormBackground').style.display = 'none'
+    }
+    
     closeFloating()
 }
 function closeFloating(){

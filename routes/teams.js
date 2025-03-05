@@ -38,6 +38,42 @@ router.post(['/getTeams'], async (req,res,next)=>{
         next(err)
     }
 })
+router.post(['/addPlayerToDatabase'], async (req,res,next)=>{
+    try{
+        console.log('test')
+        let result = await pool.request()
+        .input('email', sql.VarChar, req.body.email)
+        .query(`select * from users
+        where email = @email`)
+        if(!result.recordset[0]){
+
+            await pool.request()
+            .input('firstName', sql.VarChar, req.body.firstName)
+            .input('lastName', sql.VarChar, req.body.lastName)
+            .input('preferredName', sql.VarChar, req.body.preferredName == '' ? req.body.firstName : req.body.preferredName)
+            .input('email', sql.VarChar, req.body.email)
+            .input('sport', sql.VarChar, req.body.sport ?? 'soccer')
+            .input('rating', sql.Decimal(10,3), 3)
+            .query(`            
+            EXECUTE  [dbo].[insert_user] 
+               @firstName
+              ,@lastName
+              ,@preferredName
+              ,@email
+
+            EXECUTE [dbo].[insert_userSportRating] 
+            @sport
+            ,@email
+            ,@rating
+
+            `)
+        }
+        console.log(result.recordset[0])
+        res.json({ message: 'Form submitted successfully!', data: result.recordset[0] });
+    }catch(err){
+        next(err)
+    }
+})
 router.post(['/addPlayer'], async (req,res,next)=>{
     try{
         let result = await pool.request()

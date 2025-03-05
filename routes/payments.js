@@ -318,7 +318,7 @@ router.get('/success', async (req,res, next)=>{
 });
 router.get('/cancel', async (req,res, next)=>{
     try{
-        const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
+        // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
         // console.log(session)
 
         // const hoursArray = Array.isArray(session.metadata.hours) ? session.metadata.hours : [session.metadata.hours];
@@ -359,7 +359,8 @@ router.get('/cancel', async (req,res, next)=>{
         // // `)
         // console.log(result.recordset)
         let data = {
-            url: `/pickup/register/${session.metadata.date}`
+            // url: `/pickup/register/${session.metadata.date}`
+            url: req.query.url || 'https://envoroot.com'
         }
         res.render('paymentFailure.ejs',{data: data});
         
@@ -392,7 +393,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
       type: 'individualSeasonCheckout',
       priceId: product.data[0].default_price,
       success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer')}`,
+      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
       ...transformedBody
     }
     // console.log(product.data[0].default_price)

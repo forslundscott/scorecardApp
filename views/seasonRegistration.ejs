@@ -148,9 +148,9 @@
         <br>
         <br>
         
-        <input type="radio" name="discounted" id="discounted_yes" value="1" <%= data.userAttributes.discounted && data.userAttributes.discounted === 1 ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
+        <input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && data.userAttributes.discounted === true ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
-        <input type="radio" name="discounted" id="discounted_no" value="0" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== 1 ? 'checked' : ''  %>><label for="discounted_no">No</label>
+        <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== true ? 'checked' : ''  %>><label for="discounted_no">No</label>
         <br><br><br>
         <label for=""><b>Leagues & Teams:</b></label>
         <br>
@@ -190,6 +190,7 @@
             
         <% } %>
         <br><br>
+        <% console.log(data.userAttributes) %>
         <label for=""><b>Shirt Size: </b></label>
         <select name="shirtSize" id="" required>
             <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
@@ -214,10 +215,18 @@
         <br>
         <input type="radio" name="keeper" id="keeper_no" value="0" onchange="keeperChange()" ><label for="keeper_no">No</label>
         <br><br><br>
-          <input type="text" name="keeperShirtColor" id="keeperShirtColor" value="" hidden >
+          <!-- <input type="text" name="keeperShirtColor" id="keeperShirtColor" value="" hidden > -->
+          
           <div id="keeperColorContainer" style="display: none;">
               <label for=""><b>Keeper Shirt Color: </b></label>
-              <div class="color-dropdown">
+              <select name="" id="keeperShirtColor" onchange="this.style.backgroundColor=this.value">
+                <option value="" disabled selected>Shirt Color</option>
+                <option value="Lime">Lime</option>
+                <option value="Orchid">Orchid</option>
+                <option value="Pink">Pink</option>
+                <option value="Sapphire">Sapphire</option>
+              </select>
+              <!-- <div class="color-dropdown">
                 <div class="dropdown-btn" onclick="toggleDropdown()">Click to Select</div>
                 <div class="dropdown-menu">
                   <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
@@ -225,7 +234,7 @@
                   <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
                   <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
                 </div>
-              </div>
+              </div> -->
             <br><br><br>  
           </div>
         
