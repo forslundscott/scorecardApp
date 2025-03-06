@@ -146,12 +146,12 @@
         <br>
         <br>
         <input type="text" name="teamAbbreviation" placeholder="Team Abbreviation" value="" required>
-        <input type="tel" name="phone" placeholder="Phone Number" value="" required>
+        <!-- <input type="tel" name="phone" placeholder="Phone Number" value="" required> -->
         <br>
         <br>
-        
+        <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('teamSearchContainer'),document.getElementById('formBackground'))">Search for Existing Team</button>
     
-        <br>
+        <br><br>
         <label for="skill"><b>Rate your Team's Experience Level:</b></label>
         <select name="skill" id="" required>
             <option value="1" <%= data.userAttributes.skill == '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
@@ -291,7 +291,7 @@
                         <th>
                             Paying Now
                             <br><br>
-                            <button class="buttonStyle">Select All</button>
+                            <button type="button" class="buttonStyle" onclick="selectAllPay()">Select All</button>
                         </th>
                         <th>
                             Remove
@@ -310,7 +310,7 @@
                             <input type="text" name="lastName" value="<%= data.userAttributes.lastName%>" disabled required>
                         </td>
                         <td>
-                            <select name="shirtSize" id="" required>
+                            <select name="<%= data.userAttributes.ID %>_shirtSize" id="" required>
                                 <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
                                 <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
                                 <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
@@ -319,20 +319,20 @@
                             </select>
                         </td>
                         <td>
-                            <input name="captain" type="radio" checked required>
+                            <input name="captain" type="radio" value="<%= data.userAttributes.ID %>" checked required>
                         </td>
                         <td>
-                            <input name="keeper" type="radio">
+                            <input name="keeper" type="radio" value="<%= data.userAttributes.ID %>">
                         </td>
                         <td>
                             <% console.log(data.userAttributes) %>
-                            <input name="discounted" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %>>
+                            <input name="<%= data.userAttributes.ID %>_discounted" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %>>
                         </td>
                         <td>
-                            <input name="payNow" type="checkbox" checked disabled>
+                            <input name="<%= data.userAttributes.ID %>_payNow" type="checkbox" checked disabled>
                         </td>
                         <td>
-                            <button name="remove" style="color: gray;" disabled>X</button>
+                            <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
                         </td>
                         <input type="hidden" class="userId" value="<%= data.userAttributes.ID%>">
                     </tr>
@@ -496,7 +496,7 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
                         <td><input name="keeper" type="radio" value="${responseData.data.ID}"></td>
                         <td><input name="${responseData.data.ID}_discounted" type="checkbox"></td>
                         <td><input name="${responseData.data.ID}_payNow" type="checkbox"></td>
-                        <td><button style="color: red;" name="${responseData.data.ID}_remove" onclick="">X</button></td>
+                        <td><button style="color: red;" name="${responseData.data.ID}_remove" onclick="removeRow(this)">X</button></td>
                         <input type="hidden" class="userId" value="${responseData.data.ID}">
                     `;
                     document.getElementById("rosterList").appendChild(newRow)
@@ -524,10 +524,22 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
             const brightness = (r * 299 + g * 587 + b * 114) / 1000; 
             return brightness > 128 ? 'black' : 'white';
         }
+        function selectAllPay(){
+            document.querySelectorAll('input[name$="_payNow"]:not(:disabled)').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+        function removeRow(button) {
+            let row = button.closest("tr"); // Find the closest <tr> (row)
+            if (row) {
+                row.remove(); // Remove the row
+            }
+        }
     </script>
     <script src="/main.js"></script>
     <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>
     <%- include('newPlayerFormTeamRegistration'); %>
     <%- include('playerSearchForm'); %>
+    <%- include('teamSearchForm'); %>
 </body>
 </html>

@@ -313,7 +313,58 @@ async function playerSearch(xForm,event){
                         <input type="hidden" name="preferredName" value="${user.preferredName}">
                         <input type="hidden" name="shirtSize" value="${user.shirtSize}">
                         <input type="hidden" name="discounted" value="${user.discounted}">
-                        <button type="button" class="playerButton" name="type" value="game" onclick="addPlayerToRosterList(this.form)">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="selectPlayer(this.form)">
+                        <div class="itemFormat primaryStyle primaryBorder">
+                            <div class="playerTag">
+                                <div class="playerName" style="text-align: center;">
+                                    ${user.firstName} ${user.lastName} - ${user.preferredName} - ${user.email}
+                                </div>
+                            </div>                
+                        </div>
+                        </button>
+                    </form>
+                `
+                resultsList.innerHTML += userCard
+        });
+          } else {
+            console.error('Form submission failed');
+          }
+        
+        
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+
+}
+async function teamSearch(xForm,event){
+
+    event.preventDefault();
+    try {
+
+        let formData = new FormData(xForm)
+        const response = await fetch(`/games/teamSearch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+
+        
+        if (response.ok) {
+            const results = await response.json();
+            const resultsList = document.getElementById('teamSearchResults');
+            resultsList.innerHTML = '';
+            results.forEach(user => {
+                const userCard = `
+                    <form class="" action="" method="post">
+                        <input type="hidden" name="email" value="${user.email}">
+                        <input type="hidden" name="firstName" value="${user.firstName}">
+                        <input type="hidden" name="lastName" value="${user.lastName}">
+                        <input type="hidden" name="preferredName" value="${user.preferredName}">
+                        <input type="hidden" name="shirtSize" value="${user.shirtSize}">
+                        <input type="hidden" name="discounted" value="${user.discounted}">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="addTeam(this.form)">
                         <div class="itemFormat primaryStyle primaryBorder">
                             <div class="playerTag">
                                 <div class="playerName" style="text-align: center;">
