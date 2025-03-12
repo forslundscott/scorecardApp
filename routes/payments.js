@@ -377,6 +377,57 @@ router.get('/cancel', async (req,res, next)=>{
 //         next(err)
 //     }
 // });
+router.post('/teamSeasonCheckoutSession', async (req, res) => {
+  
+  try {
+    console.log(req.body)
+    // const transformedBody = Object.fromEntries(
+    //   Object.entries(req.body).map(([key, value]) => [
+    //     key,
+    //     Array.isArray(value) ? value.join(", ") : value,
+    //   ])
+    // );
+    // const product = await stripe.products.search({
+    //     query: `name:'6 Game Season'`,
+    // })
+    const metadata = {
+      type: 'teamSeasonCheckout',
+      // priceId: product.data[0].default_price,
+      // success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+      // cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
+      // ...transformedBody
+    }
+    // let leaguesTeams = [];
+
+    // Object.keys(req.body).forEach(key => {
+    //     if (key.includes('leagueId_')) {
+    //         let remainingKey = key.replace('leagueId_', ''); // Remove 'leagueId_'
+            
+    //         // Find another key that contains the remaining part
+    //         let matchingKey = Object.keys(req.body).find(k => k.includes(remainingKey) && k !== key);
+
+    //         if (matchingKey) {
+    //             leaguesTeams.push({
+    //                 leagueId: remainingKey,
+    //                 teamId: req.body[matchingKey]
+    //             });
+    //         }
+    //     }
+    // });
+    // metadata.quantity = leaguesTeams.length
+    // metadata.leaguesTeams = JSON.stringify(leaguesTeams)
+    //   await functions.addUserToDatabase(req.body);
+    //   const user = await functions.getUser(req.body)
+    //   metadata.userId = user.ID
+    //   const session = await functions.createCheckoutSession({
+    //     metadata
+    // });
+    //   res.json({ url: session.url });
+  } catch (error) {
+    console.log(error)
+      res.status(500).json({ error: error.message });
+  }
+});
 router.post('/individualSeasonCheckoutSession', async (req, res) => {
   
   try {

@@ -139,6 +139,8 @@
    
     
     <form id="teamSeasonRegistrationForm" action="" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
+        
+        <label for=""><h2><b>Team Information: </b></h2></label>
         <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
         <input type="hidden" name="teamId" id="" >
         <input type="text" name="teamFullName" placeholder="Team Full Name" value="" required>
@@ -164,7 +166,7 @@
         
         <label for=""><b>League:</b></label>
         
-        <select name="" id="">
+        <select name="leagueId" required>
             <option value="" disabled selected>League</option>
             <% for(let league of data.leagues){ %>
                 <option value="<%= league.leagueId %>"> <%= league.leagueShortName %></option>
@@ -173,7 +175,7 @@
         </select>
         <br><br>
         <label for=""><b>Division:</b></label>
-        <select name="" id="">
+        <select name="division" id="" required>
             <option value="" disabled selected>Division</option>
             <option value="upper">Upper</option>
             <option value="lower">Lower</option>
@@ -249,6 +251,15 @@
                 <option value="White">White</option>
                 <option value="Yellow">Yellow</option>
               </select>
+              <br>
+              <label for=""><b>Keeper Shirt Color: </b></label>
+              <select name="" id="keeperShirtColor" onchange="colorSelect(this)">
+                <option value="" disabled selected>Shirt Color</option>
+                <option value="Lime">Lime</option>
+                <option value="Orchid">Orchid</option>
+                <option value="Pink">Pink</option>
+                <option value="Sapphire">Sapphire</option>
+              </select>
               <!-- <div class="color-dropdown">
                 <div class="dropdown-btn" onclick="toggleDropdown(this)">Click to Select</div>
                 <div class="dropdown-menu">
@@ -258,8 +269,16 @@
                   <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
                 </div>
               </div> -->
+              <br><br>
+              <div class="primaryStyle" style="font-size: 100%;">
+                <h3><b>Team Logo (optional): </b></h3>
+                    <br>
+                <input class="primaryStyle" type="file" name="teamLogo" id="teamLogo" accept="image/png">
+                <br>
+                <img id="imagePreview" style="display:none; max-width: 100px; max-height: 100px; margin-top: 10px;">
+            </div>
             <br><br><br>  
-            <label for=""><h2><b>Roster: </b></h2></label>
+            <label for=""><h2><b>Team Roster: </b></h2></label>
             <!-- <br> -->
             <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('newPlayerFormTeamRegistration'),document.getElementById('formBackground'))">Add Player</button>
             <table>
@@ -334,13 +353,91 @@
                         <td>
                             <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
                         </td>
-                        <input type="hidden" class="userId" value="<%= data.userAttributes.ID%>">
+                        <input type="hidden" class="userId" name="rosterUserId" value="<%= data.userAttributes.ID%>">
                     </tr>
                 </tbody>
             </table>
             <br>
+            <label for=""><h2><b>Your Information: </b></h2></label>
+        <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
+        <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
+        <br>
+        <br>
+        <input type="email" name="email" placeholder="Email" value="<%= data.userAttributes.email ? data.userAttributes.email : ''  %>" required>
+        <input type="tel" name="phone" placeholder="Phone Number" value="<%= data.userAttributes.phone ? data.userAttributes.phone : ''  %>" required>
+        <br>
+        <br>
+        <label for="dob"><b>Date of Birth:</b></label>
+        <input type="date" name="dob" value="<%= (data.userAttributes.dob && data.userAttributes.dob !== '' && data.userAttributes.dob !== 0) ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : '' %>" required>
+        <br>
+        <br>
+        <label for="gender"><b>Gender:</b></label>
+        <br>
+
+        <input type="radio" name="gender" id="gender_male" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="gender_male">Male</label>
+        <br>
+        <input type="radio" name="gender" id="gender_female" value="female" <%= data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'female' ? 'checked' : ''  %>><label for="gender_female">Female</label>
+        <br>
+        <input type="radio" name="gender" id="gender_unspecified" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="gender_unspecified">Unspecified</label>
+        <br>
+        <br>
+        <label for=""><b>Emergency Contact:</b></label>
+        <br>
+        <br>
+        <input type="text" name="emergencyContactFirstName" placeholder="First Name" value="<%= data.userAttributes.emergencyContactFirstName ? data.userAttributes.emergencyContactFirstName : ''  %>" required>
+        <input type="text" name="emergencyContactLastName" placeholder="Last Name" value="<%= data.userAttributes.emergencyContactLastName ? data.userAttributes.emergencyContactLastName : ''  %>" required>
+        <br>
+        <br>
+
+        <input type="tel" name="emergencyContactPhone" placeholder="Phone Number" value="<%= data.userAttributes.emergencyContactPhone ? data.userAttributes.emergencyContactPhone : ''  %>" required>
+
+        <input type="text" name="emergencyContactRelationship" placeholder="Relationship" value="<%= data.userAttributes.emergencyContactRelationship ? data.userAttributes.emergencyContactRelationship : ''  %>" required>
+        <br><br><br>
+        <label for=""><b>Do you have any allergies or medical conditions we should be aware of?</b></label>
+        <br>
+        <!-- <br> -->
+
+        <div class="container">
+            <div class="section">
+                <h3>Allergies</h3>
+                <div id="allergy-list">
+                    <% for(let allergy of data.userAttributes.allergies){ %>
+                        <% if(allergy !== ''){ %>
+                            <br>
+                            <input type="text" class="allergy-input" name="allergies[]" value="<%= allergy %>" placeholder="Enter an allergy">
+                        <% } %>
+                    <% } %>
+                    <br>
+                    <input type="text" class="allergy-input" name="allergies[]" placeholder="Enter an allergy">
+                </div>
+            </div>
+            <div class="section">
+                <h3>Medical Conditions</h3>
+                <div id="medical-list">
+                    <% for(let condition of data.userAttributes.medicalConditions){ %>
+                        <% if(condition !== ''){ %>
+                            <br>
+                            <input type="text" class="medical-input" name="medicalConditions[]" value="<%= condition %>" placeholder="Enter a medical condition">
+                        <% } %>
+                    <% } %>
+                    <br>
+                    <input type="text" class="medical-input" name="medicalConditions[]" placeholder="Enter a medical condition">
+                </div>
+            </div>
+        </div>
+        <br><br>
+        
+        <a target="_blank" href="https://envoroot.com/player-resources/waiver/">GLOS Waiver</a>
+        <br>
+        <a target="_blank" href="https://envoroot.com/player-resources/rules/">GLOS Rules & Regulations</a>
+        <br><br>
+        <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the GLOS Wavier.</label>
+        <br>
+        <input type="checkbox" name="rules" id="rules" required><label for="rules" >I have read and agree to the terms of the GLOS Rules and Regulations.</label>
+        <br>
+        <br>
             <button type="button" class="buttonStyle formButton" onclick="history.back()">Back</button>
-        <button class="buttonStyle formButton" style="background-color: #ceff00;" id="registerButton">Continue To Player Registration</button>
+        <button class="buttonStyle formButton" style="background-color: #ceff00;" id="registerButton">Continue To Payment</button>
     </form>
     <script>
         document.addEventListener("input", function(event) {
@@ -388,21 +485,21 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
     e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
   });
 });
-// document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
-//     // Check if at least one checkbox is selected
-//     const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
+document.getElementById('teamSeasonRegistrationForm').addEventListener('submit', function(event) {
+    // Check if at least one checkbox is selected
+    // const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
     
-//     if (checkboxes.length === 0) {
-//       alert('Please select at least one league!');
-//       event.preventDefault(); // Prevent form submission
-//     }
-//     handleSubmit(this,event)
-//   });
+    // if (checkboxes.length === 0) {
+    //   alert('Please select at least one league!');
+    //   event.preventDefault(); // Prevent form submission
+    // }
+    handleSubmit(this,event)
+  });
   function handleSubmit(form,event) {
             // if (!validateCheckboxes(form)) {
             //     return false; 
             // }
-            paymentSubmit(form,event, 'individualSeasonCheckoutSession')
+            paymentSubmit(form,event, 'teamSeasonCheckoutSession')
         }
 //   async function handlePlayerRegistrationSubmit(form, event) {
 //     let formData = new FormData(form)
@@ -497,7 +594,7 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
                         <td><input name="${responseData.data.ID}_discounted" type="checkbox"></td>
                         <td><input name="${responseData.data.ID}_payNow" type="checkbox"></td>
                         <td><button style="color: red;" name="${responseData.data.ID}_remove" onclick="removeRow(this)">X</button></td>
-                        <input type="hidden" class="userId" value="${responseData.data.ID}">
+                        <input type="hidden" class="userId" name="rosterUserId" value="${responseData.data.ID}">
                     `;
                     document.getElementById("rosterList").appendChild(newRow)
                     closeForm()
@@ -510,7 +607,7 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
             }
         }
         function colorSelect(el){
-            el.style.backgroundColor=el.value
+            el.style.backgroundColor= el.value == 'Sapphire'? '#0F52BA' : el.value
             const bgColor = window.getComputedStyle(el).backgroundColor;
             const hexColor = bgColor.match(/\d+/g).map(Number)
             .reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '#');
@@ -535,6 +632,18 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
                 row.remove(); // Remove the row
             }
         }
+        document.getElementById('teamLogo').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('imagePreview');
+                img.src = e.target.result;
+                img.style.display = '';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
     </script>
     <script src="/main.js"></script>
     <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>

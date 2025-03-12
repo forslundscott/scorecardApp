@@ -174,16 +174,13 @@ router.get(['/newTeam'], async (req, res, next) => {
 })
 router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res, next) => {
     try{ 
-        const outputDir = path.join(__dirname, '../public/images');
-        const filename = `${req.body.abbreviation}.png`;
-        if(req.file && req.file.buffer) {
-            await functions.pngUpload(req.file.buffer, filename, outputDir)
-        }
+        
 
         // Add team to database
-        await pool.request()
+        const result = await pool.request()
         .input('abbreviation', sql.VarChar, req.body.abbreviation)
-        .input('teamName', sql.VarChar, req.body.teamName)
+        .input('fullName', sql.VarChar, req.body.fullName)
+        .input('shortName', sql.VarChar, req.body.shortName)
         .input('leagueId', sql.VarChar, req.body.leagueId)
         .input('seasonId', sql.Int, req.body.seasonId)
         .input('color', sql.VarChar, req.body.color)
@@ -193,7 +190,7 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
                 DECLARE @teamId INT;
 
                 INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color)
-                VALUES (@abbreviation, @teamName, @teamName, @leagueId, @seasonId, @abbreviation, @color);
+                VALUES (@abbreviation, @fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color);
 
                 SET @teamId = SCOPE_IDENTITY();
 
@@ -201,12 +198,43 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
                 values(@seasonId,@leagueId,@teamId);
 
             END
+            select @teamId as teamId
             `)
+            if(result.recordset[0]){
+                const outputDir = path.join(__dirname, '../public/images');
+                const filename = `${result.recordset[0].teamId}.png`;
+                if(req.file && req.file.buffer) {
+                    await functions.pngUpload(req.file.buffer, filename, outputDir)
+                }
+            }
         res.redirect(302,'/teams')
     }catch(err){
         next(err)
     }
   });
+  router.post('/teamSearch', async (req, res) => {
+    const query  = req.body.teamSearchValue;
+
+    if (!query) {
+        return res.status(400).send('Query parameter is required');
+    }
+
+    try {
+        const result = await pool.request()
+        .input('searchValue', sql.VarChar, req.body.teamSearchValue)
+        .query(`
+            SELECT t.* FROM teams as t
+            WHERE abbreviation LIKE '%' + @searchValue + '%' 
+            OR fullName LIKE '%' + @searchValue + '%' 
+            OR shortName LIKE '%' + @searchValue + '%' 
+        `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Query failed: ', err);
+        res.status(500).send('Internal server error');
+    }
+});
 router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
     try{
         let result = await pool.request()
@@ -392,7 +420,7 @@ router.get('/', async (req,res, next)=>{
         }
         const result = await pool.request()
         .query(`
-            select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor 
+            select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor, t.teamId
             from teams as t
             left join leagues as l on t.league=l.abbreviation
             LEFT join users as u on t.captain=u.ID

@@ -210,7 +210,7 @@ function toggleAddPlayer(xform){
         document.getElementById('newPlayerForm').querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
         document.getElementById('newPlayerForm').querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
         document.getElementById('newPlayerForm').querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
-        document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="team"]').value}.png`
+        document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="teamId"]').value}.png`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
     }
@@ -342,7 +342,7 @@ async function teamSearch(xForm,event){
     try {
 
         let formData = new FormData(xForm)
-        const response = await fetch(`/games/teamSearch`, {
+        const response = await fetch(`/teams/teamSearch`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -355,27 +355,25 @@ async function teamSearch(xForm,event){
             const results = await response.json();
             const resultsList = document.getElementById('teamSearchResults');
             resultsList.innerHTML = '';
-            results.forEach(user => {
-                const userCard = `
+            results.forEach(team => {
+                const teamCard = `
                     <form class="" action="" method="post">
-                        <input type="hidden" name="email" value="${user.email}">
-                        <input type="hidden" name="firstName" value="${user.firstName}">
-                        <input type="hidden" name="lastName" value="${user.lastName}">
-                        <input type="hidden" name="preferredName" value="${user.preferredName}">
-                        <input type="hidden" name="shirtSize" value="${user.shirtSize}">
-                        <input type="hidden" name="discounted" value="${user.discounted}">
-                        <button type="button" class="playerButton" name="type" value="game" onclick="addTeam(this.form)">
+                        <input type="hidden" name="teamId" value="${team.teamId}">
+                        <input type="hidden" name="fullName" value="${team.fullName}">
+                        <input type="hidden" name="shortName" value="${team.shortName}">
+                        <input type="hidden" name="abbreviation" value="${team.abbreviation}">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="insertExistingTeamInfo(this.form)">
                         <div class="itemFormat primaryStyle primaryBorder">
                             <div class="playerTag">
                                 <div class="playerName" style="text-align: center;">
-                                    ${user.firstName} ${user.lastName} - ${user.preferredName} - ${user.email}
+                                    ${team.fullName} - ${team.abbreviation}
                                 </div>
                             </div>                
                         </div>
                         </button>
                     </form>
                 `
-                resultsList.innerHTML += userCard
+                resultsList.innerHTML += teamCard
         });
           } else {
             console.error('Form submission failed');
@@ -448,7 +446,7 @@ async function toggleTeamForm(xform){
         teamForm.querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
         teamForm.querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
-        teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="team"]').value}.png`
+        teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="teamId"]').value}.png`
     }else{
         teamForm.style.display = 'none'
     }

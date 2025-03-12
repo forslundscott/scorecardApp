@@ -13,10 +13,12 @@
         <% } %>
     </select>
         <br><br>
-    <input type="text" name="teamName" placeholder="Full Team Name">
+    <input type="text" name="fullName" placeholder="Full Team Name">
+        <br><br>
+    <input type="text" name="shortName" placeholder="Short Team Name (Optional)">
         <br><br>
     <input type="text" name="abbreviation" placeholder="Abbreviation">
-        <br>
+        <br><br>
     <div class="primaryStyle" style="font-size: 100%;">
         Color:
         <br>
@@ -26,8 +28,24 @@
     <div class="primaryStyle" style="font-size: 100%;">
         Team Logo (optional):
             <br>
-        <input class="primaryStyle" type="file" name="teamLogo" accept="image/png">
+        <input class="primaryStyle" type="file" name="teamLogo" id="teamLogo" accept="image/png">
+        <br>
+        <img id="imagePreview" style="display:none; max-width: 100px; max-height: 100px; margin-top: 10px;">
     </div>
         <br><br><br>
     <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Add Team</button>
 </form>
+<script>
+    document.getElementById('teamLogo').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('imagePreview');
+                img.src = e.target.result;
+                img.style.display = '';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    </script>

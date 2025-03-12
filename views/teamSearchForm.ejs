@@ -24,5 +24,22 @@
             </div>
         </div>
     </div>
+    <script>
+        async function insertExistingTeamInfo(form){
+            event.preventDefault();
+            let formData = new FormData(form)
+            try{
+                // document.getElementById('teamSeasonRegistrationForm')
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamFullName"]').value = form.querySelector('[name="fullName"]').value
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').value = form.querySelector('[name="shortName"]').value
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').value = form.querySelector('[name="abbreviation"]').value
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamId"]').value = form.querySelector('[name="teamId"]').value
+                closeForm()
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+    </script>
 </body>
 </html>
