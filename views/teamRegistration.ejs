@@ -128,7 +128,15 @@
             background: #ceff00;
             color: #121212;
         } */
-
+        input::file-selector-button {
+            background-color: #ceff00;
+            /* font-size: 3vh; */
+            border-width: medium;
+            border-color: black;
+            font-weight: 500;
+            border-style: solid;
+            color: black;
+        }
     </style>
 </head>
 <body style="text-align: center; width: 100%;" >
@@ -156,11 +164,11 @@
         <br><br>
         <label for="skill"><b>Rate your Team's Experience Level:</b></label>
         <select name="skill" id="" required>
-            <option value="1" <%= data.userAttributes.skill == '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
-            <option value="2" <%= data.userAttributes.skill == '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
-            <option value="3" <%= !['1', '2', '4', '5', 1, 2, 4, 5].includes(data.userAttributes.skill) ? 'selected' : ''  %>>3 - We used to play back in the day</option>
-            <option value="4" <%= data.userAttributes.skill == '4' ? 'selected' : ''  %>>4 - We play regularly</option>
-            <option value="5" <%= data.userAttributes.skill == '5' ? 'selected' : ''  %>>5 - We live for soccer</option>
+            <option value="1" >1 - What's a soccer ball?</option>
+            <option value="2" >2 - Running is overrated</option>
+            <option value="3" selected>3 - We used to play back in the day</option>
+            <option value="4">4 - We play regularly</option>
+            <option value="5">5 - We live for soccer</option>
         </select>
         <br><br>
         
@@ -273,7 +281,8 @@
               <div class="primaryStyle" style="font-size: 100%;">
                 <h3><b>Team Logo (optional): </b></h3>
                     <br>
-                <input class="primaryStyle" type="file" name="teamLogo" id="teamLogo" accept="image/png">
+                <input class="" type="file" name="teamLogo" id="teamLogo" accept="image/png">
+                <button id="removeButton" class="buttonStyle" type="button" style="display:none; margin-top: 5px;">Remove</button>
                 <br>
                 <img id="imagePreview" style="display:none; max-width: 100px; max-height: 100px; margin-top: 10px;">
             </div>
@@ -640,10 +649,16 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
                 const img = document.getElementById('imagePreview');
                 img.src = e.target.result;
                 img.style.display = '';
+                document.getElementById('removeButton').style.display = '';
             };
             reader.readAsDataURL(file);
         }
     });
+    document.getElementById('removeButton').addEventListener('click', function() {
+    document.getElementById('teamLogo').value = ""; // Clear the file input
+    document.getElementById('imagePreview').style.display = 'none'; // Hide preview
+    this.style.display = 'none'; // Hide remove button
+});
     </script>
     <script src="/main.js"></script>
     <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>

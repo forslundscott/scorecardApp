@@ -12,7 +12,7 @@
   display: none;
 }
 .popupForm{
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -24,7 +24,7 @@
   align-items: center; */
 }
 .floatingPopupForm{
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
