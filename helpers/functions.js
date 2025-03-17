@@ -17,6 +17,7 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 //     debug_mode: false,
 //     remove_infected: false, 
 // });
+
 function titleCase(str){
     try{
         let words = str.split(' ')
@@ -235,4 +236,55 @@ async function failedQuery(data,errorMessage) {
         console.error("Error writing to failed inserts file:", fileError);
       }
 }
-module.exports = {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate,fileNameSanitizer,pngUpload,createCheckoutSession,failedQuery}
+
+async function addTeam(data){
+    const result = await pool.request()
+        .input('abbreviation', sql.VarChar, data.abbreviation)
+        .input('fullName', sql.VarChar, data.fullName)
+        .input('shortName', sql.VarChar, data.shortName)
+        .input('leagueId', sql.VarChar, data.leagueId)
+        .input('seasonId', sql.Int, data.seasonId)
+        .input('color', sql.VarChar, data.color)
+        .query(`
+            IF NOT EXISTS (SELECT 1 FROM teams WHERE id = @abbreviation)
+            BEGIN
+                DECLARE @teamId INT;
+
+                INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color)
+                VALUES (@abbreviation, @fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color);
+
+                SET @teamId = SCOPE_IDENTITY();
+
+                insert into seasonLeagueTeam (seasonId, leagueId, teamId)
+                values(@seasonId,@leagueId,@teamId);
+
+            END
+            select @teamId as teamId
+            `)
+            return result.recordset[0].teamId
+}
+async function addTeamLogo(logo, teamId) {
+    if(teamId){
+        const outputDir = path.join(__dirname, '../public/images');
+        const filename = `${teamId}.png`;
+        if(logo && logo.buffer) {
+            await pngUpload(logo.buffer, filename, outputDir)
+        }
+    }
+}
+module.exports = {
+    titleCase
+    ,getOrdinalNumber
+    ,exportToCSV
+    ,getHexColor
+    ,millisecondsToTimeString
+    ,addUserToDatabase
+    ,getUser
+    ,formatDate
+    ,fileNameSanitizer
+    ,pngUpload
+    ,createCheckoutSession
+    ,failedQuery
+    ,addTeam
+    ,addTeamLogo
+}

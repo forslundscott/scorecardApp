@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Schedule</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: rgba(206, 255, 0, 0.50);
+        }
+        .date-header {
+            background-color: #ceff00;
+            color: #121212;
+            font-size: 1.2em;
+            padding: 10px;
+            text-align: left;
+            border-radius: 5px;
+            border-style: solid;
+            border-width: thin;
+        }
+        .tooltip {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ceff00;
+            color: #121212;
+            padding: 5px;
+            border-radius: 5px;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            border-style: solid;
+            border-width: thin;
+        }
+
+        .tooltip:hover::after,
+        .tooltip:focus::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip:focus::after {
+            visibility: visible;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #ceff00; /* Change to your preferred color */
+        }
+        ::selection {
+            background: #ceff00; 
+            color: #121212; 
+        }
+        .blur-text {
+            filter: blur(4px);
+            user-select: none; /* Prevents text selection */
+            pointer-events: none; /* Prevents interaction */
+        }
+    </style>
+</head>
+<body>
+    <br>
+    <% data.schedule.forEach((group, index) => { %>
+        <div class="date-header"> <%= group.date %> </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Court/Field</th>
+                    <th>Match</th>
+                    <th>League</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% group.matches.forEach(match => { %>
+                    <tr>
+                        <td><%= match.time %></td>
+                        <td><%= match.location %></td>
+                        <td class="tooltip" data-tooltip="<%= match.team1ShortName %> vs <%= match.team2ShortName %>"><%= match.team1Abbreviation %> vs <%= match.team2Abbreviation %></td>
+                        <td class="tooltip" data-tooltip="<%= match.leagueName %>"><%= match.leagueAbbreviation %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% }) %>
+</body>
+</html>

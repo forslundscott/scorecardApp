@@ -3,11 +3,20 @@ const express = require('express');
 const Stripe = require('stripe');
 const router = express.Router();
 const pool = require(`../db`)
+const sql = require('mssql'); 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { Blob } = require('buffer');
 const nodemailer = require('nodemailer');
 const functions = require('../helpers/functions')
 const gateway = require('../config/braintreeConfig');
+const { Readable } = require('stream');
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
-
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+});
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // async function createCheckoutSession({ email, hours, date, origin, referer, priceId, userId }) {
@@ -377,10 +386,88 @@ router.get('/cancel', async (req,res, next)=>{
 //         next(err)
 //     }
 // });
-router.post('/teamSeasonCheckoutSession', async (req, res) => {
+router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req, res) => {
   
   try {
+    
+    const consolidatedBody = Object.entries(req.body).reduce((acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        value = value.join(", ");
+      }
+    
+      // Handle shirt sizes
+      if (key.startsWith("shirtSize_")) {
+        const id = key.replace("shirtSize_", "");
+        acc.shirtSizes = acc.shirtSizes || {};
+        acc.shirtSizes[id] = value;
+      }
+      // Handle discounts
+      else if (key.startsWith("discounted_")) {
+        const id = key.replace("discounted_", "");
+        acc.discounts = acc.discounts || [];
+        acc.discounts.push(id);
+      }
+      else if (key.startsWith("payNow_")) {
+        const id = key.replace("payNow_", "");
+        acc.payingNow = acc.payingNow || [];
+        acc.payingNow.push(id);
+      }
+      // Handle other fields normally
+      else {
+        acc[key] = value;
+      }
+    
+      return acc;
+    }, {});
+    const transformedBody = Object.fromEntries(
+      Object.entries(consolidatedBody).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value.join(", ") : (typeof value === "object" && value !== null ? JSON.stringify(value) : value),
+      ])
+    );
+    
+    // const transformedBody = Object.fromEntries(
+    //   Object.entries(consolidatedBody).map(([key, value]) => [
+    //     key,
+    //     Array.isArray(value) ? value.join(", ") : value,
+    //   ])
+    // );
+
+    const product = await stripe.products.search({
+        query: `name:'6 Game Season'`,
+    })
+    const metadata = {
+      type: 'teamSeasonCheckout',
+      priceId: product.data[0].default_price,
+      success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
+      ...transformedBody
+    }
     console.log(req.body)
+    console.log(metadata)
+        if(req.body.teamId === ''){
+          console.log('test team checkout')
+          
+          
+          const data = {
+            abbreviation: req.body.teamAbbreviation,
+            fullName: req.body.teamFullName,
+            shortName: req.body.teamShortName,
+            leagueId: req.body.leagueId,
+            seasonId: req.body.seasonId,
+            teamId: req.body.teamId,
+            color: req.body.teamShirtColor1,
+          }
+        
+          req.body.teamId = await functions.addTeam(data)
+          
+        }
+        if(req.file){
+          functions.addTeamLogo(req.file,req.body.teamId)
+        }
+        
+
+    // console.log(req.body)
     // const transformedBody = Object.fromEntries(
     //   Object.entries(req.body).map(([key, value]) => [
     //     key,
@@ -390,13 +477,13 @@ router.post('/teamSeasonCheckoutSession', async (req, res) => {
     // const product = await stripe.products.search({
     //     query: `name:'6 Game Season'`,
     // })
-    const metadata = {
-      type: 'teamSeasonCheckout',
+    // const metadata = {
+    //   type: 'teamSeasonCheckout',
       // priceId: product.data[0].default_price,
       // success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
       // cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
       // ...transformedBody
-    }
+    // }
     // let leaguesTeams = [];
 
     // Object.keys(req.body).forEach(key => {

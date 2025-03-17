@@ -156,11 +156,15 @@
         <br>
         <br>
         <input type="text" name="teamAbbreviation" placeholder="Team Abbreviation" value="" required>
-        <!-- <input type="tel" name="phone" placeholder="Phone Number" value="" required> -->
-        <br>
-        <br>
-        <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('teamSearchContainer'),document.getElementById('formBackground'))">Search for Existing Team</button>
-    
+        <div style="display: none;">
+            <br>
+            <button type="button" name="teamIdClear" class="buttonStyle" onclick="teamClear()">Clear</button>
+        </div>
+        
+        <div>
+            <br>
+            <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('teamSearchContainer'),document.getElementById('formBackground'))">Search for Existing Team</button>
+        </div>
         <br><br>
         <label for="skill"><b>Rate your Team's Experience Level:</b></label>
         <select name="skill" id="" required>
@@ -193,7 +197,7 @@
         <br><br>
         <!-- <input type="text" name="teamShirtColor1" id="teamShirtColor1" value="" hidden> -->
               <label for="teamShirtColor1"><b>Team Shirt Color 1: </b></label>
-              <select name="" id="teamShirtColor1" onchange="colorSelect(this)" required>
+              <select name="teamShirtColor1" id="teamShirtColor1" onchange="colorSelect(this)" required>
                 <option value="" disabled selected>Shirt Color</option>
                 <option value="Black">Black</option>
                 <option value="Blue">Blue</option>
@@ -219,7 +223,7 @@
               <br>
               <!-- <input type="text" name="teamShirtColor2" id="teamShirtColor2" value="" hidden> -->
               <label for="teamShirtColor2"><b>Team Shirt Color 2: </b></label>
-              <select name="" id="teamShirtColor2" onchange="colorSelect(this)" required>
+              <select name="teamShirtColor2" id="teamShirtColor2" onchange="colorSelect(this)" required>
                 <option value="" disabled selected>Shirt Color</option>
                 <option value="Black">Black</option>
                 <option value="Blue">Blue</option>
@@ -245,7 +249,7 @@
               <br>
               <!-- <input type="text" name="teamShirtColor3" id="teamShirtColor3" value="" hidden> -->
               <label for="teamShirtColor3"><b>Team Shirt Color 3: </b></label>
-              <select name="" id="teamShirtColor3" onchange="colorSelect(this)" required>
+              <select name="teamShirtColor3" id="teamShirtColor3" onchange="colorSelect(this)" required>
                 <option value="" disabled selected>Shirt Color</option>
                 <option value="Black">Black</option>
                 <option value="Blue">Blue</option>
@@ -260,8 +264,8 @@
                 <option value="Yellow">Yellow</option>
               </select>
               <br>
-              <label for=""><b>Keeper Shirt Color: </b></label>
-              <select name="" id="keeperShirtColor" onchange="colorSelect(this)">
+              <label for="keeperShirtColor"><b>Keeper Shirt Color: </b></label>
+              <select name="keeperShirtColor" id="keeperShirtColor" onchange="colorSelect(this)">
                 <option value="" disabled selected>Shirt Color</option>
                 <option value="Lime">Lime</option>
                 <option value="Orchid">Orchid</option>
@@ -338,7 +342,7 @@
                             <input type="text" name="lastName" value="<%= data.userAttributes.lastName%>" disabled required>
                         </td>
                         <td>
-                            <select name="<%= data.userAttributes.ID %>_shirtSize" id="" required>
+                            <select name="shirtSize_<%= data.userAttributes.ID %>" id="" required>
                                 <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
                                 <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
                                 <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
@@ -354,10 +358,10 @@
                         </td>
                         <td>
                             <% console.log(data.userAttributes) %>
-                            <input name="<%= data.userAttributes.ID %>_discounted" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %>>
+                            <input name="discounted_<%= data.userAttributes.ID %>" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %>>
                         </td>
                         <td>
-                            <input name="<%= data.userAttributes.ID %>_payNow" type="checkbox" checked disabled>
+                            <input name="payNow_<%= data.userAttributes.ID %>" type="checkbox" checked disabled>
                         </td>
                         <td>
                             <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
@@ -590,7 +594,7 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
                         <td><input type="text" value="${responseData.data.firstName}" disabled></td>
                         <td><input type="text" value="${responseData.data.lastName}" disabled></td>
                         <td>
-                            <select name="${responseData.data.ID}_shirtSize" required>
+                            <select name="shirtSize_${responseData.data.ID}" required>
                                 <option value="S">Small</option>
                                 <option value="M">Medium</option>
                                 <option value="L" selected>Large</option>
@@ -600,8 +604,8 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
                         </td>
                         <td><input name="captain" type="radio" value="${responseData.data.ID}"></td>
                         <td><input name="keeper" type="radio" value="${responseData.data.ID}"></td>
-                        <td><input name="${responseData.data.ID}_discounted" type="checkbox"></td>
-                        <td><input name="${responseData.data.ID}_payNow" type="checkbox"></td>
+                        <td><input name="discounted_${responseData.data.ID}" type="checkbox"></td>
+                        <td><input name="payNow_${responseData.data.ID}" type="checkbox"></td>
                         <td><button style="color: red;" name="${responseData.data.ID}_remove" onclick="removeRow(this)">X</button></td>
                         <input type="hidden" class="userId" name="rosterUserId" value="${responseData.data.ID}">
                     `;
@@ -631,7 +635,7 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
             return brightness > 128 ? 'black' : 'white';
         }
         function selectAllPay(){
-            document.querySelectorAll('input[name$="_payNow"]:not(:disabled)').forEach(checkbox => {
+            document.querySelectorAll('input[name$="payNow_"]:not(:disabled)').forEach(checkbox => {
                 checkbox.checked = true;
             });
         }
@@ -654,11 +658,22 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
             reader.readAsDataURL(file);
         }
     });
+    function teamClear(){
+        document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamFullName"]').value = ''
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').value = ''
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').value = ''
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamId"]').value = ''
+
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamFullName"]').disabled = false
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').disabled = false
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').disabled = false
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamIdClear"]').parentElement.style.display = 'none'
+    }
     document.getElementById('removeButton').addEventListener('click', function() {
-    document.getElementById('teamLogo').value = ""; // Clear the file input
-    document.getElementById('imagePreview').style.display = 'none'; // Hide preview
-    this.style.display = 'none'; // Hide remove button
-});
+        document.getElementById('teamLogo').value = ""; // Clear the file input
+        document.getElementById('imagePreview').style.display = 'none'; // Hide preview
+        this.style.display = 'none'; // Hide remove button
+    });
     </script>
     <script src="/main.js"></script>
     <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>

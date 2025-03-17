@@ -935,16 +935,18 @@ async function getLeagues(xform){
 }
 async function paymentSubmit(form,event,path) {
             event.preventDefault();
-            console.log('paysubmit')
             let formData = new FormData(form)
+
             const response = await fetch(`/api/payments/${path}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(formData).toString(),
+                // headers: {
+                //     'Content-Type': 'application/x-www-form-urlencoded',
+                // },
+                body: 
+                // new URLSearchParams(
+                    formData
+                // ).toString(),
             })
-            console.log('test')
         const { url } = await response.json();
         window.location.href = url; // Redirect to Stripe Checkout
 }

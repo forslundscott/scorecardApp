@@ -175,38 +175,10 @@ router.get(['/newTeam'], async (req, res, next) => {
 router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res, next) => {
     try{ 
         
-
-        // Add team to database
-        const result = await pool.request()
-        .input('abbreviation', sql.VarChar, req.body.abbreviation)
-        .input('fullName', sql.VarChar, req.body.fullName)
-        .input('shortName', sql.VarChar, req.body.shortName)
-        .input('leagueId', sql.VarChar, req.body.leagueId)
-        .input('seasonId', sql.Int, req.body.seasonId)
-        .input('color', sql.VarChar, req.body.color)
-        .query(`
-            IF NOT EXISTS (SELECT 1 FROM teams WHERE id = @abbreviation)
-            BEGIN
-                DECLARE @teamId INT;
-
-                INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color)
-                VALUES (@abbreviation, @fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color);
-
-                SET @teamId = SCOPE_IDENTITY();
-
-                insert into seasonLeagueTeam (seasonId, leagueId, teamId)
-                values(@seasonId,@leagueId,@teamId);
-
-            END
-            select @teamId as teamId
-            `)
-            if(result.recordset[0]){
-                const outputDir = path.join(__dirname, '../public/images');
-                const filename = `${result.recordset[0].teamId}.png`;
-                if(req.file && req.file.buffer) {
-                    await functions.pngUpload(req.file.buffer, filename, outputDir)
-                }
-            }
+        const teamId = await functions.addTeam(req.body)
+        if(req.file){
+            functions.addTeamLogo(req.file,teamId)
+        }
         res.redirect(302,'/teams')
     }catch(err){
         next(err)
@@ -233,6 +205,47 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
     } catch (err) {
         console.error('Query failed: ', err);
         res.status(500).send('Internal server error');
+    }
+});
+router.get('/site/myteams', checkAuthenticated, async (req,res, next)=>{
+    try{
+        // if (req.isAuthenticated()) {
+        //     // console.log(req.user)
+        // }
+        let data = {
+            page: `teams`,
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('userId',sql.Int,req.user.id)
+        .query(`
+                        select t.id
+            , t.fullName as teamFullName
+            , t.color
+            , t.abbreviation as teamAbbreviation
+            , u.firstName + ' ' + u.lastName as captain
+            , l.color as LeagueColor
+            , t.teamId
+            , l.shortName as leagueShortName
+            , l.abbreviation as leagueAbbreviation
+            ,s.seasonName
+            from seasonLeagueTeam as slt 
+            left join  teams as t on slt.teamId=t.teamId
+            left join leagues as l on slt.leagueId=l.leagueId
+            LEFT join users as u on t.captain=u.ID
+            LEFT join seasons as s on slt.seasonId=s.seasonId
+            where slt.seasonId in (select seasonId from seasons
+            where active = 1)
+            and t.teamId in (
+                select teamId from user_team as ut
+                where ut.userId = @userId and ut.seasonId = slt.seasonId
+            )
+            ORDER by t.league, fullName
+        `)
+        data.teams = result.recordset
+        res.render('myTeamsSite.ejs',{data: data}) 
+    }catch(err){
+        next(err)
     }
 });
 router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{

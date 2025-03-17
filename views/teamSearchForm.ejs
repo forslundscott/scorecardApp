@@ -34,6 +34,11 @@
                 document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').value = form.querySelector('[name="shortName"]').value
                 document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').value = form.querySelector('[name="abbreviation"]').value
                 document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamId"]').value = form.querySelector('[name="teamId"]').value
+
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamFullName"]').disabled = true
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').disabled = true
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').disabled = true
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamIdClear"]').parentElement.style.display = ''
                 closeForm()
             }
             catch(err){
