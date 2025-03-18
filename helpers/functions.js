@@ -187,17 +187,31 @@ async function createCheckoutSession({ metadata }) {
             query: `name:'6 Game Season'`,
         })
         console.log(product.data[0].default_price)
+        console.log(metadata)
         // Create Stripe Checkout session
         const session = await stripe.checkout.sessions.create({
-            line_items: [
-                {
-                    price: metadata.priceId,
-                    quantity: metadata.quantity,
-                },
-            ],
+            line_items: 
+            metadata.lineItems
+            // [
+            //     {
+            //         price: metadata.priceId,
+            //         quantity: metadata.quantity,
+            //     },
+            //     {
+            //         price_data: {
+            //           currency: 'usd',
+            //           product_data: {
+            //             name: 'Stripe Processing Fee',
+            //           },
+            //           unit_amount: 2000, // amount in cents
+            //         },
+            //         quantity: 1,
+            //       },
+            // ]
+            ,
             customer_email: metadata.email,
             mode: 'payment',
-            metadata: metadata,
+            metadata: metadata.metadata,
             success_url: metadata.success_url,
             cancel_url: metadata.cancel_url,
         });

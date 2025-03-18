@@ -389,7 +389,13 @@ router.get('/cancel', async (req,res, next)=>{
 router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req, res) => {
   
   try {
-    
+    // let result = await pool.request()
+    // .input('leagueId',sql.Int,req.body.leagueId)
+    // .query(`
+    //   select *
+    //   from leagues as l
+    //   where l.leagueId = @leagueId
+    //   `)
     const consolidatedBody = Object.entries(req.body).reduce((acc, [key, value]) => {
       if (Array.isArray(value)) {
         value = value.join(", ");
@@ -434,17 +440,123 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
     // );
 
     const product = await stripe.products.search({
-        query: `name:'6 Game Season'`,
+        query: `name:'8 Game Season'`,
     })
+    const prices = await stripe.prices.list({
+      product: product.id,
+      active: true, // Only get active prices
+  });
+  const teamPrice = prices.data.find(price => price.nickname === 'Team')
+  const lineItems = [{
+    price_data: {
+      currency: 'usd',
+      product_data: {
+        name: 'Spring 2025 - Team',
+      },
+      unit_amount: teamPrice.unit_amount, // amount in cents
+    },
+    quantity: 1,
+  }]
+  let totalPrice = teamPrice.unit_amount
+  let result = await pool.request()
+    .input('leagueId',sql.Int,req.body.leagueId)
+    .query(`
+      select *
+      from leagues as l
+      where l.leagueId = @leagueId
+      `)
+      console.log(result.recordset[0].abbreviation)
+      if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
+        totalPrice = totalPrice + 15000
+        lineItems.push(
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: 'Referee Fees - Premier - Team',
+              },
+              unit_amount: 15000, // amount in cents
+            },
+            quantity: 1,
+          }
+        )
+      }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
+        totalPrice = totalPrice + 30000
+        lineItems.push(
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: 'Referee Fees - Mens - Team',
+              },
+              unit_amount: 30000, // amount in cents
+            },
+            quantity: 1,
+          }
+        )
+      }
+      lineItems.push(
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Annual Waiver Fee',
+            },
+            unit_amount: 2000, // amount in cents
+          },
+          quantity: 1,
+        }
+      )
+      totalPrice = totalPrice + 2000
+      lineItems.push(
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Stripe Processing Fee',
+            },
+            unit_amount: totalPrice*.03, // amount in cents
+          },
+          quantity: 1,
+        }
+      )
     const metadata = {
       type: 'teamSeasonCheckout',
-      priceId: product.data[0].default_price,
+      lineItems: lineItems
+      // [
+      //   // {
+      //   //   price: teamPrice.id,
+      //   //   quantity: 1
+      //   // },
+      //   {
+      //     price_data: {
+      //       currency: 'usd',
+      //       product_data: {
+      //         name: 'Spring 2025 - Team',
+      //       },
+      //       unit_amount: teamPrice.unit_amount, // amount in cents
+      //     },
+      //     quantity: 1,
+      //   },
+      //   {
+      //       price_data: {
+      //         currency: 'usd',
+      //         product_data: {
+      //           name: 'Stripe Processing Fee',
+      //         },
+      //         unit_amount: teamPrice.unit_amount*.03, // amount in cents
+      //       },
+      //       quantity: 1,
+      //     },
+      // ]
+      ,
+      priceId: teamPrice.id,
       success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
       ...transformedBody
     }
-    console.log(req.body)
-    console.log(metadata)
+    // console.log(req.body)
+    // console.log(specificPrice)
         if(req.body.teamId === ''){
           console.log('test team checkout')
           
@@ -464,52 +576,15 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
         }
         if(req.file){
           functions.addTeamLogo(req.file,req.body.teamId)
-        }
-        
-
-    // console.log(req.body)
-    // const transformedBody = Object.fromEntries(
-    //   Object.entries(req.body).map(([key, value]) => [
-    //     key,
-    //     Array.isArray(value) ? value.join(", ") : value,
-    //   ])
-    // );
-    // const product = await stripe.products.search({
-    //     query: `name:'6 Game Season'`,
-    // })
-    // const metadata = {
-    //   type: 'teamSeasonCheckout',
-      // priceId: product.data[0].default_price,
-      // success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-      // cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
-      // ...transformedBody
-    // }
-    // let leaguesTeams = [];
-
-    // Object.keys(req.body).forEach(key => {
-    //     if (key.includes('leagueId_')) {
-    //         let remainingKey = key.replace('leagueId_', ''); // Remove 'leagueId_'
-            
-    //         // Find another key that contains the remaining part
-    //         let matchingKey = Object.keys(req.body).find(k => k.includes(remainingKey) && k !== key);
-
-    //         if (matchingKey) {
-    //             leaguesTeams.push({
-    //                 leagueId: remainingKey,
-    //                 teamId: req.body[matchingKey]
-    //             });
-    //         }
-    //     }
-    // });
-    // metadata.quantity = leaguesTeams.length
-    // metadata.leaguesTeams = JSON.stringify(leaguesTeams)
-    //   await functions.addUserToDatabase(req.body);
-    //   const user = await functions.getUser(req.body)
-    //   metadata.userId = user.ID
-    //   const session = await functions.createCheckoutSession({
-    //     metadata
-    // });
-    //   res.json({ url: session.url });
+        }   
+      metadata.quantity = 1
+      await functions.addUserToDatabase(req.body);
+      const user = await functions.getUser(req.body)
+      metadata.userId = user.ID
+      const session = await functions.createCheckoutSession({
+        metadata
+      });
+      res.json({ url: session.url });
   } catch (error) {
     console.log(error)
       res.status(500).json({ error: error.message });
@@ -525,18 +600,15 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
       ])
     );
     const product = await stripe.products.search({
-        query: `name:'6 Game Season'`,
+        query: `name:'8 Game Season'`,
     })
-    const metadata = {
-      type: 'individualSeasonCheckout',
-      priceId: product.data[0].default_price,
-      success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
-      ...transformedBody
-    }
+    const price = await stripe.prices.retrieve(product.data[0].default_price);
+    console.log(price)
     // console.log(product.data[0].default_price)
     let leaguesTeams = [];
-
+    let result 
+    let lineItems = []
+    let totalPrice = 0
     Object.keys(req.body).forEach(key => {
         if (key.includes('leagueId_')) {
             let remainingKey = key.replace('leagueId_', ''); // Remove 'leagueId_'
@@ -552,6 +624,108 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
             }
         }
     });
+    for(const league of leaguesTeams){
+      result = await pool.request()
+            .input('leagueId',sql.Int,league.leagueId)
+            .query(`
+              select *
+              from leagues as l
+              where l.leagueId = @leagueId
+              `)
+            console.log(result.recordset[0])
+        lineItems.push(
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `Spring 2025 - ${result.recordset[0].shortName}`,
+              },
+              unit_amount: price.unit_amount, // amount in cents
+            },
+            quantity: 1,
+          }
+        )
+        totalPrice = totalPrice + price.unit_amount
+        if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
+          totalPrice = totalPrice + 1500
+          lineItems.push(
+            {
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: 'Referee Fees - Premier - Individual',
+                },
+                unit_amount: 1500, // amount in cents
+              },
+              quantity: 1,
+            }
+          )
+        }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
+          totalPrice = totalPrice + 3000
+          lineItems.push(
+            {
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: `Referee Fees - Men's - Individual`,
+                },
+                unit_amount: 3000, // amount in cents
+              },
+              quantity: 1,
+            }
+          )
+        }
+    }
+    lineItems.push(
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Annual Waiver Fee',
+          },
+          unit_amount: 2000, // amount in cents
+        },
+        quantity: 1,
+      }
+    )
+    totalPrice = totalPrice + 2000
+    lineItems.push(
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Stripe Processing Fee',
+          },
+          unit_amount: totalPrice*.03, // amount in cents
+        },
+        quantity: 1,
+      }
+    )
+    const metadata = {
+      type: 'individualSeasonCheckout',
+      lineItems: lineItems
+      // [
+      //   {
+      //     price: product.data[0].default_price,
+      //     quantity: leaguesTeams.length
+      //   },
+      //   {
+      //       price_data: {
+      //         currency: 'usd',
+      //         product_data: {
+      //           name: 'Stripe Processing Fee',
+      //         },
+      //         unit_amount: price.unit_amount*leaguesTeams.length*.03, // amount in cents
+      //       },
+      //       quantity: 1,
+      //     },
+      // ]
+      ,
+      priceId: product.data[0].default_price,
+      success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
+      metadata: {...transformedBody}
+    }
     metadata.quantity = leaguesTeams.length
     metadata.leaguesTeams = JSON.stringify(leaguesTeams)
     console.log(metadata)

@@ -316,17 +316,17 @@
                             Keeper?
                         </th>
                         <th>
+                            Remove
+                        </th>
+                        <th style="display: none;">
                             Student, Teacher,
                             <br>
                             First Responder, or Military?
                         </th>
-                        <th>
+                        <th style="display: none;">
                             Paying Now
                             <br><br>
                             <button type="button" class="buttonStyle" onclick="selectAllPay()">Select All</button>
-                        </th>
-                        <th>
-                            Remove
                         </th>
                     </tr>
                 </thead>
@@ -357,14 +357,14 @@
                             <input name="keeper" type="radio" value="<%= data.userAttributes.ID %>">
                         </td>
                         <td>
-                            <% console.log(data.userAttributes) %>
-                            <input name="discounted_<%= data.userAttributes.ID %>" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %>>
-                        </td>
-                        <td>
-                            <input name="payNow_<%= data.userAttributes.ID %>" type="checkbox" checked disabled>
-                        </td>
-                        <td>
                             <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
+                        </td>
+                        <td style="display: none;">
+
+                            <input name="discounted_<%= data.userAttributes.ID %>" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %> disabled>
+                        </td>
+                        <td style="display: none;">
+                            <input name="payNow_<%= data.userAttributes.ID %>" type="checkbox" checked disabled>
                         </td>
                         <input type="hidden" class="userId" name="rosterUserId" value="<%= data.userAttributes.ID%>">
                     </tr>
@@ -508,24 +508,28 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
     // }
     handleSubmit(this,event)
   });
-  function handleSubmit(form,event) {
+  async function handleSubmit(form,event) {
             // if (!validateCheckboxes(form)) {
             //     return false; 
             // }
+        //     event.preventDefault();
+        //     let formData = new FormData(form)
+        //     console.log('check')
+        //     const response = await fetch(`/api/payments/teamSeasonCheckoutSession`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/x-www-form-urlencoded',
+        //         },
+        //         body: 
+        //         new URLSearchParams(
+        //             formData
+        //         ).toString(),
+        //     })
+        // const { url } = await response.json();
+        // window.location.href = url; // Redirect to Stripe Checkout
             paymentSubmit(form,event, 'teamSeasonCheckoutSession')
         }
-//   async function handlePlayerRegistrationSubmit(form, event) {
-//     let formData = new FormData(form)
-//     console.log(formData);
-//     await fetch('registration', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded',
-//         },
-//         body: new URLSearchParams(formData).toString(),
-//     });
 
-//     }
         function leagueSelect(ele){
             // console.log(document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`))
             document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).style.display = ele.checked ? "" : "none"
@@ -604,9 +608,9 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
                         </td>
                         <td><input name="captain" type="radio" value="${responseData.data.ID}"></td>
                         <td><input name="keeper" type="radio" value="${responseData.data.ID}"></td>
-                        <td><input name="discounted_${responseData.data.ID}" type="checkbox"></td>
-                        <td><input name="payNow_${responseData.data.ID}" type="checkbox"></td>
                         <td><button style="color: red;" name="${responseData.data.ID}_remove" onclick="removeRow(this)">X</button></td>
+                        <td style="display: none;"><input name="discounted_${responseData.data.ID}" type="checkbox" disabled></td>
+                        <td style="display: none;"><input name="payNow_${responseData.data.ID}" type="checkbox" disabled></td>
                         <input type="hidden" class="userId" name="rosterUserId" value="${responseData.data.ID}">
                     `;
                     document.getElementById("rosterList").appendChild(newRow)
