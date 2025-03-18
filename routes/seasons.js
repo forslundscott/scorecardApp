@@ -26,11 +26,13 @@ router.post('/addSeason', async (req, res, next) => {
         .input('seasonName',sql.VarChar, req.body.seasonName)
         .input('active', sql.Bit, req.body.active ? 1 : 0)
         .input('registrationOpen', sql.Bit, req.body.registrationOpen ? 1 : 0)
+        .input('defaultPeriods',sql.Int, req.body.defaultPeriods)
+        .input('millisPerPeriod',sql.Int, req.body.minutesPerPeriod*60000)
         .query(`
             IF NOT EXISTS (SELECT 1 FROM seasons WHERE seasonName = @seasonName)
             BEGIN
-                insert into seasons (seasonName, active, registrationOpen)
-                values (@seasonName, @active, @registrationOpen)
+                insert into seasons (seasonName, active, registrationOpen,defaultPeriods,millisPerPeriod)
+                values (@seasonName, @active, @registrationOpen, @defaultPeriods, @millisPerPeriod)
             END
             `)
         res.redirect(302,'/seasons')

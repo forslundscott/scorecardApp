@@ -1,6 +1,16 @@
 <form id="newSeasonForm" class="textCenter" action="/seasons/addSeason" method="post" style="display: ''; text-align: center;">
     <input type="text" name="seasonName" value="" placeholder="Season Name" required>
         <br><br>
+        <label for="defaultPeriods">Periods</label>
+        <br>
+    <input type="number" name="defaultPeriods" id="defaultPeriods" max="4" min="1" value="2">
+    <br><br>
+    <!-- <input type="text" name="minutesPerPeriod" inputmode="numeric" id="" value="15"> -->
+    <label for="minutesPerPeriod">minutes Per Period</label>
+        <br>
+    <input type="text" id="minutesPerPeriod" name="minutesPerPeriod" inputmode="numeric" maxlength="3" pattern="[0-9]*" value="15" oninput="this.value = this.value.replace(/\D/g, '')">
+
+    <br><br>
     <label for="active" class="primaryStyle">Active Season?</label> <input type="checkbox" name="active" id="active" checked>
     <br><br>
     <label for="registrationOpen" class="primaryStyle">Registration Open?</label> <input type="checkbox" name="registrationOpen" id="registrationOpen" checked>
