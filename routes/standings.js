@@ -100,7 +100,7 @@ router.get('/site/:seasonId/:type/:league', async (req, res, next) => {
         //     from leagues
         //     where leagueId = @leagueId
         //     `)
-        // console.log(data)
+        console.log(data)
         // data.league = result.recordset[0]
         res.render('standingsSite.ejs',{data: data})
     }catch(err){

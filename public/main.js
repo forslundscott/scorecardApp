@@ -883,6 +883,16 @@ async function getTeams(xform){
                     team2 = xform.querySelector('[name="team2Id"]');
                     team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
                     team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
+                    let tbdOption1 = document.createElement('option')
+                    tbdOption1.value = 1000000024
+                    tbdOption1.text = 'TBD'
+                    team1.appendChild(tbdOption1)
+
+                    let tbdOption2 = document.createElement('option')
+                    tbdOption2.value = 1000000024
+                    tbdOption2.text = 'TBD'
+                    team2.appendChild(tbdOption2)
+                    
                     results.teams.forEach(team => {
                         let option1 = document.createElement('option');
                         option1.value = team.teamId;

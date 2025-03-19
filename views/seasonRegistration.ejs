@@ -121,7 +121,6 @@
         <br>
         <br>
         <label for="dob"><b>Date of Birth:</b></label>
-        <% console.log(data.userAttributes.dob) %>
         <input type="date" name="dob" value="<%= (data.userAttributes.dob && data.userAttributes.dob !== '' && data.userAttributes.dob !== 0) ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : '' %>" required>
         <br>
         <br>
@@ -347,10 +346,11 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
 document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
     // Check if at least one checkbox is selected
     const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
-    
+    console.log(checkboxes)
     if (checkboxes.length === 0) {
       alert('Please select at least one league!');
       event.preventDefault(); // Prevent form submission
+      return false
     }
     handleSubmit(this,event)
   });
@@ -376,6 +376,8 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
             // console.log(document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`))
             document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).style.display = ele.checked ? "" : "none"
             document.getElementById(`${ele.id.replace('leagueId_','')}_division`).style.display = ele.checked ? "" : "none"
+            document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).required = ele.checked
+            document.getElementById(`${ele.id.replace('leagueId_','')}_division`).required = ele.checked
         }
         function toggleDropdown() {
             document.querySelector(".dropdown-menu").style.display = 

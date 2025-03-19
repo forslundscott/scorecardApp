@@ -446,12 +446,12 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       product: product.id,
       active: true, // Only get active prices
   });
-  const teamPrice = prices.data.find(price => price.nickname === 'Team')
+  const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : req.body.discounted ? 'Student, Teacher, First Responder, Military' : 'Regular'))
   const lineItems = [{
     price_data: {
       currency: 'usd',
       product_data: {
-        name: 'Spring 2025 - Team',
+        name: `Spring 2025 - ${req.body.teamPayType === 'team' ? 'Team' : req.body.discounted ? 'Student, Teacher, First Responder, Military' : 'Individual'}`,
       },
       unit_amount: teamPrice.unit_amount, // amount in cents
     },
@@ -465,49 +465,50 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       from leagues as l
       where l.leagueId = @leagueId
       `)
-      console.log(result.recordset[0].abbreviation)
+      console.log(req.body.teamPayType)
       if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
-        totalPrice = totalPrice + 15000
+        totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 15000 : 1500)
         lineItems.push(
           {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: 'Referee Fees - Premier - Team',
+                name: `Referee Fees - Premier - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
               },
-              unit_amount: 15000, // amount in cents
+              unit_amount: req.body.teamPayType === 'team' ? 15000 : 1500, // amount in cents
             },
             quantity: 1,
           }
         )
       }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
-        totalPrice = totalPrice + 30000
+        totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 30000 : 3000)
         lineItems.push(
           {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: 'Referee Fees - Mens - Team',
+                name: `Referee Fees - Men's - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
               },
-              unit_amount: 30000, // amount in cents
+              unit_amount: req.body.teamPayType === 'team' ? 30000 : 3000, // amount in cents
             },
             quantity: 1,
           }
         )
       }
+      
       lineItems.push(
         {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Annual Waiver Fee',
+              name: 'Annual GLOS Waiver Fee',
             },
-            unit_amount: 2000, // amount in cents
+            unit_amount: req.body.discounted === 'true' ? 1000 : 2000, // amount in cents
           },
           quantity: 1,
         }
       )
-      totalPrice = totalPrice + 2000
+      totalPrice = totalPrice + (req.body.discounted === 'true' ? 1000 : 2000)
       lineItems.push(
         {
           price_data: {
@@ -515,7 +516,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
             product_data: {
               name: 'Stripe Processing Fee',
             },
-            unit_amount: totalPrice*.03, // amount in cents
+            unit_amount: (totalPrice*.03)+30, // amount in cents
           },
           quantity: 1,
         }
@@ -681,14 +682,14 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'Annual Waiver Fee',
+            name: 'Annual GLOS Waiver Fee',
           },
-          unit_amount: 2000, // amount in cents
+          unit_amount: req.body.discounted === 'true' ? 1000 : 2000, // amount in cents
         },
         quantity: 1,
       }
     )
-    totalPrice = totalPrice + 2000
+    totalPrice = totalPrice + (req.body.discounted === 'true' ? 1000 : 2000)
     lineItems.push(
       {
         price_data: {
@@ -696,7 +697,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
           product_data: {
             name: 'Stripe Processing Fee',
           },
-          unit_amount: totalPrice*.03, // amount in cents
+          unit_amount: (totalPrice*.03)+30, // amount in cents
         },
         quantity: 1,
       }
@@ -723,12 +724,13 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
       ,
       priceId: product.data[0].default_price,
       success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
+      cancel_url: `${req.get('Referer') || 'https://envoroot.com'}`,
+      // `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
       metadata: {...transformedBody}
     }
     metadata.quantity = leaguesTeams.length
     metadata.leaguesTeams = JSON.stringify(leaguesTeams)
-    console.log(metadata)
+    console.log(req.get('Referer'))
       // let priceId = 'price_1QRdBOFGzuNCeWURG6JFGgYi';
       // if (Array.isArray(req.body.hour)) {
       //   switch(req.body.hour.length){

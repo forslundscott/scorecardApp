@@ -289,87 +289,97 @@
                 <button id="removeButton" class="buttonStyle" type="button" style="display:none; margin-top: 5px;">Remove</button>
                 <br>
                 <img id="imagePreview" style="display:none; max-width: 100px; max-height: 100px; margin-top: 10px;">
+                <br><br>
             </div>
-            <br><br><br>  
-            <label for=""><h2><b>Team Roster: </b></h2></label>
-            <!-- <br> -->
-            <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('newPlayerFormTeamRegistration'),document.getElementById('formBackground'))">Add Player</button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>
-                            Email
-                        </th>
-                        <th>
-                            First Name
-                        </th>
-                        <th>
-                            Last Name
-                        </th>
-                        <th>
-                            Shirt Size
-                        </th>
-                        <th>
-                            Captain?
-                        </th>
-                        <th>
-                            Keeper?
-                        </th>
-                        <th>
-                            Remove
-                        </th>
-                        <th style="display: none;">
-                            Student, Teacher,
-                            <br>
-                            First Responder, or Military?
-                        </th>
-                        <th style="display: none;">
-                            Paying Now
-                            <br><br>
-                            <button type="button" class="buttonStyle" onclick="selectAllPay()">Select All</button>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="rosterList">
-                    <tr>
-                        <td>
-                            <input type="text" name="email" value="<%= data.userAttributes.email%>" disabled required>
-                        </td>
-                        <td>
-                            <input type="text" name="firstName" value="<%= data.userAttributes.firstName%>" disabled required>
-                        </td>
-                        <td>
-                            <input type="text" name="lastName" value="<%= data.userAttributes.lastName%>" disabled required>
-                        </td>
-                        <td>
-                            <select name="shirtSize_<%= data.userAttributes.ID %>" id="" required>
-                                <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
-                                <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
-                                <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
-                                <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
-                                <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input name="captain" type="radio" value="<%= data.userAttributes.ID %>" checked required>
-                        </td>
-                        <td>
-                            <input name="keeper" type="radio" value="<%= data.userAttributes.ID %>">
-                        </td>
-                        <td>
-                            <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
-                        </td>
-                        <td style="display: none;">
-
-                            <input name="discounted_<%= data.userAttributes.ID %>" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %> disabled>
-                        </td>
-                        <td style="display: none;">
-                            <input name="payNow_<%= data.userAttributes.ID %>" type="checkbox" checked disabled>
-                        </td>
-                        <input type="hidden" class="userId" name="rosterUserId" value="<%= data.userAttributes.ID%>">
-                    </tr>
-                </tbody>
-            </table>
+            <!-- <br><br><br>   -->
+            <label for=""> Are you registering...</label>
+            <label for=""><input type="radio" name="teamPayType" value="self" onclick="payChange(this)"> Self Only</label>
+            <label for=""><input type="radio" name="teamPayType" value="team" onclick="payChange(this)" checked> Whole Team</label>
+            <div id="rosterContainer">
+                <label for=""><h2><b>Team Roster: </b></h2></label>
+                <b>(Max 14) </b>
+                <br><br>
+                <button 
+                    type="button" 
+                    class="buttonStyle" 
+                    style="background-color: #ceff00;" 
+                    onclick="if(checkRows()){toggleForm(document.getElementById('newPlayerFormTeamRegistration'),document.getElementById('formBackground'))}">Add Player</button>
+                <table id="rosterTable">
+                    <thead>
+                        <tr>
+                            <th>
+                                Email
+                            </th>
+                            <th>
+                                First Name
+                            </th>
+                            <th>
+                                Last Name
+                            </th>
+                            <th>
+                                Shirt Size
+                            </th>
+                            <th>
+                                Captain?
+                            </th>
+                            <th>
+                                Keeper?
+                            </th>
+                            <th>
+                                Remove
+                            </th>
+                            <th style="display: none;">
+                                Student, Teacher,
+                                <br>
+                                First Responder, or Military?
+                            </th>
+                            <th style="display: none;">
+                                Paying Now
+                                <br><br>
+                                <button type="button" class="buttonStyle" onclick="selectAllPay()">Select All</button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="rosterList">
+                        <tr>
+                            <td>
+                                <input type="text" name="email" value="<%= data.userAttributes.email%>" disabled required>
+                            </td>
+                            <td>
+                                <input type="text" name="firstName" value="<%= data.userAttributes.firstName%>" disabled required>
+                            </td>
+                            <td>
+                                <input type="text" name="lastName" value="<%= data.userAttributes.lastName%>" disabled required>
+                            </td>
+                            <td>
+                                <select name="shirtSize_<%= data.userAttributes.ID %>" id="" required>
+                                    <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
+                                    <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
+                                    <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
+                                    <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
+                                    <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="captain" type="radio" value="<%= data.userAttributes.ID %>" checked required>
+                            </td>
+                            <td>
+                                <input name="keeper" type="radio" value="<%= data.userAttributes.ID %>">
+                            </td>
+                            <td>
+                                <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
+                            </td>
+                            <td style="display: none;">
+                                <input name="discounted_<%= data.userAttributes.ID %>" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %> disabled>
+                            </td>
+                            <td style="display: none;">
+                                <input name="payNow_<%= data.userAttributes.ID %>" type="checkbox" checked disabled>
+                            </td>
+                            <input type="hidden" class="userId" name="rosterUserId" value="<%= data.userAttributes.ID%>">
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <br>
             <label for=""><h2><b>Your Information: </b></h2></label>
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
@@ -394,6 +404,14 @@
         <input type="radio" name="gender" id="gender_unspecified" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="gender_unspecified">Unspecified</label>
         <br>
         <br>
+        <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
+        <br>
+        <br>
+        
+        <input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && data.userAttributes.discounted === true ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
+        <br>
+        <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== true ? 'checked' : ''  %>><label for="discounted_no">No</label>
+        <br><br><br>
         <label for=""><b>Emergency Contact:</b></label>
         <br>
         <br>
@@ -599,11 +617,11 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
                         <td><input type="text" value="${responseData.data.lastName}" disabled></td>
                         <td>
                             <select name="shirtSize_${responseData.data.ID}" required>
-                                <option value="S">Small</option>
-                                <option value="M">Medium</option>
-                                <option value="L" selected>Large</option>
-                                <option value="XL">X-Large</option>
-                                <option value="XXL">XX-Large</option>
+                                <option value="S" ${responseData.data.shirtSize === 'S' ? 'selected' : ''}>Small</option>
+                                <option value="M" ${responseData.data.shirtSize === 'M' ? 'selected' : ''}>Medium</option>
+                                <option value="L" ${!['S', 'M', 'XL', 'XXL'].includes(responseData.data.shirtSize) ? 'selected' : ''}>Large</option>
+                                <option value="XL" ${responseData.data.shirtSize === 'XL' ? 'selected' : ''}>X-Large</option>
+                                <option value="XXL" ${responseData.data.shirtSize === 'XXL' ? 'selected' : ''}>XX-Large</option>
                             </select>
                         </td>
                         <td><input name="captain" type="radio" value="${responseData.data.ID}"></td>
@@ -678,6 +696,19 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
         document.getElementById('imagePreview').style.display = 'none'; // Hide preview
         this.style.display = 'none'; // Hide remove button
     });
+    function payChange(ele){
+        ele.value === 'self' ? document.getElementById('rosterContainer').style.display = 'none': document.getElementById('rosterContainer').style.display = ''
+    }
+    function checkRows() {
+            let tbody = document.querySelector("#rosterTable tbody");
+            let rowCount = tbody.querySelectorAll("tr").length;
+
+            if (rowCount === 14) {
+                alert("You are at the Roster Maximum.");
+                return false
+            }
+            return true
+        }
     </script>
     <script src="/main.js"></script>
     <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>
