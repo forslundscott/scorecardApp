@@ -610,6 +610,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
     let result 
     let lineItems = []
     let totalPrice = 0
+
     Object.keys(req.body).forEach(key => {
         if (key.includes('leagueId_')) {
             let remainingKey = key.replace('leagueId_', ''); // Remove 'leagueId_'
@@ -751,7 +752,15 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
       const session = await functions.createCheckoutSession({
         metadata
     });
-    console.log('checkout')
+    console.log({userId: req.user.id,
+      ...transformedBody
+    })
+    console.log(Date.now())
+    functions.updateUserInfo({
+      userId: req.user.id,
+      ...transformedBody,
+      waiverDate: Date.now()
+    })
       res.json({ url: session.url });
   } catch (error) {
     console.log(error)

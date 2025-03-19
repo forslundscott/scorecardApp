@@ -114,44 +114,6 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
 
         await transaction.commit()
 
-        await pool.request()
-        .input('userId', sql.Int, req.user.id)
-        .input('firstName', sql.VarChar, req.body.firstName)
-        .input('lastName', sql.VarChar, req.body.lastName)
-        // .input('preferredName', sql.VarChar, req.body.preferredName) // May add later
-        .input('email', sql.VarChar, req.body.email)
-        .input('phone', sql.VarChar(20), req.body.phone)
-        .input('dob', sql.BigInt, new Date(req.body.dob).getTime())
-        .input('gender', sql.VarChar, req.body.gender)
-        .input('skill', sql.Int, req.body.skill)
-        .input('discounted', sql.Bit, req.body.discounted)
-        .input('shirtSize', sql.VarChar, req.body.shirtSize)
-        .input('emergencyContactFirstName', sql.VarChar, req.body.emergencyContactFirstName)
-        .input('emergencyContactLastName', sql.VarChar, req.body.emergencyContactLastName)
-        .input('emergencyContactPhone', sql.VarChar(20), req.body.emergencyContactPhone)
-        .input('emergencyContactRelationship', sql.VarChar, req.body.emergencyContactRelationship)
-        .input('allergies', sql.VarChar, `${req.body.allergies}`)
-        .input('medicalConditions', sql.VarChar, `${req.body.medicalConditions}`)
-        .query(`
-            update users
-            set firstName = @firstName,
-            lastName = @lastName,
-            email = @email,
-            phone = @phone,
-            dob = @dob,
-            gender = @gender,
-            skill = @skill,
-            discounted = @discounted,
-            shirtSize = @shirtSize,
-            emergencyContactFirstName = @emergencyContactFirstName,
-            emergencyContactLastName = @emergencyContactLastName,
-            emergencyContactPhone = @emergencyContactPhone,
-            emergencyContactRelationship = @emergencyContactRelationship,
-            allergies = @allergies,
-            medicalConditions = @medicalConditions
-            where ID = @userId
-            `)
-
         res.redirect(`/seasons/${req.params.seasonId}/registration`);
     }catch(err){
         // console.log(req)

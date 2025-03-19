@@ -146,10 +146,10 @@
         <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
         <br>
         <br>
-        
-        <input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && data.userAttributes.discounted === true ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
+        <% console.log(data.userAttributes.discounted) %><input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
-        <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== true ? 'checked' : ''  %>><label for="discounted_no">No</label>
+        <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || !['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %>><label for="discounted_no">No</label>
+        
         <br><br><br>
         <label for=""><b>Leagues & Teams:</b></label>
         <br>

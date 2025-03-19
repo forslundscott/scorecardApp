@@ -286,6 +286,58 @@ async function addTeamLogo(logo, teamId) {
         }
     }
 }
+
+async function updateUserInfo(user){
+    let testuser = {
+        userId: '1'
+    }
+    if (!user.userId) return; // Don't run if userId is missing
+    console.log('test return')
+    const request = pool.request();
+    request.input('userId', sql.Int, user.userId);
+
+    const fields = [];
+    const paramMap = {
+        firstName: sql.VarChar,
+        lastName: sql.VarChar,
+        preferredName: sql.VarChar,
+        email: sql.VarChar,
+        phone: sql.VarChar(20),
+        dob: sql.BigInt,
+        gender: sql.VarChar,
+        skill: sql.Int,
+        discounted: sql.Bit,
+        shirtSize: sql.VarChar,
+        emergencyContactFirstName: sql.VarChar,
+        emergencyContactLastName: sql.VarChar,
+        emergencyContactPhone: sql.VarChar(20),
+        emergencyContactRelationship: sql.VarChar,
+        allergies: sql.VarChar,
+        medicalConditions: sql.VarChar,
+        waiverDate: sql.BigInt,
+        waiverPayDate: sql.BigInt,
+        banned: sql.Bit
+    };
+
+    for (const key in paramMap) {
+        if (user[key] !== undefined && user[key] !== null) {
+            let value = user[key];
+
+            // Special handling for `dob` and `discounted`
+            if (key === 'dob') value = new Date(value).getTime();
+            if (key === 'discounted') value = ['true', true, 1].includes(value) ? 1 : 0;
+
+            request.input(key, paramMap[key], value);
+            fields.push(`${key} = @${key}`);
+        }
+    }
+    console.log(fields)
+    if (fields.length === 0) return; // If no valid fields, don't run query
+    console.log(`UPDATE users SET ${fields.join(', ')} WHERE ID = @userId`)
+    const query = `UPDATE users SET ${fields.join(', ')} WHERE ID = @userId`;
+
+    await request.query(query);
+}
 module.exports = {
     titleCase
     ,getOrdinalNumber
@@ -301,4 +353,5 @@ module.exports = {
     ,failedQuery
     ,addTeam
     ,addTeamLogo
+    ,updateUserInfo
 }
