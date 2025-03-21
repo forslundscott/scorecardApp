@@ -113,7 +113,7 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
 
 
         await transaction.commit()
-
+        
         res.redirect(`/seasons/${req.params.seasonId}/registration`);
     }catch(err){
         // console.log(req)
@@ -256,6 +256,7 @@ router.get(['/:seasonId/registration/team'],checkAuthenticated, async (req, res,
             seasonId: req.params.seasonId
             
         }
+
         let result = await pool.request()
         .input('userId', sql.Int, data.user.id)
         .input('seasonId', sql.Int, req.params.seasonId)
@@ -281,7 +282,7 @@ router.get(['/:seasonId/registration/team'],checkAuthenticated, async (req, res,
             select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
             from seasonRegistration_leagueTeam as srl
             left join leagues as l on srl.leagueId = l.leagueId
-            left join teams as t on srl.teamId = t.id
+            left join teams as t on srl.teamId = t.teamId
             where srl.seasonId = @seasonId and srl.userId = @userId
             `)
             console.log('testing123')
@@ -326,7 +327,7 @@ router.get(['/:seasonId/registration/team'],checkAuthenticated, async (req, res,
                     `)
                 league.teams = result.recordset
             }
-            // console.log(data.leagues[0].teams)
+            console.log(await functions.checkWaiverFeeDue(req.user.id))
         res.render('teamRegistration.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -365,7 +366,7 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
             from seasonRegistration_leagueTeam as srl
             left join leagues as l on srl.leagueId = l.leagueId
-            left join teams as t on srl.teamId = t.id
+            left join teams as t on srl.teamId = t.teamId
             where srl.seasonId = @seasonId and srl.userId = @userId
             `)
             console.log('testing123')

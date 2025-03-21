@@ -164,7 +164,7 @@
             <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %></label>
             <select name="<%=league.leagueId %>_teamId" id="<%=league.leagueId %>_teamId" style="display: none;">
                 <option value="" disabled selected>Team Name (Captain Name)</option>
-                <option value="FA">Free Agent</option>
+                <option value="1000000069">Free Agent</option>
                 <% for(let team of league.teams) { %>
                     <option value="<%= team.teamId %>"><%= team.teamShortName %> (<%= team.captainPreferredName %> <%= team.captainLastName %>)</option>
                 <% } %>
@@ -218,7 +218,7 @@
           
           <div id="keeperColorContainer" style="display: none;">
               <label for=""><b>Keeper Shirt Color: </b></label>
-              <select name="" id="keeperShirtColor" onchange="this.style.backgroundColor=this.value">
+              <select name="keeperShirtColor" id="keeperShirtColor" onchange="this.style.backgroundColor=this.value" required>
                 <option value="" disabled selected>Shirt Color</option>
                 <option value="Lime">Lime</option>
                 <option value="Orchid">Orchid</option>

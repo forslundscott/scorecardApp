@@ -9,6 +9,9 @@ const pool = require(`../db`)
 const sql = require('mssql'); 
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+let teamTransaction
+let isTeamTransactionActive = false
 // import { flatten } from 'flat'
 // const clam = new ClamScan({
 //     clamdscan: {
@@ -209,7 +212,7 @@ async function createCheckoutSession({ metadata }) {
             //       },
             // ]
             ,
-            customer_email: metadata.email,
+            customer_email: metadata.metadata.email,
             mode: 'payment',
             metadata: metadata.metadata,
             success_url: metadata.success_url,
@@ -252,31 +255,58 @@ async function failedQuery(data,errorMessage) {
 }
 
 async function addTeam(data){
-    const result = await pool.request()
-        .input('abbreviation', sql.VarChar, data.abbreviation)
-        .input('fullName', sql.VarChar, data.fullName)
-        .input('shortName', sql.VarChar, data.shortName)
+    try{console.log(`test team transaction: ${data.fullName}`)
+    if (!teamTransaction) {
+        teamTransaction = pool.transaction();
+        await teamTransaction.begin();
+        isTeamTransactionActive = true
+    }
+    console.log(data.keeperId, data.captainId)
+    // const request = teamTransaction.request();
+    const result = await teamTransaction.request()
+    // const result = await pool.request()
+        .input('abbreviation', sql.VarChar, data.abbreviation || data.teamAbbreviation)
+        .input('fullName', sql.VarChar, data.fullName || data.teamFullName)
+        .input('shortName', sql.VarChar, data.shortName || data.teamShortName)
         .input('leagueId', sql.VarChar, data.leagueId)
         .input('seasonId', sql.Int, data.seasonId)
-        .input('color', sql.VarChar, data.color)
+        .input('color', sql.VarChar, data.color || data.teamShirtColor1)
+        .input('captain', sql.VarChar, data.captainId.toString())
+        .input('keeper', sql.VarChar, data.keeperId.toString())
         .query(`
-            IF NOT EXISTS (SELECT 1 FROM teams WHERE id = @abbreviation)
-            BEGIN
                 DECLARE @teamId INT;
 
-                INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color)
-                VALUES (@abbreviation, @fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color);
+                INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color, keeper, captain)
+                VALUES (@abbreviation, @fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color, @keeper, @captain);
 
                 SET @teamId = SCOPE_IDENTITY();
 
                 insert into seasonLeagueTeam (seasonId, leagueId, teamId)
                 values(@seasonId,@leagueId,@teamId);
 
-            END
-            select @teamId as teamId
+                select @teamId as teamId
             `)
             return result.recordset[0].teamId
+        }catch(err){
+            rollBackTeam()
+            console.log(err)
+        }
 }
+async function commitTeam() {
+    if (teamTransaction) {
+        await teamTransaction.commit();
+        isTeamTransactionActive = false
+        teamTransaction = null;
+    }
+}
+
+async function rollBackTeam() {
+    if (teamTransaction && isTeamTransactionActive) {
+        await teamTransaction.rollback();
+        teamTransaction = null;
+    }
+}
+
 async function addTeamLogo(logo, teamId) {
     if(teamId){
         const outputDir = path.join(__dirname, '../public/images');
@@ -331,12 +361,42 @@ async function updateUserInfo(user){
             fields.push(`${key} = @${key}`);
         }
     }
-    console.log(fields)
+    // console.log(fields)
     if (fields.length === 0) return; // If no valid fields, don't run query
-    console.log(`UPDATE users SET ${fields.join(', ')} WHERE ID = @userId`)
+    // console.log(`UPDATE users SET ${fields.join(', ')} WHERE ID = @userId`)
     const query = `UPDATE users SET ${fields.join(', ')} WHERE ID = @userId`;
 
     await request.query(query);
+}
+function getWaiverResetDate() {
+    const now = new Date();
+    let year = now.getUTCFullYear();
+
+    // If today is before March 1st, get the previous year's March 1st
+    if (now.getUTCMonth() < 2) {
+        year--;
+    }
+
+    const lastMarchFirst = new Date(Date.UTC(year, 2, 1, 0, 0, 0)); // March 1st, 00:00:00 UTC
+    const offsetMinutes = lastMarchFirst.toLocaleString('en-US', { timeZone: 'America/New_York', timeZoneName: 'short' })
+        .includes('EST') ? 300 : 240; // EST = 300 min (5 hours), EDT = 240 min (4 hours)
+
+    // Convert to Unix timestamp
+    return Math.floor((lastMarchFirst.getTime() + offsetMinutes * 60 * 1000) / 1000);
+    
+}
+async function checkWaiverFeeDue(userId) {
+    let result = await pool.request()
+    .input('userId',sql.Int,userId)
+    .query(`
+        select waiverPayDate
+        from users
+        where ID = @userId
+        `
+    )
+    // console.log(result.recordset)
+    // return true
+    return result.recordset[0].waiverPayDate < getWaiverResetDate()
 }
 module.exports = {
     titleCase
@@ -354,4 +414,8 @@ module.exports = {
     ,addTeam
     ,addTeamLogo
     ,updateUserInfo
+    ,getWaiverResetDate
+    ,checkWaiverFeeDue
+    ,commitTeam
+    ,rollBackTeam
 }
