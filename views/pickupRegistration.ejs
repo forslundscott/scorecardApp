@@ -27,9 +27,7 @@
             <br>
             
             <br>
-            
-
-            <%# console.log(data) %>
+        
             <% for (let i=0; i<data.pickupEvents.length;i++) {%>
             <label>
                 <input 
@@ -70,7 +68,7 @@
         async function fillExistingUserInfo(emailElement){
             let form = emailElement.form;
             let formData = new FormData(form)
-            // console.log(formData)
+)
             const response = await fetch('/games/checkEmail', {
                 method: 'POST',
                 headers: {
@@ -80,7 +78,7 @@
             })
             if (response.ok) {
                 const responseData = await response.json();
-                console.log(responseData)
+
                 if(responseData.user){
                     form.querySelector('[name="firstName"]').value = responseData.user.firstName
                     form.querySelector('[name="lastName"]').value = responseData.user.lastName
@@ -109,7 +107,7 @@
         document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
             let email = this.value;
             let formData = new FormData(document.getElementById('newPlayerForm'))
-            console.log(formData)
+
             const response = await fetch('/games/checkEmail', {
                 method: 'POST',
                 headers: {
@@ -119,7 +117,7 @@
             })
             if (response.ok) {
                 const responseData = await response.json();
-                console.log(responseData)
+
                 if(responseData.user){
                     this.form.querySelector('[name="firstName"]').value = responseData.user.firstName
                     this.form.querySelector('[name="lastName"]').value = responseData.user.lastName

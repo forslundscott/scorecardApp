@@ -24,8 +24,17 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
         if (!user) { return res.render('login.ejs', {messages: info}) }
         req.session.passport = {}
         req.session.passport.user = user.id
-        console.log(`${req.protocol}://${req.get('host').replace(/^app\./, '')}`)
-        const redirectUrl = req.session.returnTo || (req.hostname.startsWith('app.') ? `https://envoroot.com/`:'/');
+        
+        let redirectUrl 
+            if (req.session.returnTo) {
+                redirectUrl = req.session.returnTo;
+            // } else if (req.hostname.startsWith('app.')) {
+            //     redirectUrl = 'https://envoroot.com/';
+            // } else if (['forslundhome.duckdns.org', 'glosoccer.org', 'www.glosoccer.org'].includes(req.headers.host)) {
+            //     redirectUrl = `https://${req.headers.host}/comingsoon`;
+            } else {
+                redirectUrl = '/';
+            }
         delete req.session.returnTo;
         // res.json({ url: redirectUrl })
         res.redirect(redirectUrl);

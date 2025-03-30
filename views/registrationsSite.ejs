@@ -72,7 +72,7 @@
                     <td>
                         <select name="" id="" onchange="leagueChange(this)">
                             <%  data.leagues.forEach(league => {%>
-                                <% console.log(league.leagueId) %>
+                                
                             <option value="<%= league.leagueId %>" <%= league.leagueId === item.leagueId ? 'selected' : '' %> ><%= league.shortName%></option>
                             <% }) %>
                         </select>
@@ -96,10 +96,6 @@
             
             let columnIndex = Array.from(tr.children).indexOf(td); // Get the index of the <td> in the row
             let th = thead.querySelectorAll("th")[columnIndex]; // Get the corresponding <th>
-            
-            if (th) {
-                console.log("Corresponding TH:", th.textContent);
-            }
         }
     </script>
 </body>

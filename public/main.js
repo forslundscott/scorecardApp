@@ -971,5 +971,17 @@ function hasDuplicate(values) {
     console.log(uniqueValues.length)
     return uniqueValues.size < filteredValues.length; // Check for duplicates
 }
+
+
+window.onerror = function (message, source, lineno, colno, error) {
+    fetch('/log-client-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ message, source, lineno, colno, error: error?.stack })
+    });
+    console.log('test client side error report')
+};
+
+
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);

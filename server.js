@@ -16,7 +16,7 @@ const sql = require('mssql');
 const cors = require('cors');
 
 const corsOptions = {
-  origin: ['http://app.localhost.com:3000','http://localhost.com:3000','https://envoroot.com','https://app.envoroot.com'], // Allow the app subdomain
+  origin: ['http://app.localhost.com:3000','http://localhost.com:3000','https://envoroot.com','https://app.envoroot.com', 'https://forslundhome.duckdns.org'], // Allow the app subdomain
   methods: ['GET', 'POST', 'OPTIONS'], // List allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
   credentials: true, // Allow credentials if needed
@@ -111,10 +111,31 @@ const functions = require('./helpers/functions');
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('./middleware/authMiddleware')
 app.locals.functions = functions
 
-
+app.post('/log-client-error', express.json(), (req, res) => {
+    console.error('Client-side error:', req.body);
+    res.sendStatus(200); // Respond to acknowledge receipt
+});
+app.get(['/comingsoon'], async (req,res)=>{
+    try{
+        res.render('comingSoon.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
 app.get(['/'], async (req,res)=>{
     try{
-        res.redirect('/games')
+        let redirectUrl 
+            
+            if (req.hostname.startsWith('app.')) {
+                redirectUrl = 'https://envoroot.com/';
+            } else if (['forslundhome.duckdns.org', 'glosoccer.org', 'www.glosoccer.org'].includes(req.headers.host)) {
+                redirectUrl = `https://${req.headers.host}/comingsoon`;
+            } else {
+                redirectUrl = '/games';
+            }
+
+
+        res.redirect(redirectUrl)
     }catch(err){
         console.error('Error:', err)
     }    

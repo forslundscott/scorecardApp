@@ -288,11 +288,13 @@ router.get('/success', async (req,res, next)=>{
             data.metadata = session.metadata
 
             let leaguesTeams = JSON.parse(session.metadata.leaguesTeams);
-        console.log(session)
-        const transaction = new sql.Transaction(pool);
+        console.log('session')
+        transaction = new sql.Transaction(pool);
+        console.log('trans')
         data.leaguesTeams = leaguesTeams
             // Begin the transaction
             await transaction.begin();
+          console.log('begin')
             isTransactionActive = true
         const result = await new sql.Request(transaction)
                 .input('seasonId', sql.Int, session.metadata.seasonId)
@@ -312,7 +314,7 @@ router.get('/success', async (req,res, next)=>{
             const registrationId = result.recordset[0].registrationId;
             data.registrationId = registrationId
             console.log('Registration inserted, registrationId:', registrationId);
-
+                  console.log('first')
 
             for (const item of leaguesTeams) {
                 await new sql.Request(transaction)
@@ -331,6 +333,7 @@ router.get('/success', async (req,res, next)=>{
                         VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
                     `);
             }
+            console.log('second')
             if(session.metadata.waiverPaid){
               await new sql.Request(transaction)
                     .input('waiverPayDate', sql.BigInt, Date.now())
@@ -532,11 +535,13 @@ router.get('/success', async (req,res, next)=>{
         res.render('paymentSuccess.ejs');
         
     }catch(err){
+      console.log(isTransactionActive)
       if (isTransactionActive) {
         await transaction.rollback();
       }
       functions.rollBackTeam()
-        next(err)
+        console.log(err)
+        res.render('paymentSuccess.ejs');
     }
 });
 router.get('/cancel', async (req,res, next)=>{

@@ -146,7 +146,7 @@
         <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
         <br>
         <br>
-        <% console.log(data.userAttributes.discounted) %><input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
+        <%# console.log(data.userAttributes.discounted) %><input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
         <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || !['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %>><label for="discounted_no">No</label>
         
@@ -189,7 +189,7 @@
             
         <% } %>
         <br><br>
-        <% console.log(data.userAttributes) %>
+        <%# console.log(data.userAttributes) %>
         <label for=""><b>Shirt Size: </b></label>
         <select name="shirtSize" id="" required>
             <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
