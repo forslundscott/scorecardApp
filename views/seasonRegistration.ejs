@@ -284,9 +284,9 @@
 
         <!-- <input type="text" name="medicalConditions" placeholder="List Medical Conditions"> -->
         <br><br>
-        <a target="_blank" href="https://envoroot.com/player-resources/waiver/">GLOS Waiver</a>
+        <a id="waiver-link" target="_blank">GLOS Waiver</a>
         <br>
-        <a target="_blank" href="https://envoroot.com/player-resources/rules/">GLOS Rules & Regulations</a>
+        <a id="rules-link" target="_blank">GLOS Rules & Regulations</a>
         <br><br>
         <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the GLOS Wavier.</label>
         <br>
@@ -400,6 +400,46 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
                 document.getElementById('keeperShirtColor').removeAttribute('required')
             }
         }
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     const link = document.getElementById("waiver-link");
+        //     const host = window.location.host;
+
+        //     // Define different hrefs based on the host
+        //     const hrefMap = {
+        //     "www.glosoccer.com": "https://www.glosoccer.com/waiver/",
+        //     "glosoccer.com": "https://glosoccer.com/waiver/",
+        //     "forslundhome.duckdns.org": "https://forslundhome.duckdns.org/waiver/"
+        //     };
+
+        //     // Set href dynamically
+        //     link.href = hrefMap[host] || "https://envoroot.com/player-resources/waiver/";
+        // });
+        document.addEventListener("DOMContentLoaded", function () {
+            const host = window.location.host;
+
+            // Define base URLs for different hosts (without specifying waiver/rules)
+            const baseHrefMap = {
+            "www.glosoccer.com": "https://www.glosoccer.com/",
+            "glosoccer.com": "https://glosoccer.com/",
+            "forslundhome.duckdns.org": "https://forslundhome.duckdns.org/"
+            };
+
+            // Get the base URL or fallback to envoroot
+            const baseUrl = baseHrefMap[host] || "https://envoroot.com/player-resources/";
+
+            // Update both links dynamically
+            const links = {
+            "waiver-link": `${baseUrl}waiver/`,
+            "rules-link": `${baseUrl}rules/`
+            };
+
+            Object.entries(links).forEach(([id, url]) => {
+            const link = document.getElementById(id);
+            if (link) link.href = url;
+            });
+        });
+
+
     </script>
     <script src="/main.js"></script>
 </body>

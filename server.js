@@ -122,6 +122,20 @@ app.get(['/comingsoon'], async (req,res)=>{
         console.error('Error:', err)
     }    
 })
+app.get(['/rules'], async (req,res)=>{
+    try{
+        res.render('glosOutdoorRules.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
+app.get(['/waiver'], async (req,res)=>{
+    try{
+        res.render('glosWaiver.ejs')
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
 app.get(['/'], async (req,res)=>{
     try{
         let redirectUrl 
