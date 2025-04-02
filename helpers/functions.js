@@ -398,6 +398,41 @@ async function checkWaiverFeeDue(userId) {
     // return true
     return result.recordset[0].waiverPayDate < getWaiverResetDate()
 }
+async function sendEmail(body, toEmail , fromText, subject){
+      try {    
+        // Send reset email
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            service: 'gmail',
+            secure: true,
+            auth: {
+               user: process.env.ORG_EMAIL,
+               pass: process.env.ORG_EMAIL_PASSWORD
+            },
+            debug: false,
+            logger: true
+        });
+        const isHTML = /<\/?[a-z][\s\S]*>/i.test(body);
+        const mailOptions = {
+          from: `${fromText} <${process.env.ORG_EMAIL}>`,
+          to: toEmail,
+          subject: subject,
+          ...(isHTML ? { html: body } : { text: body }),
+        };
+    
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return console.error('Error sending reset email:', error);
+          }
+          return res.redirect('/')
+    
+        });
+      } catch (error) {
+        console.error('Error finding user:', error);
+      } 
+   
+}
 module.exports = {
     titleCase
     ,getOrdinalNumber
@@ -418,4 +453,5 @@ module.exports = {
     ,checkWaiverFeeDue
     ,commitTeam
     ,rollBackTeam
+    ,sendEmail
 }
