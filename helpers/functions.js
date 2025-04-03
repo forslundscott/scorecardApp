@@ -272,8 +272,8 @@ async function addTeam(data){
         .input('leagueId', sql.VarChar, data.leagueId)
         .input('seasonId', sql.Int, data.seasonId)
         .input('color', sql.VarChar, data.color || data.teamShirtColor1)
-        .input('captain', sql.VarChar, data.captainId.toString())
-        .input('keeper', sql.VarChar, data.keeperId.toString())
+        .input('captain', sql.VarChar, data.captainId ? data.captainId.toString() : null)
+        .input('keeper', sql.VarChar, data.keeperId ? data.keeperId.toString() : null)
         .query(`
                 DECLARE @teamId INT;
 
@@ -403,10 +403,10 @@ async function sendEmail(body, toEmail , fromText, subject){
       try {    
         // Send reset email
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
+            // host: 'smtp.gmail.com',
+            // port: 587,
             service: 'gmail',
-            secure: true,
+            // secure: true,
             auth: {
                user: process.env.ORG_EMAIL,
                pass: process.env.ORG_EMAIL_PASSWORD

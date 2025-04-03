@@ -141,9 +141,9 @@ app.get(['/waiver'], async (req,res)=>{
 
 app.get(['/test'], async (req,res)=>{
     try{
-        
-        const session = await stripe.paymentIntents.retrieve('pi_3R9qIOFGzuNCeWUR05YeiQHb')
-        console.log(session)
+        functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test')
+        // const session = await stripe.paymentIntents.retrieve('pi_3R9qIOFGzuNCeWUR05YeiQHb')
+        // console.log(session)
         res.send('<p>test</p>');      
         
     }catch(err){

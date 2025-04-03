@@ -666,12 +666,14 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       product: product.id,
       active: true, // Only get active prices
   });
-  const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : req.body.discounted ? 'Student, Teacher, First Responder, Military' : 'Regular'))
+
+  console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
+  const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
   const lineItems = [{
     price_data: {
       currency: 'usd',
       product_data: {
-        name: `Spring 2025 - ${req.body.teamPayType === 'team' ? 'Team' : req.body.discounted ? 'Student, Teacher, First Responder, Military' : 'Individual'}`,
+        name: `Spring 2025 - ${req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Individual')}`,
       },
       unit_amount: teamPrice.unit_amount, // amount in cents
     },
