@@ -247,7 +247,7 @@ app.get(['/test'], async (req,res)=>{
             </table>
             `
                 // functions.sendEmail(htmlBody,'forslund.scott@gmail.com','noReplyGlos', 'New Registration')
-                // functions.newRegistrationEmail()
+                functions.newRegistrationEmail()
                 console.log(stripe)
         res.send(htmlBody);      
         

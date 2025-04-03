@@ -438,7 +438,7 @@ async function newRegistrationEmail(){
     try {    
       // Send reset email
       let result = await pool.request()
-            // .input('email', sql.VarChar, email)
+            .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
             .query(`select u.firstName + ' ' + u.lastName as fullName,
                  u.email
                  , sr.type
@@ -446,7 +446,7 @@ async function newRegistrationEmail(){
                  , sr.transactionId
                  , sr.gateway from seasonRegistrations as sr
                 left join users as u on sr.userId=u.ID
-                where sr.test = ${stripe._authenticator._apiKey.startsWith('sk_test_')?1:0}
+                where sr.test = @testMode
                 `)
         let paymentIntent
         console.log(result.recordset)
@@ -469,7 +469,7 @@ async function newRegistrationEmail(){
             </tr>`
         }
         result = await pool.request()
-            // .input('email', sql.VarChar, email)
+            .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
             .query(`
                     select u.firstName + ' ' + u.lastName as fullName
                     , u.email
@@ -483,7 +483,7 @@ async function newRegistrationEmail(){
                     left join users as u on sr.userId=u.ID
                     LEFT join leagues as l on sr.leagueId=l.leagueId
                     left join teams as t on sr.teamId=t.teamId
-                    where sr test = ${stripe._authenticator._apiKey.startsWith('sk_test_')?1:0}
+                    where sr.test = @testMode
                 `)
 
                 for(let registration of result.recordset){
