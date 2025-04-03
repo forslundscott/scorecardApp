@@ -376,7 +376,7 @@ router.get('/success', async (req,res, next)=>{
                 .input('test', sql.Bit, !session.livemode)
                 .input('captainId', sql.Int, session.metadata.captainId || req.user.id)
                 .input('keeperId', sql.Int, session.metadata.keeperId || req.user.id)
-                .input('type', sql.VarChar, 'team')
+                .input('type', sql.VarChar, session.metadata.teamPayType === 'self' ? 'captain' : 'team')
                 .query(`
                     INSERT INTO seasonRegistrations (
                       seasonId
