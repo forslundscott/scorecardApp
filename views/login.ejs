@@ -42,17 +42,17 @@
                     <br>
                     <div class="textCenter" style="height: 15vh;"><img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" style="height: 100%;"></div>
                     <br>
-                    <% if (messages.error) { %>
-                        <%= messages.error %>
-                    <% } else if (messages.message) { %>
-                        <%= messages.message %>
-                    <% } %>
+                    
                     <br>
                     <input type="text" name="email" value="" placeholder="Email" style="margin-bottom: .75vh; font-size: 250%;" required>
                     <br>
                     <input type="password" name="password" value="" placeholder="Password" style="margin-bottom: 1.25vh; font-size: 250%;" required>
                     <br>
-                    <p><%- message.replace(/\n/g, '<br>')%></p>
+                    <p><% if (messages.error) { %>
+                        <%= messages.error %>
+                    <% } else if (messages.message) { %>
+                        <%= messages.message %>
+                    <% } %></p>
                     <button type="submit" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;">Login</button>
                     <br><br><br>
                     <button type="button" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;" onclick="window.location.href='/auth/forgotPassword'">Forgot Password</button>

@@ -11,8 +11,11 @@ function initialize(passport, getUserByEmail, getUserById){
                 return done(null, false, {message: 'No user with that email'})
             }
             const user = result.recordset[0]
+            console.log(user)
             try {
-                if(await bcrypt.compare(password, user.password)){
+                if (!user.password) {
+                    return done(null, false, {message: 'Please use Forgot Password for your first time logging into the new site.'});
+                } else if(await bcrypt.compare(password, user.password)){
                     return done(null, user)
                 } else {
                     return done(null, false, {message: 'Password incorrect'})

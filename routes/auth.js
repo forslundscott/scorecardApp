@@ -12,9 +12,9 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
         console.log(req.get('host'))
-        let message = req.session.message || ''
+        let message = req.session.message || `If this is your first time using the new site, please use Forgot Password to create a password`
         delete req.session.message
-        res.render('login.ejs', {message: message})
+        res.render('login.ejs', {messages: {message: message}})
     }catch(err){
         console.error('Error:', err)
     }    
