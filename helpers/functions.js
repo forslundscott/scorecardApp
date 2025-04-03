@@ -541,7 +541,7 @@ async function newRegistrationEmail(){
                 </tbody>
             </table>
             `
-            sendEmail(htmlBody,'forslund.scott@gmail.com','noReplyGlos', 'New Registration')
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'noReplyGlos', 'New Registration')
     } catch (error) {
       console.error('Error sending email:', error);
     } 
