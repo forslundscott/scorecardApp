@@ -532,6 +532,7 @@ router.get('/success', async (req,res, next)=>{
         //     await fullEmail(result.recordset)
             
         // console.log(result.recordset)
+        functions.newRegistrationEmail()
         res.render('paymentSuccess.ejs');
         
     }catch(err){

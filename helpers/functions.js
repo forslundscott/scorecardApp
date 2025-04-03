@@ -7,6 +7,7 @@ const path = require('path');
 const sanitizeFilename = require('sanitize-filename')
 const pool = require(`../db`)
 const sql = require('mssql'); 
+const nodemailer = require('nodemailer');
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -429,9 +430,122 @@ async function sendEmail(body, toEmail , fromText, subject){
     
         });
       } catch (error) {
-        console.error('Error finding user:', error);
+        console.error('Error sending email:', error);
       } 
    
+}
+async function newRegistrationEmail(){
+    try {    
+      // Send reset email
+      let result = await pool.request()
+            // .input('email', sql.VarChar, email)
+            .query(`select u.firstName + ' ' + u.lastName as fullName,
+                 u.email
+                 , sr.type
+                 , sr.registrationId
+                 , sr.transactionId
+                 , sr.gateway from seasonRegistrations as sr
+                left join users as u on sr.userId=u.ID
+                where sr.test = ${stripe._authenticator._apiKey.startsWith('sk_test_')?1:0}
+                `)
+        let paymentIntent
+        console.log(result.recordset)
+        let htmlString = ''
+        let htmlString2 = ''
+        let totalPrice = 0
+        for(let registration of result.recordset){
+            paymentIntent = await stripe.paymentIntents.retrieve(registration.transactionId)
+            let registrationPrice = new Intl.NumberFormat('en-US', { 
+                style: 'currency', 
+                currency: 'USD' 
+            }).format(paymentIntent.amount/100)
+            totalPrice = totalPrice + (paymentIntent.amount/100)
+            htmlString += `<tr>
+                <td>${registration.fullName}</td>
+                <td>${registration.email}</td>
+                <td>${registration.type}</td>
+                <td>${registrationPrice}</td>
+                <td>${registration.registrationId}</td>
+            </tr>`
+        }
+        result = await pool.request()
+            // .input('email', sql.VarChar, email)
+            .query(`
+                    select u.firstName + ' ' + u.lastName as fullName
+                    , u.email
+                    , l.shortName as leagueShortName
+                    , t.shortName as teamShortName
+                    , sr.division
+                    , sr.keeper
+                    , sr.shirtSize
+                    , sr.registrationId
+                     from seasonRegistration_leagueTeam as sr
+                    left join users as u on sr.userId=u.ID
+                    LEFT join leagues as l on sr.leagueId=l.leagueId
+                    left join teams as t on sr.teamId=t.teamId
+                    where sr test = ${stripe._authenticator._apiKey.startsWith('sk_test_')?1:0}
+                `)
+
+                for(let registration of result.recordset){
+                    htmlString2 += `<tr>
+                        <td>${registration.fullName}</td>
+                        <td>${registration.email}</td>
+                        <td>${registration.leagueShortName}</td>
+                        <td>${registration.teamShortName}</td>
+                        <td>${registration.division}</td>
+                        <td>${registration.keeper}</td>
+                        <td>${registration.shirtSize}</td>
+                        <td>${registration.registrationId}</td>
+                    </tr>`
+                }
+            let htmlBody = `
+            <h2>Registration Payments:</h2>
+            <table border="1" cellspacing="0" cellpadding="5">
+                <thead>
+                    <td>Name</td>
+                    <td>Email</td>
+                    <td>Registration Type</td>
+                    <td>Amount</td>
+                    <td>Registration Id</td>
+                </thead>
+                <tbody>
+                    ${htmlString}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
+                        <td id="total"><strong>${new Intl.NumberFormat('en-US', { 
+                            style: 'currency', 
+                            currency: 'USD' 
+                        }).format(totalPrice)}</strong></td>
+                        <td><strong></strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <h2>Registration Details:</h2>
+            <table border="1" cellspacing="0" cellpadding="5">
+                <thead>
+                    <td>Name</td>
+                    <td>Email</td>
+                    <td>League</td>
+                    <td>Team</td>
+                    <td>Division</td>
+                    <td>Keeper?</td>
+                    <td>Shirt Size</td>
+                    <td>Registration Id</td>
+                </thead>
+                <tbody>
+                    ${htmlString2}
+                </tbody>
+            </table>
+            `
+            sendEmail(htmlBody,'forslund.scott@gmail.com','noReplyGlos', 'New Registration')
+    } catch (error) {
+      console.error('Error sending email:', error);
+    } 
+ 
 }
 module.exports = {
     titleCase
@@ -454,4 +568,5 @@ module.exports = {
     ,commitTeam
     ,rollBackTeam
     ,sendEmail
+    ,newRegistrationEmail
 }

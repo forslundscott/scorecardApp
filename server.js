@@ -15,7 +15,7 @@ const pool = require(`./db`)
 const sql = require('mssql');
 const cors = require('cors');
 const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_LIVE_SECRET_KEY);
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const corsOptions = {
   origin: ['http://app.localhost.com:3000','http://localhost.com:3000','https://envoroot.com','https://app.envoroot.com', 'https://forslundhome.duckdns.org'], // Allow the app subdomain
@@ -141,6 +141,7 @@ app.get(['/waiver'], async (req,res)=>{
 
 app.get(['/test'], async (req,res)=>{
     try{
+        console.log(stripe._authenticator._apiKey.startsWith('sk_test_'))
         let result = await pool.request()
             // .input('email', sql.VarChar, email)
             .query(`select u.firstName + ' ' + u.lastName as fullName,
@@ -149,7 +150,9 @@ app.get(['/test'], async (req,res)=>{
                  , sr.registrationId
                  , sr.transactionId
                  , sr.gateway from seasonRegistrations as sr
-                left join users as u on sr.userId=u.ID`)
+                left join users as u on sr.userId=u.ID
+                where sr.test = ${stripe._authenticator._apiKey.startsWith('sk_test_')?1:0}
+                `)
         let paymentIntent
         console.log(result.recordset)
         let htmlString = ''
@@ -163,21 +166,11 @@ app.get(['/test'], async (req,res)=>{
             }).format(paymentIntent.amount/100)
             totalPrice = totalPrice + (paymentIntent.amount/100)
             htmlString += `<tr>
-                <td>
-                    ${registration.fullName}
-                </td>
-                <td>
-                    ${registration.email}
-                </td>
-                <td>
-                    ${registration.type}
-                </td>
-                <td>
-                    ${registrationPrice}
-                </td>
-                <td>
-                    ${registration.registrationId}
-                </td>
+                <td>${registration.fullName}</td>
+                <td>${registration.email}</td>
+                <td>${registration.type}</td>
+                <td>${registrationPrice}</td>
+                <td>${registration.registrationId}</td>
             </tr>`
         }
         result = await pool.request()
@@ -195,55 +188,30 @@ app.get(['/test'], async (req,res)=>{
                     left join users as u on sr.userId=u.ID
                     LEFT join leagues as l on sr.leagueId=l.leagueId
                     left join teams as t on sr.teamId=t.teamId
+                    where sr.test = ${stripe._authenticator._apiKey.startsWith('sk_test_')?1:0}
                 `)
 
                 for(let registration of result.recordset){
                     htmlString2 += `<tr>
-                        <td>
-                            ${registration.fullName}
-                        </td>
-                        <td>
-                            ${registration.email}
-                        </td>
-                        <td>
-                            ${registration.leagueShortName}
-                        </td>
-                        <td>
-                            ${registration.teamShortName}
-                        </td>
-                        <td>
-                            ${registration.division}
-                        </td>
-                        <td>
-                            ${registration.keeper}
-                        </td>
-                        <td>
-                            ${registration.shirtSize}
-                        </td>
-                        <td>
-                            ${registration.registrationId}
-                        </td>
+                        <td>${registration.fullName}</td>
+                        <td>${registration.email}</td>
+                        <td>${registration.leagueShortName}</td>
+                        <td>${registration.teamShortName}</td>
+                        <td>${registration.division}</td>
+                        <td>${registration.keeper}</td>
+                        <td>${registration.shirtSize}</td>
+                        <td>${registration.registrationId}</td>
                     </tr>`
                 }
-        res.send(`
+            let htmlBody = `
             <h2>Registration Payments:</h2>
             <table border="1" cellspacing="0" cellpadding="5">
                 <thead>
-                    <td>
-                    Name
-                    </td>
-                    <td>
-                    Email
-                    </td>
-                    <td>
-                    Registration Type
-                    </td>
-                    <td>
-                    Amount
-                    </td>
-                    <td>
-                    Registration Id
-                    </td>
+                    <td>Name</td>
+                    <td>Email</td>
+                    <td>Registration Type</td>
+                    <td>Amount</td>
+                    <td>Registration Id</td>
                 </thead>
                 <tbody>
                     ${htmlString}
@@ -264,36 +232,24 @@ app.get(['/test'], async (req,res)=>{
             <h2>Registration Details:</h2>
             <table border="1" cellspacing="0" cellpadding="5">
                 <thead>
-                    <td>
-                    Name
-                    </td>
-                    <td>
-                    Email
-                    </td>
-                    <td>
-                    League
-                    </td>
-                    <td>
-                    Team
-                    </td>
-                    <td>
-                    Division
-                    </td>
-                    <td>
-                    Keeper?
-                    </td>
-                    <td>
-                    Shirt Size
-                    </td>
-                    <td>
-                    Registration Id
-                    </td>
+                    <td>Name</td>
+                    <td>Email</td>
+                    <td>League</td>
+                    <td>Team</td>
+                    <td>Division</td>
+                    <td>Keeper?</td>
+                    <td>Shirt Size</td>
+                    <td>Registration Id</td>
                 </thead>
                 <tbody>
                     ${htmlString2}
                 </tbody>
             </table>
-            `);      
+            `
+                // functions.sendEmail(htmlBody,'forslund.scott@gmail.com','noReplyGlos', 'New Registration')
+                // functions.newRegistrationEmail()
+                console.log(stripe)
+        res.send(htmlBody);      
         
     }catch(err){
         console.error('Error:', err)
