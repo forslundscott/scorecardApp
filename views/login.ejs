@@ -52,6 +52,7 @@
                     <br>
                     <input type="password" name="password" value="" placeholder="Password" style="margin-bottom: 1.25vh; font-size: 250%;" required>
                     <br>
+                    <p><%- message.replace(/\n/g, '<br>')%></p>
                     <button type="submit" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;">Login</button>
                     <br><br><br>
                     <button type="button" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;" onclick="window.location.href='/auth/forgotPassword'">Forgot Password</button>

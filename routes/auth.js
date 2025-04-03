@@ -12,7 +12,9 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
         console.log(req.get('host'))
-        res.render('login.ejs')
+        let message = req.session.message || ''
+        delete req.session.message
+        res.render('login.ejs', {message: message})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -178,7 +180,9 @@ router.post(['/forgotPassword'], async (req,res)=>{
         return console.error('Error sending reset email:', error);
       }
       console.log('Reset email sent:', info.response);
-      return res.redirect('/')
+      req.session.message = `You should receive a reset link to your specified email shortly. 
+      If you do not receive one, please check your spam folder.`
+      return res.redirect('/auth/login')
 
     });
   } catch (error) {
