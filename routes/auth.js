@@ -157,7 +157,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
     const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     const mailOptions = {
-      from: `Scott Forslund <${process.env.ORG_EMAIL}>`,
+      from: `No Reply - GLOS <${process.env.ORG_EMAIL}>`,
       to: user.email,
       subject: 'GLOS Account Password Reset',
       text: `Hello,
