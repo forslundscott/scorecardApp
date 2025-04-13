@@ -50,7 +50,7 @@ initializePassport(
     async email => {
             const result = await pool.request()
             .input('email', sql.VarChar, email)
-            .query(`select t1.firstName, t1.id, t1.email, t2.password 
+            .query(`select t1.firstName, t1.id, t1.email, t2.password, t1.banned
             from users as t1
             LEFT JOIN credentials as t2 
             on t1.ID=t2.userID
@@ -60,7 +60,7 @@ initializePassport(
     async id => {
             let result = await pool.request()
             .input('id', sql.Int, id)
-            .query(`select firstName, id, email
+            .query(`select firstName, id, email, banned
             from users
             where id = @id`)
             const user = result.recordset[0]
@@ -141,9 +141,10 @@ app.get(['/waiver'], async (req,res)=>{
 
 app.get(['/test'], async (req,res)=>{
     try{
-        functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test')
+        // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test')
         // const session = await stripe.paymentIntents.retrieve('pi_3R9qIOFGzuNCeWUR05YeiQHb')
         // console.log(session)
+        console.log(req.user)
         res.send('<p>test</p>');      
         
     }catch(err){
