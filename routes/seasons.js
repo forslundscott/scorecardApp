@@ -324,6 +324,7 @@ router.get(['/:seasonId/registration/team'],checkAuthenticated, async (req, res,
                     where 
                         slt.leagueId = @leagueId 
                         and slt.seasonId = @seasonId
+                        
                     `)
                 league.teams = result.recordset
             }
@@ -408,6 +409,7 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
                     where 
                         slt.leagueId = @leagueId 
                         and slt.seasonId = @seasonId
+                        and t.status = 'active'
                     `)
                 league.teams = result.recordset
             }

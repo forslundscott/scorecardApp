@@ -197,9 +197,10 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
         .input('searchValue', sql.VarChar, req.body.teamSearchValue)
         .query(`
             SELECT t.* FROM teams as t
-            WHERE abbreviation LIKE '%' + @searchValue + '%' 
+            WHERE (abbreviation LIKE '%' + @searchValue + '%' 
             OR fullName LIKE '%' + @searchValue + '%' 
-            OR shortName LIKE '%' + @searchValue + '%' 
+            OR shortName LIKE '%' + @searchValue + '%')
+            and t.status = 'active' 
         `);
 
         res.json(result.recordset);

@@ -91,10 +91,10 @@ router.post(['/createProfile'], async (req,res)=>{
                 id int
             )
             BEGIN TRANSACTION
-            insert into users (firstName, lastName, email)
+            insert into users (firstName, lastName, email, preferredName)
             OUTPUT inserted.id
             into @tempTable
-            values (@firstName, @lastName, @email)
+            values (@firstName, @lastName, @email, @firstName)
             
             insert into credentials (userID,[password])
             select id, @password from @tempTable

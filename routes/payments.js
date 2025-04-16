@@ -352,7 +352,7 @@ router.get('/success', async (req,res, next)=>{
         console.log('team')
         console.log(session.metadata)
         if(session.metadata.teamType === 'new'){
-          functions.commitTeam()
+          functions.commitTeam(parseInt(session.metadata.teamId))
         }
         transaction = new sql.Transaction(pool);
         

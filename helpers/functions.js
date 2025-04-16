@@ -257,47 +257,52 @@ async function failedQuery(data,errorMessage) {
 
 async function addTeam(data){
     try{console.log(`test team transaction: ${data.fullName}`)
-    if (!teamTransaction) {
-        teamTransaction = pool.transaction();
-        await teamTransaction.begin();
-        isTeamTransactionActive = true
-    }
-    console.log(data.keeperId, data.captainId)
-    // const request = teamTransaction.request();
-    const result = await teamTransaction.request()
-    // const result = await pool.request()
-        .input('abbreviation', sql.VarChar, data.abbreviation || data.teamAbbreviation)
-        .input('fullName', sql.VarChar, data.fullName || data.teamFullName)
-        .input('shortName', sql.VarChar, data.shortName || data.teamShortName)
-        .input('leagueId', sql.VarChar, data.leagueId)
-        .input('seasonId', sql.Int, data.seasonId)
-        .input('color', sql.VarChar, data.color || data.teamShirtColor1)
-        .input('captain', sql.VarChar, data.captainId ? data.captainId.toString() : null)
-        .input('keeper', sql.VarChar, data.keeperId ? data.keeperId.toString() : null)
-        .query(`
-                DECLARE @teamId INT;
+        const result = await pool.request()
+                .input('abbreviation', sql.VarChar, data.abbreviation || data.teamAbbreviation)
+                .input('fullName', sql.VarChar, data.fullName || data.teamFullName)
+                .input('shortName', sql.VarChar, data.shortName || data.teamShortName)
+                .input('leagueId', sql.VarChar, data.leagueId)
+                .input('seasonId', sql.Int, data.seasonId)
+                .input('color', sql.VarChar, data.color || data.teamShirtColor1)
+                .input('captain', sql.VarChar, data.captainId?.toString() || null)
+                .input('keeper', sql.VarChar, data.keeperId?.toString() || null)
+                .input('status', sql.VarChar, 'pending')
+                .query(`
+                    DECLARE @teamId INT;
 
-                INSERT INTO teams (id, fullName, shortName, leagueId, seasonId, abbreviation, color, keeper, captain)
-                VALUES (@abbreviation, @fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color, @keeper, @captain);
+                    INSERT INTO teams (fullName, shortName, leagueId, seasonId, abbreviation, color, keeper, captain, status)
+                    VALUES (@fullName, @shortName, @leagueId, @seasonId, @abbreviation, @color, @keeper, @captain, @status);
 
-                SET @teamId = SCOPE_IDENTITY();
+                    SET @teamId = SCOPE_IDENTITY();
 
-                insert into seasonLeagueTeam (seasonId, leagueId, teamId)
-                values(@seasonId,@leagueId,@teamId);
+                    INSERT INTO seasonLeagueTeam (seasonId, leagueId, teamId, status)
+                    VALUES (@seasonId, @leagueId, @teamId, @status);
 
-                select @teamId as teamId
-            `)
-            return result.recordset[0].teamId
+                    SELECT @teamId AS teamId;
+                `);
+
+            return result.recordset[0].teamId;
         }catch(err){
             rollBackTeam()
             console.log(err)
         }
 }
-async function commitTeam() {
-    if (teamTransaction) {
-        await teamTransaction.commit();
-        isTeamTransactionActive = false
-        teamTransaction = null;
+async function commitTeam(teamId) {
+    try {
+        await pool.request()
+            .input('teamId', sql.Int, teamId)
+            .query(`
+                UPDATE teams
+                SET status = 'active'
+                WHERE teamId = @teamId;
+
+                UPDATE seasonLeagueTeam
+                SET status = 'active'
+                WHERE teamId = @teamId;
+                `);
+    } catch (err) {
+        console.error('Error finalizing team:', err);
+        throw err;
     }
 }
 
