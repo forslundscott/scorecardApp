@@ -364,6 +364,17 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
             league = @leagueId,
             season = @seasonId
             where ID = @teamId
+
+            IF NOT EXISTS (
+                SELECT 1 FROM seasonLeagueTeam
+                WHERE seasonId = @seasonId AND leagueId = @leagueId AND teamId = @teamId
+            )
+            BEGIN
+                INSERT INTO seasonLeagueTeam (seasonId, leagueId, teamId)
+                VALUES (@seasonId, @leagueId, @teamId);
+            END
+
+
             `)
 
         res.redirect(302,`/teams/${req.params.teamId}`)
@@ -415,9 +426,10 @@ router.get('/:teamId', async (req,res, next)=>{
         .query(`
             SELECT * 
             from dbo.teams
-            where id = @teamId
+            where teamId = @teamId
             `)        
         data.data = result.recordset[0]
+        
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
