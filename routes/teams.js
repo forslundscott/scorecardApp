@@ -176,7 +176,7 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
     try{ 
         
         const teamId = await functions.addTeam(req.body)
-        functions.commitTeam()
+        functions.commitTeam(parseInt(teamId))
         if(req.file){
             functions.addTeamLogo(req.file,teamId)
         }
