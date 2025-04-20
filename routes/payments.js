@@ -671,7 +671,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
   // console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
   let nickname;
   let productName;
-  const crewRoles = ['Scorekeeper', 'Referee', 'Monitor']
+  const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
   console.log(req.user)
   if (req.body.teamPayType === 'team') {
     nickname = 'Team';
@@ -887,7 +887,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
   });
   let nickname;
   let productName;
-  const crewRoles = ['Scorekeeper', 'Referee', 'Monitor']
+  const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
   console.log(req.user)
   if (req.user.roles.some(role => crewRoles.includes(role.name))) {
     nickname = 'Crew';
