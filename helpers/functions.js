@@ -275,6 +275,24 @@ async function addTeam(data){
 
                     SET @teamId = SCOPE_IDENTITY();
 
+                    SELECT @teamId AS teamId;
+                `);
+
+            return result.recordset[0].teamId;
+        }catch(err){
+            rollBackTeam()
+            console.log(err)
+        }
+}
+async function assignTeam(seasonId,leagueId,teamId,status = 'active'){
+    try{
+        
+        const result = await pool.request()
+                .input('seasonId', sql.Int, seasonId)
+                .input('leagueId', sql.Int, leagueId)
+                .input('teamId', sql.Int, teamId)
+                .input('status', sql.VarChar, status)
+                .query(`
                     INSERT INTO seasonLeagueTeam (seasonId, leagueId, teamId, status)
                     VALUES (@seasonId, @leagueId, @teamId, @status);
 
@@ -566,6 +584,7 @@ module.exports = {
     ,createCheckoutSession
     ,failedQuery
     ,addTeam
+    ,assignTeam
     ,addTeamLogo
     ,updateUserInfo
     ,getWaiverResetDate

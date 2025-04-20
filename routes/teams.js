@@ -177,6 +177,16 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
         
         const teamId = await functions.addTeam(req.body)
         functions.commitTeam(parseInt(teamId))
+        functions.assignTeam(parseInt(req.body.seasonId),parseInt(req.body.leagueId),parseInt(req.body.teamId))
+        // await pool.request()
+        //             .input('seasonId', sql.Int, parseInt(session.metadata.seasonId))
+        //             .input('leagueId', sql.Int, parseInt(session.metadata.leagueId))
+        //             .input('teamId', sql.Int, parseInt(session.metadata.teamId))
+        //             .input('status', sql.VarChar, 'active')
+        //             .query(`
+        //                 insert into seasonLeagueTeam (seasonId,leagueId,teamId,[status])
+        //                 VALUES(@seasonId, @leagueId, @teamId, @status)
+        //                 `);
         if(req.file){
             functions.addTeamLogo(req.file,teamId)
         }

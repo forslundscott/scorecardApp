@@ -354,6 +354,7 @@ router.get('/success', async (req,res, next)=>{
         if(session.metadata.teamType === 'new'){
           functions.commitTeam(parseInt(session.metadata.teamId))
         }
+        functions.assignTeam(parseInt(session.metadata.seasonId),parseInt(session.metadata.leagueId),parseInt(session.metadata.teamId))
         transaction = new sql.Transaction(pool);
         
             // Begin the transaction
