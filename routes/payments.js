@@ -668,13 +668,35 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       active: true, // Only get active prices
   });
 
-  console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
-  const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
+  // console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
+  let nickname;
+  let productName;
+  const crewRoles = ['Scorekeeper', 'Referee', 'Monitor']
+  console.log(req.user)
+  if (req.body.teamPayType === 'team') {
+    nickname = 'Team';
+    productName = 'Team'
+  } else if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+    nickname = 'Crew';
+    productName = 'Crew'
+  } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
+    nickname = 'Crew';
+    productName = 'Friends & Family'
+  } else if (req.body.discounted === 'true') {
+    nickname = 'Student, Teacher, First Responder, Military';
+    productName = 'Student, Teacher, First Responder, Military'
+  } else {
+    nickname = 'Regular';
+    productName = 'Individual'
+  }
+
+const teamPrice = prices.data.find(price => price.nickname === nickname);
+  // const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
   const lineItems = [{
     price_data: {
       currency: 'usd',
       product_data: {
-        name: `Spring 2025 - ${req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Individual')}`,
+        name: `Spring 2025 - ${productName}`,
       },
       unit_amount: teamPrice.unit_amount, // amount in cents
     },
@@ -826,9 +848,16 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
       metadata.userId = user.ID
+      // Full discount code 
+      // ,[{
+      //   coupon: 'SENIORCREW100', 
+      // }]
       const session = await functions.createCheckoutSession({
-        metadata
-      });
+          metadata,
+        
+        }
+        
+      );
       functions.updateUserInfo({
         userId: req.user.id,
         ...transformedBody,
@@ -852,7 +881,30 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
     const product = await stripe.products.search({
         query: `name:'8 Game Season'`,
     })
-    const price = await stripe.prices.retrieve(product.data[0].default_price);
+    const prices = await stripe.prices.list({
+      product: product.id,
+      active: true, // Only get active prices
+  });
+  let nickname;
+  let productName;
+  const crewRoles = ['Scorekeeper', 'Referee', 'Monitor']
+  console.log(req.user)
+  if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+    nickname = 'Crew';
+    productName = 'Crew'
+  } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
+    nickname = 'Crew';
+    productName = 'Friends & Family'
+  } else if (req.body.discounted === 'true') {
+    nickname = 'Student, Teacher, First Responder, Military';
+    productName = 'Student, Teacher, First Responder, Military'
+  } else {
+    nickname = 'Regular';
+    productName = 'Individual'
+  }
+
+const price = prices.data.find(price => price.nickname === nickname);
+    // const price = await stripe.prices.retrieve(product.data[0].default_price);
     console.log(price)
     // console.log(product.data[0].default_price)
     let leaguesTeams = [];
@@ -890,7 +942,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `Spring 2025 - ${result.recordset[0].shortName}`,
+                name: `Spring 2025 - ${result.recordset[0].shortName} - ${productName}`,
               },
               unit_amount: price.unit_amount, // amount in cents
             },
@@ -942,8 +994,9 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
           quantity: 1,
         }
       )
+      totalPrice = totalPrice + (req.body.discounted === 'true' ? 1000 : 2000)
     }
-    totalPrice = totalPrice + (req.body.discounted === 'true' ? 1000 : 2000)
+    
     lineItems.push(
       {
         price_data: {

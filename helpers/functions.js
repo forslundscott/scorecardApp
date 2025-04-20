@@ -183,43 +183,23 @@ async function pngUpload (fileBuffer, filename, outputDir) {
     fs.writeFileSync(outputPath, processedImage, { mode: 0o644 });
     return outputPath //for debugging
 }
-async function createCheckoutSession({ metadata }) {
+async function createCheckoutSession({ metadata },discount) {
     try {
-        
-        // console.log(await stripe.prices.list({ active: true }))
-        const product = await stripe.products.search({
-            query: `name:'6 Game Season'`,
-        })
-        console.log(product.data[0].default_price)
-        console.log(metadata)
-        // Create Stripe Checkout session
-        const session = await stripe.checkout.sessions.create({
-            line_items: 
-            metadata.lineItems
-            // [
-            //     {
-            //         price: metadata.priceId,
-            //         quantity: metadata.quantity,
-            //     },
-            //     {
-            //         price_data: {
-            //           currency: 'usd',
-            //           product_data: {
-            //             name: 'Stripe Processing Fee',
-            //           },
-            //           unit_amount: 2000, // amount in cents
-            //         },
-            //         quantity: 1,
-            //       },
-            // ]
-            ,
+        const sessionData = {
+            line_items: metadata.lineItems,
             customer_email: metadata.metadata.email,
             mode: 'payment',
             metadata: metadata.metadata,
             success_url: metadata.success_url,
             cancel_url: metadata.cancel_url,
-        });
-  
+        };
+    
+        // Only add discounts if there's a valid value
+        if (discount && discount.length > 0) {
+            sessionData.discounts = [...discount];
+        }
+    
+        const session = await stripe.checkout.sessions.create(sessionData);
         return session;
     } catch (error) {
         // failedQuery(metadata,error)
