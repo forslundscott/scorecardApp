@@ -373,7 +373,7 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
             color = @color,
             league = @leagueId,
             season = @seasonId
-            where ID = @teamId
+            where teamId = @teamId
 
             IF NOT EXISTS (
                 SELECT 1 FROM seasonLeagueTeam
@@ -404,7 +404,7 @@ router.get('/:teamId/editTeam', async (req,res, next)=>{
         .query(`
             SELECT * 
             from dbo.teams
-            where id = @teamId
+            where teamId = @teamId
             `)        
         data.data = result.recordset[0]
         data.data.color = functions.getHexColor(data.data.color)
