@@ -14,7 +14,8 @@ function initialize(passport, getUserByEmail, getUserById){
             console.log(user)
             try {
                 if (user.banned) {
-                    return done(null, false, {message: 'Unfortunately, we are unable to complete your request at this time. If you need help resolving this issue, please reach out to our director of Operations'});
+                    return done(null, false, {message: `Unfortunately, we are unable to complete your request at this time.
+                        If you need help resolving this issue, please reach out to our director of Operations`});
                 } else if (!user.password) {
                     return done(null, false, {message: 'Please use Forgot Password for your first time logging into the new site.'});
                 } else if(await bcrypt.compare(password, user.password)){
