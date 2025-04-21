@@ -1043,9 +1043,15 @@ const price = prices.data.find(price => price.nickname === nickname);
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
       metadata.userId = user.ID
-      const session = await functions.createCheckoutSession({
-        metadata
-    });
+      const isSeniorCrew = req.user.roles?.some(role => role.name === 'Senior Staff');
+
+const session = isSeniorCrew
+  ? await functions.createCheckoutSession({ metadata }, [{ coupon: 'SENIORCREW100' }])
+  : await functions.createCheckoutSession({ metadata });
+
+    //   const session = await functions.createCheckoutSession({
+    //     metadata
+    // }, req.user.roles?.some(role => role.name === 'Senior Staff')&&[{coupon: 'SENIORCREW100'}]);
     console.log({userId: req.user.id,
       ...transformedBody
     })
