@@ -294,13 +294,13 @@ router.get('/success', async (req,res, next)=>{
         data.leaguesTeams = leaguesTeams
             // Begin the transaction
             await transaction.begin();
-          console.log('begin')
+          console.log(session.id)
             isTransactionActive = true
         const result = await new sql.Request(transaction)
                 .input('seasonId', sql.Int, session.metadata.seasonId)
                 .input('userId', sql.Int, req.user.id)
                 .input('registrationTime', sql.BigInt, Date.now())
-                .input('transactionId', sql.VarChar, session.payment_intent)
+                .input('transactionId', sql.VarChar, session.id)
                 .input('gateway', sql.VarChar, 'Stripe')
                 .input('keeperShirtColor', sql.VarChar, session.metadata.keeperShirtColor || '')
                 .input('test', sql.Bit, !session.livemode)
@@ -364,7 +364,7 @@ router.get('/success', async (req,res, next)=>{
                 .input('seasonId', sql.Int, session.metadata.seasonId)
                 .input('userId', sql.Int, req.user.id)
                 .input('registrationTime', sql.BigInt, Date.now())
-                .input('transactionId', sql.VarChar, session.payment_intent)
+                .input('transactionId', sql.VarChar, session.id)
                 .input('gateway', sql.VarChar, 'Stripe')
                 .input('keeperShirtColor', sql.VarChar, session.metadata.keeperShirtColor || '')
                 .input('teamShirtColor1', sql.VarChar, session.metadata.teamShirtColor1 || '')
@@ -533,7 +533,7 @@ router.get('/success', async (req,res, next)=>{
         //     await fullEmail(result.recordset)
             
         // console.log(result.recordset)
-        functions.newRegistrationEmail()
+        functions.newRegistrationEmail(session.id)
         res.render('paymentSuccess.ejs');
         
     }catch(err){

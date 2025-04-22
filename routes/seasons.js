@@ -83,7 +83,7 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
             .input('seasonId', sql.Int, req.params.seasonId)
             .input('userId', sql.Int, req.user.id)
             .input('registrationTime', sql.BigInt, Date.now())
-            .input('sessionId', sql.VarChar, session.payment_intent)
+            .input('sessionId', sql.VarChar, session.id)
             .input('gateway', sql.VarChar, 'Stripe')
             .input('test', sql.Bit, !session.livemode)
             .query(`
@@ -269,12 +269,6 @@ router.get(['/:seasonId/registration/team'],checkAuthenticated, async (req, res,
             left join leagues as l 
                 on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
-            and not exists (
-                select 1 
-                from seasonRegistration_leagueTeam as srl 
-                where srl.userId = @userId 
-                    and srl.leagueId = ls.leagueId
-            );
             
             select * from seasons
             where seasonId = @seasonId;
@@ -354,12 +348,6 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             left join leagues as l 
                 on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
-            and not exists (
-                select 1 
-                from seasonRegistration_leagueTeam as srl 
-                where srl.userId = @userId 
-                    and srl.leagueId = ls.leagueId
-            );
             
             select * from seasons
             where seasonId = @seasonId;

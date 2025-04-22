@@ -437,12 +437,13 @@ async function sendEmail(body, toEmail , fromText, subject){
       } 
    
 }
-async function newRegistrationEmail(){
+async function newRegistrationEmail(sessionId){
     try {    
       // Send reset email
       let result = await pool.request()
             .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
-            .query(`select u.firstName + ' ' + u.lastName as fullName,
+            .input('transactionId', sql.VarChar, sessionId)
+            .query(`select top 1 u.firstName + ' ' + u.lastName as fullName,
                  u.email
                  , sr.type
                  , sr.registrationId
@@ -450,19 +451,21 @@ async function newRegistrationEmail(){
                  , sr.gateway from seasonRegistrations as sr
                 left join users as u on sr.userId=u.ID
                 where sr.test = @testMode
+                and transactionId = @transactionId
                 `)
-        let paymentIntent
+        let session
         console.log(result.recordset)
         let htmlString = ''
         let htmlString2 = ''
         let totalPrice = 0
-        for(let registration of result.recordset){
-            paymentIntent = await stripe.paymentIntents.retrieve(registration.transactionId)
+        let registration = result.recordset[0]
+        // for(let registration of result.recordset){
+            session = await stripe.checkout.sessions.retrieve(registration.transactionId)
             let registrationPrice = new Intl.NumberFormat('en-US', { 
                 style: 'currency', 
                 currency: 'USD' 
-            }).format(paymentIntent.amount/100)
-            totalPrice = totalPrice + (paymentIntent.amount/100)
+            }).format(session.amount_total/100)
+            totalPrice = totalPrice + (session.amount_total/100)
             htmlString += `<tr>
                 <td>${registration.fullName}</td>
                 <td>${registration.email}</td>
@@ -470,9 +473,10 @@ async function newRegistrationEmail(){
                 <td>${registrationPrice}</td>
                 <td>${registration.registrationId}</td>
             </tr>`
-        }
+        // }
         result = await pool.request()
             .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
+            .input('registrationId', sql.Int, result.recordset[0].registrationId)
             .query(`
                     select u.firstName + ' ' + u.lastName as fullName
                     , u.email
@@ -487,6 +491,7 @@ async function newRegistrationEmail(){
                     LEFT join leagues as l on sr.leagueId=l.leagueId
                     left join teams as t on sr.teamId=t.teamId
                     where sr.test = @testMode
+                    and registrationId = @registrationId
                 `)
 
                 for(let registration of result.recordset){
