@@ -138,27 +138,39 @@ router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, nex
             left join leagues as l 
                 on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
-            and not exists (
-                select 1 
-                from seasonRegistration_leagueTeam as srl 
-                where srl.userId = @userId 
-                    and srl.leagueId = ls.leagueId
-            );
-            
+           
             select * from seasons
             where seasonId = @seasonId;
             
             select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName, u.firstName, u.lastName
             from seasonRegistration_leagueTeam as srl
             left join leagues as l on srl.leagueId = l.leagueId
-            left join teams as t on srl.teamId = t.id
+            left join teams as t on srl.teamId = t.teamId
             left join users as u on srl.userId = u.id
             where srl.seasonId = @seasonId
             `)
             data.leagues = result.recordsets[0]
             data.season = result.recordsets[1][0]
             data.leaguesAlreadyRegistered = result.recordsets[2]
-            console.log(data)
+            for(let league of data.leagues){
+                result = await pool.request()
+                .input('leagueId', sql.Int, league.leagueId)
+                .input('seasonId', sql.Int, req.params.seasonId)
+                .query(`
+                        select t.teamId, t.fullName, t.shortName, t.abbreviation from seasonLeagueTeam as slt
+                        left join teams as t on slt.teamId=t.teamId
+                        where slt.leagueId = @leagueId
+                        and slt.seasonId = @seasonId
+                    
+                        union all
+
+                        select teamId, fullName, shortName, abbreviation from teams
+                        where teamId = 1000000069
+                    `)
+                league.teams = result.recordset
+                // console.log(league)
+            }
+            console.log(data.leagues[0])
         res.render('registrationsSite.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
