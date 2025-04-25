@@ -147,7 +147,7 @@ router.get('/:userId/teams', async (req,res, next)=>{
             where userId = @userId
             `)
 
-        data.header = `${result.recordset[0].preferredName} ${result.recordset[0].lastName} Teams`
+        data.header = `${result.recordset[0].firstName} ${result.recordset[0].lastName} Teams`
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)

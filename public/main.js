@@ -873,7 +873,7 @@ async function getTeams(xform){
                     results.teams.forEach(team => {
                         let option = document.createElement('option');
                         option.value = team.teamId;
-                        option.text = team.abbreviation;
+                        option.text = team.fullName;
                         team1.appendChild(option);
                         
                     });
