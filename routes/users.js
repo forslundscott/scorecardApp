@@ -55,9 +55,21 @@ router.post('/:userId/teams/addTeam', async (req,res, next)=>{
         await pool.request()
         .input('userId', sql.Int, req.params.userId)
         .input('teamId', sql.VarChar, req.body.teamId)
+        .input('leagueId', sql.Int, req.body.leagueId)
+        .input('seasonId', sql.Int, req.body.seasonId)
         .query(`
-            insert into user_team (userId,teamId)
-            values (@userId,@teamId)
+            IF NOT EXISTS (
+                SELECT 1 FROM user_team 
+                WHERE userId = @userId 
+                AND teamId = @teamId 
+                AND seasonId = @seasonId 
+                AND leagueId = @leagueId
+            )
+            BEGIN
+                INSERT INTO user_team (userId, teamId, seasonId, leagueId)
+                VALUES (@userId, @teamId, @seasonId, @leagueId);
+            END
+
             `)
         res.redirect(302,`/users/${req.params.userId}/teams`)
     }catch(err){
@@ -113,17 +125,29 @@ router.get('/:userId/teams', async (req,res, next)=>{
             page: 'users/teams',
             userId: req.params.userId
         }
-        const result = await pool.request()
+        let result = await pool.request()
         .input('userId', sql.Int, req.params.userId)
         .query(`
-            select userId, preferredName,lastName, ut.teamId, t.fullName
+            select ut.teamId, t.fullName, l.name as leagueName, s.seasonName, l.color as leagueColor, t.color as teamColor
             from user_team as ut 
-            LEFT join users as u on ut.userId=u.ID
-            left join teams as t on ut.teamId=t.id
+            left join teams as t on ut.teamId=t.teamId
+            left join leagues as l on ut.leagueId=l.leagueId
+            left join seasons as s on ut.seasonId=s.seasonId
             where userId = @userId
             `)
         
         data.list = result.recordset
+
+        result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
+            select userId, firstName,lastName
+            from user_team as ut 
+            LEFT join users as u on ut.userId=u.ID
+            where userId = @userId
+            `)
+
+        data.header = `${result.recordset[0].preferredName} ${result.recordset[0].lastName} Teams`
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)

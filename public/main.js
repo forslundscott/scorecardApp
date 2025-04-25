@@ -869,7 +869,7 @@ async function getTeams(xform){
             switch(xform.id){
                 case 'newUserTeamForm':
                     team1 = xform.querySelector('[name="teamId"]');
-                    team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+                    team1.innerHTML = '<option value="" disabled selected>Team</option>';
                     results.teams.forEach(team => {
                         let option = document.createElement('option');
                         option.value = team.teamId;
