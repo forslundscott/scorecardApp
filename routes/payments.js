@@ -324,7 +324,7 @@ router.get('/success', async (req,res, next)=>{
                     .input('teamId', sql.VarChar, item.teamId)
                     .input('seasonId', sql.Int, session.metadata.seasonId)
                     .input('division', sql.VarChar, item.division)
-                    .input('keeper', sql.Bit, ['true', true, 1].includes(session.metadata.keeper) ? 1 : 0)
+                    .input('keeper', sql.Bit, ['true', true, 1, '1'].includes(session.metadata.keeper) ? 1 : 0)
                     .input('test', sql.Bit, !session.livemode)
                     .input('paid', sql.Bit, 1)
                     .input('shirtSize', sql.VarChar(10), String(session.metadata.shirtSize))
