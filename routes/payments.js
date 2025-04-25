@@ -590,7 +590,7 @@ router.get('/cancel', async (req,res, next)=>{
         // console.log(result.recordset)
         let data = {
             // url: `/pickup/register/${session.metadata.date}`
-            url: req.query.url || 'https://envoroot.com'
+            url: req.query.url || 'https://glosoccer.com'
         }
         res.render('paymentFailure.ejs',{data: data});
         
@@ -838,7 +838,7 @@ const teamPrice = prices.data.find(price => price.nickname === nickname);
         lineItems: lineItems,
         priceId: teamPrice.id,
         success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.get('Referer') || 'https://envoroot.com'}`,
+        cancel_url: `${req.get('Referer') || 'https://glosoccer.com'}`,
         metadata: {type: 'teamSeasonCheckout'
           , ...transformedBody
           ,waiverPaid: waiverPay
@@ -1015,7 +1015,7 @@ const price = prices.data.find(price => price.nickname === nickname);
       ,
       priceId: product.data[0].default_price,
       success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.get('Referer') || 'https://envoroot.com'}`,
+      cancel_url: `${req.get('Referer') || 'https://glosoccer.com'}`,
       // `${req.headers.origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${req.get('Referer') || 'https://envoroot.com'}`,
       metadata: {type: 'individualSeasonCheckout'
         , ...transformedBody

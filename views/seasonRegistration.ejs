@@ -105,7 +105,7 @@
 </head>
 <body style="text-align: center; width: 100%;" >
     <div style="background-image: linear-gradient(180deg, #CEFF00 0%, #4E6100 100%); width: 100%;">
-         <img style="padding: 12px 0 0 0;" height="200vh" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" onclick="window.location.href='https://envoroot.com/'">
+         <img style="padding: 12px 0 0 0;" height="200vh" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" onclick="window.location.href='https://glosoccer.com/'">
         <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;"><%= data.season.seasonName %> Registration</h1>
     </div>
    
@@ -420,12 +420,13 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
             // Define base URLs for different hosts (without specifying waiver/rules)
             const baseHrefMap = {
             "www.glosoccer.com": "https://www.glosoccer.com/",
+            "app.glosoccer.com": "https://app.glosoccer.com/",
             "glosoccer.com": "https://glosoccer.com/",
             "forslundhome.duckdns.org": "https://forslundhome.duckdns.org/"
             };
 
             // Get the base URL or fallback to envoroot
-            const baseUrl = baseHrefMap[host] || "https://envoroot.com/player-resources/";
+            const baseUrl = baseHrefMap[host] || "https://glosoccer.com/player-resources/";
 
             // Update both links dynamically
             const links = {
