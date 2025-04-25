@@ -156,9 +156,10 @@ app.get(['/'], async (req,res)=>{
     try{
         let redirectUrl 
             
-            if (req.hostname.startsWith('app.')) {
-                redirectUrl = 'https://envoroot.com/';
-            } else if (['forslundhome.duckdns.org', 'glosoccer.com', 'www.glosoccer.com'].includes(req.headers.host)) {
+            // if (req.hostname.startsWith('app.')) {
+            //     redirectUrl = 'https://envoroot.com/';
+            // } else 
+            if (['forslundhome.duckdns.org', 'glosoccer.com', 'www.glosoccer.com', 'app.glosoccer.com'].includes(req.headers.host)) {
                 redirectUrl = `/comingsoon`;
             } else {
                 redirectUrl = '/games';
