@@ -18,7 +18,7 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const corsOptions = {
-  origin: ['http://app.localhost.com:3000','http://localhost.com:3000','https://envoroot.com','https://app.envoroot.com', 'https://forslundhome.duckdns.org'], // Allow the app subdomain
+  origin: ['http://app.localhost.com:3000','http://localhost.com:3000', 'https://forslundhome.duckdns.org'], // Allow the app subdomain
   methods: ['GET', 'POST', 'OPTIONS'], // List allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
   credentials: true, // Allow credentials if needed
@@ -156,10 +156,10 @@ app.get(['/'], async (req,res)=>{
     try{
         let redirectUrl 
             
-            // if (req.hostname.startsWith('app.')) {
-            //     redirectUrl = 'https://envoroot.com/';
-            // } else 
-            if (['forslundhome.duckdns.org', 'glosoccer.com', 'www.glosoccer.com', 'app.glosoccer.com'].includes(req.headers.host)) {
+            if (['app.glosoccer.com'].includes(req.headers.host)) {
+                redirectUrl = 'https://glosoccer.com/';
+            } else 
+            if (['forslundhome.duckdns.org', 'glosoccer.com', 'www.glosoccer.com'].includes(req.headers.host)) {
                 redirectUrl = `/comingsoon`;
             } else {
                 redirectUrl = '/games';
