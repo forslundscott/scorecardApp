@@ -176,8 +176,11 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
     try{ 
         
         const teamId = await functions.addTeam(req.body)
+        console.log(req.body)
+        console.log(teamId)
+        functions.assignTeam(parseInt(req.body.seasonId),parseInt(req.body.leagueId),parseInt(teamId))
         functions.commitTeam(parseInt(teamId))
-        functions.assignTeam(parseInt(req.body.seasonId),parseInt(req.body.leagueId),parseInt(req.body.teamId))
+        
         // await pool.request()
         //             .input('seasonId', sql.Int, parseInt(session.metadata.seasonId))
         //             .input('leagueId', sql.Int, parseInt(session.metadata.leagueId))
@@ -365,6 +368,7 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
         .input('leagueId', sql.VarChar, req.body.leagueId)
         .input('seasonId', sql.Int, req.body.seasonId)
         .input('teamId', sql.VarChar, req.params.teamId)
+        .input('status', sql.VarChar, 'active')
         .query(`
             UPDATE teams
             set fullName = @fullName,
@@ -380,13 +384,14 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
                 WHERE seasonId = @seasonId AND leagueId = @leagueId AND teamId = @teamId
             )
             BEGIN
-                INSERT INTO seasonLeagueTeam (seasonId, leagueId, teamId)
-                VALUES (@seasonId, @leagueId, @teamId);
+                INSERT INTO seasonLeagueTeam (seasonId, leagueId, teamId, status)
+                VALUES (@seasonId, @leagueId, @teamId, @status);
             END
 
 
             `)
-
+            console.log('test')
+            functions.commitTeam(req.params.teamId)
         res.redirect(302,`/teams/${req.params.teamId}`)
     }catch(err){
         next(err)
@@ -462,7 +467,7 @@ router.get('/', async (req,res, next)=>{
             left join leagues as l on t.league=l.abbreviation
             LEFT join users as u on t.captain=u.ID
             where seasonId in (select seasonId from seasons
-            where active = 1)
+            where active in (1,0))
             ORDER by t.league, fullName
         `)
         data.teams = result.recordset

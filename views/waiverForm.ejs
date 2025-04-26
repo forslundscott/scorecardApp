@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/siteStyles.css">
+    <link rel="icon" href="/GLOSLogo.png">
+    <title>Sign Waiver</title>
+    
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url('/silverBackground.jpg');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                height: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .container {
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        }
+        /* #registerButton {
+            background-color: #ceff00;
+            font-size: 3vh;
+            border-width: medium;
+            border-color: black;
+            font-weight: 500;
+            border-style: solid;
+            color: black;
+            padding: 5px 40px 5px 40px;
+        } */
+        input:focus, textarea:focus, select:focus {
+            outline: 2px solid #ceff00; /* Change to your preferred color */
+        }
+        ::selection {
+            background: #ceff00; 
+            color: #121212; 
+        }
+        
+        .color-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-btn {
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: 100px;
+  }
+
+  .dropdown-menu div {
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .red { background: #ff0000; }
+  .green { background: #00ff00; }
+  .blue { background: #0000ff; }
+
+  .dropdown-menu div:hover {
+    opacity: 0.8;
+  }
+        /* input::selection, textarea::selection {
+            background: #ceff00;
+            color: #121212;
+        } */
+
+    </style>
+</head>
+<body style="text-align: center; width: 100%;" >
+    <div style="background-image: linear-gradient(180deg, #CEFF00 0%, #4E6100 100%); width: 100%;">
+         <img style="padding: 12px 0 0 0;" height="200vh" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" onclick="window.location.href='/'">
+        <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;"><%= data.season.seasonName %> Registration</h1>
+    </div>
+   
+    
+    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
+        <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
+        <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
+        <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
+        <br>
+        <br>
+        <input type="email" name="email" placeholder="Email" value="<%= data.userAttributes.email ? data.userAttributes.email : ''  %>" required>
+        <input type="tel" name="phone" placeholder="Phone Number" value="<%= data.userAttributes.phone ? data.userAttributes.phone : ''  %>" required>
+        <br>
+        <br>
+        <label for="dob"><b>Date of Birth:</b></label>
+        <input type="date" name="dob" value="<%= (data.userAttributes.dob && data.userAttributes.dob !== '' && data.userAttributes.dob !== 0) ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : '' %>" required>
+        <br>
+        <br>
+        <label for="gender"><b>Gender:</b></label>
+        <br>
+
+        <input type="radio" name="gender" id="gender_male" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="gender_male">Male</label>
+        <br>
+        <input type="radio" name="gender" id="gender_female" value="female" <%= data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'female' ? 'checked' : ''  %>><label for="gender_female">Female</label>
+        <br>
+        <input type="radio" name="gender" id="gender_unspecified" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="gender_unspecified">Unspecified</label>
+        <br>
+        <br>
+        <label for="skill"><b>Rate your Experience Level:</b></label>
+        <select name="skill" id="" required>
+            <option value="1" <%= data.userAttributes.skill == '1' ? 'selected' : ''  %>>1 - What's a soccer ball?</option>
+            <option value="2" <%= data.userAttributes.skill == '2' ? 'selected' : ''  %>>2 - Running is overrated</option>
+            <option value="3" <%= !['1', '2', '4', '5', 1, 2, 4, 5].includes(data.userAttributes.skill) ? 'selected' : ''  %>>3 - I used to play back in the day</option>
+            <option value="4" <%= data.userAttributes.skill == '4' ? 'selected' : ''  %>>4 - I play regularly</option>
+            <option value="5" <%= data.userAttributes.skill == '5' ? 'selected' : ''  %>>5 - I live for soccer</option>
+        </select>
+        <br><br>
+        <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
+        <br>
+        <br>
+        <%# console.log(data.userAttributes.discounted) %><input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
+        <br>
+        <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || !['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %>><label for="discounted_no">No</label>
+        
+        <br><br><br>
+        <label for=""><b>Leagues & Teams:</b></label>
+        <br>
+        <br>
+        <% for(let league of data.leagues){ %>
+            <input 
+                type="checkbox" 
+                name="leagueId_<%= league.leagueId %>" 
+                id="leagueId_<%= league.leagueId %>"
+                onchange="leagueSelect(this)"
+            >
+            <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %></label>
+            <select name="<%=league.leagueId %>_teamId" id="<%=league.leagueId %>_teamId" style="display: none;">
+                <option value="" disabled selected>Team Name (Captain Name)</option>
+                <option value="1000000069">Free Agent</option>
+                <% for(let team of league.teams) { %>
+                    <option value="<%= team.teamId %>"><%= team.teamShortName %> (<%= team.captainPreferredName %> <%= team.captainLastName %>)</option>
+                <% } %>
+            </select>
+            <select name="<%=league.leagueId %>_division" id="<%=league.leagueId %>_division" style="display: none;">
+                <option value="" disabled selected>Division</option>
+                <option value="upper">Upper</option>
+                <option value="lower">Lower</option>
+                <option value="either">Either</option>
+            </select>
+        <br>
+        <% } %>
+        <% if (data.leaguesAlreadyRegistered.length !== 0) { %>
+            <br>
+            <label for=""><b>Already Registered:</b></label>
+            <br><br>
+            <% for(let league of data.leaguesAlreadyRegistered){ %>
+                <input type="text" disabled value="<%= league.leagueShortName %>">
+                <input type="text" disabled value="<%= league.teamShortName %>">
+                <br>
+            <% } %>
+            
+        <% } %>
+        <br><br>
+        <%# console.log(data.userAttributes) %>
+        <label for=""><b>Shirt Size: </b></label>
+        <select name="shirtSize" id="" required>
+            <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
+            <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
+            <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
+            <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
+            <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
+        </select>
+        <br><br><br>
+        <!-- <select id="color" name="color">
+            <option value="#00FF00" style="background-color: #00FF00;">Lime</option>
+            <option value="#da70d6" style="background-color: #da70d6;">Orchid</option>
+            <option value="#FF69B4" style="background-color: #FF69B4;">Pink</option>
+            <option value="#0F52BA" style="background-color: #0F52BA;">Pink</option>
+          </select>
+          <br> -->
+          <label for="discounted"><b>Are you a keeper?</b></label>
+        <br>
+        <br>
+        
+        <input type="radio" name="keeper" id="keeper_yes" value="1" onchange="keeperChange()" required><label for="keeper_yes">Yes</label>
+        <br>
+        <input type="radio" name="keeper" id="keeper_no" value="0" onchange="keeperChange()" ><label for="keeper_no">No</label>
+        <br><br><br>
+          <!-- <input type="text" name="keeperShirtColor" id="keeperShirtColor" value="" hidden > -->
+          
+          <div id="keeperColorContainer" style="display: none;">
+              <label for=""><b>Keeper Shirt Color: </b></label>
+              <select name="keeperShirtColor" id="keeperShirtColor" onchange="this.style.backgroundColor=this.value" required>
+                <option value="" disabled selected>Shirt Color</option>
+                <option value="Lime">Lime</option>
+                <option value="Orchid">Orchid</option>
+                <option value="Pink">Pink</option>
+                <option value="Sapphire">Sapphire</option>
+              </select>
+              <!-- <div class="color-dropdown">
+                <div class="dropdown-btn" onclick="toggleDropdown()">Click to Select</div>
+                <div class="dropdown-menu">
+                  <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
+                  <div class="green" style="background-color: #da70d6;" onclick="selectColor('#da70d6','Orchid')">Orchid</div>
+                  <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
+                  <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
+                </div>
+              </div> -->
+            <br><br><br>  
+          </div>
+        
+        <label for=""><b>Emergency Contact:</b></label>
+        <br>
+        <br>
+        <input type="text" name="emergencyContactFirstName" placeholder="First Name" value="<%= data.userAttributes.emergencyContactFirstName ? data.userAttributes.emergencyContactFirstName : ''  %>" required>
+        <input type="text" name="emergencyContactLastName" placeholder="Last Name" value="<%= data.userAttributes.emergencyContactLastName ? data.userAttributes.emergencyContactLastName : ''  %>" required>
+        <br>
+        <br>
+
+        <input type="tel" name="emergencyContactPhone" placeholder="Phone Number" value="<%= data.userAttributes.emergencyContactPhone ? data.userAttributes.emergencyContactPhone : ''  %>" required>
+
+        <input type="text" name="emergencyContactRelationship" placeholder="Relationship" value="<%= data.userAttributes.emergencyContactRelationship ? data.userAttributes.emergencyContactRelationship : ''  %>" required>
+        <br><br><br>
+        <label for=""><b>Do you have any allergies or medical conditions we should be aware of?</b></label>
+        <br>
+        <!-- <br> -->
+
+        <div class="container">
+            <div class="section">
+                <h3>Allergies</h3>
+                <div id="allergy-list">
+                    <% for(let allergy of data.userAttributes.allergies){ %>
+                        <% if(allergy !== ''){ %>
+                            <br>
+                            <input type="text" class="allergy-input" name="allergies[]" value="<%= allergy %>" placeholder="Enter an allergy">
+                        <% } %>
+                    <% } %>
+                    <br>
+                    <input type="text" class="allergy-input" name="allergies[]" placeholder="Enter an allergy">
+                </div>
+            </div>
+            <div class="section">
+                <h3>Medical Conditions</h3>
+                <div id="medical-list">
+                    <% for(let condition of data.userAttributes.medicalConditions){ %>
+                        <% if(condition !== ''){ %>
+                            <br>
+                            <input type="text" class="medical-input" name="medicalConditions[]" value="<%= condition %>" placeholder="Enter a medical condition">
+                        <% } %>
+                    <% } %>
+                    <br>
+                    <input type="text" class="medical-input" name="medicalConditions[]" placeholder="Enter a medical condition">
+                </div>
+            </div>
+        </div>
+
+        <!-- <input type="text" name="medicalConditions" placeholder="List Medical Conditions"> -->
+        <br><br>
+        <a id="waiver-link" target="_blank">GLOS Waiver</a>
+        <br>
+        <a id="rules-link" target="_blank">GLOS Rules & Regulations</a>
+        <br><br>
+        <input type="checkbox" name="waiver" id="waiver" required><label for="waiver" >I have read and agree to the terms of the GLOS Wavier.</label>
+        <br>
+        <input type="checkbox" name="rules" id="rules" required><label for="rules" >I have read and agree to the terms of the GLOS Rules and Regulations.</label>
+        <br>
+        <br>
+        <button type="button" class="buttonStyle formButton" onclick="history.back()">Back</button>
+
+        <button class="buttonStyle formButton" id="registerButton">Continue To Payment</button>
+    </form>
+    <script>
+        document.addEventListener("input", function(event) {
+        if (event.target.classList.contains("allergy-input")) {
+            handleDynamicInputs("allergy-list", "allergy-input", "allergies[]", "Enter an allergy");
+        } else if (event.target.classList.contains("medical-input")) {
+            handleDynamicInputs("medical-list", "medical-input", "medicalConditions[]", "Enter a medical condition");
+        }
+    });
+
+    function handleDynamicInputs(listId, inputClass, inputName, placeholderText) {
+        let list = document.getElementById(listId);
+        let inputs = list.querySelectorAll(`.${inputClass}`);
+        
+        // Count blank inputs
+        let blankInputs = Array.from(inputs).filter(input => input.value.trim() === "");
+        
+        // If more than one blank input, remove the last one
+        if (blankInputs.length > 1) {
+            list.removeChild(blankInputs[blankInputs.length - 1].previousSibling); // Remove <br>
+            list.removeChild(blankInputs[blankInputs.length - 1]); // Remove input
+            return;
+        }
+
+        // If the last input has a value, add a new one
+        let lastInput = inputs[inputs.length - 1];
+        if (lastInput.value.trim() !== "") {
+            let newBr = document.createElement("br");
+            let newInput = document.createElement("input");
+            newInput.type = "text";
+            newInput.name = inputName;
+            newInput.placeholder = placeholderText;
+            newInput.classList.add(inputClass);
+
+            list.appendChild(newBr);
+            list.appendChild(newInput);
+        }
+    }
+  
+document.querySelectorAll('input[type="tel"]').forEach(input => {
+  input.addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+    if (value.length > 3) value = value.replace(/^(\d{3})/, "$1-");
+    if (value.length > 6) value = value.replace(/^(\d{3})-(\d{3})/, "$1-$2-");
+    e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
+  });
+});
+document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
+    // Check if at least one checkbox is selected
+    const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
+    console.log(checkboxes)
+    if (checkboxes.length === 0) {
+      alert('Please select at least one league!');
+      event.preventDefault(); // Prevent form submission
+      return false
+    }
+    handleSubmit(this,event)
+  });
+  function handleSubmit(form,event) {
+            // if (!validateCheckboxes(form)) {
+            //     return false; 
+            // }
+            paymentSubmit(form,event, 'individualSeasonCheckoutSession')
+        }
+//   async function handlePlayerRegistrationSubmit(form, event) {
+//     let formData = new FormData(form)
+//     console.log(formData);
+//     await fetch('registration', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded',
+//         },
+//         body: new URLSearchParams(formData).toString(),
+//     });
+
+//     }
+        function leagueSelect(ele){
+            // console.log(document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`))
+            document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).style.display = ele.checked ? "" : "none"
+            document.getElementById(`${ele.id.replace('leagueId_','')}_division`).style.display = ele.checked ? "" : "none"
+            document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).required = ele.checked
+            document.getElementById(`${ele.id.replace('leagueId_','')}_division`).required = ele.checked
+        }
+        function toggleDropdown() {
+            document.querySelector(".dropdown-menu").style.display = 
+            document.querySelector(".dropdown-menu").style.display === "block" ? "none" : "block";
+        }
+
+        function selectColor(color,name) {
+            document.querySelector(".dropdown-btn").textContent = name;
+            document.getElementById("keeperShirtColor").value = name
+            document.querySelector(".dropdown-btn").style.backgroundColor = color
+            document.querySelector(".dropdown-menu").style.display = "none";
+        }
+        function keeperChange() {
+            const conditionalDiv = document.getElementById('keeperColorContainer');
+            if (document.getElementById('keeper_yes').checked) {
+                document.getElementById('keeperColorContainer').style.display = 'block';
+                document.getElementById('keeperShirtColor').setAttribute('required', '')
+            } else {
+                document.getElementById('keeperColorContainer').style.display = 'none';
+                document.getElementById('keeperShirtColor').removeAttribute('required')
+            }
+        }
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     const link = document.getElementById("waiver-link");
+        //     const host = window.location.host;
+
+        //     // Define different hrefs based on the host
+        //     const hrefMap = {
+        //     "www.glosoccer.com": "https://www.glosoccer.com/waiver/",
+        //     "glosoccer.com": "https://glosoccer.com/waiver/",
+        //     "forslundhome.duckdns.org": "https://forslundhome.duckdns.org/waiver/"
+        //     };
+
+        //     // Set href dynamically
+        //     link.href = hrefMap[host] || "https://envoroot.com/player-resources/waiver/";
+        // });
+        document.addEventListener("DOMContentLoaded", function () {
+            const host = window.location.host;
+
+            // Define base URLs for different hosts (without specifying waiver/rules)
+            const baseHrefMap = {
+            "www.glosoccer.com": "https://www.glosoccer.com/",
+            "app.glosoccer.com": "https://app.glosoccer.com/",
+            "glosoccer.com": "https://glosoccer.com/",
+            "forslundhome.duckdns.org": "https://forslundhome.duckdns.org/"
+            };
+
+            // Get the base URL or fallback to envoroot
+            const baseUrl = baseHrefMap[host] || "https://glosoccer.com/player-resources/";
+
+            // Update both links dynamically
+            const links = {
+            "waiver-link": `${baseUrl}waiver/`,
+            "rules-link": `${baseUrl}rules/`
+            };
+
+            Object.entries(links).forEach(([id, url]) => {
+            const link = document.getElementById(id);
+            if (link) link.href = url;
+            });
+        });
+
+
+    </script>
+    <script src="/main.js"></script>
+</body>
+</html>

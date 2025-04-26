@@ -133,7 +133,78 @@ app.get(['/rules'], async (req,res)=>{
 })
 app.get(['/waiver'], async (req,res)=>{
     try{
-        res.render('glosWaiver.ejs')
+        let data = {
+            page: `/season/register`,
+            user: req.user,
+            seasonId: req.params.seasonId
+            
+        }
+        let result = await pool.request()
+        .input('userId', sql.Int, data.user.id)
+        .input('seasonId', sql.Int, req.params.seasonId)
+        .query(`
+            SELECT * from users
+            WHERE ID = @userId;
+
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+            from league_season as ls 
+            left join leagues as l 
+                on ls.leagueId = l.leagueId
+            where ls.seasonId = @seasonId
+            
+            select * from seasons
+            where seasonId = @seasonId;
+            
+            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
+            from seasonRegistration_leagueTeam as srl
+            left join leagues as l on srl.leagueId = l.leagueId
+            left join teams as t on srl.teamId = t.teamId
+            where srl.seasonId = @seasonId and srl.userId = @userId
+            `)
+            console.log('testing123')
+            data.userAttributes = result.recordsets[0][0]
+            data.userAttributes.dob = Number(data.userAttributes.dob)
+            data.leagues = result.recordsets[1]
+            data.season = result.recordsets[2][0]
+            data.leaguesAlreadyRegistered = result.recordsets[3]
+            console.log(data.leaguesAlreadyRegistered)
+            data.userAttributes.allergies = data.userAttributes.allergies
+            ? data.userAttributes.allergies.split(',').map(allergy => allergy.trim())
+            : [];
+            data.userAttributes.medicalConditions = data.userAttributes.medicalConditions
+            ? data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
+            : [];
+            console.log(data.leagues)
+            // data.userAttributes.medicalConditions = data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
+            // console.log(data.userAttributes.allergies.split(',').map(allergy => allergy.trim()))
+            for(let league of data.leagues){
+                console.log(league.leagueId)
+                result = await pool.request()
+                .input('leagueId', sql.VarChar, `${league.leagueId}`)
+                .input('seasonId', sql.Int, req.params.seasonId)
+                .query(`
+                    select slt.*
+                        , t.fullName as teamFullName
+                        , t.shortName as teamShortName
+                        , t.abbreviation as teamAbbreviation
+                        , t.color as teamColor
+                        ,t.keeper as teamKeeper
+                        ,t.captain as teamCaptain
+                        , u.preferredName as captainPreferredName
+                        , u.lastName as captainLastName 
+                        from seasonLeagueTeam as slt
+                        left join teams as t 
+                            on slt.teamId=t.teamId
+                        left join users as u 
+                            on t.captain=u.ID
+                    where 
+                        slt.leagueId = @leagueId 
+                        and slt.seasonId = @seasonId
+                        and t.status = 'active'
+                    `)
+                league.teams = result.recordset
+            }
+        res.render('waiverForm.ejs', {data: data})
     }catch(err){
         console.error('Error:', err)
     }    
