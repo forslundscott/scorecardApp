@@ -468,7 +468,7 @@ router.get('/', async (req,res, next)=>{
             LEFT join users as u on t.captain=u.ID
             where seasonId in (select seasonId from seasons
             where active in (1,0))
-            ORDER by t.league, fullName
+            ORDER by fullName
         `)
         data.teams = result.recordset
         res.render('index.ejs',{data: data}) 
