@@ -30,7 +30,7 @@
             <select name="leagueId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="" required>
                 <option value="" disabled selected>League</option>
                 <% for(let i=0; i< data.leagues.length; i++) {%>
-                    <option value="<%= data.leagues[i].leagueAbbreviation%>" <%= data.leagues[i].leagueId== data.data.leagueId? 'selected' : ''%>><%= data.leagues[i].leagueShortName%></option>
+                    <option value="<%= data.leagues[i].leagueId%>" <%= data.leagues[i].leagueId== data.data.leagueId? 'selected' : ''%>><%= data.leagues[i].leagueShortName%></option>
                 <% } %>
             </select>
             <br>

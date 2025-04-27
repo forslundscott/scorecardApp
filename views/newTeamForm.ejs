@@ -9,7 +9,7 @@
         <option value="" disabled selected>League</option>
 
         <% for(let i=0; i< data.leagues.length; i++) {%>
-            <option value="<%= data.leagues[i].leagueAbbreviation%>"><%= data.leagues[i].leagueShortName%></option>
+            <option value="<%= data.leagues[i].leagueId%>"><%= data.leagues[i].leagueShortName%></option>
         <% } %>
     </select>
         <br><br>

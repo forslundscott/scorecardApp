@@ -30,7 +30,9 @@ router.post(['/getTeams'], async (req,res,next)=>{
         from seasonleagueteam slt
         left join teams as t on slt.teamId=t.teamId
         WHERE slt.leagueId = @leagueId
-        AND slt.seasonId = @seasonId;
+        AND slt.seasonId = @seasonId
+        and t.status = 'active'
+        order by t.fullName;
         `)
         console.log(result.recordset)
         res.json({ message: 'Success', teams: result.recordset })
