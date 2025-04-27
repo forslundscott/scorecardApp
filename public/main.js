@@ -957,8 +957,14 @@ async function paymentSubmit(form,event,path) {
                     formData
                 ).toString(),
             })
-        const { url } = await response.json();
-        window.location.href = url; // Redirect to Stripe Checkout
+            const data = await response.json();
+
+            if (data.url) {
+              window.location.href = data.url;
+            } else if (data.message) {
+              alert(data.message);
+            }
+            
 }
 function hasDuplicate(values) {
     console.log(values)

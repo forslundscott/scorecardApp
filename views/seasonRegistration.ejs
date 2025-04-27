@@ -182,8 +182,8 @@
             <label for=""><b>Already Registered:</b></label>
             <br><br>
             <% for(let league of data.leaguesAlreadyRegistered){ %>
-                <input type="text" disabled value="<%= league.leagueShortName %>">
-                <input type="text" disabled value="<%= league.teamShortName %>">
+                <input type="text" class="alreadyRegistered" disabled value="<%= league.leagueShortName %>">
+                <input type="text" class="alreadyRegistered" disabled value="<%= league.teamShortName %>">
                 <br>
             <% } %>
             
@@ -347,7 +347,7 @@ document.getElementById('individualSeasonRegistrationForm').addEventListener('su
     // Check if at least one checkbox is selected
     const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
     console.log(checkboxes)
-    if (checkboxes.length === 0) {
+    if (checkboxes.length === 0 && document.getElementsByClassName('alreadyRegistered').length === 0) {
       alert('Please select at least one league!');
       event.preventDefault(); // Prevent form submission
       return false

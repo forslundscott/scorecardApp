@@ -1026,42 +1026,29 @@ const price = prices.data.find(price => price.nickname === nickname);
     metadata.quantity = leaguesTeams.length
     metadata.leaguesTeams = JSON.stringify(leaguesTeams)
     console.log(req.get('Referer'))
-      // let priceId = 'price_1QRdBOFGzuNCeWURG6JFGgYi';
-      // if (Array.isArray(req.body.hour)) {
-      //   switch(req.body.hour.length){
-      //     case 2:
-      //       priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_2LEAGUE
-      //       break
-      //     case 3:
-      //       priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_3LEAGUE
-      //       break
-      //     case 4:
-      //       priceId = process.env.STRIPE_INDIVIDUAL_SEASON_PRICE_4LEAGUE
-      //       break
-      //   }
-      // }
+      
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
       metadata.userId = user.ID
       const isSeniorCrew = req.user.roles?.some(role => role.name === 'Senior Staff');
 
-const session = isSeniorCrew
-  ? await functions.createCheckoutSession({ metadata }, [{ coupon: 'SENIORCREW100' }])
-  : await functions.createCheckoutSession({ metadata });
-
-    //   const session = await functions.createCheckoutSession({
-    //     metadata
-    // }, req.user.roles?.some(role => role.name === 'Senior Staff')&&[{coupon: 'SENIORCREW100'}]);
-    console.log({userId: req.user.id,
-      ...transformedBody
-    })
-    console.log(metadata)
-    functions.updateUserInfo({
+      functions.updateUserInfo({
       userId: req.user.id,
       ...transformedBody,
       waiverDate: Date.now()
     })
+    if(totalPrice > 0){
+      const session = isSeniorCrew
+        ? await functions.createCheckoutSession({ metadata }, [{ coupon: 'SENIORCREW100' }])
+        : await functions.createCheckoutSession({ metadata });
+    
       res.json({ url: session.url });
+    }else{
+      res.json({message: `You are all paid up for registered teams and annual waiver fee. 
+        If you meant to register for another team please select the appropriate league.
+        Thank you.`})
+    }
+
   } catch (error) {
     console.log(error)
       res.status(500).json({ error: error.message });

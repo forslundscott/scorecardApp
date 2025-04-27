@@ -111,7 +111,7 @@
    
     
     <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
-        <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
+        
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
         <br>
@@ -150,45 +150,6 @@
         <br>
         <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || !['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %>><label for="discounted_no">No</label>
         
-        <br><br><br>
-        <label for=""><b>Leagues & Teams:</b></label>
-        <br>
-        <br>
-        <% for(let league of data.leagues){ %>
-            <input 
-                type="checkbox" 
-                name="leagueId_<%= league.leagueId %>" 
-                id="leagueId_<%= league.leagueId %>"
-                onchange="leagueSelect(this)"
-            >
-            <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %></label>
-            <select name="<%=league.leagueId %>_teamId" id="<%=league.leagueId %>_teamId" style="display: none;">
-                <option value="" disabled selected>Team Name (Captain Name)</option>
-                <option value="1000000069">Free Agent</option>
-                <% for(let team of league.teams) { %>
-                    <option value="<%= team.teamId %>"><%= team.teamShortName %> (<%= team.captainPreferredName %> <%= team.captainLastName %>)</option>
-                <% } %>
-            </select>
-            <select name="<%=league.leagueId %>_division" id="<%=league.leagueId %>_division" style="display: none;">
-                <option value="" disabled selected>Division</option>
-                <option value="upper">Upper</option>
-                <option value="lower">Lower</option>
-                <option value="either">Either</option>
-            </select>
-        <br>
-        <% } %>
-        <% if (data.leaguesAlreadyRegistered.length !== 0) { %>
-            <br>
-            <label for=""><b>Already Registered:</b></label>
-            <br><br>
-            <% for(let league of data.leaguesAlreadyRegistered){ %>
-                <input type="text" disabled value="<%= league.leagueShortName %>">
-                <input type="text" disabled value="<%= league.teamShortName %>">
-                <br>
-            <% } %>
-            
-        <% } %>
-        <br><br>
         <%# console.log(data.userAttributes) %>
         <label for=""><b>Shirt Size: </b></label>
         <select name="shirtSize" id="" required>
