@@ -364,11 +364,48 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             select * from seasons
             where seasonId = @seasonId;
             
-            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
-            from seasonRegistration_leagueTeam as srl
-            left join leagues as l on srl.leagueId = l.leagueId
-            left join teams as t on srl.teamId = t.teamId
-            where srl.seasonId = @seasonId and srl.userId = @userId
+            select 
+                srl.leagueId, 
+                srl.teamId, 
+                l.shortName as leagueShortName, 
+                t.shortName as teamShortName, 
+                'Registered' as type
+            from 
+                seasonRegistration_leagueTeam as srl
+            left join 
+                leagues as l on srl.leagueId = l.leagueId
+            left join 
+                teams as t on srl.teamId = t.teamId
+            where 
+                srl.seasonId = @seasonId 
+                and srl.userId = @userId
+                and not exists (
+                    select 1 
+                    from user_team ut 
+                    where 
+                        ut.seasonId = srl.seasonId 
+                        and ut.teamId = srl.teamId 
+                        and ut.userId = srl.userId
+                )
+            union all
+            select 
+                ut.leagueId, 
+                ut.teamId, 
+                l.shortName as leagueShortName, 
+                t.shortName as teamShortName, 
+                'Rostered' as type
+            from 
+                user_team as ut
+            left join 
+                leagues as l on ut.leagueId = l.leagueId
+            left join 
+                teams as t on ut.teamId = t.teamId
+            where 
+                ut.seasonId = @seasonId 
+                and ut.userId = @userId
+
+            
+
             `)
             console.log('testing123')
             data.userAttributes = result.recordsets[0][0]

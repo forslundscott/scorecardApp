@@ -100,6 +100,10 @@
             background: #ceff00;
             color: #121212;
         } */
+        .alreadyRegisteredTable {
+            width: auto;
+            display: inline-table;
+    }
 
     </style>
 </head>
@@ -181,13 +185,26 @@
             <br>
             <label for=""><b>Already Registered:</b></label>
             <br><br>
-            <% for(let league of data.leaguesAlreadyRegistered){ %>
-                <input type="text" class="alreadyRegistered" disabled value="<%= league.leagueShortName %>">
-                <input type="text" class="alreadyRegistered" disabled value="<%= league.teamShortName %>">
-                <br>
-            <% } %>
-            
+            <table class="alreadyRegisteredTable">
+                <thead>
+                    <tr>
+                        <th>League</th>
+                        <th>Team</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let league of data.leaguesAlreadyRegistered) { %>
+                        <tr class="alreadyRegistered">
+                            <td style="font-size: 80%;"><%= league.leagueShortName %></td>
+                            <td style="font-size: 80%;"><%= league.teamShortName %></td>
+                            <td style="font-size: 80%;"><%= league.type %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
         <% } %>
+        
         <br><br>
         <%# console.log(data.userAttributes) %>
         <label for=""><b>Shirt Size: </b></label>
