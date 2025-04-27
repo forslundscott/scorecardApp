@@ -16,6 +16,8 @@ const sql = require('mssql');
 const cors = require('cors');
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+app.set('trust proxy', 'loopback');
+
 
 const corsOptions = {
   origin: ['http://app.localhost.com:3000','http://localhost.com:3000', 'https://forslundhome.duckdns.org'], // Allow the app subdomain
