@@ -141,12 +141,11 @@ router.get('/:userId/teams', async (req,res, next)=>{
         result = await pool.request()
         .input('userId', sql.Int, req.params.userId)
         .query(`
-            select userId, firstName,lastName
-            from user_team as ut 
-            LEFT join users as u on ut.userId=u.ID
-            where userId = @userId
+            select ID, firstName, lastName
+            from users
+            where ID = @userId
             `)
-
+            console.log(req.params.userId)
         data.header = `${result.recordset[0].firstName} ${result.recordset[0].lastName} Teams`
         res.render('index.ejs',{data: data})
     }catch(err){
