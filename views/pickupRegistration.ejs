@@ -16,7 +16,7 @@
     <main>
         <img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo">
         <br><br>
-        <form action="/api/payments/checkout" method="get" onsubmit="return handleSubmit(this,event)">
+        <form action="/api/payments/confirmation" method="get" onsubmit="return handleSubmit(this,event)">
             <label for="date"><input type="text" name="date" value="<%= data.pickupEvents[0].date %>" hidden><%= functions.formatDate(data.pickupEvents[0].date) %></label>
             <br><br>
 
@@ -27,9 +27,7 @@
             <br>
             
             <br>
-            
-
-            <%# console.log(data) %>
+        
             <% for (let i=0; i<data.pickupEvents.length;i++) {%>
             <label>
                 <input 
@@ -65,12 +63,12 @@
             if (!validateCheckboxes(form)) {
                 return false; 
             }
-            // paymentSubmit(form,event)
+            paymentSubmit(form,event, 'pickupCheckoutSession')
         }
         async function fillExistingUserInfo(emailElement){
             let form = emailElement.form;
             let formData = new FormData(form)
-            // console.log(formData)
+)
             const response = await fetch('/games/checkEmail', {
                 method: 'POST',
                 headers: {
@@ -80,7 +78,7 @@
             })
             if (response.ok) {
                 const responseData = await response.json();
-                console.log(responseData)
+
                 if(responseData.user){
                     form.querySelector('[name="firstName"]').value = responseData.user.firstName
                     form.querySelector('[name="lastName"]').value = responseData.user.lastName
@@ -109,7 +107,7 @@
         document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
             let email = this.value;
             let formData = new FormData(document.getElementById('newPlayerForm'))
-            console.log(formData)
+
             const response = await fetch('/games/checkEmail', {
                 method: 'POST',
                 headers: {
@@ -119,7 +117,7 @@
             })
             if (response.ok) {
                 const responseData = await response.json();
-                console.log(responseData)
+
                 if(responseData.user){
                     this.form.querySelector('[name="firstName"]').value = responseData.user.firstName
                     this.form.querySelector('[name="lastName"]').value = responseData.user.lastName

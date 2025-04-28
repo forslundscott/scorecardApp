@@ -16,6 +16,9 @@ router.post('/updateGameInfo', async (req, res, next) => {
             .input('team1Id', sql.VarChar, formData.Team1_ID)
             .input('team2Id', sql.VarChar, formData.Team2_ID)
             .input('scoreKeeperId', sql.VarChar, formData.scoreKeeper_ID == 'TBD'? null : formData.scoreKeeper_ID)
+            .input('monitorId', sql.VarChar, formData.monitorId == 'TBD'? null : formData.monitorId)
+            .input('referee1Id', sql.VarChar, formData.ref1Id == 'TBD'? null : formData.ref1Id)
+            .input('referee2Id', sql.VarChar, formData.ref2Id == 'TBD'? null : formData.ref2Id)
             .input('period', sql.Int, formData.period)
             .input('eventId', sql.Int, formData.Event_ID)
             .query(`
@@ -23,6 +26,9 @@ router.post('/updateGameInfo', async (req, res, next) => {
             set Team1_ID = @team1Id,
             Team2_ID = @team2Id,
             scoreKeeperId = @scoreKeeperId,
+            monitorId = @monitorId,
+            referee1Id = @referee1Id,
+            referee2Id = @referee2Id,
             period = @period
             where Event_ID = @eventId
             `)
@@ -96,21 +102,39 @@ router.post('/gameInfo', async (req, res, next) => {
         from games 
         where Event_ID = @eventId
 
-        SELECT id 
-        from teams
-        where league in (
-            select league 
+        SELECT t.teamId, t.abbreviation  
+        from teams as t
+        left join seasonleagueteam as slt on t.teamId=slt.teamId
+        where slt.leagueId in (
+            select leagueId 
             from games
             where Event_ID = @eventId
             )
+
         SELECT userId,roleId,firstName,lastName, preferredName
         FROM [user_role]
         left join users on user_role.userId=users.ID
         where roleId in (select id from roles where name in ('scorekeeper'))
-        order by preferredName`)
+        order by preferredName
+
+        SELECT userId,roleId,firstName,lastName, preferredName
+        FROM [user_role]
+        left join users on user_role.userId=users.ID
+        where roleId in (select id from roles where name in ('monitor'))
+        order by preferredName
+
+        SELECT userId,roleId,firstName,lastName, preferredName
+        FROM [user_role]
+        left join users on user_role.userId=users.ID
+        where roleId in (select id from roles where name in ('referee'))
+        order by preferredName
+        
+        `)
         data.game = result.recordsets[0][0]
         data.teams = result.recordsets[1]
         data.scoreKeepers = result.recordsets[2]
+        data.monitors = result.recordsets[3]
+        data.referees = result.recordsets[4]
         res.json({ message: 'Form submitted successfully!', data: data });
     }catch(err){
         next(err)
@@ -124,7 +148,6 @@ router.post(['/checkEmail'], async (req,res,next)=>{
         where email = @email`)
   
         res.json({ message: 'Success', user: result.recordset[0] })
-        // res.redirect('back')
     }catch(err){
         next(err)
     }
@@ -162,7 +185,7 @@ router.get(['/readyForUpload'], async (req,res, next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
-        const result = await pool.request().query(`SELECT * from dbo.gamesreadytoupload()`)
+        const result = await pool.request().query(`Select * from gamesList(1) order by startUnixTime, location `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -176,19 +199,10 @@ router.get(['/completedGames'], async (req,res, next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
-        const result = await pool.request().query(`SELECT t1.*, 
-                                                t2.color as Team1Color, 
-                                                t3.color as Team2Color,
-                                                t4.color as LeagueColor,
-                                                t5.preferredName as scoreKeeper
-                                                FROM [scorecard].[dbo].[games] t1 
-                                                left join teams as t2 
-                                                on t1.Team1_ID=t2.id and t1.season=t2.season
-                                                left join teams as t3 
-                                                on t1.Team2_ID=t3.id and t1.season=t3.season
-                                                LEFT join leagues as t4 on t1.league=t4.abbreviation
-                                                LEFT join users as t5 on t1.scoreKeeperId=t5.ID
-                                                where t1.[Status]=2`)
+        const result = await pool.request()
+        .query(`
+            Select * from gamesList(2) order by startUnixTime, location 
+            `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -202,19 +216,21 @@ router.get(['/rescheduleGames'], async (req,res, next)=>{
             page: req.route.path[0].replace('/',''),
             user: req.user
         }
-        const result = await pool.request().query(`SELECT t1.*, 
-                                                t2.color as Team1Color, 
-                                                t3.color as Team2Color,
-                                                t4.color as LeagueColor,
-                                                t5.preferredName as scoreKeeper
-                                                FROM [scorecard].[dbo].[games] t1 
-                                                left join teams as t2 
-                                                on t1.Team1_ID=t2.id and t1.season=t2.season
-                                                left join teams as t3 
-                                                on t1.Team2_ID=t3.id and t1.season=t3.season
-                                                LEFT join leagues as t4 on t1.league=t4.abbreviation
-                                                LEFT join users as t5 on t1.scoreKeeperId=t5.ID
-                                                where t1.[Status]=3`)
+        const result = await pool.request().query(`
+            SELECT t1.*, 
+            t2.color as Team1Color, 
+            t3.color as Team2Color,
+            t4.color as LeagueColor,
+            t5.preferredName as scoreKeeper
+            FROM [scorecard].[dbo].[games] t1 
+            left join teams as t2 
+            on t1.Team1_ID=t2.id and t1.season=t2.seasonId
+            left join teams as t3 
+            on t1.Team2_ID=t3.id and t1.season=t3.seasonId
+            LEFT join leagues as t4 on t1.leagueId=t4.leagueId
+            LEFT join users as t5 on t1.scoreKeeperId=t5.ID
+            where t1.[Status]=3
+        `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -232,27 +248,24 @@ router.get(['/timer'], async (req,res,next)=>{
             WHERE event_Id = @eventId`)
             res.redirect('/games/readyforupload')
         }else if(req.query.timerState == 2){
-            console.log('test1')
-            const result = await pool.request()
-            .input('eventId', sql.Int, req.query.Event_ID)
-            .query(`select * from winningTeam(@eventId)`)
-            console.log('test2')
-            if(result.recordset[0].length==1){
-                await pool.request()
-                .input('eventId', sql.Int, req.query.Event_ID)
-                .input('teamName',sql.VarChar,result.recordset[0].teamName)
-                .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
-                select top 1 Teamid,fullName,shortName,color,captain,player,email, @eventId as Event_ID, 'false' 
-                from winningTeamContact(@teamName)
-                where giftCards = 1`)
-            }  
-            console.log('test3')
+            // not needed anymore
+            // const result = await pool.request()
+            // .input('eventId', sql.Int, req.query.Event_ID)
+            // .query(`select * from winningTeam(@eventId)`)
+            // if(result.recordset[0].length==1){
+            //     await pool.request()
+            //     .input('eventId', sql.Int, req.query.Event_ID)
+            //     .input('teamName',sql.VarChar,result.recordset[0].teamName)
+            //     .query(`insert into winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
+            //     select top 1 Teamid,fullName,shortName,color,captain,player,email, @eventId as Event_ID, 'false' 
+            //     from winningTeamContact(@teamName)
+            //     where giftCards = 1`)
+            // }  
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`UPDATE [scorecard].[dbo].[games] 
             set [Status] = 1 
             WHERE event_Id = @eventId`)
-            console.log('test4')
             await pool.request()
             .input('eventId', sql.Int, req.query.Event_ID)
             .query(`
@@ -306,18 +319,16 @@ router.post(['/eventLog'], async (req,res,next)=>{
          }
          let result
          if(req.body.type == 'makecaptain'){
-             console.log('cap')
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
-             .query(`update scorecard.dbo.teams set captain = @playerId where id = @teamName`)
+             .query(`update scorecard.dbo.teams set captain = @playerId where teamId = @teamName`)
              res.json({ message: 'Reload', data: data })
          }else if(req.body.type == 'makekeeper'){
-             console.log('keep')
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
-             .query(`update scorecard.dbo.teams set keeper = @playerId where id = @teamName`)            
+             .query(`update scorecard.dbo.teams set keeper = @playerId where teamId = @teamName`)            
              res.json({ message: 'Reload', data: data })
          }else{
              await pool.request()
@@ -329,7 +340,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              .input('value',sql.Int, req.body.value)
              .input('type', sql.VarChar, req.body.type)
              .input('eventId', sql.VarChar, req.body.Event_ID)
-             .input('opponentKeeper',sql.VarChar, req.body.type == 'owngoal' ? "'"+req.body.keeper+"'": req.body.type == 'goal' ? "'"+req.body.opponentKeeper+"'" : null)
+             .input('opponentKeeper',sql.VarChar, req.body.type == 'owngoal' ? req.body.keeper: req.body.type == 'goal' ? req.body.opponentKeeper : null)
              .input('season',sql.VarChar,req.body.season)
              .input('subseason',sql.VarChar,req.body.subseason)
              .query(`insert into scorecard.dbo.eventLog (playerId, 
@@ -347,6 +358,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .input('eventId', sql.Int, req.body.Event_ID)
+             .input('seasonId',sql.VarChar,req.body.season)
              .query(`
              DECLARE @Team1_ID VARCHAR(255);
              DECLARE @Team2_ID VARCHAR(255)
@@ -359,7 +371,8 @@ router.post(['/eventLog'], async (req,res,next)=>{
              Select * 
              from scorecard.dbo.rosterGameStats(
                  @teamName,
-                 @eventId
+                 @eventId,
+                 @seasonId
                  ) 
              where userId = @playerId
              UNION ALL
@@ -371,6 +384,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              `)
              try{
                  data.player = result.recordsets[0][0]
+                 console.log(data.player)
                  data.team1.team = result.recordsets[1][0].teamName
                  data.team2.team = result.recordsets[2][0].teamName
                  if(result.recordsets[1].length == 0){
@@ -405,21 +419,21 @@ router.post(['/eventLog'], async (req,res,next)=>{
             
         }
         let result = await pool.request()
-        .query(`select top 1 seasonName from seasons where active = 1
+        .query(`select top 1 * from seasons where active = 1
+            and not seasonName = 'Test Season'
         `)
-            data.season = result.recordset[0].seasonName
+            data.season = result.recordset[0]
         result = await pool.request()
-        .query(`select seasonName from seasons where active = 1
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
         result = await pool.request()
-        .input('season',sql.VarChar,data.season)
-        .query(`SELECT * from league_season ls
-            LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = @season
+        .input('seasonId',sql.Int,data.season.seasonId)
+        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            from league_season ls
+            LEFT join leagues l on ls.leagueId=l.leagueId
+            where seasonId = @seasonId
         `)
-        // console.log(req)
-        
         data.leagues = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -477,7 +491,6 @@ router.post('/periodEnd', async (req, res, next) => {
             .input('eventId', sql.Int, req.body.Event_ID)
             .query(`SELECT * FROM [scorecard].[dbo].[games] WHERE event_Id = @eventId`)
             game = result.recordset[0]
-            console.log(req.query)
             if(game.period===req.body.period){
                 if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
                     if(game.period<game.maxPeriods){
@@ -512,10 +525,6 @@ router.post('/periodEnd', async (req, res, next) => {
 router.get(['/activeGame/:eventId'], async (req,res,next)=>{
     try {
         let game
-        // console.log(await pool.request()
-        // .input('eventId', sql.Int, req.params.eventId)
-        // .query(`select period from games
-        //     where Event_ID = @eventId`))
         let eventResult = await pool.request()
         .input('eventId', sql.Int, req.params.eventId)
         .query(`
@@ -539,12 +548,17 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
         .input('team1Id', sql.VarChar, eventResult.Team1_ID)
         .input('team2Id', sql.VarChar, eventResult.Team2_ID)
         .query(`
+            declare @seasonId int;
+
+            select top 1 @seasonId = season from games where event_id = @eventId
+
             Select * 
             from [scorecard].[dbo].[teams] 
             where id =@team1Id 
             and keeper in (Select userId 
                 from [scorecard].[dbo].[user_team] 
                 where teamid =@team1Id
+                and seasonId = @seasonId
                 union all
                 Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team1Id
                 and eventId = @eventId
@@ -556,6 +570,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             and keeper in (Select userId 
                 from [scorecard].[dbo].[user_team] 
                 where teamid =@team2Id
+                and seasonId = @seasonId
                 union all
                 Select userId from [scorecard].[dbo].[subTeamGame] where teamid =@team2Id
                 and eventId = @eventId
@@ -613,8 +628,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
                 team2.score = result.recordsets[5][0].score
             }
             game = result.recordsets[6][0]
-            // team1.priorSubs = result.recordsets[7]
-            // team2.priorSubs = result.recordsets[8]
+            console.log(team1.players)
         if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
             if(game.period<game.maxPeriods){
                 game.period=game.period +1
@@ -644,12 +658,93 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
+        // console.log(data)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)
     }
 })
-router.get('/', async (req,res, next)=>{
+router.get('/site/mygames', checkAuthenticated, async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            teams: [],
+            page: 'games',
+            user: req.user
+        }
+        console.log(req.user)
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await pool.request()
+        .input('userId',sql.Int,req.user.id)
+        .query(`Select g.*,
+                t1.abbreviation as t1Abbreviation,
+                t2.abbreviation as t2Abbreviation,
+                t1.shortName as t1ShortName,
+                t2.shortName as t2ShortName,
+                l.abbreviation as leagueAbbreviation,
+                l.name as leagueName
+            from gamesList(0) as g
+            left join teams as t1 on g.Team1_ID=t1.teamId
+            left join teams as t2 on g.Team2_ID=t2.teamId
+            left join leagues as l on g.leagueId=l.leagueId
+            where g.Team1_ID in (
+                select teamId from user_team as ut
+                where ut.userId = @userId and ut.seasonId = g.season
+            )
+                or 
+                g.Team2_ID in (
+                select teamId from user_team as ut
+                where ut.userId = @userId and ut.seasonId = g.season
+            )
+            order by startUnixTime, location `)
+            console.log(result.recordset)
+        const groupedData = result.recordset.reduce((acc, game) => {
+            const dateObj = new Date(Number(game.startUnixTime)); // Convert Unix timestamp to Date object
+            // const date = dateObj.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const date = dateObj.toLocaleDateString('en-US', options)
+
+
+            // const time = dateObj.toTimeString().split(' ')[0].slice(0, 5); // Extract HH:mm
+
+            // Convert time to 12-hour AM/PM format
+            let hours = dateObj.getHours();
+            const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12; // Convert 0 to 12 for 12 AM
+
+            const time = `${hours}:${minutes} ${ampm}`;
+
+            if (!acc[date]) {
+                acc[date] = { date, matches: [] };
+            }
+            acc[date].matches.push({
+                time,
+                location: game.Location,
+                team1Id: game.Team1_ID,
+                team2Id: game.Team2_ID,
+                team1Abbreviation: game.t1Abbreviation,
+                team2Abbreviation: game.t2Abbreviation,
+                team1ShortName: game.t1ShortName,
+                team2ShortName: game.t2ShortName,
+                league: game.leagueId,
+                leagueName: game.leagueName,
+                leagueAbbreviation: game.leagueAbbreviation
+            });
+
+            return acc;
+        }, {});
+        data.schedule = Object.values(groupedData)
+        console.log(data.schedule[0])
+        res.render('scheduleSite.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/site', async (req,res, next)=>{
     try{
         if (req.isAuthenticated()) {
             // console.log(req.user)
@@ -663,7 +758,83 @@ router.get('/', async (req,res, next)=>{
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
         // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
         const result = await pool.request()
-        .query(`Select * from gamesList() order by startUnixTime, location `)
+        .query(`Select g.*,
+                t1.abbreviation as t1Abbreviation,
+                t2.abbreviation as t2Abbreviation,
+                t1.shortName as t1ShortName,
+                t2.shortName as t2ShortName,
+                l.abbreviation as leagueAbbreviation,
+                l.name as leagueName
+            from gamesList(0) as g
+            left join teams as t1 on g.Team1_ID=t1.teamId
+            left join teams as t2 on g.Team2_ID=t2.teamId
+            left join leagues as l on g.leagueId=l.leagueId
+            order by startUnixTime, location `)
+            console.log(result.recordset)
+            
+        
+        const groupedData = result.recordset.reduce((acc, game) => {
+            const dateObj = new Date(Number(game.startUnixTime)); // Ensure correct conversion
+            const dateOptions = { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric',
+                timeZone: 'America/New_York'  // Explicitly set EST/EDT
+            };
+            const date = dateObj.toLocaleDateString('en-US', dateOptions);
+            // Convert time to Eastern Time in 12-hour format
+            const timeOptions = { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true,
+                timeZone: 'America/New_York'  // Explicitly set EST/EDT
+            };
+            const time = dateObj.toLocaleTimeString('en-US', timeOptions);
+
+            if (!acc[date]) {
+                acc[date] = { date, matches: [] };
+            }
+            acc[date].matches.push({
+                time,
+                location: game.Location,
+                team1Id: game.Team1_ID,
+                team2Id: game.Team2_ID,
+                team1Abbreviation: game.t1Abbreviation,
+                team2Abbreviation: game.t2Abbreviation,
+                team1ShortName: game.t1ShortName,
+                team2ShortName: game.t2ShortName,
+                league: game.leagueId,
+                leagueName: game.leagueName,
+                leagueAbbreviation: game.leagueAbbreviation
+            });
+        
+            return acc;
+        }, {});
+        
+
+        data.schedule = Object.values(groupedData)
+        // console.log(data.schedule[0])
+        res.render('scheduleSite.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            teams: [],
+            page: 'games',
+            user: req.user
+        }
+        
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await pool.request()
+        .query(`Select * from gamesList(0) order by startUnixTime, location `)
         data.games = result.recordset
         res.render('index.ejs',{data: data}) 
     }catch(err){

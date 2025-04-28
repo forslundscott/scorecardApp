@@ -1,30 +1,19 @@
-<form id="newLeagueForm" action="/leagues/addLeague" method="post" class="textCenter">
-                
+<form id="newLeagueForm" action="/leagues/addLeague" method="post" class="textCenter">                
     <select name="seasonId" id="seasonId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" required>
-        <!-- <option value="" disabled selected hidden>Season</option> -->
-        <!-- <option value="<%# data.season %>" selected><%= data.season %></option> -->
         <% for(let i=0; i< data.seasons.length; i++) {%>
-            <option value="<%= data.seasons[i].seasonName%>" <%= data.seasons[i].seasonName== data.season? 'selected' : ''%>><%= data.seasons[i].seasonName%></option>
+            <option value="<%= data.seasons[i].seasonId%>" <%= data.seasons[i].seasonId== data.season.seasonId? 'selected' : ''%>><%= data.seasons[i].seasonName%></option>
         <% } %>
-        <!-- <option value="Indoor">Indoor</option> -->
     </select>
-    
-    <br>
-    <br>
+        <br><br>
     <input type="text" name="leagueName" placeholder="Full League Name">
-    <br>
-    <br>
+        <br><br>
     <input type="text" name="abbreviation" placeholder="Abbreviation">
-    <br>
+        <br>
     <div class="primaryStyle" style="font-size: 100%;">
         Color:
-        <br>
-
+            <br>
         <input type="color" name="color" required>
     </div>
-    
-    <br>
-    <br>
-    <br>
+        <br><br><br>
     <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">Add Team</button>
 </form>

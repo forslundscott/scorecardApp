@@ -6,7 +6,7 @@
     <form id="newUserRoleForm" class="textCenter" action="addRole" method="post" style="display: ''; text-align: center;">
         <select name="roleId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="" required>
             <option value="" disabled selected>Role</option>
-            <!-- <script>console.log(document.getElementById('newGameForm').getElementsByName('leagueId')[0])</script> -->
+           
             <% for(let i=0; i< data.roles.length; i++) {%>
                 <option value="<%= data.roles[i].id%>"><%= data.roles[i].name%></option>
             <% } %>

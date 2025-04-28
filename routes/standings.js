@@ -24,7 +24,6 @@ router.post('/exportStandings', async (req, res, next) => {
         .execute(procedureName)
         const csvData = await functions.exportToCSV(result.recordset);
         // Set response headers for CSV download
-        console.log('test filename')
         let fileName = functions.fileNameSanitizer(`${req.body.league}_${req.body.type}_standings`)
         fileName = fileName.slice(0,251) + '.csv'
         res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
@@ -36,7 +35,6 @@ router.post('/exportStandings', async (req, res, next) => {
 })
 router.get('/site/:type/:league', async (req, res, next) => {
     try{
-        console.log('test')
         const procedureMap = {
             keeper: 'keeperStandings',
             individual: 'individualStandings',
@@ -50,7 +48,6 @@ router.get('/site/:type/:league', async (req, res, next) => {
         const result = await pool.request()
         .input('league', sql.VarChar, req.params.league)
         .execute(procedureName)
-        console.log(result)
         let data = {
             league: req.params.league,
             type: req.params.type,
@@ -64,23 +61,93 @@ router.get('/site/:type/:league', async (req, res, next) => {
         console.error('Error:', err)
     }
 })
-router.get('/:type/:league', async (req, res, next) => {
-    try{
-        // console.log(req.params)
-        const request = pool.request()
-        const result = await request
-        .query(`DECLARE @league varchar(255)
-        Set @league = '${req.params.league}'
-        Execute ${req.params.type}Standings @league
-        `)
-        let data = {
+router.get('/site/:seasonId/:type/:league', async (req, res, next) => {
+    let data = {
             league: req.params.league,
             type: req.params.type,
             page: `${req.originalUrl.split('/')[1]}`,
-            list: result.recordsets[0],
             user: req.user
         }
-        
+    try{
+        console.log(req.hostname)
+        const procedureMap = {
+            keeper: 'keeperStandings',
+            individual: 'individualStandings',
+            team: 'teamStandings',
+          };
+          const procedureName = procedureMap[req.params.type.toLowerCase()];
+          // Verifying the procedure value was set
+          if (!procedureName) {
+              return res.status(400).send('Invalid standings type');
+          }
+        let result = await pool.request()
+        .input('league', sql.VarChar, req.params.league)
+        .input('seasonId', sql.Int, req.params.seasonId) 
+        .execute(procedureName)
+        data.list = result.recordsets[0]
+        // result = await pool.request()
+        // .input('seasonId', sql.Int, req.params.seasonId) 
+        // .query(`
+        //     select top 1 *
+        //     from seasons
+        //     where seasonId = @seasonId
+        //     `)
+        // data.season = result.recordset[0]
+        // result = await pool.request()
+        // .input('leagueId', sql.VarChar, req.params.league)
+        // .query(`
+        //     select top 1 *
+        //     from leagues
+        //     where leagueId = @leagueId
+        //     `)
+        console.log(data)
+        // data.league = result.recordset[0]
+        res.render('standingsSite.ejs',{data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }
+})
+router.get('/:seasonId/:type/:league', async (req, res, next) => {
+    let data = {
+            league: req.params.league,
+            type: req.params.type,
+            page: `${req.originalUrl.split('/')[1]}`,
+            user: req.user
+        }
+    try{
+        const procedureMap = {
+            keeper: 'keeperStandings',
+            individual: 'individualStandings',
+            team: 'teamStandings',
+          };
+          const procedureName = procedureMap[req.params.type.toLowerCase()];
+          // Verifying the procedure value was set
+          if (!procedureName) {
+              return res.status(400).send('Invalid standings type');
+          }
+        let result = await pool.request()
+        .input('league', sql.VarChar, req.params.league)
+        .input('seasonId', sql.Int, req.params.seasonId) 
+        .execute(procedureName)
+        data.list = result.recordsets[0]
+        console.log(data.list)
+        result = await pool.request()
+        .input('seasonId', sql.Int, req.params.seasonId) 
+        .query(`
+            select top 1 *
+            from seasons
+            where seasonId = @seasonId
+            `)
+        data.season = result.recordset[0]
+        result = await pool.request()
+        .input('leagueId', sql.VarChar, req.params.league)
+        .query(`
+            select top 1 *
+            from leagues
+            where leagueId = @leagueId
+            `)
+        console.log(data)
+        data.league = result.recordset[0]
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -88,20 +155,40 @@ router.get('/:type/:league', async (req, res, next) => {
 })
 router.get('/', async (req,res, next)=>{
     try{
-        const request = pool.request()
-        const result = await request
-        .query(`select shortName, abbreviation from leagues
-            where abbreviation in (
-            select ls.leagueId from league_season as ls
-            left join seasons as s on ls.seasonId=s.seasonName
-            where s.active = 1
-            )
-        `)
         let data = {
             page: `${req.originalUrl.split('/')[1]}`,
             user: req.user,
-            leagues: result.recordset
+            // leagues: result.recordset
         }
+        let result = await pool.request()
+                .query(`select top 1 * from seasons where active = 1
+                     and not seasonName = 'Test Season'
+                `)
+                    data.season = result.recordset[0]
+                result = await pool.request()
+                .query(`select * from seasons where active = 1
+                `)
+                data.seasons = result.recordset
+                result = await pool.request()
+                .input('seasonId', sql.Int, data.season.seasonId)
+                .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+                    from league_season ls
+                    LEFT join leagues l on ls.leagueId=l.leagueId
+                    where seasonId = @seasonId
+                `)
+                
+                data.leagues = result.recordset
+
+
+        // const result = await pool.request()
+        // .query(`select shortName, abbreviation, leagueId from leagues
+        //     where leagueId in (
+        //     select ls.leagueId from league_season as ls
+        //     left join seasons as s on ls.seasonId=s.seasonId
+        //     where s.active = 1
+        //     )
+        // `)
+        
         
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -110,7 +197,7 @@ router.get('/', async (req,res, next)=>{
 });
 router.post('/', async (req, res, next) => {
     try{
-        res.redirect(`/standings/${req.body.type}/${req.body.leagueId}`)
+        res.redirect(`/standings/${req.body.seasonId}/${req.body.type}/${req.body.leagueId}`)
 
     }catch(err){
         console.error('Error:', err)

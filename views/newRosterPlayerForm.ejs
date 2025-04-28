@@ -9,8 +9,8 @@
             <br>
             <input type="text" name="preferredName" value="" placeholder="Preferred Name (Optional)">
             <br>
-            <input type="text" name="team" value="<%= data.teamId %>" hidden>
-            <input type="text" name="season" value="<%= data.seasonId %>" hidden>
+            <input type="text" name="teamId" value="<%= data.teamId %>" hidden>
+            <input type="text" name="seasonId" value="<%= data.seasonId %>" hidden>
             <br>
             <label for="waiver" class="primaryStyle">Signed Waiver</label><input type="checkbox" name="waiver" id="waiver" oninvalid="this.setCustomValidity('Player must sign waiver to play')" onchange="this.setCustomValidity('')" required>
             <br>

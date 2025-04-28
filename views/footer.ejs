@@ -14,7 +14,7 @@
       <!-- </div> -->
     </div>
 
-    <div class="triColumn textCenter" ><img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo" onclick="toggleForm('managementForm')"></div>
+    <div class="triColumn textCenter" ><img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo" onclick="toggleForm(document.getElementById('managementForm'),document.getElementById('formBackground'))"></div>
     <div class="triColumn textCenter">
       <% if (data.user == undefined) { %>
         <form action="/auth/login" method="get" class="navButton">

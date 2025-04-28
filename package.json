@@ -24,6 +24,8 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "braintree": "^3.26.0",
+    "buffer": "^6.0.3",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "csv-parser": "^3.1.0",
     "debug": "^4.3.7",
@@ -48,6 +50,7 @@
     "sanitize-filename": "^1.6.3",
     "sequelize": "^6.37.1",
     "sharp": "^0.33.5",
+    "stream": "^0.0.3",
     "stripe": "^17.4.0"
   },
   "devDependencies": {

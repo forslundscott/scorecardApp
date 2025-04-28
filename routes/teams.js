@@ -1,4 +1,3 @@
-// routes/users.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -7,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const pool = require(`../db`)
+const sql = require('mssql'); 
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 const upload = multer({
@@ -22,47 +22,76 @@ router.post(['/getTeams'], async (req,res,next)=>{
     try{
 
         const request = pool.request()
-        let result = await request.query(`
-        SELECT * 
-        FROM teams
-        WHERE league = '${req.body.leagueId}' 
-        AND season = '${req.body.seasonId}';
+        let result = await request
+        .input('leagueId', sql.VarChar, req.body.leagueId)
+        .input('seasonId', sql.VarChar, req.body.seasonId)
+        .query(`
+        select slt.seasonId, slt.leagueId, t.fullName,t.shortName,t.color,t.keeper,t.captain, t.abbreviation, t.teamId 
+        from seasonleagueteam slt
+        left join teams as t on slt.teamId=t.teamId
+        WHERE slt.leagueId = @leagueId
+        AND slt.seasonId = @seasonId
+        and t.status = 'active'
+        order by t.fullName;
         `)
-        // console.log(result.recordset)
+        console.log(result.recordset)
         res.json({ message: 'Success', teams: result.recordset })
-        // res.redirect('back')
+    }catch(err){
+        next(err)
+    }
+})
+router.post(['/addPlayerToDatabase'], async (req,res,next)=>{
+    try{
+        console.log('test')
+        let result = await pool.request()
+        .input('email', sql.VarChar, req.body.email)
+        .query(`select * from users
+        where email = @email`)
+        if(!result.recordset[0]){
+
+            await pool.request()
+            .input('firstName', sql.VarChar, req.body.firstName)
+            .input('lastName', sql.VarChar, req.body.lastName)
+            .input('preferredName', sql.VarChar, req.body.preferredName == '' ? req.body.firstName : req.body.preferredName)
+            .input('email', sql.VarChar, req.body.email)
+            .input('sport', sql.VarChar, req.body.sport ?? 'soccer')
+            .input('rating', sql.Decimal(10,3), 3)
+            .query(`            
+            EXECUTE  [dbo].[insert_user] 
+               @firstName
+              ,@lastName
+              ,@preferredName
+              ,@email
+
+            EXECUTE [dbo].[insert_userSportRating] 
+            @sport
+            ,@email
+            ,@rating
+
+            `)
+        }
+        console.log(result.recordset[0])
+        res.json({ message: 'Form submitted successfully!', data: result.recordset[0] });
     }catch(err){
         next(err)
     }
 })
 router.post(['/addPlayer'], async (req,res,next)=>{
     try{
-
-        const request = pool.request()
-        let result = await request.query(`select id from users
-        where email = '${req.body.email}'`)
+        let result = await pool.request()
+        .input('email', sql.VarChar, req.body.email)
+        .query(`select id from users
+        where email = @email`)
         if(!result.recordset[0]){
 
-            result = await request.query(`
-            DECLARE @firstName varchar(255)
-            DECLARE @lastName varchar(255)
-            DECLARE @preferredName varchar(255)
-            DECLARE @email varchar(255)
-            DECLARE @userId varchar(255)
-            DECLARE @sport varchar(255)
-            DECLARE @rating decimal(10,3)
-            DECLARE @teamId varchar(255)
-            DECLARE @seasonId varchar(255)
-            
-            set @firstName = '${req.body.firstName}'
-            set @lastName = '${req.body.lastName}'
-            set @preferredName = '${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}'
-            set @email = '${req.body.email}'
-            set @sport = '${req.body.sport}'
-            set @rating = 3
-            set @teamId = '${req.body.team}'
-            set @seasonId = '${req.body.season}'
-            
+            await pool.request()
+            .input('firstName', sql.VarChar, req.body.firstName)
+            .input('lastName', sql.VarChar, req.body.lastName)
+            .input('preferredName', sql.VarChar, req.body.preferredName == '' ? req.body.firstName : req.body.preferredName)
+            .input('email', sql.VarChar, req.body.email)
+            .input('sport', sql.VarChar, req.body.sport ?? 'soccer')
+            .input('rating', sql.Decimal(10,3), 3)
+            .query(`            
             EXECUTE  [dbo].[insert_user] 
                @firstName
               ,@lastName
@@ -77,14 +106,12 @@ router.post(['/addPlayer'], async (req,res,next)=>{
             `)
         }
         if(req.body.playerType == 'Rostered'){
-            result = await request.query(`
-            DECLARE @email varchar(255)
-            DECLARE @teamId varchar(255)
-            DECLARE @seasonId varchar(255)
-            
-            set @email = '${req.body.email}'
-            set @teamId = '${req.body.team}'
-            set @seasonId = '${req.body.season}'
+            console.log('rostered')
+             await pool.request()
+            .input('email', sql.VarChar, req.body.email)
+            .input('teamId', sql.VarChar, req.body.teamId)
+            .input('seasonId', sql.Int, req.body.seasonId)
+            .query(`
             
             EXECUTE [dbo].[insert_userTeamSeason] 
                @email
@@ -92,17 +119,13 @@ router.post(['/addPlayer'], async (req,res,next)=>{
               ,@seasonId
             `)
         }else{
-            result = await request.query(`
-            DECLARE @email varchar(255)
-            DECLARE @teamId varchar(255)
-            DECLARE @seasonId varchar(255)
-            DECLARE @eventId varchar(255)
-            
-            set @email = '${req.body.email}'
-            set @teamId = '${req.body.team}'
-            set @seasonId = '${req.body.season}'
-            set @eventId = '${req.body.eventId}'
-            
+             await pool.request()
+            .input('email', sql.VarChar, req.body.email)
+            .input('teamId', sql.VarChar, req.body.teamId)
+            .input('seasonId', sql.Int, req.body.seasonId)
+            .input('eventId', sql.Int, req.body.eventId)
+            .query(`
+                        
             EXECUTE [dbo].[insert_subTeamGame] 
                @email
               ,@teamId
@@ -113,8 +136,7 @@ router.post(['/addPlayer'], async (req,res,next)=>{
               where userId = 'undefined'
             `)
         }
-        // console.log(result.recordset[0])
-        // await request.query(`insert into scorecard.dbo.players (Team, Player, Id, firstName, lastName, playerType) VALUES('${req.body.team}','${req.body.firstName} ${req.body.lastName}','${req.body.firstName}${req.body.lastName}','${req.body.firstName}','${req.body.lastName}','${req.body.playerType}')`)
+    
         res.redirect('back')
     }catch(err){
         next(err)
@@ -130,23 +152,23 @@ router.get(['/newTeam'], async (req, res, next) => {
             
         }
         let result = await request
-        .query(`select top 1 seasonName from seasons where active = 1
+        .query(`select top 1 * from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
-            data.season = result.recordset[0].seasonName
+            data.season = result.recordset[0]
         result = await request
-        .query(`select seasonName from seasons where active = 1
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
         result = await request
-        .query(`SELECT * from league_season ls
-            LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = '${data.season}'
+        .input('seasonId', sql.Int, data.season.seasonId)
+        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+            from league_season ls
+            LEFT join leagues l on ls.leagueId=l.leagueId
+            where seasonId = @seasonId
         `)
-        // console.log(req)
         
         data.leagues = result.recordset
-        console.log(data)
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -154,50 +176,111 @@ router.get(['/newTeam'], async (req, res, next) => {
 })
 router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res, next) => {
     try{ 
-        const outputDir = path.join(__dirname, '../public/images');
-        const filename = `${req.body.abbreviation}.png`;
-        await functions.pngUpload(req.file.buffer, filename, outputDir)
-
-        // Add team to database
-        const request = pool.request()
-        await request.query(`
-            IF NOT EXISTS (SELECT 1 FROM teams WHERE id = '${req.body.abbreviation}')
-            BEGIN
-                INSERT INTO teams (id, fullName, shortName, league, season, abbreviation, color)
-                VALUES ('${req.body.abbreviation}', '${req.body.teamName}', '${req.body.teamName}', '${req.body.leagueId}', '${req.body.seasonId}', '${req.body.abbreviation}', '${req.body.color}')
-            END
-            `)
+        
+        const teamId = await functions.addTeam(req.body)
+        console.log(req.body)
+        console.log(teamId)
+        functions.assignTeam(parseInt(req.body.seasonId),parseInt(req.body.leagueId),parseInt(teamId))
+        functions.commitTeam(parseInt(teamId))
+        
+        // await pool.request()
+        //             .input('seasonId', sql.Int, parseInt(session.metadata.seasonId))
+        //             .input('leagueId', sql.Int, parseInt(session.metadata.leagueId))
+        //             .input('teamId', sql.Int, parseInt(session.metadata.teamId))
+        //             .input('status', sql.VarChar, 'active')
+        //             .query(`
+        //                 insert into seasonLeagueTeam (seasonId,leagueId,teamId,[status])
+        //                 VALUES(@seasonId, @leagueId, @teamId, @status)
+        //                 `);
+        if(req.file){
+            functions.addTeamLogo(req.file,teamId)
+        }
         res.redirect(302,'/teams')
     }catch(err){
         next(err)
     }
   });
+  router.post('/teamSearch', async (req, res) => {
+    const query  = req.body.teamSearchValue;
+
+    if (!query) {
+        return res.status(400).send('Query parameter is required');
+    }
+
+    try {
+        const result = await pool.request()
+        .input('searchValue', sql.VarChar, req.body.teamSearchValue)
+        .query(`
+            SELECT t.* FROM teams as t
+            WHERE (abbreviation LIKE '%' + @searchValue + '%' 
+            OR fullName LIKE '%' + @searchValue + '%' 
+            OR shortName LIKE '%' + @searchValue + '%')
+            and t.status = 'active' 
+        `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Query failed: ', err);
+        res.status(500).send('Internal server error');
+    }
+});
+router.get('/site/myteams', checkAuthenticated, async (req,res, next)=>{
+    try{
+        // if (req.isAuthenticated()) {
+        //     // console.log(req.user)
+        // }
+        let data = {
+            page: `teams`,
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('userId',sql.Int,req.user.id)
+        .query(`
+                        select t.id
+            , t.fullName as teamFullName
+            , t.color
+            , t.abbreviation as teamAbbreviation
+            , u.firstName + ' ' + u.lastName as captain
+            , l.color as LeagueColor
+            , t.teamId
+            , l.shortName as leagueShortName
+            , l.abbreviation as leagueAbbreviation
+            ,s.seasonName
+            from seasonLeagueTeam as slt 
+            left join  teams as t on slt.teamId=t.teamId
+            left join leagues as l on slt.leagueId=l.leagueId
+            LEFT join users as u on t.captain=u.ID
+            LEFT join seasons as s on slt.seasonId=s.seasonId
+            where slt.seasonId in (select seasonId from seasons
+            where active = 1)
+            and t.teamId in (
+                select teamId from user_team as ut
+                where ut.userId = @userId and ut.seasonId = slt.seasonId
+            )
+            ORDER by t.league, fullName
+        `)
+        data.teams = result.recordset
+        res.render('myTeamsSite.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
 router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
     try{
-        const request = pool.request()
-        let result = await request.query(`select id from users
-        where email = '${req.body.email}'`)
+        let result = await pool.request()
+        .input('email', sql.VarChar, req.body.email)
+        .query(`select id from users
+        where email = @email`)
         if(!result.recordset[0]){
-            result = await request.query(`
-            DECLARE @firstName varchar(255)
-            DECLARE @lastName varchar(255)
-            DECLARE @preferredName varchar(255)
-            DECLARE @email varchar(255)
-            DECLARE @userId varchar(255)
-            DECLARE @sport varchar(255)
-            DECLARE @rating decimal(10,3)
-            DECLARE @teamId varchar(255)
-            DECLARE @seasonId varchar(255)
-            
-            set @firstName = '${req.body.firstName}'
-            set @lastName = '${req.body.lastName}'
-            set @preferredName = '${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}'
-            set @email = '${req.body.email}'
-            set @sport = '${req.body.sport}'
-            set @rating = 3
-            set @teamId = '${req.body.team}'
-            set @seasonId = '${req.body.season}'
-            
+            await pool.request()
+            .input('firstName', sql.VarChar, req.body.firstName)
+            .input('lastName', sql.VarChar, req.body.lastName)
+            .input('preferredName', sql.VarChar, req.body.preferredName == '' ? req.body.firstName : req.body.preferredName)
+            .input('email', sql.VarChar, req.body.email)
+            .input('sport', sql.VarChar, 'futsal')
+            .input('rating', sql.Decimal(10,3), 3)
+            .query(`
+                        
             EXECUTE  [dbo].[insert_user] 
                @firstName
               ,@lastName
@@ -212,39 +295,33 @@ router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
             `)
         }
 
-        result = await request.query(`
-        DECLARE @email varchar(255)
-        DECLARE @teamId varchar(255)
-        DECLARE @seasonId varchar(255)
-        
-        set @email = '${req.body.email}'
-        set @teamId = '${req.body.team}'
-        set @seasonId = '${req.body.season}'
-        
+        await pool.request()
+        .input('email', sql.VarChar, req.body.email)
+        .input('teamId', sql.VarChar, req.body.teamId)
+        .input('seasonId', sql.Int, req.body.seasonId)
+        .query(`        
         EXECUTE [dbo].[insert_userTeamSeason] 
             @email
             ,@teamId
             ,@seasonId
         `)
-        console.log()
-        res.redirect('./')
-        // res.redirect('back')
+        res.redirect(`/teams/${req.params.teamId}/roster`)
     }catch(err){
         next(err)
     }
 });
 router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'team/newPlayer',
             teamId: req.params.teamId
         }
-        const request = pool.request()
-        let result = await request.query(`
+        let result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .query(`
             select season from teams
-            where id = '${req.params.teamId}'
+            where id = @teamId
             `)
 
         data.seasonId = result.recordset[0].season
@@ -263,16 +340,15 @@ router.get('/:teamId/roster', async (req,res, next)=>{
             page: 'team/roster',
             userId: req.params.userId
         }
-        const request = pool.request()
-        const result = await request.query(`
-            select userId, preferredName,lastName
+        const result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .query(`
+            select ut.userId, preferredName,lastName
             from user_team as ut
             LEFT join users as u on ut.userId=u.ID
             left join teams as t on ut.teamId=t.id
-            where teamId = '${req.params.teamId}'
-            `)
-            // console.log(result.recordsets[0])
-        
+            where ut.teamId = @teamId
+            `)        
         data.list = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -281,24 +357,43 @@ router.get('/:teamId/roster', async (req,res, next)=>{
 });
 router.post('/:teamId/editTeam', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'team/editTeam',
             teamId: req.params.teamId
-        }
-        // console.log(req)
-        const request = pool.request()
-        const result = await request.query(`
+        }     
+        await pool.request()
+        .input('fullName', sql.VarChar, req.body.fullName)
+        .input('shortName', sql.VarChar, req.body.shortName)
+        .input('abbreviation', sql.VarChar, req.body.abbreviation)
+        .input('color', sql.VarChar, req.body.color)
+        .input('leagueId', sql.VarChar, req.body.leagueId)
+        .input('seasonId', sql.Int, req.body.seasonId)
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .input('status', sql.VarChar, 'active')
+        .query(`
             UPDATE teams
-            set fullName = '${req.body.fullName}',
-            shortName = '${req.body.shortName}',
-            color = '${req.body.color}',
-            league = '${req.body.leagueId}',
-            season = '${req.body.seasonId}'
-            where ID = '${req.params.teamId}'
-            `)
+            set fullName = @fullName,
+            shortName = @shortName,
+            abbreviation = @abbreviation,
+            color = @color,
+            league = @leagueId,
+            season = @seasonId
+            where teamId = @teamId
 
+            IF NOT EXISTS (
+                SELECT 1 FROM seasonLeagueTeam
+                WHERE seasonId = @seasonId AND leagueId = @leagueId AND teamId = @teamId
+            )
+            BEGIN
+                INSERT INTO seasonLeagueTeam (seasonId, leagueId, teamId, status)
+                VALUES (@seasonId, @leagueId, @teamId, @status);
+            END
+
+
+            `)
+            console.log('test')
+            functions.commitTeam(req.params.teamId)
         res.redirect(302,`/teams/${req.params.teamId}`)
     }catch(err){
         next(err)
@@ -306,32 +401,31 @@ router.post('/:teamId/editTeam', async (req,res, next)=>{
 });
 router.get('/:teamId/editTeam', async (req,res, next)=>{
     try{
-        // console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: '/editTeam'
         }
-        const request = pool.request()
-        let result = await request.query(`
+
+        let result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .query(`
             SELECT * 
             from dbo.teams
-            where id = '${req.params.teamId}'
-            `)
-            console.log(result.recordsets[0])
-        
+            where teamId = @teamId
+            `)        
         data.data = result.recordset[0]
         data.data.color = functions.getHexColor(data.data.color)
-        result = await request
-        .query(`select seasonName from seasons where active = 1
+        result = await pool.request()
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
-        result = await request
-        .query(`SELECT * from league_season ls
-            LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = '${data.data.season}'
+        result = await pool.request()
+        .input('seasonId', sql.Int, data.data.seasonId)
+        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            from league_season ls
+            LEFT join leagues l on ls.leagueId=l.leagueId
+            where seasonId = @seasonId
         `)
-        // console.log(req)
-        
         data.leagues = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -340,20 +434,19 @@ router.get('/:teamId/editTeam', async (req,res, next)=>{
 });
 router.get('/:teamId', async (req,res, next)=>{
     try{
-        // console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'teams/details'
         }
-        const request = pool.request()
-        const result = await request.query(`
+        const result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .query(`
             SELECT * 
             from dbo.teams
-            where id = '${req.params.teamId}'
-            `)
-            console.log(result.recordsets[0])
-        
+            where teamId = @teamId
+            `)        
         data.data = result.recordset[0]
+        
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
@@ -362,7 +455,6 @@ router.get('/:teamId', async (req,res, next)=>{
 
 router.get('/', async (req,res, next)=>{
     try{
-        console.log(req.user)
         // if (req.isAuthenticated()) {
         //     // console.log(req.user)
         // }
@@ -370,15 +462,15 @@ router.get('/', async (req,res, next)=>{
             page: `teams`,
             user: req.user
         }
-        const request = pool.request()
-        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
-        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
-        const result = await request.query(`select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor from teams as t
+        const result = await pool.request()
+        .query(`
+            select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor, t.teamId
+            from teams as t
             left join leagues as l on t.league=l.abbreviation
             LEFT join users as u on t.captain=u.ID
-            where season in (select seasonName from seasons
-            where active = 1)
-            ORDER by t.league, fullName
+            where seasonId in (select seasonId from seasons
+            where active in (1,0))
+            ORDER by fullName
         `)
         data.teams = result.recordset
         res.render('index.ejs',{data: data}) 

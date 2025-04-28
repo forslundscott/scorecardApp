@@ -1,15 +1,10 @@
-// routes/users.js
 const express = require('express');
 const router = express.Router();
 const pool = require(`../db`)
+const sql = require('mssql'); 
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
-// Define a GET route for `/users`
-// router.get('*', async (req,res, next)=>{
-//         console.log(req)
-//         next()
-//     })
 router.post('/userSearch', async (req, res) => {
     const query  = req.body.userSearchValue;
 
@@ -18,17 +13,17 @@ router.post('/userSearch', async (req, res) => {
     }
 
     try {
-        const request = pool.request()
-        const result = await request.query(`
+        const result = await pool.request()
+        .input('query', sql.VarChar, `%${query}%`)
+        .query(`
             SELECT * FROM users 
-            WHERE firstName LIKE '%${query}%' 
-            OR lastName LIKE '%${query}%' 
-            OR preferredName LIKE '%${query}%' 
-            OR email LIKE '%${query}%'
-            OR firstName + ' ' + lastName LIKE '%${query}%'
-            OR preferredName + ' ' + lastName LIKE '%${query}%'
+            WHERE firstName LIKE @query
+            OR lastName LIKE @query 
+            OR preferredName LIKE @query 
+            OR email LIKE @query
+            OR firstName + ' ' + lastName LIKE @query
+            OR preferredName + ' ' + lastName LIKE @query
         `);
-        // console.log(result.recordset)
         res.json(result.recordset);
     } catch (err) {
         console.error('Query failed: ', err);
@@ -36,7 +31,6 @@ router.post('/userSearch', async (req, res) => {
     }
 });
 router.get(['/newUser'], async (req, res, next) => {
-    console.log('test')
     try{       
         let data = {
             page: `/newUser`,
@@ -49,17 +43,8 @@ router.get(['/newUser'], async (req, res, next) => {
     }
 })
 router.post('/addUser', async (req, res, next) => {
-    // Process form data here
     try{
-        await addUserToDatabase(req.body);
-        // const request = pool.request()
-        // await request.query(`
-        //     IF NOT EXISTS (SELECT 1 FROM users WHERE email = '${req.body.email}')
-        //     BEGIN
-        //         insert into users (firstName, lastName, preferredName, email)
-        //         values ('${req.body.firstName}','${req.body.lastName}','${req.body.preferredName == '' ? req.body.firstName : req.body.preferredName}','${req.body.email}')
-        //     END
-        //     `)
+        await functions.addUserToDatabase(req.body);
         res.redirect(302,'/games')
     }catch(err){
         next(err)
@@ -67,16 +52,24 @@ router.post('/addUser', async (req, res, next) => {
   });
 router.post('/:userId/teams/addTeam', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
-        let data = {
-            user: req.user,
-            page: 'user/newRole',
-            userId: req.params.userId
-        }
-        const request = pool.request()
-        const result = await request.query(`
-            insert into user_team (userId,teamId)
-            values (${req.params.userId},'${req.body.teamId}')
+        await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .input('teamId', sql.VarChar, req.body.teamId)
+        .input('leagueId', sql.Int, req.body.leagueId)
+        .input('seasonId', sql.Int, req.body.seasonId)
+        .query(`
+            IF NOT EXISTS (
+                SELECT 1 FROM user_team 
+                WHERE userId = @userId 
+                AND teamId = @teamId 
+                AND seasonId = @seasonId 
+                AND leagueId = @leagueId
+            )
+            BEGIN
+                INSERT INTO user_team (userId, teamId, seasonId, leagueId)
+                VALUES (@userId, @teamId, @seasonId, @leagueId);
+            END
+
             `)
         res.redirect(302,`/users/${req.params.userId}/teams`)
     }catch(err){
@@ -85,31 +78,28 @@ router.post('/:userId/teams/addTeam', async (req,res, next)=>{
 });
 router.get('/:userId/teams/newTeam', async (req,res, next)=>{
     try{
-        const request = pool.request()
-        
         let data = {
             page: `user/newTeam`,
             user: req.user
-            
         }
-        let result = await request
-        .query(`select top 1 seasonName from seasons where active = 1
+        let result = await pool.request()
+        .query(`select top 1 * from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
-            data.season = result.recordset[0].seasonName
-        result = await request
-        .query(`select seasonName from seasons where active = 1
+            data.season = result.recordset[0]
+        result = await pool.request()
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
-        result = await request
-        .query(`SELECT * from league_season ls
-            LEFT join leagues l on ls.leagueId=l.abbreviation
-            where seasonId = '${data.season}'
+        result = await pool.request()
+        .input('seasonId', sql.Int, data.season.seasonId)
+        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            from league_season ls
+            LEFT join leagues l on ls.leagueId=l.leagueId
+            where seasonId = @seasonId
         `)
-        // console.log(req)
-        
+        console.log(result.recordset)
         data.leagues = result.recordset
-        console.log(data)
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -117,24 +107,12 @@ router.get('/:userId/teams/newTeam', async (req,res, next)=>{
 });
 router.get('/:userId/teams/:teamId', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
-            page: 'users/roles/role',
+            page: 'users/teams/team',
             userId: req.params.userId,
             roleId: req.params.teamId
         }
-        // const request = pool.request()
-        // const result = await request.query(`
-        //     select userId, preferredName,lastName, roleId, name
-        //     from user_role as ur 
-        //     LEFT join users as u on ur.userId=u.ID
-        //     left join roles as r on ur.roleId=r.id
-        //     where userId = ${req.params.userId}
-        //     `)
-        //     // console.log(result.recordsets[0])
-        
-        // data.list = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
@@ -142,23 +120,33 @@ router.get('/:userId/teams/:teamId', async (req,res, next)=>{
 });
 router.get('/:userId/teams', async (req,res, next)=>{
     try{
-        console.log(`newtest ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'users/teams',
             userId: req.params.userId
         }
-        const request = pool.request()
-        const result = await request.query(`
-            select userId, preferredName,lastName, teamId, t.fullName
+        let result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
+            select ut.teamId, t.fullName, l.name as leagueName, s.seasonName, l.color as leagueColor, t.color as teamColor
             from user_team as ut 
-            LEFT join users as u on ut.userId=u.ID
-            left join teams as t on ut.teamId=t.id
-            where userId = ${req.params.userId}
+            left join teams as t on ut.teamId=t.teamId
+            left join leagues as l on ut.leagueId=l.leagueId
+            left join seasons as s on ut.seasonId=s.seasonId
+            where userId = @userId
             `)
-            // console.log(result.recordsets[0])
         
         data.list = result.recordset
+
+        result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
+            select ID, firstName, lastName
+            from users
+            where ID = @userId
+            `)
+            console.log(req.params.userId)
+        data.header = `${result.recordset[0].firstName} ${result.recordset[0].lastName} Teams`
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
@@ -166,17 +154,12 @@ router.get('/:userId/teams', async (req,res, next)=>{
 });
 router.post('/:userId/roles/addRole', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
-        let data = {
-            user: req.user,
-            page: 'user/newRole',
-            userId: req.params.userId
-        }
-        console.log(req)
-        const request = pool.request()
-        const result = await request.query(`
+        await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .input('roleId', sql.Int, req.body.roleId)
+        .query(`
             insert into user_role (userId,roleId)
-            values (${req.params.userId},${req.body.roleId})
+            values (@userId,@roleId)
             `)
 
         res.redirect(302,`/users/${req.params.userId}/roles`)
@@ -186,24 +169,22 @@ router.post('/:userId/roles/addRole', async (req,res, next)=>{
 });
 router.get('/:userId/roles/newRole', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'user/newRole',
             userId: req.params.userId
         }
-        const request = pool.request()
-        const result = await request.query(`
+        const result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
             select * 
             from roles
             where not id in (
                 select roleId 
                 from user_role 
-                where userId = ${req.params.userId}
+                where userId = @userId
                 )
-            `)
-            // console.log(result.recordsets[0])
-        
+            `)        
         data.roles = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -212,24 +193,12 @@ router.get('/:userId/roles/newRole', async (req,res, next)=>{
 });
 router.get('/:userId/roles/:roleId', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'users/roles/role',
             userId: req.params.userId,
             roleId: req.params.roleId
         }
-        // const request = pool.request()
-        // const result = await request.query(`
-        //     select userId, preferredName,lastName, roleId, name
-        //     from user_role as ur 
-        //     LEFT join users as u on ur.userId=u.ID
-        //     left join roles as r on ur.roleId=r.id
-        //     where userId = ${req.params.userId}
-        //     `)
-        //     // console.log(result.recordsets[0])
-        
-        // data.list = result.recordset
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
@@ -237,21 +206,20 @@ router.get('/:userId/roles/:roleId', async (req,res, next)=>{
 });
 router.get('/:userId/roles', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'users/roles',
             userId: req.params.userId
         }
-        const request = pool.request()
-        const result = await request.query(`
+        const result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
             select userId, preferredName,lastName, roleId, name
             from user_role as ur 
             LEFT join users as u on ur.userId=u.ID
             left join roles as r on ur.roleId=r.id
-            where userId = ${req.params.userId}
+            where userId = @userId
             `)
-            // console.log(result.recordsets[0])
         
         data.list = result.recordset
         res.render('index.ejs',{data: data})
@@ -261,26 +229,20 @@ router.get('/:userId/roles', async (req,res, next)=>{
 });
 router.post('/:userId/editUser', async (req,res, next)=>{
     try{
-        console.log(`test ${req.params.userId}`)
-        let data = {
-            user: req.user,
-            page: 'user/editUser',
-            userId: req.params.userId
-        }
-        console.log(req)
-        const request = pool.request()
-        const result = await request.query(`
+        await pool.request()
+        .input('firstName', sql.VarChar, req.body.firstName)
+        .input('lastName', sql.VarChar, req.body.lastName)
+        .input('preferredName', sql.VarChar, req.body.preferredName)
+        .input('email', sql.VarChar, req.body.email)
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
             UPDATE users
-            set firstName = '${req.body.firstName}',
-            lastName = '${req.body.lastName}',
-            preferredName = '${req.body.preferredName}',
-            email = '${req.body.email}'
-            where ID = ${req.params.userId}
+            set firstName = @firstName,
+            lastName = @lastName,
+            preferredName = @preferredName,
+            email = @email
+            where ID = @userId
             `)
-            // console.log(result.recordsets[0])
-        
-        // data.roles = result.recordset
-        // res.render('index.ejs',{data: data})
         res.redirect(302,`/users/${req.params.userId}`)
     }catch(err){
         next(err)
@@ -288,18 +250,17 @@ router.post('/:userId/editUser', async (req,res, next)=>{
 });
 router.get('/:userId/editUser', async (req,res, next)=>{
     try{
-        // console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: '/editUser'
         }
-        const request = pool.request()
-        const result = await request.query(`
+        const result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
             SELECT * 
             from dbo.users
-            where id = ${req.params.userId}
+            where id = @userId
             `)
-            console.log(result.recordsets[0])
         
         data.data = result.recordset[0]
         res.render('index.ejs',{data: data})
@@ -309,19 +270,17 @@ router.get('/:userId/editUser', async (req,res, next)=>{
 });
 router.get('/:userId', async (req,res, next)=>{
     try{
-        // console.log(`test ${req.params.userId}`)
         let data = {
             user: req.user,
             page: 'users/details'
         }
-        const request = pool.request()
-        const result = await request.query(`
+        const result = await pool.request()
+        .input('userId', sql.Int, req.params.userId)
+        .query(`
             SELECT * 
             from dbo.users
-            where id = ${req.params.userId}
-            `)
-            console.log(req)
-        
+            where id = @userId
+            `)        
         data.data = result.recordset[0]
         res.render('index.ejs',{data: data})
     }catch(err){
@@ -334,21 +293,11 @@ router.get('/', async (req,res, next)=>{
         let data = {
             page: 'users',
             user: req.user
-        }
-        // console.log(req.originalUrl)
-        const request = pool.request()
-        const result = await request.query(`SELECT * from dbo.users`)
-        data.users = result.recordsets[0]  
+        } 
         res.render('index.ejs',{data: data})
     }catch(err){
         next(err)
     }
 });
 
-// Define a POST route for `/users`
-// router.post('/', (req, res) => {
-//   res.send('Create a new user');
-// });
-
-// Export the router so it can be used in other files
 module.exports = router;

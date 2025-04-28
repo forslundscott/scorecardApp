@@ -1,14 +1,16 @@
     <% if (data.page.includes('activeGame')) { %>
-        <% if (team.id !== 'TBD' && team.players.length > 0) { %>
-            <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
+        <% if (team.teamId !== 1000000024 && team.players.length > 0) { %>
+            <%- include('player_item',{player: team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)] ? team.players[team.players.map(function(o){return o.userId}).indexOf(team.keeper)]: team.players[0], team: team, Event_ID: data.Event_ID, opponent: opponent, side: side}); %>
         <% } %>
     <% } %>
     <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? 'height: calc(100% - 10vh)' : '' %>">
 
         <% if (data.page == 'games' || data.page == 'readyForUpload' || data.page == 'completedGames' || data.page == 'rescheduleGames') { %>
-            <% for(let i=0; i< data.games.length; i++) {%>
-                <%- include('game_item',{game: data.games[i]}); %>
-            <% } %>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <% for(let i=0; i< data.games.length; i++) {%>
+                    <%- include('game_item',{game: data.games[i]}); %>
+                <% } %>
+            </div>
         <% } else if (data.page == 'teams') { %>
             <% for(let i=0; i< data.teams.length; i++) {%>
                 <%- include('team_item',{team: data.teams[i]}); %>
@@ -25,7 +27,7 @@
             <% for(let i=0; i< data.list.length; i++) {%>
                 <%- include('pickup_item',{item: data.list[i]}); %>
             <% } %>
-        <% } else if (data.page == 'leagues') { %>
+        <% } else if (data.page == 'leagues' || data.page == 'season/leagues') { %>
             <% for(let i=0; i< data.leagues.length; i++) {%>
                 <%- include('league_item',{league: data.leagues[i]}); %>
             <% } %>
@@ -119,23 +121,7 @@
                     <%- include(`${data.type}Standings_item`,{item: data.list[i]}); %>
                 <% } %>
             <% }else { %>
-                <form action="/standings" method="post" class="textCenter">
-                    <select name="leagueId" id="leagueId" class="primaryStyle" style="font-size: 100%;" required>
-                        <option value="" disabled selected hidden>League</option>
-                        <% for(let i=0; i< data.leagues.length; i++) {%>
-                            <option value="<%= data.leagues[i].abbreviation%>"><%= data.leagues[i].shortName%></option>
-                        <% } %>
-                    </select>
-                    <select name="type" id="type" class="primaryStyle" style="font-size: 100%;" required>
-                        <option value="" disabled selected hidden>Type</option>
-                        <option value="team">Team</option>
-                        <option value="individual">Individual</option>
-                        <option value="keeper">Keeper</option>
-                    </select>
-                    <br>
-                    <br>
-                    <button type="submit" class="itemFormat primaryStyle" style="font-size: 150%;">GO</button>
-                </form>
+                <%- include(`standingsSelectorPage`,{data: data}); %>
             <% } %>
         <% } else if (data.page == 'winners') { %>
             <% let url = ''; %>
@@ -167,17 +153,10 @@ Thank you and have a nice day!`
                 );
                 let bccAddress = encodeURIComponent(`<%= url %>`);
                 function openMailtoLink() {
-                    // Replace 'email@example.com' with the desired email address
-                    // window.location.href = 'test.com'
                     window.location.href = `mailto:?bcc=${bccAddress}&subject=${emailSubject}&body=${emailBody}`;
                 }
                 let testlet = document.getElementById('emailAllButton')
-              
                 testvar.onclick = openMailtoLink
-                
-                // document.getElementById('emailAllButton').onclick = function(){
-                //     window.location.href = url
-                // }
             </script>
         <% } else if (data.page.includes('activeGame')) { %>
             
@@ -188,11 +167,10 @@ Thank you and have a nice day!`
             <% } %>
         <% } else if (data.page == 'users/details') { %>
             <%- include('userDetails',{data: data}); %>
+        <% } else if (data.page == 'season/details') { %>
+            <%- include('seasonDetails',{data: data}); %>
         <% } else if (data.page == 'teams/details') { %>
             <%- include('teamDetails',{data: data}); %>
-            <%# for(let i=0; i< data.users.length; i++) {%>
-                    <%# include('user_item',{user: data.users[i]}); %>
-            <%# } %>
         <% } else if (data.page == 'team/newPlayer') { %>
             <%- include(`newRosterPlayerForm`,{data: data}); %>
         <% } else if (data.page == 'user/newRole') { %>
@@ -209,15 +187,11 @@ Thank you and have a nice day!`
         <% } else if (data.page == 'user/newTeam') { %>
             <%- include(`newUserTeam`,{data: data}); %>
         <% } else if (data.page == 'users/teams') { %>
-            <%# console.log(data.list) %>
             <% for(let i=0; i< data.list.length; i++) {%>
-                <%# console.log(data.list[i]) %>
                 <%- include(`userTeam_item`,{data: data.list[i]}); %>
             <% } %>    
         <% } else if (data.page == 'users') { %>
             <%- include('userSearchForm'); %>
-            <%# for(let i=0; i< data.users.length; i++) {%>
-                    <%# include('user_item',{user: data.users[i]}); %>
-            <%# } %>
+
         <% } %>
     </div>

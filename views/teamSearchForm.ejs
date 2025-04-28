@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+
+    <div id="teamSearchContainer" class="floatingPopupForm primaryStyle primaryBorder" style="display: none; text-align: center;">
+        <div>
+            <form id="teamSearchForm" class="primaryStyle primaryBorder" style=" text-align: center;" onsubmit="teamSearch(this,event)">
+                    <div class="playerName">
+                        Team Search
+                    </div>
+                    <br>
+                    <div class="textCenter" style="height: 15vh;"><img src="/GLOSLogo.png" alt="GLOS Logo" id="newPlayerLogo"></div>
+                    <br>
+                    <input type="text" id="teamSearchField" name="teamSearchValue" placeholder="Search..." required>
+                    <br>
+                    <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Search</button>
+                    <!-- <button type="button" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;" onclick="toggleSearchUser(this.form)">Back</button> -->
+            </form>
+        </div>
+        <div id="teamSearchContent" style="height: 20vh;">
+            <div id="teamSearchResults" class="singleColumn dragColumn fielderColumn">
+            </div>
+        </div>
+    </div>
+    <script>
+        async function insertExistingTeamInfo(form){
+            event.preventDefault();
+            let formData = new FormData(form)
+            try{
+                // document.getElementById('teamSeasonRegistrationForm')
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamFullName"]').value = form.querySelector('[name="fullName"]').value
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').value = form.querySelector('[name="shortName"]').value
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').value = form.querySelector('[name="abbreviation"]').value
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamId"]').value = form.querySelector('[name="teamId"]').value
+
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamFullName"]').disabled = true
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamShortName"]').disabled = true
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamAbbreviation"]').disabled = true
+                document.getElementById('teamSeasonRegistrationForm').querySelector('[name="teamIdClear"]').parentElement.style.display = ''
+                closeForm()
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+    </script>
+</body>
+</html>
