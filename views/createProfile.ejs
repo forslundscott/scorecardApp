@@ -1,44 +1,67 @@
-<meta name="viewport" content="maximum-scale=1">
-<link rel="stylesheet" href="/styles.css">
-<div id="formBackground" style="touch-action: '';"></div>
-<form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="/auth/createProfile" method="post" style="text-align: center; ">
-        <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
-            Create Profile
-        </div>
-        <br>
-        <div class="textCenter" style="height: 15vh;"><img src="GLOSLogo.png" alt="GLOS Logo" id="mainLogo"></div>
-        <br>
-        <% if (messages.error) { %>
-            <%= messages.error %>
-            <%#= console.log(messages);  %>
-        <% } else if (messages.message) { %>
-            <%= messages.message %>
-        <% } %>
-        <br>
-        <input type="text" name="firstName" value="" placeholder="First Name" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br>
-        <input type="text" name="lastName" value="" placeholder="Last Name" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br>
-        <!-- <label for="dob" style="margin-bottom: .75vh; font-size: 250%;">Date of Birth:  </label>
-        <input type="date" name="dob" value="" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br> -->
-        <!-- <label for="gender" style="margin-bottom: .75vh; font-size: 250%;">Gender: </label> -->
-        <!-- <div style="all: unset; margin-bottom: .75vh; font-size: 250%;" >
-            Male<input type="radio" name="gender" value="male" required> 
-            Female<input type="radio" name="gender" value="female">
-        </div>
-        <br>
-        <input type="tel" name="phone" value="" placeholder="Phone Number" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br> -->
-        <input type="text" name="email" value="" placeholder="Email" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br>
-        <input type="password" name="password" value="" placeholder="Password" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br>
-        <!-- <input type="password" name="password2" value="" placeholder="Re-Enter Password" style="margin-bottom: 1.25vh; font-size: 250%;" required>
-        <br> -->
-        <button type="submit" style="margin-bottom: 1.5vh; font-size: 250%;">Create</button>
-        <br>
-        <a href="/auth/forgotPassword" class="" style="margin-bottom: 1.25vh; font-size: 250%;">Forgot Password</a>
-        <br>
-        <a href="/auth/login" style="margin-bottom: 1.5vh; font-size: 250%; display: block;">Login Page</a>
-</form>
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+    <head style="height: 100%;">
+        <meta name="viewport" content="maximum-scale=1">
+        <link rel="icon" href="/GLOSLogo.png">
+        <title>Create Profile</title>
+        <style>
+            body {
+            font-family: sans-serif;
+        }
+            .Buttons {
+                background-color: #ceff00;
+                font-size: 3vh;
+                border-width: medium;
+                border-color: black;
+                font-weight: 500;
+                border-style: solid;
+                color: black;
+                padding: 5px 40px 5px 40px;
+            }
+            input:focus, textarea:focus, select:focus {
+                outline: 2px solid #ceff00; /* Change to your preferred color */
+            }
+            ::selection {
+                background: #ceff00;
+                color: #121212;
+            }
+            body {
+                background-image: url('/silverBackground.jpg');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                height: 100%;
+            }
+    
+        </style>
+    </head>
+        <body>
+            <form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="/auth/createProfile" method="post" style="text-align: center; ">
+                    <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
+                        Create Profile
+                    </div>
+                    <br>
+                    <div class="textCenter" style="height: 15vh;"><img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" style="height: 100%;"></div>
+                    <br>
+                    <% if (messages.error) { %>
+                        <%= messages.error %>
+                    <% } else if (messages.message) { %>
+                        <%= messages.message %>
+                    <% } %>
+                    <br>
+                    <input type="text" name="firstName" value="" placeholder="First Name" style="margin-bottom: .75vh; font-size: 250%;" required>
+                    <br>
+                    <input type="text" name="lastName" value="" placeholder="Last Name" style="margin-bottom: .75vh; font-size: 250%;" required>
+                    <br>
+                    <input type="text" name="email" value="" placeholder="Email" style="margin-bottom: .75vh; font-size: 250%;" required>
+                    <br>
+                    <input type="password" name="password" value="" placeholder="Password" style="margin-bottom: .75vh; font-size: 250%;" required>
+                    <br><br>
+                    <button type="submit" class="Buttons" style="margin-bottom: 1.5vh; font-size: 250%;">Create</button>
+                    <br><br><br>
+                    <button type="button" class="Buttons" style="margin-bottom: 1.5vh; font-size: 250%;" onclick="window.location.href='/auth/forgotPassword'">Forgot Password</button>
+                    <br>
+                    <button type="button" class="Buttons" style="margin-bottom: 1.5vh; font-size: 250%;" onclick="window.location.href='/auth/login'">Login Page</button>
+            </form>
+        </body>
+</html>

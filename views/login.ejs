@@ -1,28 +1,81 @@
-<meta name="viewport" content="maximum-scale=1">
-<link rel="stylesheet" href="/styles.css">
-<div id="formBackground" style="touch-action: '';"></div>
-
-<form id="newPlayerForm" class="popupForm primaryStyle primaryBorder" action="/auth/login" method="post" style="text-align: center; ">
-        <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
-            Login
-        </div>
-        <br>
-        <div class="textCenter" style="height: 15vh;"><img src="/GLOSLogo.png" alt="GLOS Logo" id="mainLogo"></div>
-        <br>
-        <% if (messages.error) { %>
-            <%= messages.error %>
-            <%#= console.log(messages);  %>
-        <% } else if (messages.message) { %>
-            <%= messages.message %>
-        <% } %>
-        <br>
-        <input type="text" name="email" value="" placeholder="Email" style="margin-bottom: .75vh; font-size: 250%;" required>
-        <br>
-        <input type="password" name="password" value="" placeholder="Password" style="margin-bottom: 1.25vh; font-size: 250%;" required>
-        <br>
-        <button type="submit" class="" style="margin-bottom: 1.25vh; font-size: 250%;">Login</button>
-        <br>
-        <a href="/auth/forgotPassword" class="" style="margin-bottom: 1.25vh; font-size: 250%;">Forgot Password</a>
-        <br>
-        <a href="/auth/createProfile" class="" style="margin-bottom: 1.25vh; font-size: 250%;">Create Profile</a>
-</form>
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+    <head>
+        <meta name="viewport" content="maximum-scale=1">
+        <link rel="icon" href="/GLOSLogo.png">
+        <title>Login</title>
+        <style>
+            body {
+            font-family: sans-serif;
+        }
+            .Buttons {
+                background-color: #ceff00;
+                font-size: 3vh;
+                border-width: medium;
+                border-color: black;
+                font-weight: 500;
+                border-style: solid;
+                color: black;
+                padding: 5px 40px 5px 40px;
+            }
+            input:focus, textarea:focus, select:focus {
+                outline: 2px solid #ceff00; /* Change to your preferred color */
+            }
+            ::selection {
+                background: #ceff00;
+                color: #121212;
+            }
+            body {
+                background-image: url('/silverBackground.jpg');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+    
+        </style>
+    </head>    
+        <body>
+            <form id="loginForm" class=" primaryStyle" action="/auth/login" method="post" style="text-align: center; ">
+                    <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
+                        Login
+                    </div>
+                    <br>
+                    <div class="textCenter" style="height: 15vh;"><img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" style="height: 100%;"></div>
+                    <br>
+                    
+                    <br>
+                    <input type="text" name="email" value="" placeholder="Email" style="margin-bottom: .75vh; font-size: 250%;" required>
+                    <br>
+                    <input type="password" name="password" value="" placeholder="Password" style="margin-bottom: 1.25vh; font-size: 250%;" required>
+                    <br>
+                    <p><% if (messages.error) { %>
+                        <%= messages.error %>
+                    <% } else if (messages.message) { %>
+                        <%= messages.message %>
+                    <% } %></p>
+                    <button type="submit" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;">Login</button>
+                    <br><br><br>
+                    <button type="button" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;" onclick="window.location.href='/auth/forgotPassword'">Forgot Password</button>
+                    <br>
+                    <button type="button" class="Buttons" style="margin-bottom: 1.25vh; font-size: 250%;" onclick="window.location.href='/auth/createProfile'">Create Profile</button>
+            </form>
+            <script>
+            //     document.getElementById('loginForm').addEventListener('submit', function(event) {
+            //         handleSubmit(this,event)
+            //     });
+            // async function handleSubmit(form,event) {
+            //     event.preventDefault();
+            //         let formData = new FormData(form)
+            //         const response = await fetch(`/auth/login`, {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/x-www-form-urlencoded',
+            //             },
+            //             body: new URLSearchParams(formData).toString(),
+            //         })
+            //     const { url } = await response.json();
+            //     window.location.href = url; // Redirect after login
+            // }
+            </script>
+        </body>
+</html>

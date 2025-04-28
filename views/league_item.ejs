@@ -3,16 +3,16 @@
 <head>
 </head>
 <body>
-    <form class="listItem" action="" method="get">
-        <button class="playerButton" name="type" value="team" onclick="" style="height: 100%;">
-            <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick; border-color: <%-league.color%>; ">
+    <form class="listItem" method="get">
+        <button class="playerButton" type="button" onclick="window.location.href = 'leagues/<%= league.leagueId %>'" style="height: 100%;">
+            <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick; border-color: <%-league.leagueColor%>; ">
                 <div style="width: 100%;">
                     <div class="playerName" style="text-align: center;">
-                        <%= league.shortName %>
+                        <%= league.leagueShortName %>
                     </div>
                 </div>
                 <div class="playerName" style="text-align: center;">  
-                    <%= league.seasonId %>
+                    <%= league.leagueAbbreviation %>
                 </div>                  
             </div>
         </button>

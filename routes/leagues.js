@@ -1,18 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const pool = require(`../db`)
+const sql = require('mssql');
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
 router.post(['/getLeagues'], async (req,res,next)=>{
     try{
-        const request = pool.request()
-        let result = await request.query(`
-            select * from leagues as l
-            LEFT join league_season as ls on l.abbreviation=ls.leagueId
-            where ls.seasonId = '${req.body.seasonId}'
+        
+        let result = await pool.request()
+        .input('seasonId', sql.Int, req.body.seasonId)
+        .query(`
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+            from leagues as l
+            LEFT join league_season as ls on l.leagueId=ls.leagueId
+            where ls.seasonId = @seasonId
         `)
-
+        console.log(result.recordset)
         res.json({ message: 'Success', leagues: result.recordset })
 
     }catch(err){
@@ -22,15 +26,22 @@ router.post(['/getLeagues'], async (req,res,next)=>{
 router.post('/addLeague', async (req, res, next) => {
     // Process form data here
     try{
-
-        const request = pool.request()
-        await request.query(`
-            IF NOT EXISTS (SELECT 1 FROM leagues WHERE abbreviation = '${req.body.abbreviation}')
+        await pool.request()
+        .input('leagueAbbreviation', sql.VarChar, req.body.abbreviation)
+        .input('leagueName', sql.VarChar, req.body.leagueName)
+        .input('leagueColor', sql.VarChar, req.body.color)
+        .input('seasonId', sql.Int, req.body.seasonId)
+        .query(`
+            IF NOT EXISTS (SELECT 1 FROM leagues WHERE abbreviation = @leagueAbbreviation)
             BEGIN
+                DECLARE @leagueId INT;
                 insert into leagues (name, color, shortName, abbreviation)
-                values ('${req.body.leagueName}','${req.body.color}','${req.body.leagueName}','${req.body.abbreviation}')
-                insert into league_season (leagueId, seasonId)
-                values ('${req.body.abbreviation}','${req.body.seasonId}')
+                values (@leagueName,@leagueColor,@leagueName,@leagueAbbreviation);
+
+                SET @leagueId = SCOPE_IDENTITY();
+
+                insert into league_season (leagueId, seasonId, leagueAbbreviation)
+                values (@leagueId,@seasonId,@leagueAbbreviation);
             END
             `)
         res.redirect(302,'/leagues')
@@ -40,23 +51,22 @@ router.post('/addLeague', async (req, res, next) => {
   });
 router.get(['/newLeague'], async (req, res, next) => {
     try{
-        const request = pool.request()
+        
         
         let data = {
             page: `/newLeague`,
             user: req.user
             
         }
-        let result = await request
-        .query(`select top 1 seasonName from seasons where active = 1
+        let result = await pool.request()
+        .query(`select top 1 * from seasons where active = 1
              and not seasonName = 'Test Season'
         `)
-            data.season = result.recordset[0].seasonName
-        result = await request
-        .query(`select seasonName from seasons where active = 1
+            data.season = result.recordset[0]
+        result = await pool.request()
+        .query(`select * from seasons where active = 1
         `)
         data.seasons = result.recordset
-        console.log(data)
         res.render('index.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
@@ -64,7 +74,6 @@ router.get(['/newLeague'], async (req, res, next) => {
 })
 router.get('/', async (req,res, next)=>{
     try{
-        console.log(req.user)
         if (req.isAuthenticated()) {
             // console.log(req.user)
         }
@@ -73,22 +82,19 @@ router.get('/', async (req,res, next)=>{
             page: 'leagues',
             user: req.user
         }
-        const request = pool.request()
-        const result = await request.query(`select * from leagues as l
-            left join league_season as ls on l.abbreviation=ls.leagueId
-            where seasonId in (select seasonName from seasons where active = 1)
+        const result = await pool.request()
+        .query(`
+            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+             from leagues as l
+            left join league_season as ls on l.leagueId=ls.leagueId
+            where seasonId in (select seasonId from seasons where active = 1)
         `)
         data.leagues = result.recordset
+        console.log(data.leagues)
         res.render('index.ejs',{data: data}) 
     }catch(err){
         next(err)
     }
 });
 
-// Define a POST route for `/users`
-// router.post('/', (req, res) => {
-//   res.send('Create a new user');
-// });
-
-// Export the router so it can be used in other files
 module.exports = router;

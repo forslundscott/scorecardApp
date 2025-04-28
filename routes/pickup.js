@@ -85,8 +85,8 @@ router.get('/register/:date', async (req,res, next)=>{
         `)
         // const result = await request.query(`Select * from gamesList() order by startUnixTime, location `)
         data.pickupEvents = result.recordset
-        // res.render('pickupRegistration.ejs',{data: data}) 
-        res.render('venmoPickupRegistration.ejs',{data: data})
+        res.render('pickupRegistration.ejs',{data: data}) 
+        // res.render('venmoPickupRegistration.ejs',{data: data})
     }catch(err){
         next(err)
     }
@@ -163,10 +163,5 @@ router.get('/', async (req,res, next)=>{
         next(err)
     }
 });
-// Define a POST route for `/users`
-// router.post('/', (req, res) => {
-//   res.send('Create a new user');
-// });
 
-// Export the router so it can be used in other files
 module.exports = router;

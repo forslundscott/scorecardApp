@@ -11,17 +11,10 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
-        console.log(req.session.cookie.returnTo)
-        if (req.query.returnTo != undefined) {
-
-            req.session.returnTo = req.query.returnTo;
-        }else{
-
-            req.session.returnTo = req.header('Referer')
-
-        }
-
-        res.render('login.ejs')
+        console.log(req.get('host'))
+        let message = req.session.message || `If this is your first time using the new site, please use Forgot Password to create a password`
+        delete req.session.message
+        res.render('login.ejs', {messages: {message: message}})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -33,8 +26,19 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
         if (!user) { return res.render('login.ejs', {messages: info}) }
         req.session.passport = {}
         req.session.passport.user = user.id
-        const redirectUrl = req.session.returnTo || '/';
+        
+        let redirectUrl 
+            if (req.session.returnTo) {
+                redirectUrl = req.session.returnTo;
+            // } else if (req.hostname.startsWith('app.')) {
+            //     redirectUrl = 'https://envoroot.com/';
+            // } else if (['forslundhome.duckdns.org', 'glosoccer.org', 'www.glosoccer.org'].includes(req.headers.host)) {
+            //     redirectUrl = `https://${req.headers.host}/comingsoon`;
+            } else {
+                redirectUrl = '/';
+            }
         delete req.session.returnTo;
+        // res.json({ url: redirectUrl })
         res.redirect(redirectUrl);
     }catch(err){
         console.error('Error:', err)
@@ -87,10 +91,10 @@ router.post(['/createProfile'], async (req,res)=>{
                 id int
             )
             BEGIN TRANSACTION
-            insert into users (firstName, lastName, email)
+            insert into users (firstName, lastName, email, preferredName)
             OUTPUT inserted.id
             into @tempTable
-            values (@firstName, @lastName, @email)
+            values (@firstName, @lastName, @email, @firstName)
             
             insert into credentials (userID,[password])
             select id, @password from @tempTable
@@ -144,7 +148,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
         host: 'smtp.gmail.com',
         port: 587,
         service: 'gmail',
-        secure: false,
+        secure: true,
         auth: {
            user: process.env.ORG_EMAIL,
            pass: process.env.ORG_EMAIL_PASSWORD
@@ -155,10 +159,20 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
     const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     const mailOptions = {
-      from: process.env.ORG_EMAIL,
+      from: `No Reply - GLOS <${process.env.ORG_EMAIL}>`,
       to: user.email,
-      subject: 'Password Reset',
-      text: `Click the following link to reset your password: ${resetLink}`,
+      subject: 'GLOS Account Password Reset',
+      text: `Hello,
+
+  We received a request to reset your password for your GLOS account. You can reset your password by clicking the link below:
+
+  ${resetLink}
+
+  If you didn’t request a password reset, please let us know.
+
+  Regards,
+  The GLOS Team
+      `,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -166,7 +180,9 @@ router.post(['/forgotPassword'], async (req,res)=>{
         return console.error('Error sending reset email:', error);
       }
       console.log('Reset email sent:', info.response);
-      return res.redirect('/')
+      req.session.message = `You should receive a reset link to your specified email shortly. 
+      If you do not receive one, please check your spam folder.`
+      return res.redirect('/auth/login')
 
     });
   } catch (error) {

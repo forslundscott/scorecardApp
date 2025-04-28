@@ -88,7 +88,6 @@ if(document.getElementById('timerForm')){
             clearInterval(x);
                 playSoundAndWait('whistle.mp3')
                 async function playSoundAndWait(soundFilePath) {
-                    console.log(audio)
                     let form = document.getElementById('timerForm')
                         let formData = new FormData(form)
                     await fetch('/games/periodEnd', {
@@ -130,7 +129,6 @@ if(document.getElementById('timerForm')){
     } 
   }
   async function statHandler(ele,xperiod,val = 1){
-    console.log('testonclick')
     let form = ele.form
         form.querySelector('[name="realTime"]').value = Date.now()
         form.querySelector('[name="value"]').value = val
@@ -188,7 +186,6 @@ function handleMouseUp(e) {
   if (isDown) {                                     // if we came from down status:
       clearTimeout(longTID);                        // clear timer to avoid false longpress
       isDown = false;
-      console.log('Normal up')
       target = null;
   }
 };
@@ -210,10 +207,10 @@ function handleLongPress(e){
 function toggleAddPlayer(xform){
     if(document.getElementById('newPlayerForm').style.display == 'none'){
         document.getElementById('newPlayerForm').style.display = ''
-        document.getElementById('newPlayerForm').querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        document.getElementById('newPlayerForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        document.getElementById('newPlayerForm').querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
+        document.getElementById('newPlayerForm').querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
         document.getElementById('newPlayerForm').querySelector('[name="eventId"]').value = xform.querySelector('[name="eventId"]').value
-        document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="team"]').value}.png`
+        document.getElementById('newPlayerLogo').src = `/images/${xform.querySelector('[name="teamId"]').value}.png`
     }else{
         document.getElementById('newPlayerForm').style.display = 'none'
     }
@@ -262,7 +259,6 @@ async function userSearch(xForm,event){
                 const results = await response.json();
                 const resultsList = document.getElementById('userSearchResults');
                 resultsList.innerHTML = '';
-                console.log(window.location.pathname)
                 results.forEach(user => {
                     const userCard = `
                         <form class="" action="/${window.location.pathname.replace(/\//g, '')}/${user.ID}" method="get">
@@ -315,6 +311,8 @@ async function playerSearch(xForm,event){
                         <input type="hidden" name="firstName" value="${user.firstName}">
                         <input type="hidden" name="lastName" value="${user.lastName}">
                         <input type="hidden" name="preferredName" value="${user.preferredName}">
+                        <input type="hidden" name="shirtSize" value="${user.shirtSize}">
+                        <input type="hidden" name="discounted" value="${user.discounted}">
                         <button type="button" class="playerButton" name="type" value="game" onclick="selectPlayer(this.form)">
                         <div class="itemFormat primaryStyle primaryBorder">
                             <div class="playerTag">
@@ -327,6 +325,55 @@ async function playerSearch(xForm,event){
                     </form>
                 `
                 resultsList.innerHTML += userCard
+        });
+          } else {
+            console.error('Form submission failed');
+          }
+        
+        
+    } catch (error) {
+        console.error('Error fetching results:', error);
+    }
+
+}
+async function teamSearch(xForm,event){
+
+    event.preventDefault();
+    try {
+
+        let formData = new FormData(xForm)
+        const response = await fetch(`/teams/teamSearch`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            body: new URLSearchParams(formData).toString(),
+          });
+
+        
+        if (response.ok) {
+            const results = await response.json();
+            const resultsList = document.getElementById('teamSearchResults');
+            resultsList.innerHTML = '';
+            results.forEach(team => {
+                const teamCard = `
+                    <form class="" action="" method="post">
+                        <input type="hidden" name="teamId" value="${team.teamId}">
+                        <input type="hidden" name="fullName" value="${team.fullName}">
+                        <input type="hidden" name="shortName" value="${team.shortName}">
+                        <input type="hidden" name="abbreviation" value="${team.abbreviation}">
+                        <button type="button" class="playerButton" name="type" value="game" onclick="insertExistingTeamInfo(this.form)">
+                        <div class="itemFormat primaryStyle primaryBorder">
+                            <div class="playerTag">
+                                <div class="playerName" style="text-align: center;">
+                                    ${team.fullName} - ${team.abbreviation}
+                                </div>
+                            </div>                
+                        </div>
+                        </button>
+                    </form>
+                `
+                resultsList.innerHTML += teamCard
         });
           } else {
             console.error('Form submission failed');
@@ -356,16 +403,23 @@ function togglePaidCheckbox() {
 }
 function selectPlayer(xform){
     let newPlayerForm
+    console.log(window.location.href)
     if(window.location.href.includes('activeGame')){
         newPlayerForm = document.getElementById('newPlayerForm')
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
     }else if(window.location.href.includes('roster/newPlayer')){
         newPlayerForm = document.getElementById('newRosterPlayerForm')
+        newPlayerForm.querySelector('[name="waiver"]').checked = true
+    }else if(window.location.href.includes('registration/team')){
+        newPlayerForm = document.getElementById('newPlayerFormTeamRegistration')
+        newPlayerForm.querySelector('[name="shirtSize"]').value = xform.querySelector('[name="shirtSize"]').value
+        newPlayerForm.querySelector('[name="discounted"]').value = xform.querySelector('[name="discounted"]').value
     }
         newPlayerForm.querySelector('[name="email"]').value = xform.querySelector('[name="email"]').value
         newPlayerForm.querySelector('[name="firstName"]').value = xform.querySelector('[name="firstName"]').value
         newPlayerForm.querySelector('[name="lastName"]').value = xform.querySelector('[name="lastName"]').value
         newPlayerForm.querySelector('[name="preferredName"]').value = xform.querySelector('[name="preferredName"]').value
-        newPlayerForm.querySelector('[name="waiver"]').checked = true
+        // newPlayerForm.querySelector('[name="waiver"]').checked = true
     
     toggleSearchPlayer()
 }
@@ -389,11 +443,10 @@ async function toggleTeamForm(xform){
     if(teamForm.style.display == 'none'){
         teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="teamName"]').value
         teamForm.style.display = ''
-        teamForm.querySelector('[name="team"]').value = xform.querySelector('[name="team"]').value
-        teamForm.querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        teamForm.querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
+        teamForm.querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
         teamForm.querySelector('[name="eventId"]').value = document.getElementById('timerForm').querySelector('[name="Event_ID"]').value
-        teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="team"]').value}.png`
-        console.log(`images/${xform.querySelector('[name="team"]').value}.png`)
+        teamForm.getElementsByClassName('formLogo')[0].src = `/images/${xform.querySelector('[name="teamId"]').value}.png`
     }else{
         teamForm.style.display = 'none'
     }
@@ -410,12 +463,13 @@ async function toggleGameInfoForm(xform){
           });
           if (response.ok) {
             const responseData = await response.json();
-            console.log(responseData.data);
             if(document.getElementById('gameInfoForm').style.display == 'none'){
                 let team1Select = document.getElementById('gameInfoForm').querySelector('[name="Team1_ID"]')
                 let team2Select = document.getElementById('gameInfoForm').querySelector('[name="Team2_ID"]')
                 let scoreKeeperSelect = document.getElementById('gameInfoForm').querySelector('[name="scoreKeeper_ID"]')
-                console.log(responseData.data.game.period)
+                let monitorSelect = document.getElementById('gameInfoForm').querySelector('[name="monitorId"]')
+                let ref1Select = document.getElementById('gameInfoForm').querySelector('[name="ref1Id"]')
+                let ref2Select = document.getElementById('gameInfoForm').querySelector('[name="ref2Id"]')
                 document.getElementById('gameInfoForm').querySelector('[name="period"]').value=responseData.data.game.period
                 while (team1Select.options.length > 1) {
                     team1Select.remove(1);
@@ -426,14 +480,25 @@ async function toggleGameInfoForm(xform){
                 while (scoreKeeperSelect.options.length > 1) {
                     scoreKeeperSelect.remove(1);
                 }
+                while (monitorSelect.options.length > 1) {
+                    monitorSelect.remove(1);
+                }
+                while (ref1Select.options.length > 1) {
+                    ref1Select.remove(1);
+                }
+                while (ref2Select.options.length > 1) {
+                    ref2Select.remove(1);
+                }
+                // console.log(responseData.data)
                 responseData.data.teams.forEach(function(xoption) {
+                    console.log(xoption.teamId)
                     let option = document.createElement("option");
-                    option.text = xoption.id;
-                    option.value = xoption.id;
+                    option.text = xoption.abbreviation;
+                    option.value = xoption.teamId;
                     team1Select.add(option);
                     option = document.createElement("option");
-                    option.text = xoption.id;
-                    option.value = xoption.id;
+                    option.text = xoption.abbreviation;
+                    option.value = xoption.teamId;
                     team2Select.add(option);
                   })
                   responseData.data.scoreKeepers.forEach(function(xoption) {
@@ -442,11 +507,41 @@ async function toggleGameInfoForm(xform){
                     option.value = xoption.userId;
                     scoreKeeperSelect.add(option);
                   })
+                  responseData.data.monitors.forEach(function(xoption) {
+                    let option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                    option.value = xoption.userId;
+                    monitorSelect.add(option);
+                  })
+                  responseData.data.referees.forEach(function(xoption) {
+                    let option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                    option.value = xoption.userId;
+                    ref1Select.add(option);
+                    option = document.createElement("option");
+                    option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                    option.value = xoption.userId;
+                    ref2Select.add(option);
+                  })
+                //   responseData.data.referees.forEach(function(xoption) {
+                //     let option = document.createElement("option");
+                //     option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
+                //     option.value = xoption.userId;
+                //     ref2Select.add(option);
+                //   })
                   team1Select.value = responseData.data.game.Team1_ID
                   team2Select.value = responseData.data.game.Team2_ID
                   if(responseData.data.game.scoreKeeperId !== null){
-                    console.log(responseData.data.game.scoreKeeperId)
                     scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
+                  }
+                  if(responseData.data.game.monitorId !== null){
+                    monitorSelect.value = responseData.data.game.monitorId
+                  }
+                  if(responseData.data.game.referee1Id !== null){
+                    ref1Select.value = responseData.data.game.referee1Id
+                  }
+                  if(responseData.data.game.referee2Id !== null){
+                    ref2Select.value = responseData.data.game.referee2Id
                   }
                 
 
@@ -470,13 +565,21 @@ async function toggleGameInfoForm(xform){
 async function updateGameData(xele){
     let xform = xele.form
     let formData = new FormData(xform)
-    console.log(xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value)
-    if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== 'TBD'){
+    console.log(formData)
+    // 1000000024 is teamId for TBD
+    if((xform.querySelector('[name="Team1_ID"]').value == xform.querySelector('[name="Team2_ID"]').value) && xform.querySelector('[name="Team1_ID"]').value !== '1000000024'){ 
       xform.querySelector('[name="Team1_ID"]').setCustomValidity('Team1 cannot match Team2')
         xform.querySelector('[name="Team1_ID"]').reportValidity()
         return
     }
+    console.log([formData.get('scoreKeeper_ID'), formData.get('monitorId'), formData.get('ref1Id'), formData.get('ref2Id')])
+    if(hasDuplicate([formData.get('scoreKeeper_ID'), formData.get('monitorId'), formData.get('ref1Id'), formData.get('ref2Id')])){
+        xform.querySelector('[name="scoreKeeper_ID"]').setCustomValidity('Crew members cannot hold multiple roles in the same game.')
+          xform.querySelector('[name="scoreKeeper_ID"]').reportValidity()
+          return
+      }
     xform.querySelector('[name="Team1_ID"]').setCustomValidity('')
+    xform.querySelector('[name="scoreKeeper_ID"]').setCustomValidity('')
     const response = await fetch('/games/updateGameInfo', {
         method: 'POST',
         headers: {
@@ -514,31 +617,26 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').style.display = 'none'
     }
     if(document.getElementById('formBackground').style.display == 'none'){
-        console.log('visible');
         document.getElementById('formBackground').style.display = ''
     }else{
-        console.log('hidden');
         document.getElementById('formBackground').style.display = 'none'
     }
 }
-function toggleForm(formName){
-    let xform = document.getElementById(formName)
-    if(xform.style.display == 'none'){
-        xform.style.display = ''
+function toggleForm(form,background){
+
+    if(form.style.display == 'none'){
+        form.style.display = ''
     }else{
-        xform.style.display = 'none'
+        form.style.display = 'none'
     }
-    if(document.getElementById('formBackground').style.display == 'none'){
-        console.log('visible');
-        document.getElementById('formBackground').style.display = ''
+    if(background.style.display == 'none'){
+        background.style.display = ''
     }else{
-        console.log('hidden');
-        document.getElementById('formBackground').style.display = 'none'
+        background.style.display = 'none'
     }
 }
 async function exportStandings(xtype,xleague){
     let sqlString = `DECLARE @league varchar(255) Set @league = '${xleague}' Execute ${xtype}Standings @league`
-    console.log(sqlString)
     const response = await fetch('/standings/exportStandings', {
         method: 'POST',
         headers: {
@@ -608,7 +706,10 @@ function closeForm(){
         form.style.display = 'none'
     }
     document.getElementById('formBackground').style.display = 'none'
-    document.getElementById('teamFormBackground').style.display = 'none'
+    if(document.getElementById('teamFormBackground')){
+        document.getElementById('teamFormBackground').style.display = 'none'
+    }
+    
     closeFloating()
 }
 function closeFloating(){
@@ -668,7 +769,6 @@ function convertUnixTimeToMMDD(unixTime) {
     let form = ele.form
     
     let formData = new FormData(form)
-    console.log(formData)
     try{
         const response = await fetch('/games/switchSides', {
             method: 'POST',
@@ -679,7 +779,6 @@ function convertUnixTimeToMMDD(unixTime) {
           });
           if (response.ok) {
             const responseData = await response.json();
-            console.log(responseData.data);
             location.reload()
           } else {
             console.error('Form submission failed');
@@ -728,7 +827,6 @@ function handleVisibilityChange() {
 
 document.getElementById('newPlayerForm').querySelector('[name="email"]').addEventListener('blur',async function() {
     let formData = new FormData(document.getElementById('newPlayerForm'))
-    console.log(formData)
     const response = await fetch('/games/checkEmail', {
         method: 'POST',
         headers: {
@@ -738,7 +836,6 @@ document.getElementById('newPlayerForm').querySelector('[name="email"]').addEven
     })
     if (response.ok) {
         const responseData = await response.json();
-        console.log(responseData)
         if(responseData.user){
             this.form.querySelector('[name="firstName"]').value = responseData.user.firstName
             this.form.querySelector('[name="lastName"]').value = responseData.user.lastName
@@ -767,17 +864,16 @@ async function getTeams(xform){
           });
         if (response.ok) {
             const results = await response.json();
-            console.log(xform.id)
             let team1
             let team2
             switch(xform.id){
                 case 'newUserTeamForm':
                     team1 = xform.querySelector('[name="teamId"]');
-                    team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
+                    team1.innerHTML = '<option value="" disabled selected>Team</option>';
                     results.teams.forEach(team => {
                         let option = document.createElement('option');
-                        option.value = team.id;
-                        option.text = team.id;
+                        option.value = team.teamId;
+                        option.text = team.fullName;
                         team1.appendChild(option);
                         
                     });
@@ -787,15 +883,25 @@ async function getTeams(xform){
                     team2 = xform.querySelector('[name="team2Id"]');
                     team1.innerHTML = '<option value="" disabled selected>Team 1</option>';
                     team2.innerHTML = '<option value="" disabled selected>Team 2</option>';
+                    let tbdOption1 = document.createElement('option')
+                    tbdOption1.value = 1000000024
+                    tbdOption1.text = 'TBD'
+                    team1.appendChild(tbdOption1)
+
+                    let tbdOption2 = document.createElement('option')
+                    tbdOption2.value = 1000000024
+                    tbdOption2.text = 'TBD'
+                    team2.appendChild(tbdOption2)
+                    
                     results.teams.forEach(team => {
                         let option1 = document.createElement('option');
-                        option1.value = team.id;
-                        option1.text = team.id;
+                        option1.value = team.teamId;
+                        option1.text = team.abbreviation;
                         team1.appendChild(option1);
                         
                         let option2 = document.createElement('option');
-                        option2.value = team.id;
-                        option2.text = team.id;
+                        option2.value = team.teamId;
+                        option2.text = team.abbreviation;
                         team2.appendChild(option2);
                         
                     });
@@ -827,7 +933,7 @@ async function getLeagues(xform){
             results.leagues.forEach(league => {
                 let option1 = document.createElement('option');
                 option1.value = league.leagueId;
-                option1.text = league.name;
+                option1.text = league.leagueName;
                 league1.appendChild(option1);
             });
           } else {
@@ -837,23 +943,51 @@ async function getLeagues(xform){
         console.error('Error fetching results:', error);
     }
 }
-async function paymentSubmit(form,event) {
+async function paymentSubmit(form,event,path) {
             event.preventDefault();
             let formData = new FormData(form)
-            const response = await fetch('/api/payments/create-checkout-session', {
+            console.log('check')
+            const response = await fetch(`/api/payments/${path}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams(formData).toString(),
+                body: 
+                new URLSearchParams(
+                    formData
+                ).toString(),
             })
+            const data = await response.json();
 
-
-
-        const { url } = await response.json();
-        window.location.href = url; // Redirect to Stripe Checkout
-
+            if (data.url) {
+              window.location.href = data.url;
+            } else if (data.message) {
+              alert(data.message);
+            }
+            
 }
+function hasDuplicate(values) {
+    console.log(values)
+    console.log(values.length)
+    const filteredValues = values.filter(val => val !== 'TBD'); // Remove 'TBD' values
+    console.log(filteredValues)
+    console.log(filteredValues.length)
+    const uniqueValues = new Set(filteredValues);
+    console.log(uniqueValues)
+    console.log(uniqueValues.length)
+    return uniqueValues.size < filteredValues.length; // Check for duplicates
+}
+
+
+window.onerror = function (message, source, lineno, colno, error) {
+    fetch('/log-client-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ message, source, lineno, colno, error: error?.stack })
+    });
+    console.log('test client side error report')
+};
+
 
 // Event listener for visibility change
 document.addEventListener('visibilitychange', handleVisibilityChange);
