@@ -456,6 +456,76 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
         console.error('Error:', err)
     }
 })
+router.get('/:seasonId/leagues/:leagueId', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'season/leagues',
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('seasonId',sql.Int, req.params.seasonId)
+        .query(`
+            select l.leagueId
+            , ls.seasonId
+            , ls.seasonName
+            , ls.leagueAbbreviation
+            , l.name as leagueName
+            , l.gender
+            , l.color as leagueColor
+            , l.shortName as leagueShortName
+            , l.sport
+            , l.dayOfWeek
+            , l.giftCards
+             from leagues as l
+            left join league_season as ls on l.leagueId=ls.leagueId
+            where seasonId = @seasonId
+        `)
+        data.leagues = result.recordset
+        console.log(data.leagues)
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/:seasonId/leagues', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'season/leagues',
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('seasonId',sql.Int, req.params.seasonId)
+        .query(`
+            select l.leagueId
+            , ls.seasonId
+            , ls.seasonName
+            , ls.leagueAbbreviation
+            , l.name as leagueName
+            , l.gender
+            , l.color as leagueColor
+            , l.shortName as leagueShortName
+            , l.sport
+            , l.dayOfWeek
+            , l.giftCards
+             from leagues as l
+            left join league_season as ls on l.leagueId=ls.leagueId
+            where seasonId = @seasonId
+        `)
+        data.leagues = result.recordset
+        console.log(data.leagues)
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
 router.get(['/:seasonId'], async (req, res, next) => {
     try{
         let data = {

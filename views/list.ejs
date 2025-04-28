@@ -27,7 +27,7 @@
             <% for(let i=0; i< data.list.length; i++) {%>
                 <%- include('pickup_item',{item: data.list[i]}); %>
             <% } %>
-        <% } else if (data.page == 'leagues') { %>
+        <% } else if (data.page == 'leagues' || data.page == 'season/leagues') { %>
             <% for(let i=0; i< data.leagues.length; i++) {%>
                 <%- include('league_item',{league: data.leagues[i]}); %>
             <% } %>

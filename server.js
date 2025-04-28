@@ -229,7 +229,7 @@ app.get(['/'], async (req,res)=>{
     try{
         let redirectUrl 
             
-            if (['app.glosoccer.com'].includes(req.headers.host)) {
+            if (['app.glosoccer.com', 'app.envoroot.com'].includes(req.headers.host)) {
                 redirectUrl = 'https://glosoccer.com/';
             } else 
             if (['forslundhome.duckdns.org', 'glosoccer.com', 'www.glosoccer.com'].includes(req.headers.host)) {
