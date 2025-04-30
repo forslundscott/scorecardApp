@@ -9,7 +9,7 @@
     <select name="leagueId" class="primaryStyle" style="font-size: 100%;" autocomplete="off" onchange="getTeams(this.form)" required>
         <option value="" disabled selected>League</option>
         <% for(let i=0; i< data.leagues.length; i++) {%>
-            <option value="<%= data.leagues[i].leagueAbbreviation%>"><%= data.leagues[i].leagueShortName%></option>
+            <option value="<%= data.leagues[i].leagueId%>"><%= data.leagues[i].leagueShortName%></option>
         <% } %>
     </select>
     <br>
@@ -33,23 +33,33 @@
         Time:
         <br>
 
-        <input type="time" name="startTime" class="primaryStyle" style="font-size: 100%;" value="15:00" required>
+        <input type="time" name="startTime" class="primaryStyle" style="font-size: 100%;" value="19:00" required>
 
         
     </div>
     <br>
-    <select name="court" class="primaryStyle" style="font-size: 100%;" autocomplete="off" required>
-        <!-- <option value="" disabled selected hidden>Season</option> -->
-        <option value="Court 1" selected>Court 1</option>
-        <option value="Court 2" >Court 2</option>
-        <!-- <option value="Indoor">Indoor</option> -->
-    </select>
+    <div class="primaryStyle" style="font-size: 100%;">
+        Field:
+        <br>
+        <select name="court" class="primaryStyle" style="font-size: 100%;" autocomplete="off" required>
+            <!-- <option value="" disabled selected hidden>Season</option> -->
+            <option value="2A" selected>2A</option>
+            <option value="2B" >2B</option>
+            <option value="3A" >3A</option>
+            <option value="3B" >3B</option>
+            <option value="SG1" >SG1</option>
+            <option value="SG2" >SG2</option>
+            <option value="SG3" >SG3</option>
+            <option value="SG4" >SG4</option>
+            <!-- <option value="Indoor">Indoor</option> -->
+        </select>
+    </div>
     <br>
-    <br>
+    <!-- <br> -->
     <div class="primaryStyle" style="font-size: 100%;">
         Number of Periods:
         <br>
-        <input type="number" name="maxPeriods" class="primaryStyle" style="font-size: 100%;" value="3" min="2" max="4">
+        <input type="number" name="maxPeriods" class="primaryStyle" style="font-size: 100%;" value="2" min="2" max="4">
     </div>
     <br>
     <br>

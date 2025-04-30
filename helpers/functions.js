@@ -236,7 +236,8 @@ async function failedQuery(data,errorMessage) {
 }
 
 async function addTeam(data){
-    try{console.log(`test team transaction: ${data.fullName}`)
+    try{
+        console.log(`test team transaction: ${data.fullName}`)
         const result = await pool.request()
                 .input('abbreviation', sql.VarChar, data.abbreviation || data.teamAbbreviation)
                 .input('fullName', sql.VarChar, data.fullName || data.teamFullName)
