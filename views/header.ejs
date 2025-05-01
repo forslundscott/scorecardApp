@@ -5,13 +5,13 @@
        <br>
        <br>
        <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="/games/newGame" onclick="window.location.href = '/games/newGame';" >New Game</button>
-       <% } else if (data.page == 'teams/details') { %>
+       <% } else if (data.page == 'teams/details' || data.page == 'season/league/teams/details') { %>
         <div class="textCenter" style="height: 10vh;"><img src="/images/<%=data.data.teamId%>.png" alt="<%= data.data.abbreviation %> Logo" class="formLogo"></div>
         <%= data.data.fullName %> (<%= data.data.abbreviation %>)
         <br>
         <%= data.data.league %>
        <br>
-       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="editTeam" onclick="window.location.href = '<%= data.data.teamId %>/editTeam';" >Edit Team Info</button>
+       <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" name="type" value="editTeam" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/editTeam';" >Edit Team Info</button>
        <% } else if (data.page == 'teams') { %>
         Teams
        <br>

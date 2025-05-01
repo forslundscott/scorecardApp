@@ -106,11 +106,11 @@
 <body style="text-align: center; width: 100%;" >
     <div style="background-image: linear-gradient(180deg, #CEFF00 0%, #4E6100 100%); width: 100%;">
          <img style="padding: 12px 0 0 0;" height="200vh" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" onclick="window.location.href='/'">
-        <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;"><%= data.season.seasonName %> Registration</h1>
+        <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;">Sub Waiver</h1>
     </div>
    
     
-    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
+    <form id="waiverForm" action="" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
         
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
@@ -146,57 +146,11 @@
         <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
         <br>
         <br>
-        <%# console.log(data.userAttributes.discounted) %><input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
+        <input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
         <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || !['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %>><label for="discounted_no">No</label>
+        <br><br>
         
-        <%# console.log(data.userAttributes) %>
-        <label for=""><b>Shirt Size: </b></label>
-        <select name="shirtSize" id="" required>
-            <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
-            <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
-            <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
-            <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
-            <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
-        </select>
-        <br><br><br>
-        <!-- <select id="color" name="color">
-            <option value="#00FF00" style="background-color: #00FF00;">Lime</option>
-            <option value="#da70d6" style="background-color: #da70d6;">Orchid</option>
-            <option value="#FF69B4" style="background-color: #FF69B4;">Pink</option>
-            <option value="#0F52BA" style="background-color: #0F52BA;">Pink</option>
-          </select>
-          <br> -->
-          <label for="discounted"><b>Are you a keeper?</b></label>
-        <br>
-        <br>
-        
-        <input type="radio" name="keeper" id="keeper_yes" value="1" onchange="keeperChange()" required><label for="keeper_yes">Yes</label>
-        <br>
-        <input type="radio" name="keeper" id="keeper_no" value="0" onchange="keeperChange()" ><label for="keeper_no">No</label>
-        <br><br><br>
-          <!-- <input type="text" name="keeperShirtColor" id="keeperShirtColor" value="" hidden > -->
-          
-          <div id="keeperColorContainer" style="display: none;">
-              <label for=""><b>Keeper Shirt Color: </b></label>
-              <select name="keeperShirtColor" id="keeperShirtColor" onchange="this.style.backgroundColor=this.value" required>
-                <option value="" disabled selected>Shirt Color</option>
-                <option value="Lime">Lime</option>
-                <option value="Orchid">Orchid</option>
-                <option value="Pink">Pink</option>
-                <option value="Sapphire">Sapphire</option>
-              </select>
-              <!-- <div class="color-dropdown">
-                <div class="dropdown-btn" onclick="toggleDropdown()">Click to Select</div>
-                <div class="dropdown-menu">
-                  <div class="red" style="background-color: #00FF00;" onclick="selectColor('#00FF00','Lime')">Lime</div>
-                  <div class="green" style="background-color: #da70d6;" onclick="selectColor('#da70d6','Orchid')">Orchid</div>
-                  <div class="blue" style="background-color: #FF69B4;" onclick="selectColor('#FF69B4','Pink')">Pink</div>
-                  <div class="blue" style="background-color: #0F52BA;" onclick="selectColor('#0F52BA','Sapphire')">Sapphire</div>
-                </div>
-              </div> -->
-            <br><br><br>  
-          </div>
         
         <label for=""><b>Emergency Contact:</b></label>
         <br>
@@ -212,7 +166,7 @@
         <br><br><br>
         <label for=""><b>Do you have any allergies or medical conditions we should be aware of?</b></label>
         <br>
-        <!-- <br> -->
+        
 
         <div class="container">
             <div class="section">
@@ -256,7 +210,7 @@
         <br>
         <button type="button" class="buttonStyle formButton" onclick="history.back()">Back</button>
 
-        <button class="buttonStyle formButton" id="registerButton">Continue To Payment</button>
+        <button class="buttonStyle formButton">Sign Waiver</button>
     </form>
     <script>
         document.addEventListener("input", function(event) {
@@ -304,77 +258,17 @@ document.querySelectorAll('input[type="tel"]').forEach(input => {
     e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
   });
 });
-document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
-    // Check if at least one checkbox is selected
-    const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
-    console.log(checkboxes)
-    if (checkboxes.length === 0) {
-      alert('Please select at least one league!');
-      event.preventDefault(); // Prevent form submission
-      return false
-    }
-    handleSubmit(this,event)
-  });
-  function handleSubmit(form,event) {
-            // if (!validateCheckboxes(form)) {
-            //     return false; 
-            // }
-            paymentSubmit(form,event, 'individualSeasonCheckoutSession')
-        }
-//   async function handlePlayerRegistrationSubmit(form, event) {
-//     let formData = new FormData(form)
-//     console.log(formData);
-//     await fetch('registration', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded',
-//         },
-//         body: new URLSearchParams(formData).toString(),
-//     });
+// document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
+    
+//     handleSubmit(this,event)
+//   });
+//         function handleSubmit(form,event) {
+//             // if (!validateCheckboxes(form)) {
+//             //     return false; 
+//             // }
+//             paymentSubmit(form,event, 'individualSeasonCheckoutSession')
+//         }
 
-//     }
-        function leagueSelect(ele){
-            // console.log(document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`))
-            document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).style.display = ele.checked ? "" : "none"
-            document.getElementById(`${ele.id.replace('leagueId_','')}_division`).style.display = ele.checked ? "" : "none"
-            document.getElementById(`${ele.id.replace('leagueId_','')}_teamId`).required = ele.checked
-            document.getElementById(`${ele.id.replace('leagueId_','')}_division`).required = ele.checked
-        }
-        function toggleDropdown() {
-            document.querySelector(".dropdown-menu").style.display = 
-            document.querySelector(".dropdown-menu").style.display === "block" ? "none" : "block";
-        }
-
-        function selectColor(color,name) {
-            document.querySelector(".dropdown-btn").textContent = name;
-            document.getElementById("keeperShirtColor").value = name
-            document.querySelector(".dropdown-btn").style.backgroundColor = color
-            document.querySelector(".dropdown-menu").style.display = "none";
-        }
-        function keeperChange() {
-            const conditionalDiv = document.getElementById('keeperColorContainer');
-            if (document.getElementById('keeper_yes').checked) {
-                document.getElementById('keeperColorContainer').style.display = 'block';
-                document.getElementById('keeperShirtColor').setAttribute('required', '')
-            } else {
-                document.getElementById('keeperColorContainer').style.display = 'none';
-                document.getElementById('keeperShirtColor').removeAttribute('required')
-            }
-        }
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     const link = document.getElementById("waiver-link");
-        //     const host = window.location.host;
-
-        //     // Define different hrefs based on the host
-        //     const hrefMap = {
-        //     "www.glosoccer.com": "https://www.glosoccer.com/waiver/",
-        //     "glosoccer.com": "https://glosoccer.com/waiver/",
-        //     "forslundhome.duckdns.org": "https://forslundhome.duckdns.org/waiver/"
-        //     };
-
-        //     // Set href dynamically
-        //     link.href = hrefMap[host] || "https://envoroot.com/player-resources/waiver/";
-        // });
         document.addEventListener("DOMContentLoaded", function () {
             const host = window.location.host;
 

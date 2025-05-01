@@ -11,7 +11,7 @@
                     <%- include('game_item',{game: data.games[i]}); %>
                 <% } %>
             </div>
-        <% } else if (data.page == 'teams') { %>
+        <% } else if (data.page == 'teams' || data.page == 'season/league/teams') { %>
             <% for(let i=0; i< data.teams.length; i++) {%>
                 <%- include('team_item',{team: data.teams[i]}); %>
             <% } %>
@@ -169,7 +169,9 @@ Thank you and have a nice day!`
             <%- include('userDetails',{data: data}); %>
         <% } else if (data.page == 'season/details') { %>
             <%- include('seasonDetails',{data: data}); %>
-        <% } else if (data.page == 'teams/details') { %>
+        <% } else if (data.page == 'season/league/details') { %>
+            <%- include('leagueDetails',{data: data}); %>
+        <% } else if (data.page == 'teams/details' || data.page == 'season/league/teams/details') { %>
             <%- include('teamDetails',{data: data}); %>
         <% } else if (data.page == 'team/newPlayer') { %>
             <%- include(`newRosterPlayerForm`,{data: data}); %>
@@ -179,7 +181,7 @@ Thank you and have a nice day!`
             <% for(let i=0; i< data.list.length; i++) {%>
                 <%- include(`userRole_item`,{data: data.list[i]}); %>
             <% } %>
-        <% } else if (data.page == 'team/roster') { %>
+        <% } else if (data.page == 'team/roster' || data.page == 'season/league/team/roster') { %>
             
             <% for(let i=0; i< data.list.length; i++) {%>
                 <%- include(`teamRoster_item`,{data: data.list[i]}); %>

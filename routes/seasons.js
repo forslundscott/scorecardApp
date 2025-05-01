@@ -456,6 +456,116 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
         console.error('Error:', err)
     }
 })
+router.get('/:seasonId/leagues/:leagueId/teams/:teamId/roster', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'season/league/team/roster',
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .input('seasonId', sql.Int, req.params.seasonId)
+        .input('leagueId', sql.Int, req.params.leagueId)
+        .query(`
+            select ut.userId, preferredName,lastName
+            from user_team as ut
+            LEFT join users as u on ut.userId=u.ID
+            left join teams as t on ut.teamId=t.id
+            where ut.teamId = @teamId
+            and ut.seasonId = @seasonId
+            and ut.leagueId = @leagueId
+            order by preferredName
+            `)        
+        data.list = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/:seasonId/leagues/:leagueId/teams/:teamId/editTeam', async (req,res, next)=>{
+    try{
+        let result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .query(`
+            SELECT * 
+            from dbo.teams
+            where teamId = @teamId
+            `)        
+        data.data = result.recordset[0]
+        data.data.color = functions.getHexColor(data.data.color)
+        result = await pool.request()
+        .query(`select * from seasons where active = 1
+        `)
+        data.seasons = result.recordset
+        result = await pool.request()
+        .input('seasonId', sql.Int, data.data.seasonId)
+        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            from league_season ls
+            LEFT join leagues l on ls.leagueId=l.leagueId
+            where seasonId = @seasonId
+        `)
+        data.leagues = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/:seasonId/leagues/:leagueId/teams/:teamId', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'season/league/teams/details',
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('teamId', sql.VarChar, req.params.teamId)
+        .query(`
+            SELECT * 
+            from dbo.teams
+            where teamId = @teamId
+            `)        
+        data.data = result.recordset[0]
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
+router.get('/:seasonId/leagues/:leagueId/teams', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            
+            page: 'season/league/teams',
+            user: req.user
+        }
+        const result = await pool.request()
+        .input('seasonId', sql.Int, req.params.seasonId)
+        .input('leagueId', sql.Int, req.params.leagueId)
+        .query(`
+            select t.id, t.fullName, t.color, t.abbreviation, u.firstName + ' ' + u.lastName as captain, l.color as LeagueColor, t.teamId
+            from seasonLeagueTeam as slt 
+            LEFT join teams as t on slt.teamId=t.teamId
+            left join leagues as l on slt.leagueId=l.leagueId
+            LEFT join users as u on t.captain=u.ID
+            where slt.seasonId = @seasonId
+            and slt.leagueId = @leagueId
+            ORDER by fullName
+        `)
+        data.teams = result.recordset
+        res.render('index.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
 router.get('/:seasonId/leagues/:leagueId', async (req,res, next)=>{
     try{
         if (req.isAuthenticated()) {
@@ -463,29 +573,29 @@ router.get('/:seasonId/leagues/:leagueId', async (req,res, next)=>{
         }
         let data = {
             
-            page: 'season/leagues',
+            page: 'season/league/details',
             user: req.user
         }
-        const result = await pool.request()
-        .input('seasonId',sql.Int, req.params.seasonId)
-        .query(`
-            select l.leagueId
-            , ls.seasonId
-            , ls.seasonName
-            , ls.leagueAbbreviation
-            , l.name as leagueName
-            , l.gender
-            , l.color as leagueColor
-            , l.shortName as leagueShortName
-            , l.sport
-            , l.dayOfWeek
-            , l.giftCards
-             from leagues as l
-            left join league_season as ls on l.leagueId=ls.leagueId
-            where seasonId = @seasonId
-        `)
-        data.leagues = result.recordset
-        console.log(data.leagues)
+        // const result = await pool.request()
+        // .input('seasonId',sql.Int, req.params.seasonId)
+        // .query(`
+        //     select l.leagueId
+        //     , ls.seasonId
+        //     , ls.seasonName
+        //     , ls.leagueAbbreviation
+        //     , l.name as leagueName
+        //     , l.gender
+        //     , l.color as leagueColor
+        //     , l.shortName as leagueShortName
+        //     , l.sport
+        //     , l.dayOfWeek
+        //     , l.giftCards
+        //      from leagues as l
+        //     left join league_season as ls on l.leagueId=ls.leagueId
+        //     where seasonId = @seasonId
+        // `)
+        // data.leagues = result.recordset
+        // console.log(data.leagues)
         res.render('index.ejs',{data: data}) 
     }catch(err){
         next(err)
