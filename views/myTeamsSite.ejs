@@ -25,79 +25,99 @@
         }
         th {
             background-color: rgba(206, 255, 0, 0.50);
-            /* background-color: #ceff00;
-            opacity: 0.3; */
-            /* background-color: #f4f4f4; */
+        }
+        .date-header {
+            background-color: #ceff00;
+            color: #121212;
+            font-size: 1.2em;
+            padding: 10px;
+            text-align: left;
+            border-radius: 5px;
+            border-style: solid;
+            border-width: thin;
         }
         .tooltip {
-  position: relative;
-  cursor: pointer;
-}
+            position: relative;
+            cursor: pointer;
+        }
 
-.tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #ceff00;
-  color: #121212;
-  padding: 5px;
-  border-radius: 5px;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.3s;
-  white-space: nowrap;
-  border-style: solid;
-  border-width: thin;
-}
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ceff00;
+            color: #121212;
+            padding: 5px;
+            border-radius: 5px;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            border-style: solid;
+            border-width: thin;
+        }
 
-.tooltip:hover::after,
-.tooltip:focus::after {
-  opacity: 1;
-  visibility: visible;
-}
+        .tooltip:hover::after,
+        .tooltip:focus::after {
+            opacity: 1;
+            visibility: visible;
+        }
 
-.tooltip:focus::after {
-  visibility: visible;
-}
-input:focus, textarea:focus, select:focus {
+        .tooltip:focus::after {
+            visibility: visible;
+        }
+        input:focus, textarea:focus, select:focus {
             outline: 2px solid #ceff00; /* Change to your preferred color */
         }
-::selection {
-    background: #ceff00; 
-    color: #121212; 
+        ::selection {
+            background: #ceff00; 
+            color: #121212; 
         }
-.blur-text {
-  filter: blur(4px);
-  user-select: none; /* Prevents text selection */
-  pointer-events: none; /* Prevents interaction */
-}
+        .blur-text {
+            filter: blur(4px);
+            user-select: none; /* Prevents text selection */
+            pointer-events: none; /* Prevents interaction */
+        }
     </style>
 </head>
 <body>
     <br>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Captain</th>
-                <th>League</th>
-                <th>Season</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            <% data.teams.forEach(item => { %>
+    
+    <% data.teams.forEach((team, index) => { %>
+        <div class="date-header"> <%= team.teamFullName %> - <%= team.leagueShortName %> - <%= team.seasonName %></div>
+        <table>
+            <thead>
                 <tr>
-                    <td class="tooltip" data-tooltip="<%= item.teamFullName %>"><%= item.teamAbbreviation %></td>
-                    <td><%= item.captain %></td>
-                    <td class="tooltip" data-tooltip="<%= item.leagueShortName %>"><%= item.leagueAbbreviation %></td>
-                    <td><%= item.seasonName %></td>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Gender</th>
+                    <th>Note</th>
                 </tr>
-            <% }) %>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <% team.roster.forEach(player => { %>
+                    <tr>
+                        <td><%= player.firstName %></td>
+                        <td><%= player.lastName %></td>
+                        <td><%= player.gender %></td>
+                        <td><%= 
+                            player.userId === team.captainId && player.userId === team.keeperId
+                                ? 'Captain, Keeper'
+                                : player.userId === team.captainId
+                                ? 'Captain'
+                                : player.userId === team.keeperId
+                                ? 'Keeper'
+                                : ''
+                            %>
+                            </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% }) %>
+        
 </body>
 </html>

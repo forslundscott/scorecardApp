@@ -224,7 +224,7 @@ router.post('/addTeam',uploadLimiter, upload.single('teamLogo'), async (req, res
         res.status(500).send('Internal server error');
     }
 });
-router.get('/site/myteams', checkAuthenticated, async (req,res, next)=>{
+router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
     try{
         // if (req.isAuthenticated()) {
         //     // console.log(req.user)
@@ -233,7 +233,7 @@ router.get('/site/myteams', checkAuthenticated, async (req,res, next)=>{
             page: `teams`,
             user: req.user
         }
-        const result = await pool.request()
+        let result = await pool.request()
         .input('userId',sql.Int,req.user.id)
         .query(`
                         select t.id
@@ -246,6 +246,10 @@ router.get('/site/myteams', checkAuthenticated, async (req,res, next)=>{
             , l.shortName as leagueShortName
             , l.abbreviation as leagueAbbreviation
             ,s.seasonName
+            ,t.captain as captainId
+            ,slt.seasonId
+            ,slt.leagueId,
+            t.keeper as keeperId
             from seasonLeagueTeam as slt 
             left join  teams as t on slt.teamId=t.teamId
             left join leagues as l on slt.leagueId=l.leagueId
@@ -257,9 +261,25 @@ router.get('/site/myteams', checkAuthenticated, async (req,res, next)=>{
                 select teamId from user_team as ut
                 where ut.userId = @userId and ut.seasonId = slt.seasonId
             )
-            ORDER by t.league, fullName
+            ORDER by t.league, t.fullName
         `)
         data.teams = result.recordset
+        for(let team of data.teams){
+            result = await pool.request()
+            .input('teamId',sql.Int,team.teamId)
+            .input('seasonId',sql.Int,team.seasonId)
+            .input('leagueId',sql.Int,team.leagueId)
+            .query(`
+                    select u.firstName, u.preferredName, u.lastName, ut.userId, u.gender from user_team as ut
+                    left join users as u on ut.userId=u.ID
+                    where ut.teamId = @teamId
+                    and ut.seasonId = @seasonId
+                    and ut.leagueId = @leagueId
+                ORDER by  u.firstName, u.lastName
+            `)
+            team.roster = result.recordset
+        }
+        console.log(data.teams[0])
         res.render('myTeamsSite.ejs',{data: data}) 
     }catch(err){
         next(err)
