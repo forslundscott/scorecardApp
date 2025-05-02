@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Something Went Wrong</title>
+  <link rel="stylesheet" href="/siteStyles.css">
+  <style>
+    body { font-family: sans-serif; background: #f8f8f8; text-align: center; padding: 50px; }
+    .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: inline-block; }
+    a { text-decoration: none; color: #007bff; }
+    img.responsive {
+        width: 80%; /* fallback */
+    }
+    div.container {
+            width: auto;
+        }
+
+    @media (orientation: portrait) {
+        img.responsive {
+        width: 95%; /* 60% of viewport width when in portrait */
+        }
+        div.container {
+            width: 95%;
+        }
+    }
+
+    @media (orientation: landscape) {
+        img.responsive {
+        width: 30vw; /* 30% of viewport width when in landscape */
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="newPlayerLogo" style="height: 15vh;">
+    <h1> Ouch! That didn't go as planned.</h1>
+    <img src="/images/ouch.JPEG" class="responsive" alt="Ouch">
+    <p>We're sorry, but something went wrong on our end.</p>
+
+    <% if (errorId) { %>
+      <p>Error ID: <strong><%= errorId %></strong></p>
+    <% } %>
+
+    <p><button type="button" class="buttonStyle formButton" style="font-size: 2vh;" onclick="window.location.href = '/'">Go Back Home</button>
+        <!-- <a href="/">Go back home</a></p> -->
+  </div>
+</body>
+</html>
