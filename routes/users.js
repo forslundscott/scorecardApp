@@ -5,6 +5,15 @@ const sql = require('mssql');
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
+
+router.get('/site/playerportal', checkAuthenticated, async (req,res, next)=>{
+    try{
+        
+        res.redirect('https://glosoccer.com/playerportal')
+    }catch(err){
+        next(err)
+    }
+});
 router.post('/userSearch', async (req, res) => {
     const query  = req.body.userSearchValue;
 

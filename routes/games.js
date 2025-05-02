@@ -701,22 +701,24 @@ router.get('/site/mygames', checkAuthenticated, async (req,res, next)=>{
             )
             order by startUnixTime, location `)
             console.log(result.recordset)
-        const groupedData = result.recordset.reduce((acc, game) => {
-            const dateObj = new Date(Number(game.startUnixTime)); // Convert Unix timestamp to Date object
-            // const date = dateObj.toISOString().split('T')[0]; // Extract YYYY-MM-DD
-            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
-            const date = dateObj.toLocaleDateString('en-US', options)
-
-
-            // const time = dateObj.toTimeString().split(' ')[0].slice(0, 5); // Extract HH:mm
-
-            // Convert time to 12-hour AM/PM format
-            let hours = dateObj.getHours();
-            const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12; // Convert 0 to 12 for 12 AM
-
-            const time = `${hours}:${minutes} ${ampm}`;
+            const groupedData = result.recordset.reduce((acc, game) => {
+                const dateObj = new Date(Number(game.startUnixTime)); // Ensure correct conversion
+                const dateOptions = { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric',
+                    timeZone: 'America/New_York'  // Explicitly set EST/EDT
+                };
+                const date = dateObj.toLocaleDateString('en-US', dateOptions);
+                // Convert time to Eastern Time in 12-hour format
+                const timeOptions = { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true,
+                    timeZone: 'America/New_York'  // Explicitly set EST/EDT
+                };
+                const time = dateObj.toLocaleTimeString('en-US', timeOptions);
 
             if (!acc[date]) {
                 acc[date] = { date, matches: [] };
