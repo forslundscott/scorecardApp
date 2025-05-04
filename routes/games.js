@@ -20,6 +20,9 @@ router.post('/updateGameInfo', async (req, res, next) => {
             .input('referee1Id', sql.VarChar, formData.ref1Id == 'TBD'? null : formData.ref1Id)
             .input('referee2Id', sql.VarChar, formData.ref2Id == 'TBD'? null : formData.ref2Id)
             .input('period', sql.Int, formData.period)
+            .input('startDate',sql.VarChar,formData.startDate)
+            .input('startTime',sql.VarChar,formData.startTime)
+            .input('court',sql.VarChar,formData.court)
             .input('eventId', sql.Int, formData.Event_ID)
             .query(`
             update games
@@ -29,7 +32,9 @@ router.post('/updateGameInfo', async (req, res, next) => {
             monitorId = @monitorId,
             referee1Id = @referee1Id,
             referee2Id = @referee2Id,
-            period = @period
+            period = @period,
+            Location = @court,
+            startUnixTime = cast(datediff(second, '1/1/1970',convert(datetime, @startDate + ' ' + @startTime) at time zone + 'Eastern Standard Time') as bigint)*1000
             where Event_ID = @eventId
             `)
             if(formData.gameCancel){

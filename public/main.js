@@ -471,6 +471,12 @@ async function toggleGameInfoForm(xform){
                 let ref1Select = document.getElementById('gameInfoForm').querySelector('[name="ref1Id"]')
                 let ref2Select = document.getElementById('gameInfoForm').querySelector('[name="ref2Id"]')
                 document.getElementById('gameInfoForm').querySelector('[name="period"]').value=responseData.data.game.period
+                console.log(responseData.data.game.startUnixTime)
+                const dateObj = new Date(Number(responseData.data.game.startUnixTime))
+                console.log(dateObj)
+                document.getElementById('gameInfoForm').querySelector('[name="startDate"]').value = dateObj.toISOString().split("T")[0]
+                document.getElementById('gameInfoForm').querySelector('[name="startTime"]').value = dateObj.toTimeString().slice(0, 5)
+                document.getElementById('gameInfoForm').querySelector('[name="court"]').value = responseData.data.game.Location
                 while (team1Select.options.length > 1) {
                     team1Select.remove(1);
                   }
