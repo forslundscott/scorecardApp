@@ -27,6 +27,7 @@
                             <%= player.lastName[0] + "." %>
                             <%= player.userId == team.keeper ? '(K)' : '' %>
                             <%= player.userId == team.captain ? '(C)' : '' %>
+                            <%= player.rostered == 0 ? '(S)' : '' %>
                             <% if (player.rostered === 0) { %>
                                 <% if (player.subCount == 2) { %>
                                   <span style="color:yellow">$$$</span>

@@ -442,6 +442,7 @@ async function toggleTeamForm(xform){
     }
     if(teamForm.style.display == 'none'){
         teamForm.getElementsByClassName('playerName')[0].innerHTML = xform.querySelector('[name="teamName"]').value
+        teamForm.getElementsByClassName('rosteredCount')[0].innerHTML = `Rostered Player Count: ${xform.querySelector('[name="rosteredCount"]').value}`
         teamForm.style.display = ''
         teamForm.querySelector('[name="teamId"]').value = xform.querySelector('[name="teamId"]').value
         teamForm.querySelector('[name="seasonId"]').value = xform.querySelector('[name="seasonId"]').value
