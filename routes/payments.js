@@ -710,36 +710,66 @@ const teamPrice = prices.data.find(price => price.nickname === nickname);
       from leagues as l
       where l.leagueId = @leagueId
       `)
-      console.log(req.body.teamPayType)
-      if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
-        totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 15000 : 1500)
+      // console.log(req.body.teamPayType)
+      if(result.recordset[0].refFeesIndividual > 50 && req.body.teamPayType !== 'team'){
+        totalPrice = totalPrice + result.recordset[0].refFeesIndividual
         lineItems.push(
           {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `Referee Fees - Premier - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
+                name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
               },
-              unit_amount: req.body.teamPayType === 'team' ? 15000 : 1500, // amount in cents
-            },
-            quantity: 1,
-          }
-        )
-      }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
-        totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 30000 : 3000)
-        lineItems.push(
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: `Referee Fees - Men's - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
-              },
-              unit_amount: req.body.teamPayType === 'team' ? 30000 : 3000, // amount in cents
+              unit_amount: result.recordset[0].refFeesIndividual, // amount in cents
             },
             quantity: 1,
           }
         )
       }
+      if(result.recordset[0].refFeesTeam > 50 && req.body.teamPayType === 'team'){
+        totalPrice = totalPrice + result.recordset[0].refFeesTeam
+        lineItems.push(
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `Referee Fees - ${result.recordset[0].shortName} - Team`,
+              },
+              unit_amount: result.recordset[0].refFeesTeam, // amount in cents
+            },
+            quantity: 1,
+          }
+        )
+      }
+      // if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
+      //   totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 15000 : 1500)
+      //   lineItems.push(
+      //     {
+      //       price_data: {
+      //         currency: 'usd',
+      //         product_data: {
+      //           name: `Referee Fees - Premier - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
+      //         },
+      //         unit_amount: req.body.teamPayType === 'team' ? 15000 : 1500, // amount in cents
+      //       },
+      //       quantity: 1,
+      //     }
+      //   )
+      // }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
+      //   totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 30000 : 3000)
+      //   lineItems.push(
+      //     {
+      //       price_data: {
+      //         currency: 'usd',
+      //         product_data: {
+      //           name: `Referee Fees - Men's - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
+      //         },
+      //         unit_amount: req.body.teamPayType === 'team' ? 30000 : 3000, // amount in cents
+      //       },
+      //       quantity: 1,
+      //     }
+      //   )
+      // }
       let waiverPay = await functions.checkWaiverFeeDue(req.user.id)
       if(req.body.teamPayType === 'self'){
         // console.log('test')
@@ -950,35 +980,51 @@ const price = prices.data.find(price => price.nickname === nickname);
           }
         )
         totalPrice = totalPrice + price.unit_amount
-        if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
-          totalPrice = totalPrice + 1500
+        // console.log(`Referee Fees - ${result.recordset[0].shortName} - Individual`)
+        if(result.recordset[0].refFeesIndividual > 50){
+          totalPrice = totalPrice + result.recordset[0].refFeesIndividual
           lineItems.push(
             {
               price_data: {
                 currency: 'usd',
                 product_data: {
-                  name: 'Referee Fees - Premier - Individual',
+                  name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
                 },
-                unit_amount: 1500, // amount in cents
-              },
-              quantity: 1,
-            }
-          )
-        }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
-          totalPrice = totalPrice + 3000
-          lineItems.push(
-            {
-              price_data: {
-                currency: 'usd',
-                product_data: {
-                  name: `Referee Fees - Men's - Individual`,
-                },
-                unit_amount: 3000, // amount in cents
+                unit_amount: result.recordset[0].refFeesIndividual, // amount in cents
               },
               quantity: 1,
             }
           )
         }
+        // if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
+        //   totalPrice = totalPrice + 1500
+        //   lineItems.push(
+        //     {
+        //       price_data: {
+        //         currency: 'usd',
+        //         product_data: {
+        //           name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
+        //         },
+        //         unit_amount: 1500, // amount in cents
+        //       },
+        //       quantity: 1,
+        //     }
+        //   )
+        // }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
+        //   totalPrice = totalPrice + 3000
+        //   lineItems.push(
+        //     {
+        //       price_data: {
+        //         currency: 'usd',
+        //         product_data: {
+        //           name: `Referee Fees - Men's - Individual`,
+        //         },
+        //         unit_amount: 3000, // amount in cents
+        //       },
+        //       quantity: 1,
+        //     }
+        //   )
+        // }
     }
     let waiverPay = await functions.checkWaiverFeeDue(req.user.id)
     if(waiverPay){
