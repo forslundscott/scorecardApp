@@ -150,12 +150,13 @@ app.post(['/waiver'], async (req,res)=>{
         //   console.log(transformedBody)
               await functions.addUserToDatabase(req.body);
               const user = await functions.getUser(req.body)
-        
+                
               functions.updateUserInfo({
-              userId: req.user.id,
+              userId: user.id,
               ...transformedBody,
               waiverDate: Date.now()
             })
+            functions.waiverSignedEmail(user)
         res.render('waiverSuccess.ejs', {data: data})
     }catch(err){
         console.error('Error:', err)

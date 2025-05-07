@@ -556,6 +556,19 @@ async function newRegistrationEmail(sessionId){
     } 
  
 }
+async function waiverSignedEmail(user){
+    try {    
+          
+            let htmlBody = `
+            <h2>Waiver Signed By:</h2>
+            <p>${user.firstName} ${user.lastName} ${user.email}</p>
+            `
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'noReplyGlos', 'Waiver Signed')
+    } catch (error) {
+      console.error('Error sending email:', error);
+    } 
+ 
+}
 module.exports = {
     titleCase
     ,getOrdinalNumber
@@ -579,4 +592,5 @@ module.exports = {
     ,rollBackTeam
     ,sendEmail
     ,newRegistrationEmail
+    ,waiverSignedEmail
 }
