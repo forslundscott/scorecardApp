@@ -17,6 +17,9 @@
             <input type="hidden" name="opponentKeeper" value="<%= opponent.keeper %>">
             <input type="hidden" name="season" value="<%= data.game.season %>">
             <input type="hidden" name="subseason" value="<%= data.game.subseason %>">
+            <input type="hidden" name="waiverSignNeeded" value="<%= Number(player.waiverDate) < functions.getWaiverResetDate() %>">
+            <input type="hidden" name="waiverPayNeeded" value="<%= Number(player.waiverPayDate) < functions.getWaiverResetDate() %>">
+            <input type="hidden" name="subPayNeeded" value="<%= player.subCount > 1 %>">
             
             <button class="itemFormat primaryStyle" style="border-style: solid ;border-image: linear-gradient(to <%= side == 'left' ? 'right' : 'left' %>, <%= team.color.toLowerCase() == 'black' ? 'silver': 'black' %> 5%,black 25%) 1; background-image: linear-gradient(90deg, <%=side == 'left' ? team.color + ' 5%, black 25%' : 'black 75%, ' + team.color + ' 95%' %> );" type="button" onclick="toggleEventForm(this)">
                 <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
@@ -28,14 +31,21 @@
                             <%= player.userId == team.keeper ? '(K)' : '' %>
                             <%= player.userId == team.captain ? '(C)' : '' %>
                             <%= player.rostered == 0 ? '(S)' : '' %>
+                            <% console.log(Number(player.waiverPayDate) < functions.getWaiverResetDate())%>
+                            <% console.log(Number(player.waiverPayDate))%>
+                            <% console.log(functions.getWaiverResetDate())%>
                             <% if (player.rostered === 0) { %>
-                                <% if (player.subCount == 2) { %>
-                                  <span style="color:yellow">$$$</span>
-                                <% } else if (player.subCount > 2) { %>
+                                <%# if (player.subCount > 1 || Number(player.waiverDate) < functions.getWaiverResetDate()) { %>
+                                <% if (player.subCount > 1) { %>
                                   <span style="color:red">$$$</span>
+                                <% } else if (player.subCount == 1) { %>
+                                  <span style="color:yellow">$$$</span>
                                 <% } %>
-                              <% } %>
-                              
+                            <% } else { %>
+                                <%# if(Number(player.waiverPayDate) < functions.getWaiverResetDate() || Number(player.waiverDate) < functions.getWaiverResetDate()){ %>
+                                    <!-- <span style="color:red">$$$</span> -->
+                                <%# } %>
+                            <% } %>
                               
                         </div>
                         <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->

@@ -984,7 +984,23 @@ function hasDuplicate(values) {
     console.log(uniqueValues.length)
     return uniqueValues.size < filteredValues.length; // Check for duplicates
 }
+function getWaiverResetDate() {
+    const now = new Date();
+    let year = now.getUTCFullYear();
 
+    // If today is before March 1st, get the previous year's March 1st
+    if (now.getUTCMonth() < 2) {
+        year--;
+    }
+
+    const lastMarchFirst = new Date(Date.UTC(year, 2, 1, 0, 0, 0)); // March 1st, 00:00:00 UTC
+    const offsetMinutes = lastMarchFirst.toLocaleString('en-US', { timeZone: 'America/New_York', timeZoneName: 'short' })
+        .includes('EST') ? 300 : 240; // EST = 300 min (5 hours), EDT = 240 min (4 hours)
+
+    // Convert to Unix timestamp
+    return Math.floor((lastMarchFirst.getTime() + offsetMinutes * 60 * 1000) / 1000);
+    
+}
 
 window.onerror = function (message, source, lineno, colno, error) {
     fetch('/log-client-error', {

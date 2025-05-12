@@ -341,9 +341,9 @@ router.get('/:teamId/roster/newPlayer', async (req,res, next)=>{
         .input('teamId', sql.VarChar, req.params.teamId)
         .query(`
             select season from teams
-            where id = @teamId
+            where teamId = @teamId
             `)
-
+            
         data.seasonId = result.recordset[0].season
 
         res.render('index.ejs',{data: data})

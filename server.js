@@ -193,8 +193,37 @@ app.get(['/waiver'],checkAuthenticated, async (req,res)=>{
 app.get(['/test'], async (req,res)=>{
     try{
         // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test')
-        // const session = await stripe.paymentIntents.retrieve('pi_3R9qIOFGzuNCeWUR05YeiQHb')
+        // const session = await stripe.sessions.retrieve('pi_3R9qIOFGzuNCeWUR05YeiQHb')
         // console.log(session)
+        let result = await pool.request()
+        // .input('userId', sql.Int, data.user.id)
+        .query(`
+            select *  from seasonRegistrations
+            where registrationId in (
+                select registrationId from seasonRegistration_leagueTeam
+                where leagueId in (1000000006)
+                and transactionId like 'cs%'
+            )
+            `)
+            console.log(result.recordset.length)
+            for(let i=0;i<result.recordset.length;i++){
+                let customer = result.recordset[i]
+                // console.log(i
+                // )
+                const session = await stripe.checkout.sessions.retrieve(customer.transactionId)
+                const lineItems = await stripe.checkout.sessions.listLineItems(customer.transactionId, {
+                    expand: ['data.price.product'], // Optional: expands product details
+                });
+                const hasRefereeItem = lineItems.data.some(item => {
+                   
+                    const description = item.description || '';
+                    return description.toLowerCase().includes('referee');
+                  });
+                  if (!hasRefereeItem) {
+                    console.log(session.customer_details.name);
+                  }
+            }
+            console.log(lineItems)
         console.log(req.user)
         res.send('<p>test</p>');      
         

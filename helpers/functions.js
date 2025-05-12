@@ -387,7 +387,7 @@ function getWaiverResetDate() {
         .includes('EST') ? 300 : 240; // EST = 300 min (5 hours), EDT = 240 min (4 hours)
 
     // Convert to Unix timestamp
-    return Math.floor((lastMarchFirst.getTime() + offsetMinutes * 60 * 1000) / 1000);
+    return Math.floor((lastMarchFirst.getTime() + offsetMinutes * 60 * 1000));
     
 }
 async function checkWaiverFeeDue(userId) {
