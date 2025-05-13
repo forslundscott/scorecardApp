@@ -751,6 +751,84 @@ router.get('/site/mygames', checkAuthenticated, async (req,res, next)=>{
         next(err)
     }
 });
+router.get('/site/:leagueId', async (req,res, next)=>{
+    try{
+        if (req.isAuthenticated()) {
+            // console.log(req.user)
+        }
+        let data = {
+            teams: [],
+            page: 'games',
+            user: req.user
+        }
+
+        // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
+        // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
+        const result = await pool.request()
+        .input('leagueId',sql.Int, req.params.leagueId)
+        .query(`Select g.*,
+                t1.abbreviation as t1Abbreviation,
+                t2.abbreviation as t2Abbreviation,
+                t1.shortName as t1ShortName,
+                t2.shortName as t2ShortName,
+                l.abbreviation as leagueAbbreviation,
+                l.name as leagueName
+            from gamesList(0) as g
+            left join teams as t1 on g.Team1_ID=t1.teamId
+            left join teams as t2 on g.Team2_ID=t2.teamId
+            left join leagues as l on g.leagueId=l.leagueId
+            where g.leagueId = @leagueId
+            order by startUnixTime, location `)
+            console.log(result.recordset)
+            
+        
+        const groupedData = result.recordset.reduce((acc, game) => {
+            const dateObj = new Date(Number(game.startUnixTime)); // Ensure correct conversion
+            const dateOptions = { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric',
+                timeZone: 'America/New_York'  // Explicitly set EST/EDT
+            };
+            const date = dateObj.toLocaleDateString('en-US', dateOptions);
+            // Convert time to Eastern Time in 12-hour format
+            const timeOptions = { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true,
+                timeZone: 'America/New_York'  // Explicitly set EST/EDT
+            };
+            const time = dateObj.toLocaleTimeString('en-US', timeOptions);
+
+            if (!acc[date]) {
+                acc[date] = { date, matches: [] };
+            }
+            acc[date].matches.push({
+                time,
+                location: game.Location,
+                team1Id: game.Team1_ID,
+                team2Id: game.Team2_ID,
+                team1Abbreviation: game.t1Abbreviation,
+                team2Abbreviation: game.t2Abbreviation,
+                team1ShortName: game.t1ShortName,
+                team2ShortName: game.t2ShortName,
+                league: game.leagueId,
+                leagueName: game.leagueName,
+                leagueAbbreviation: game.leagueAbbreviation
+            });
+        
+            return acc;
+        }, {});
+        
+
+        data.schedule = Object.values(groupedData)
+        // console.log(data.schedule[0])
+        res.render('scheduleSite.ejs',{data: data}) 
+    }catch(err){
+        next(err)
+    }
+});
 router.get('/site', async (req,res, next)=>{
     try{
         if (req.isAuthenticated()) {
