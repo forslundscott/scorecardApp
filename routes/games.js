@@ -919,7 +919,7 @@ router.get('/', async (req,res, next)=>{
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
         // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
         let sqlStr
-        if(req.user?.roles.some(role => ['admin'].includes(role.name))){
+        if(req.user?.roles.some(role => ['admin', 'Manager'].includes(role.name))){
              sqlStr = `Select * 
                 from gamesList(0) 
                 order by startUnixTime, location `
