@@ -181,7 +181,7 @@
         <select name="leagueId" required>
             <option value="" disabled selected>League</option>
             <% for(let league of data.leagues){ %>
-                <option value="<%= league.leagueId %>"> <%= league.leagueShortName %></option>
+                <option value="<%= league.leagueId %>"> <%= league.leagueShortName %> (<%= functions.getDayName(league.dayOfWeek) %>s)</option>
                 
             <% } %>
         </select>

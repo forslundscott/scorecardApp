@@ -569,6 +569,10 @@ async function waiverSignedEmail(user){
     } 
  
 }
+function getDayName(dayNumber) {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[dayNumber % 7];
+}
 module.exports = {
     titleCase
     ,getOrdinalNumber
@@ -593,4 +597,5 @@ module.exports = {
     ,sendEmail
     ,newRegistrationEmail
     ,waiverSignedEmail
+    ,getDayName
 }

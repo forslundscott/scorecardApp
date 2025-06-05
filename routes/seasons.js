@@ -281,6 +281,7 @@ router.get(['/:seasonId/registration/team'],checkAuthenticated, async (req, res,
             left join leagues as l 
                 on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
+            order by l.dayOfWeek
             
             select * from seasons
             where seasonId = @seasonId;
@@ -360,6 +361,7 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             left join leagues as l 
                 on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
+            order by l.dayOfWeek
             
             select * from seasons
             where seasonId = @seasonId;

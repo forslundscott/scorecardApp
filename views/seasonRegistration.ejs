@@ -165,7 +165,7 @@
                 id="leagueId_<%= league.leagueId %>"
                 onchange="leagueSelect(this)"
             >
-            <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %></label>
+            <label for="leagueId_<%= league.leagueId %>"><%= league.leagueShortName %> (<%= functions.getDayName(league.dayOfWeek) %>s)</label>
             <select name="<%=league.leagueId %>_teamId" id="<%=league.leagueId %>_teamId" style="display: none;">
                 <option value="" disabled selected>Team Name (Captain Name)</option>
                 <option value="1000000069">Free Agent</option>
