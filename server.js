@@ -105,6 +105,7 @@ app.use('/facilities', require(`./routes/facilities`));
 app.use('/pickup', require(`./routes/pickup`));
 app.use('/leagues', require(`./routes/leagues`));
 app.use('/standings', require(`./routes/standings`));
+app.use('/tournaments', require(`./routes/tournaments`));
 app.use('/auth', require(`./routes/auth`))
 app.use('/notifications', require(`./routes/notifications`))
 app.use('/api/payments', require(`./routes/payments`))

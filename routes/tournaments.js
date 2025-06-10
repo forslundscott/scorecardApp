@@ -105,32 +105,28 @@ router.get(['/:tournamentId/registration/team'],checkAuthenticated, async (req, 
 
         let result = await pool.request()
         .input('userId', sql.Int, data.user.id)
-        .input('seasonId', sql.Int, req.params.seasonId)
+        .input('tournamentId', sql.Int, req.params.tournamentId)
         .query(`
             SELECT * from users
             WHERE ID = @userId;
 
-            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
-            from league_season as ls 
-            left join leagues as l 
-                on ls.leagueId = l.leagueId
-            where ls.seasonId = @seasonId
             
-            select * from seasons
-            where seasonId = @seasonId;
             
-            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
-            from seasonRegistration_leagueTeam as srl
-            left join leagues as l on srl.leagueId = l.leagueId
-            left join teams as t on srl.teamId = t.teamId
-            where srl.seasonId = @seasonId and srl.userId = @userId
+            select * from tournaments
+            where tournamentId = @tournamentId;
+            
+            --select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName 
+            --from seasonRegistration_leagueTeam as srl
+            --left join leagues as l on srl.leagueId = l.leagueId
+            --left join teams as t on srl.teamId = t.teamId
+            --where srl.seasonId = @seasonId and srl.userId = @userId
             `)
             console.log('testing123')
             data.userAttributes = result.recordsets[0][0]
             data.userAttributes.dob = Number(data.userAttributes.dob)
-            data.leagues = result.recordsets[1]
-            data.season = result.recordsets[2][0]
-            data.leaguesAlreadyRegistered = result.recordsets[3]
+            // data.leagues = result.recordsets[1]
+            data.tournament = result.recordsets[1][0]
+            data.leaguesAlreadyRegistered = result.recordsets[2]
             console.log(data.leaguesAlreadyRegistered)
             data.userAttributes.allergies = data.userAttributes.allergies
             ? data.userAttributes.allergies.split(',').map(allergy => allergy.trim())
@@ -138,38 +134,38 @@ router.get(['/:tournamentId/registration/team'],checkAuthenticated, async (req, 
             data.userAttributes.medicalConditions = data.userAttributes.medicalConditions
             ? data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
             : [];
-            console.log(data.leagues)
+            // console.log(data.leagues)
             // data.userAttributes.medicalConditions = data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
             // console.log(data.userAttributes.allergies.split(',').map(allergy => allergy.trim()))
-            for(let league of data.leagues){
-                console.log(league.leagueId)
-                result = await pool.request()
-                .input('leagueId', sql.VarChar, `${league.leagueId}`)
-                .input('seasonId', sql.Int, req.params.seasonId)
-                .query(`
-                    select slt.*
-                        , t.fullName as teamFullName
-                        , t.shortName as teamShortName
-                        , t.abbreviation as teamAbbreviation
-                        , t.color as teamColor
-                        ,t.keeper as teamKeeper
-                        ,t.captain as teamCaptain
-                        , u.preferredName as captainPreferredName
-                        , u.lastName as captainLastName 
-                        from seasonLeagueTeam as slt
-                        left join teams as t 
-                            on slt.teamId=t.teamId
-                        left join users as u 
-                            on t.captain=u.ID
-                    where 
-                        slt.leagueId = @leagueId 
-                        and slt.seasonId = @seasonId
+            // for(let league of data.leagues){
+            //     console.log(league.leagueId)
+            //     result = await pool.request()
+            //     .input('leagueId', sql.VarChar, `${league.leagueId}`)
+            //     .input('seasonId', sql.Int, req.params.seasonId)
+            //     .query(`
+            //         select slt.*
+            //             , t.fullName as teamFullName
+            //             , t.shortName as teamShortName
+            //             , t.abbreviation as teamAbbreviation
+            //             , t.color as teamColor
+            //             ,t.keeper as teamKeeper
+            //             ,t.captain as teamCaptain
+            //             , u.preferredName as captainPreferredName
+            //             , u.lastName as captainLastName 
+            //             from seasonLeagueTeam as slt
+            //             left join teams as t 
+            //                 on slt.teamId=t.teamId
+            //             left join users as u 
+            //                 on t.captain=u.ID
+            //         where 
+            //             slt.leagueId = @leagueId 
+            //             and slt.seasonId = @seasonId
                         
-                    `)
-                league.teams = result.recordset
-            }
+            //         `)
+            //     league.teams = result.recordset
+            // }
             console.log(await functions.checkWaiverFeeDue(req.user.id))
-        res.render('teamRegistration.ejs',{data: data})
+        res.render('tournamentRegistration.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
     }

@@ -142,7 +142,7 @@
 <body style="text-align: center; width: 100%;" >
     <div style="background-image: linear-gradient(180deg, #CEFF00 0%, #4E6100 100%); width: 100%;">
          <img style="padding: 12px 0 0 0;" height="200vh" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" onclick="window.location.href='/'">
-        <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;"><%= data.season.seasonName %> Team Registration</h1>
+        <h1 style="color: #121212; margin: 0; padding: 15px 0px 20px 0px;"><%= data.tournament.tournamentName %> Team Registration</h1>
     </div>
    
     
@@ -152,19 +152,19 @@
         <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
         <input type="hidden" name="teamId" id="" >
         <input type="text" name="teamFullName" placeholder="Team Full Name" value="" required>
-        <input type="text" name="teamShortName" placeholder="Team Short Name" value="" required>
+        <!-- <input type="text" name="teamShortName" placeholder="Team Short Name" value="" required>
         <br>
         <br>
         <input type="text" name="teamAbbreviation" placeholder="Team Abbreviation" value="" required>
         <div style="display: none;">
             <br>
             <button type="button" name="teamIdClear" class="buttonStyle" onclick="teamClear()">Clear</button>
-        </div>
+        </div> -->
         
-        <div>
+        <!-- <div>
             <br>
             <button type="button" class="buttonStyle" style="background-color: #ceff00;" onclick="toggleForm(document.getElementById('teamSearchContainer'),document.getElementById('formBackground'))">Search for Existing Team</button>
-        </div>
+        </div> -->
         <br><br>
         <label for="skill"><b>Rate your Team's Experience Level:</b></label>
         <select name="skill" id="" required>
@@ -176,16 +176,8 @@
         </select>
         <br><br>
         
-        <label for=""><b>League:</b></label>
         
-        <select name="leagueId" required>
-            <option value="" disabled selected>League</option>
-            <% for(let league of data.leagues){ %>
-                <option value="<%= league.leagueId %>"> <%= league.leagueShortName %></option>
-                
-            <% } %>
-        </select>
-        <br><br>
+        
         <label for=""><b>Division:</b></label>
         <select name="division" id="" required>
             <option value="" disabled selected>Division</option>
@@ -193,9 +185,9 @@
             <option value="lower">Lower</option>
             <option value="either">Either</option>
         </select>
-        <!-- <input type="text" name="medicalConditions" placeholder="List Medical Conditions"> -->
+
         <br><br>
-        <!-- <input type="text" name="teamShirtColor1" id="teamShirtColor1" value="" hidden> -->
+
               <label for="teamShirtColor1"><b>Team Shirt Color 1: </b></label>
               <select name="teamShirtColor1" id="teamShirtColor1" onchange="colorSelect(this)" required>
                 <option value="" disabled selected>Shirt Color</option>
@@ -213,7 +205,7 @@
               </select>
 
               <br>
-              <!-- <input type="text" name="teamShirtColor2" id="teamShirtColor2" value="" hidden> -->
+
               <label for="teamShirtColor2"><b>Team Shirt Color 2: </b></label>
               <select name="teamShirtColor2" id="teamShirtColor2" onchange="colorSelect(this)" required>
                 <option value="" disabled selected>Shirt Color</option>
@@ -249,28 +241,11 @@
               </select>
 
               <br>
-              <label for="keeperShirtColor"><b>Keeper Shirt Color: </b></label>
-              <select name="keeperShirtColor" id="keeperShirtColor" onchange="colorSelect(this)" required>
-                <option value="" disabled selected>Shirt Color</option>
-                <option value="Lime">Lime</option>
-                <option value="Orchid">Orchid</option>
-                <option value="Pink">Pink</option>
-                <option value="Sapphire">Sapphire</option>
-              </select>
-              <br>
-              <% if (data.leaguesAlreadyRegistered.length !== 0) { %>
-                <br>
-                <label for=""><b>Already Registered:</b></label>
-                <br><br>
-                <% for(let league of data.leaguesAlreadyRegistered){ %>
-                    <input type="text" disabled value="<%= league.leagueShortName %>">
-                    <input type="text" disabled value="<%= league.teamShortName %>">
-                    <br>
-                <% } %>
-                
-            <% } %>
+              
+              
              
-              <br><br>
+             
+              <br>
               <div class="primaryStyle" style="font-size: 100%; display: none;">
                 <h3><b>Team Logo (optional): </b></h3>
                     <br>
@@ -280,185 +255,10 @@
                 <img id="imagePreview" style="display:none; max-width: 100px; max-height: 100px; margin-top: 10px;">
                 <br><br>
             </div>
-            <!-- <br><br><br>   -->
-            <label for=""> Are you registering...</label>
-            <label for=""><input type="radio" name="teamPayType" value="self" onclick="payChange(this)"> Self Only</label>
-            <label for=""><input type="radio" name="teamPayType" value="team" onclick="payChange(this)" checked> Whole Team</label>
-            <div id="rosterContainer">
-                <label for=""><h2><b>Team Roster: </b></h2></label>
-                <b>(Max 14) </b>
-                <br><br>
-                <button 
-                    type="button" 
-                    class="buttonStyle" 
-                    style="background-color: #ceff00;" 
-                    onclick="if(checkRows()){toggleForm(document.getElementById('newPlayerFormTeamRegistration'),document.getElementById('formBackground'))}">Add Player</button>
-                <table id="rosterTable">
-                    <thead>
-                        <tr>
-                            <th>
-                                Email
-                            </th>
-                            <th>
-                                First Name
-                            </th>
-                            <th>
-                                Last Name
-                            </th>
-                            <th>
-                                Shirt Size
-                            </th>
-                            <th>
-                                Captain?
-                            </th>
-                            <th>
-                                Keeper?
-                            </th>
-                            <th>
-                                Remove
-                            </th>
-                            <th style="display: none;">
-                                Student, Teacher,
-                                <br>
-                                First Responder, or Military?
-                            </th>
-                            <th style="display: none;">
-                                Paying Now
-                                <br><br>
-                                <button type="button" class="buttonStyle" onclick="selectAllPay()">Select All</button>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="rosterList">
-                        <tr>
-                            <td>
-                                <input type="text" name="email" value="<%= data.userAttributes.email%>" disabled required>
-                            </td>
-                            <td>
-                                <input type="text" name="firstName" value="<%= data.userAttributes.firstName%>" disabled required>
-                            </td>
-                            <td>
-                                <input type="text" name="lastName" value="<%= data.userAttributes.lastName%>" disabled required>
-                            </td>
-                            <td>
-                                <select name="shirtSize_<%= data.userAttributes.ID %>" id="" required>
-                                    <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
-                                    <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
-                                    <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
-                                    <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
-                                    <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input name="captainId" type="radio" value="<%= data.userAttributes.ID %>" checked required>
-                            </td>
-                            <td>
-                                <input name="keeperId" type="radio" value="<%= data.userAttributes.ID %>">
-                            </td>
-                            <td>
-                                <button name="<%= data.userAttributes.ID %>_remove" style="color: gray;" disabled>X</button>
-                            </td>
-                            <td style="display: none;">
-                                <input name="discounted_<%= data.userAttributes.ID %>" type="checkbox" <%= data.userAttributes.discounted === true ? 'checked': '' %> disabled>
-                            </td>
-                            <td style="display: none;">
-                                <input name="payNow_<%= data.userAttributes.ID %>" type="checkbox" checked disabled>
-                            </td>
-                            <input type="hidden" class="userId" name="rosterUserId" value="<%= data.userAttributes.ID%>">
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <label for="rosterTxt"><b>Please List Roster (Max 6): </b></label>
             <br>
-            <label for=""><h2><b>Your Information: </b></h2></label>
-        <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
-        <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
-        <br>
-        <br>
-        <input type="email" name="email" placeholder="Email" value="<%= data.userAttributes.email ? data.userAttributes.email : ''  %>" required>
-        <input type="tel" name="phone" placeholder="Phone Number" value="<%= data.userAttributes.phone ? data.userAttributes.phone : ''  %>" required>
-        <br>
-        <br>
-        <label for="dob"><b>Date of Birth:</b></label>
-        <input type="date" name="dob" value="<%= (data.userAttributes.dob && data.userAttributes.dob !== '' && data.userAttributes.dob !== 0) ? new Date(Number(data.userAttributes.dob)).toISOString().slice(0, 10) : '' %>" required>
-        <br>
-        <br>
-        <label for="gender"><b>Gender:</b></label>
-        <br>
-
-        <input type="radio" name="gender" id="gender_male" value="male" <%=data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'male' ? 'checked' : ''  %> required><label for="gender_male">Male</label>
-        <br>
-        <input type="radio" name="gender" id="gender_female" value="female" <%= data.userAttributes.gender && data.userAttributes.gender.toLowerCase() === 'female' ? 'checked' : ''  %>><label for="gender_female">Female</label>
-        <br>
-        <input type="radio" name="gender" id="gender_unspecified" value="unspecified" <%= (!data.userAttributes.gender || (data.userAttributes.gender.toLowerCase() !== 'male' && data.userAttributes.gender.toLowerCase() !== 'female')) ? 'checked' : ''  %>><label for="gender_unspecified">Unspecified</label>
-        <br>
-        <br>
-        
-        <div id="shirtSizeContainer" style="display: none;">
-            <label for=""><b>Shirt Size: </b></label>
-            <select name="shirtSize" id=""  required>
-                <option value="S" <%= data.userAttributes.shirtSize === 'S' ? 'selected' : ''  %>>Small</option>
-                <option value="M" <%= data.userAttributes.shirtSize === 'M' ? 'selected' : ''  %>>Medium</option>
-                <option value="L" <%= !['S', 'M', 'XL', 'XXL'].includes(data.userAttributes.shirtSize) ? 'selected' : ''  %>>Large</option>
-                <option value="XL" <%= data.userAttributes.shirtSize === 'XL' ? 'selected' : ''  %>>X-Large</option>
-                <option value="XXL" <%= data.userAttributes.shirtSize === 'XXL' ? 'selected' : ''  %>>XX-Large</option>
-            </select>
+            <textarea name="" id="rosterTxt"></textarea>
             <br><br>
-        </div>
-        
-        <label for="discounted"><b>Are you a student, teacher, first responder, or member of the military?</b></label>
-        <br>
-        <br>
-        
-        <input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && data.userAttributes.discounted === true ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
-        <br>
-        <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || data.userAttributes.discounted !== true ? 'checked' : ''  %>><label for="discounted_no">No</label>
-        <br><br><br>
-        <label for=""><b>Emergency Contact:</b></label>
-        <br>
-        <br>
-        <input type="text" name="emergencyContactFirstName" placeholder="First Name" value="<%= data.userAttributes.emergencyContactFirstName ? data.userAttributes.emergencyContactFirstName : ''  %>" required>
-        <input type="text" name="emergencyContactLastName" placeholder="Last Name" value="<%= data.userAttributes.emergencyContactLastName ? data.userAttributes.emergencyContactLastName : ''  %>" required>
-        <br>
-        <br>
-
-        <input type="tel" name="emergencyContactPhone" placeholder="Phone Number" value="<%= data.userAttributes.emergencyContactPhone ? data.userAttributes.emergencyContactPhone : ''  %>" required>
-
-        <input type="text" name="emergencyContactRelationship" placeholder="Relationship" value="<%= data.userAttributes.emergencyContactRelationship ? data.userAttributes.emergencyContactRelationship : ''  %>" required>
-        <br><br><br>
-        <label for=""><b>Do you have any allergies or medical conditions we should be aware of?</b></label>
-        <br>
-        <!-- <br> -->
-
-        <div class="container">
-            <div class="section">
-                <h3>Allergies</h3>
-                <div id="allergy-list">
-                    <% for(let allergy of data.userAttributes.allergies){ %>
-                        <% if(allergy !== ''){ %>
-                            <br>
-                            <input type="text" class="allergy-input" name="allergies[]" value="<%= allergy %>" placeholder="Enter an allergy">
-                        <% } %>
-                    <% } %>
-                    <br>
-                    <input type="text" class="allergy-input" name="allergies[]" placeholder="Enter an allergy">
-                </div>
-            </div>
-            <div class="section">
-                <h3>Medical Conditions</h3>
-                <div id="medical-list">
-                    <% for(let condition of data.userAttributes.medicalConditions){ %>
-                        <% if(condition !== ''){ %>
-                            <br>
-                            <input type="text" class="medical-input" name="medicalConditions[]" value="<%= condition %>" placeholder="Enter a medical condition">
-                        <% } %>
-                    <% } %>
-                    <br>
-                    <input type="text" class="medical-input" name="medicalConditions[]" placeholder="Enter a medical condition">
-                </div>
-            </div>
-        </div>
-        <br><br>
         
         <a id="waiver-link" target="_blank">GLOS Waiver</a>
         <br>
