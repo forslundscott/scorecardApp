@@ -36,9 +36,9 @@
                             <% console.log(functions.getWaiverResetDate())%>
                             <% if (player.rostered === 0) { %>
                                 <%# if (player.subCount > 1 || Number(player.waiverDate) < functions.getWaiverResetDate()) { %>
-                                <% if (player.subCount > 1) { %>
+                                <% if (player.subCount > 2) { %>
                                   <span style="color:red">$$$</span>
-                                <% } else if (player.subCount == 1) { %>
+                                <% } else if (player.subCount == 2) { %>
                                   <span style="color:yellow">$$$</span>
                                 <% } %>
                             <% } else { %>
