@@ -556,6 +556,117 @@ async function newRegistrationEmail(sessionId){
     } 
  
 }
+async function newTournamentRegistrationEmail(sessionId){
+    try {    
+      // Send reset email
+      let result = await pool.request()
+            .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
+            .input('transactionId', sql.VarChar, sessionId)
+            .query(`select top 1 u.firstName + ' ' + u.lastName as fullName,
+                 u.email
+                 , sr.teamName
+                 , sr.registrationId
+                 , sr.teamColor1
+                 , sr.teamColor2
+                 , sr.teamColor3
+                 , sr.teamSkill
+                 , sr.division
+                 , sr.roster
+                 , sr.transactionId
+                 , sr.gateway 
+                 from tournamentRegistrations as sr
+                left join users as u on sr.userId=u.ID
+                where sr.test = @testMode
+                and transactionId = @transactionId
+                `)
+        let session
+        console.log(result.recordset)
+        let htmlString = ''
+        let htmlString2 = ''
+        let totalPrice = 0
+        let registration = result.recordset[0]
+        // for(let registration of result.recordset){
+            session = await stripe.checkout.sessions.retrieve(registration.transactionId)
+            let registrationPrice = new Intl.NumberFormat('en-US', { 
+                style: 'currency', 
+                currency: 'USD' 
+            }).format(session.amount_total/100)
+            totalPrice = totalPrice + (session.amount_total/100)
+            htmlString += `<tr>
+                <td>${registration.fullName}</td>
+                <td>${registration.email}</td>
+                <td>${registration.teamName}</td>
+                <td>${registration.teamColor1}</td>
+                <td>${registration.teamColor2}</td>
+                <td>${registration.teamColor3}</td>
+                <td>${registration.division}</td>
+                <td>${registration.teamSkill}</td>
+                <td>${registration.roster}</td>
+                <td>${registrationPrice}</td>
+                <td>${registration.registrationId}</td>
+            </tr>`
+        // }
+        // result = await pool.request()
+        //     .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
+        //     .input('registrationId', sql.Int, result.recordset[0].registrationId)
+        //     .query(`
+        //             select u.firstName + ' ' + u.lastName as fullName
+        //             , u.email
+        //             , l.shortName as leagueShortName
+        //             , t.shortName as teamShortName
+        //             , sr.division
+        //             , sr.keeper
+        //             , sr.shirtSize
+        //             , sr.registrationId
+        //              from seasonRegistration_leagueTeam as sr
+        //             left join users as u on sr.userId=u.ID
+        //             LEFT join leagues as l on sr.leagueId=l.leagueId
+        //             left join teams as t on sr.teamId=t.teamId
+        //             where sr.test = @testMode
+        //             and registrationId = @registrationId
+        //         `)
+
+                // for(let registration of result.recordset){
+                //     htmlString2 += `<tr>
+                //         <td>${registration.fullName}</td>
+                //         <td>${registration.email}</td>
+                //         <td>${registration.leagueShortName}</td>
+                //         <td>${registration.teamShortName}</td>
+                //         <td>${registration.division}</td>
+                //         <td>${registration.keeper}</td>
+                //         <td>${registration.shirtSize}</td>
+                //         <td>${registration.registrationId}</td>
+                //     </tr>`
+                // }
+            let htmlBody = `
+            <h2>TournamentRegistration Details:</h2>
+            <table border="1" cellspacing="0" cellpadding="5">
+                <thead>
+                    <td>Name</td>
+                    <td>Email</td>
+                    <td>Team Name</td>
+                    <td>Color 1</td>
+                    <td>Color 2</td>
+                    <td>Color 3</td>
+                    <td>Division</td>
+                    <td>Experience</td>
+                    <td>Roster</td>
+                    <td>Amount</td>
+                    <td>Registration Id</td>
+                </thead>
+                <tbody>
+                    ${htmlString}
+                </tbody>
+                
+            </table>
+            
+            `
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'noReplyGlos', 'New Registration')
+    } catch (error) {
+      console.error('Error sending email:', error);
+    } 
+ 
+}
 async function waiverSignedEmail(user){
     try {    
           
@@ -596,6 +707,7 @@ module.exports = {
     ,rollBackTeam
     ,sendEmail
     ,newRegistrationEmail
+    ,newTournamentRegistrationEmail
     ,waiverSignedEmail
     ,getDayName
 }

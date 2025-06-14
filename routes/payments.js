@@ -347,7 +347,7 @@ router.get('/success', async (req,res, next)=>{
 
             await transaction.commit()
             isTransactionActive = false
-
+            functions.newRegistrationEmail(session.id)
       }else if (session.metadata.type === 'teamSeasonCheckout') {
         console.log('team')
         console.log(session.metadata)
@@ -483,6 +483,81 @@ router.get('/success', async (req,res, next)=>{
 
             await transaction.commit()
             isTransactionActive = false
+            functions.newRegistrationEmail(session.id)
+      }else if (session.metadata.type === 'teamTournamentCheckout') {
+        console.log('team')
+        console.log(session.metadata)
+        
+
+        // transaction = new sql.Transaction(pool);
+        
+            // Begin the transaction
+            // await transaction.begin();
+            // isTransactionActive = true
+        const result = await pool.request()
+                .input('tournamentId', sql.Int, session.metadata.tournamentId)
+                .input('userId', sql.Int, req.user.id)
+                .input('registrationTime', sql.BigInt, Date.now())
+                .input('transactionId', sql.VarChar, session.id)
+                .input('gateway', sql.VarChar, 'Stripe')
+                .input('roster', sql.VarChar, session.metadata.rosterTxt)
+                .input('teamShirtColor1', sql.VarChar, session.metadata.teamShirtColor1 || '')
+                .input('teamShirtColor2', sql.VarChar, session.metadata.teamShirtColor2 || '')
+                .input('teamShirtColor3', sql.VarChar, session.metadata.teamShirtColor3 || '')
+                .input('teamName', sql.VarChar, session.metadata.teamFullName)
+                
+                .input('division', sql.VarChar, session.metadata.division)
+                .input('teamSkill', sql.Int, session.metadata.skill)
+                .input('test', sql.Bit, !session.livemode)
+                .input('captainId', sql.Int, session.metadata.captainId || req.user.id)
+                
+                .input('type', sql.VarChar, 'team')
+                .query(`
+                    INSERT INTO tournamentRegistrations (
+                      tournamentId
+                      , registrationTime
+                      , userId
+                      , transactionId
+                      , gateway
+                      , roster
+                      , test
+                      , teamColor1
+                      , teamColor2
+                      , teamColor3
+                      , teamName
+                      
+                      , division
+                      , teamSkill
+                      , captainId
+                      
+                      , type
+                    )
+                    OUTPUT INSERTED.registrationId
+                    VALUES (
+                      @tournamentId
+                      , @registrationTime
+                      , @userId
+                      , @transactionId
+                      , @gateway
+                      , @roster
+                      , @test
+                      , @teamShirtColor1
+                      , @teamShirtColor2
+                      , @teamShirtColor3
+                      , @teamName
+                      
+                      , @division
+                      , @teamSkill
+                      , @captainId
+                      
+                      , @type
+                    )
+                `);
+
+            const registrationId = result.recordset[0].registrationId;
+            console.log('Registration inserted, registrationId:', registrationId);
+
+         functions.newTournamentRegistrationEmail(session.id)
       }
         // fetch(`${req.protocol}://${req.get('host')}/seasons/${session.metadata.seasonId}/registration`, {
         //   method: 'POST',
@@ -533,7 +608,7 @@ router.get('/success', async (req,res, next)=>{
         //     await fullEmail(result.recordset)
             
         // console.log(result.recordset)
-        functions.newRegistrationEmail(session.id)
+        // functions.newRegistrationEmail(session.id)
         res.render('paymentSuccess.ejs');
         
     }catch(err){
@@ -607,6 +682,299 @@ router.get('/cancel', async (req,res, next)=>{
 //         next(err)
 //     }
 // });
+router.post('/teamTournamentCheckoutSession', async (req, res) => {
+  
+  try {
+    // let result = await pool.request()
+    // .input('leagueId',sql.Int,req.body.leagueId)
+    // .query(`
+    //   select *
+    //   from leagues as l
+    //   where l.leagueId = @leagueId
+    //   `)
+    const consolidatedBody = Object.entries(req.body).reduce((acc, [key, value]) => {
+      if (Array.isArray(value)) {
+        value = value.join(", ");
+      }
+    
+      // Handle shirt sizes
+      if (key.startsWith("shirtSize_")) {
+        const id = key.replace("shirtSize_", "");
+        acc.shirtSizes = acc.shirtSizes || {};
+        acc.shirtSizes[id] = value;
+      }
+      // Handle discounts
+      else if (key.startsWith("discounted_")) {
+        const id = key.replace("discounted_", "");
+        acc.discounts = acc.discounts || [];
+        acc.discounts.push(id);
+      }
+      else if (key.startsWith("payNow_")) {
+        const id = key.replace("payNow_", "");
+        acc.payingNow = acc.payingNow || [];
+        acc.payingNow.push(id);
+      }
+      // Handle other fields normally
+      else {
+        acc[key] = value;
+      }
+    
+      return acc;
+    }, {});
+    const transformedBody = Object.fromEntries(
+      Object.entries(consolidatedBody).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value.join(", ") : (typeof value === "object" && value !== null ? JSON.stringify(value) : value),
+      ])
+    );
+    
+    // const transformedBody = Object.fromEntries(
+    //   Object.entries(consolidatedBody).map(([key, value]) => [
+    //     key,
+    //     Array.isArray(value) ? value.join(", ") : value,
+    //   ])
+    // );
+
+    const product = await stripe.products.search({
+        query: `name:'Dragon Cup Tournament'`,
+    })
+    const prices = await stripe.prices.list({
+      product: product.id,
+      active: true, // Only get active prices
+  });
+
+  // console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
+  let nickname = 'Standard';
+  let productName = '2025';
+  // const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
+  // console.log(req.user)
+  // if (req.body.teamPayType === 'team') {
+  //   nickname = 'Team';
+  //   productName = 'Team'
+  // } else if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+  //   nickname = 'Crew';
+  //   productName = 'Crew'
+  // } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
+  //   nickname = 'Crew';
+  //   productName = 'Friends & Family'
+  // } else if (req.body.discounted === 'true') {
+  //   nickname = 'Student, Teacher, First Responder, Military';
+  //   productName = 'Student, Teacher, First Responder, Military'
+  // } else {
+  //   nickname = 'Regular';
+  //   productName = 'Individual'
+  // }
+
+const teamPrice = prices.data.find(price => price.nickname === nickname);
+  // const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
+  const lineItems = [{
+    price_data: {
+      currency: 'usd',
+      product_data: {
+        name: `Dragon Cup Tournament - ${productName}`,
+      },
+      unit_amount: teamPrice.unit_amount, // amount in cents
+    },
+    quantity: 1,
+  }]
+  let totalPrice = teamPrice.unit_amount
+  // let result = await pool.request()
+  //   .input('leagueId',sql.Int,req.body.leagueId)
+  //   .query(`
+  //     select *
+  //     from leagues as l
+  //     where l.leagueId = @leagueId
+  //     `)
+  //     // console.log(req.body.teamPayType)
+  //     if(result.recordset[0].refFeesIndividual > 50 && req.body.teamPayType !== 'team'){
+  //       totalPrice = totalPrice + result.recordset[0].refFeesIndividual
+  //       lineItems.push(
+  //         {
+  //           price_data: {
+  //             currency: 'usd',
+  //             product_data: {
+  //               name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
+  //             },
+  //             unit_amount: result.recordset[0].refFeesIndividual, // amount in cents
+  //           },
+  //           quantity: 1,
+  //         }
+  //       )
+  //     }
+  //     if(result.recordset[0].refFeesTeam > 50 && req.body.teamPayType === 'team'){
+  //       totalPrice = totalPrice + result.recordset[0].refFeesTeam
+  //       lineItems.push(
+  //         {
+  //           price_data: {
+  //             currency: 'usd',
+  //             product_data: {
+  //               name: `Referee Fees - ${result.recordset[0].shortName} - Team`,
+  //             },
+  //             unit_amount: result.recordset[0].refFeesTeam, // amount in cents
+  //           },
+  //           quantity: 1,
+  //         }
+  //       )
+  //     }
+      // if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
+      //   totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 15000 : 1500)
+      //   lineItems.push(
+      //     {
+      //       price_data: {
+      //         currency: 'usd',
+      //         product_data: {
+      //           name: `Referee Fees - Premier - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
+      //         },
+      //         unit_amount: req.body.teamPayType === 'team' ? 15000 : 1500, // amount in cents
+      //       },
+      //       quantity: 1,
+      //     }
+      //   )
+      // }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
+      //   totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 30000 : 3000)
+      //   lineItems.push(
+      //     {
+      //       price_data: {
+      //         currency: 'usd',
+      //         product_data: {
+      //           name: `Referee Fees - Men's - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
+      //         },
+      //         unit_amount: req.body.teamPayType === 'team' ? 30000 : 3000, // amount in cents
+      //       },
+      //       quantity: 1,
+      //     }
+      //   )
+      // }
+      // let waiverPay = await functions.checkWaiverFeeDue(req.user.id)
+      // if(req.body.teamPayType === 'self'){
+      //   // console.log('test')
+      //   if(waiverPay){
+      //     lineItems.push(
+      //       {
+      //         price_data: {
+      //           currency: 'usd',
+      //           product_data: {
+      //             name: 'Annual GLOS Waiver Fee',
+      //           },
+      //           unit_amount: req.body.discounted === 'true' ? 1000 : 2000, // amount in cents
+      //         },
+      //         quantity: 1,
+      //       }
+      //     )
+      //     totalPrice = totalPrice + (req.body.discounted === 'true' ? 1000 : 2000)
+      //   }
+      // }else{
+      //   // const table = new sql.Table(); // Create a table-valued parameter
+      //   // table.columns.add('ID', sql.BigInt); // Define column type
+      //   // transformedBody.rosterUserId.split(', ').map(Number).forEach(id => table.rows.add(id)); // Add values
+
+      //   const result = await pool.request()
+      //   .input('userIds', sql.VarChar, transformedBody.rosterUserId)
+      //   .input('waiverResetDate', sql.BigInt, functions.getWaiverResetDate())
+      //   .query(`
+      //           SELECT id from users
+      //           where ID in (SELECT value FROM STRING_SPLIT(@userIds, ',')) 
+      //           and waiverPayDate < @waiverResetDate
+      //       `);
+      //     transformedBody.waiverPaidIds = JSON.stringify(result.recordset.map(item => item.id))
+      //     console.log(result.recordset)
+      //     if(result.recordset.length !== 0){
+      //       lineItems.push(
+      //         {
+      //           price_data: {
+      //             currency: 'usd',
+      //             product_data: {
+      //               name: 'Annual GLOS Waiver Fees',
+      //             },
+      //             unit_amount: req.body.discounted === 'true' ? 1000 : 2000, // amount in cents
+      //           },
+      //           quantity: result.recordset.length,
+      //         }
+      //       )
+      //       totalPrice = totalPrice + ((req.body.discounted === 'true' ? 1000 : 2000)*result.recordset.length)
+      //     }
+      //   // for(let uid of transformedBody.rosterUserId){
+
+      //   // }
+      // }
+      lineItems.push(
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Stripe Processing Fee',
+            },
+            unit_amount: (totalPrice*.03)+30, // amount in cents
+          },
+          quantity: 1,
+        }
+      )
+    
+    // console.log(req.body)
+    // console.log(specificPrice)
+        if(req.body.teamId === ''){
+          console.log('test team checkout')
+          
+          
+          // const data = {
+          //   abbreviation: req.body.teamAbbreviation,
+          //   fullName: req.body.teamFullName,
+          //   shortName: req.body.teamShortName,
+          //   leagueId: req.body.leagueId,
+          //   seasonId: req.body.seasonId,
+          //   teamId: req.body.teamId,
+          //   color: req.body.teamShirtColor1,
+          //   captainId: transformedBody.captainId || req.user.id,
+          //   keeperId: transformedBody.keeperId || req.user.id
+          // }
+          transformedBody.captainId = transformedBody.captainId || req.user.id
+          // transformedBody.keeperId = transformedBody.keeperId || req.user.id
+          // transformedBody.teamId = await functions.addTeam(transformedBody)
+          // transformedBody.teamType = 'new'
+          
+        }else{
+          transformedBody.teamType = 'existing'
+        }
+        if(req.file){
+          functions.addTeamLogo(req.file,req.body.teamId)
+        }   
+      const metadata = {
+        type: 'teamTournamentCheckout',
+        lineItems: lineItems,
+        priceId: teamPrice.id,
+        success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${req.get('Referer') || 'https://glosoccer.com'}`,
+        metadata: {type: 'teamTournamentCheckout'
+          , ...transformedBody
+          // ,waiverPaid: waiverPay
+        }
+      }
+      metadata.quantity = 1
+      // await functions.addUserToDatabase(req.body);
+      // const user = await functions.getUser(req.body)
+      metadata.userId = req.user.ID
+      metadata.metadata.email = req.user.email
+      // Full discount code 
+      // ,[{
+      //   coupon: 'SENIORCREW100', 
+      // }]
+      const session = await functions.createCheckoutSession({
+          metadata,
+        
+        }
+        
+      );
+      functions.updateUserInfo({
+        userId: req.user.id,
+        ...transformedBody,
+        waiverDate: Date.now()
+      })
+      res.json({ url: session.url });
+  } catch (error) {
+    console.log(error)
+      res.status(500).json({ error: error.message });
+  }
+});
 router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req, res) => {
   
   try {

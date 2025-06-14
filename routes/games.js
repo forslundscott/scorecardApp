@@ -206,7 +206,10 @@ router.get(['/completedGames'], async (req,res, next)=>{
         }
         const result = await pool.request()
         .query(`
-            Select * from gamesList(2) order by startUnixTime, location 
+            Select * from gamesList(1)
+            union all 
+            Select * from gamesList(2)
+            order by startUnixTime, location 
             `)
         data.games = result.recordsets[0]
         res.render('index.ejs',{data: data})

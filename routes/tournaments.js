@@ -99,7 +99,7 @@ router.get(['/:tournamentId/registration/team'],checkAuthenticated, async (req, 
         let data = {
             page: `/season/register/team`,
             user: req.user,
-            seasonId: req.params.seasonId
+            tournamentId: req.params.tournamentId
             
         }
 
