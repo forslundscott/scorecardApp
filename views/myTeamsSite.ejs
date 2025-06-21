@@ -98,19 +98,22 @@
                 </tr>
             </thead>
             <tbody>
+                <% console.log(team) %>
                 <% team.roster.forEach(player => { %>
                     <tr>
                         <td><%= player.firstName %></td>
                         <td><%= player.lastName %></td>
                         <td><%= player.gender %></td>
+                        <%# console.log(player) %>
+                        
                         <td><%= 
-                            player.userId === team.captainId && player.userId === team.keeperId
-                                ? 'Captain, Keeper'
-                                : player.userId === team.captainId
-                                ? 'Captain'
-                                : player.userId === team.keeperId
-                                ? 'Keeper'
-                                : ''
+                            player.userId == team.captainId && player.userId == team.keeperId
+                                ? 'Captain, Keeper' + (player.status !== '' ? ', ' + player.status : '')
+                                : player.userId == team.captainId
+                                ? 'Captain' + (player.status !== '' ? ', ' + player.status : '')
+                                : player.userId == team.keeperId
+                                ? 'Keeper' + (player.status !== '' ? ', ' + player.status : '')
+                                : player.status
                             %>
                             </td>
                     </tr>

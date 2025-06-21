@@ -248,8 +248,9 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
             ,s.seasonName
             ,t.captain as captainId
             ,slt.seasonId
-            ,slt.leagueId,
-            t.keeper as keeperId
+            ,slt.leagueId
+            ,t.keeper as keeperId
+            
             from seasonLeagueTeam as slt 
             left join  teams as t on slt.teamId=t.teamId
             left join leagues as l on slt.leagueId=l.leagueId
@@ -261,7 +262,44 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
                 select teamId from user_team as ut
                 where ut.userId = @userId and ut.seasonId = slt.seasonId
             )
-            ORDER by t.league, t.fullName
+                
+            
+
+
+            union all
+
+
+            select t.id
+            , t.fullName as teamFullName
+            , t.color
+            , t.abbreviation as teamAbbreviation
+            , u.firstName + ' ' + u.lastName as captain
+            , l.color as LeagueColor
+            , t.teamId
+            , l.shortName as leagueShortName
+            , l.abbreviation as leagueAbbreviation
+            ,s.seasonName
+            ,t.captain as captainId
+            ,slt.seasonId
+            ,slt.leagueId
+            ,t.keeper as keeperId
+            
+            from seasonLeagueTeam as slt 
+            left join  teams as t on slt.teamId=t.teamId
+            left join leagues as l on slt.leagueId=l.leagueId
+            LEFT join users as u on t.captain=u.ID
+            LEFT join seasons as s on slt.seasonId=s.seasonId
+            where slt.seasonId in (select seasonId from seasons
+            where active = 1)
+            and not t.teamId in (
+                select teamId from user_team as ut
+                where ut.userId = @userId and ut.seasonId = slt.seasonId
+            )
+                and t.teamId in (
+                select teamId from seasonRegistration_leagueTeam as lt
+                where lt.userId = @userId and lt.seasonId = slt.seasonId
+            )
+            ORDER by leagueId, teamFullName
         `)
         data.teams = result.recordset
         for(let team of data.teams){
@@ -270,11 +308,28 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
             .input('seasonId',sql.Int,team.seasonId)
             .input('leagueId',sql.Int,team.leagueId)
             .query(`
-                    select u.firstName, u.preferredName, u.lastName, ut.userId, u.gender from user_team as ut
+                    select u.firstName, u.preferredName, u.lastName, ut.userId, u.gender 
+                    , 'Rostered' as status
+                    from user_team as ut
                     left join users as u on ut.userId=u.ID
                     where ut.teamId = @teamId
                     and ut.seasonId = @seasonId
                     and ut.leagueId = @leagueId
+                    
+
+                    union all
+
+                    select u.firstName, u.preferredName, u.lastName, lt.userId, u.gender 
+                    , 'Registered' as status
+                    from seasonRegistration_leagueTeam as lt
+                    left join users as u on lt.userId=u.ID
+                    where lt.teamId = @teamId
+                    and lt.seasonId = @seasonId
+                    and lt.leagueId = @leagueId
+                    and not lt.userId in (
+                        select userId from user_team as ut
+                        where ut.teamId = @teamId and ut.seasonId = @seasonId
+                    )
                 ORDER by  u.firstName, u.lastName
             `)
             team.roster = result.recordset
