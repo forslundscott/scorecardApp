@@ -25,27 +25,29 @@
                 <!-- style="background-image: linear-gradient(135deg, <%=team.color %> .5%, <%=team.color =='White' ? '#bdbdbd' : 'White'%> 50%, <%=team.color %> 99.5%);" -->
                 <div class="playerItem" style="<%= side == 'left' ? 'margin: 0% 0% 0% 25%; text-align: left;' : 'margin: 0% 25% 0% 0%; text-align: right;' %>">
                     <div class="playerTag">
-                        <div class="playerName" style="margin: 0% 0% 0% 0%;">
+                        <%
+                        // Default color
+                        let statusColor = '';
+
+                        // Determine color based on logic
+                        if (player.rostered === 0 && Number(player.waiverPayDate) < functions.getWaiverResetDate()) {
+                            if (player.subCount > 2) {
+                            statusColor = 'red';
+                            } else if (player.subCount == 2) {
+                            statusColor = 'yellow';
+                            }
+                        }
+                        %>
+                        <div class="playerName" style="margin: 0% 0% 0% 0%; <%= statusColor ? 'color:' + statusColor + '; font-weight: bold;' : '' %>">
                             <%= player.preferredName %>
                             <%= player.lastName[0] + "." %>
                             <%= player.userId == team.keeper ? '(K)' : '' %>
                             <%= player.userId == team.captain ? '(C)' : '' %>
                             <%= player.rostered == 0 ? '(S)' : '' %>
                             <% console.log(Number(player.waiverPayDate) < functions.getWaiverResetDate())%>
-                            <% console.log(Number(player.waiverPayDate))%>
+                            <% console.log(player)%>
                             <% console.log(functions.getWaiverResetDate())%>
-                            <% if (player.rostered === 0) { %>
-                                <%# if (player.subCount > 1 || Number(player.waiverDate) < functions.getWaiverResetDate()) { %>
-                                <% if (player.subCount > 2) { %>
-                                  <span style="color:red">$$$</span>
-                                <% } else if (player.subCount == 2) { %>
-                                  <span style="color:yellow">$$$</span>
-                                <% } %>
-                            <% } else { %>
-                                <%# if(Number(player.waiverPayDate) < functions.getWaiverResetDate() || Number(player.waiverDate) < functions.getWaiverResetDate()){ %>
-                                    <!-- <span style="color:red">$$$</span> -->
-                                <%# } %>
-                            <% } %>
+                            
                               
                         </div>
                         <!-- <div style="background: yellow; height: 3vw; width: 3vw; float: right; position: absolute; border-width: .5vw; border-color: black;"></div> -->
