@@ -18,6 +18,7 @@ const upload = multer({
   limits: { fileSize: 2 * 1024 * 1024 },
 });
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe1Gol = Stripe(process.env.STRIPE_1GOL_SECRET_KEY)
 
 // async function createCheckoutSession({ email, hours, date, origin, referer, priceId, userId }) {
 //   try {
@@ -280,8 +281,16 @@ router.get('/success', async (req,res, next)=>{
     let transaction
     let isTransactionActive = false
   try{
-      const session = await stripe.checkout.sessions.retrieve(req.query.sessionId)
-      console.log(session)
+        // console.log(req.query.organizationId)
+        // console.log(req.query.organizationId == 1000000001)
+        if(req.query.organizationId == 1000000001){
+            session = await stripe1Gol.checkout.sessions.retrieve(req.query.sessionId)
+        }else{
+            session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
+        }
+
+      // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId)
+      // console.log(session)
       if (session.metadata.type === 'individualSeasonCheckout') {
               console.log('indiv')
 
@@ -557,7 +566,7 @@ router.get('/success', async (req,res, next)=>{
             const registrationId = result.recordset[0].registrationId;
             console.log('Registration inserted, registrationId:', registrationId);
 
-         functions.newTournamentRegistrationEmail(session.id)
+         functions.newTournamentRegistrationEmail(session.id,req.query.organizationId)
       }
         // fetch(`${req.protocol}://${req.get('host')}/seasons/${session.metadata.seasonId}/registration`, {
         //   method: 'POST',
@@ -791,8 +800,8 @@ router.post('/teamTournamentCheckoutSession', async (req, res) => {
       const metadata = {
         type: 'teamTournamentCheckout',
         lineItems: lineItems,
-        success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.get('Referer') || 'https://glosoccer.com'}`,
+        success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}&organizationId=${tournament.organizationId}`,
+        cancel_url: `${req.get('Referer') || (tournament.organizationId == 1000000001 ? 'https://1gameonelanguage.org' : 'https://glosoccer.com') }`,
         metadata: {type: 'teamTournamentCheckout'
           , ...transformedBody
           // ,waiverPaid: waiverPay
@@ -803,6 +812,7 @@ router.post('/teamTournamentCheckoutSession', async (req, res) => {
       // const user = await functions.getUser(req.body)
       metadata.userId = req.user.ID
       metadata.metadata.email = req.user.email
+      metadata.metadata.organizationId = tournament.organizationId
       // Full discount code 
       // ,[{
       //   coupon: 'SENIORCREW100', 

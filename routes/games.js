@@ -636,7 +636,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
                 team2.score = result.recordsets[5][0].score
             }
             game = result.recordsets[6][0]
-            console.log(team1.players)
+            // console.log(team1.players)
         if(game.timerState == 1 && (game.timerTime-(Date.now() - game.timerStartTime)) <= 0){
             if(game.period<game.maxPeriods){
                 game.period=game.period +1
@@ -666,7 +666,7 @@ router.get(['/activeGame/:eventId'], async (req,res,next)=>{
             Event_ID: eventResult.Event_ID,
             user: req.user
         }
-        // console.log(data)
+        console.log(data.page)
         res.render('index.ejs',{data: data}) 
     } catch(err){
         next(err)

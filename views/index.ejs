@@ -13,16 +13,15 @@
 <body>
     <script src="/dist/NoSleep.min.js"></script>    
     <script>
+        console.log('data.page')
         let noSleep = new NoSleep();
-        document.addEventListener('click', function enableNoSleep() {
-            document.removeEventListener('click', enableNoSleep, false);
-            noSleep.enable();
-
-            // if(navigator.platform !== 'IPhone'){
-            //     navigator.vibrate(200)
-            // }
-            
-        }, false);
+        if(data.page.includes('activeGame')){
+            console.log('test')
+            document.addEventListener('click', function enableNoSleep() {
+                document.removeEventListener('click', enableNoSleep, false);
+                noSleep.enable();
+            }, false);
+        }
     </script>  
         <%- include('header', {data: data}); %>
         

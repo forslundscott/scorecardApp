@@ -10,6 +10,7 @@ const sql = require('mssql');
 const nodemailer = require('nodemailer');
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe1Gol = Stripe(process.env.STRIPE_1GOL_SECRET_KEY)
 
 let teamTransaction
 let isTeamTransactionActive = false
@@ -198,8 +199,13 @@ async function createCheckoutSession({ metadata },discount) {
         if (discount && discount.length > 0) {
             sessionData.discounts = [...discount];
         }
-    
-        const session = await stripe.checkout.sessions.create(sessionData);
+        let session
+        if(metadata.metadata.organizationId == 1000000001){
+            session = await stripe1Gol.checkout.sessions.create(sessionData)
+        }else{
+            session = await stripe.checkout.sessions.create(sessionData);
+        }
+        
         return session;
     } catch (error) {
         // failedQuery(metadata,error)
@@ -556,7 +562,7 @@ async function newRegistrationEmail(sessionId){
     } 
  
 }
-async function newTournamentRegistrationEmail(sessionId){
+async function newTournamentRegistrationEmail(sessionId,organizationId){
     try {    
       // Send reset email
       let result = await pool.request()
@@ -586,7 +592,12 @@ async function newTournamentRegistrationEmail(sessionId){
         let totalPrice = 0
         let registration = result.recordset[0]
         // for(let registration of result.recordset){
-            session = await stripe.checkout.sessions.retrieve(registration.transactionId)
+            if(organizationId == 1000000001){
+                session = await stripe1Gol.checkout.sessions.retrieve(registration.transactionId)
+            }else{
+                session = await stripe.checkout.sessions.retrieve(registration.transactionId)
+            }
+            // session = await stripe.checkout.sessions.retrieve(registration.transactionId)
             let registrationPrice = new Intl.NumberFormat('en-US', { 
                 style: 'currency', 
                 currency: 'USD' 
