@@ -239,8 +239,8 @@
              
              
               <br>
-              
-            <label for="rosterTxt"><b>Please List Roster (Max 6): </b></label>
+            <% console.log(data.tournament) %>
+            <label for="rosterTxt"><b>Please List Roster (Max <%= data.tournament.rosterMax %>): </b></label>
             <br>
             <textarea name="rosterTxt" id="rosterTxt"></textarea>
             <br><br>
