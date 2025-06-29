@@ -306,7 +306,7 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
             result = await pool.request()
             .input('teamId',sql.Int,team.teamId)
             .input('seasonId',sql.Int,team.seasonId)
-            .input('leagueId',sql.Int,team.leagueId)
+            // .input('leagueId',sql.Int,team.leagueId)
             .query(`
                     select u.firstName, u.preferredName, u.lastName, ut.userId, u.gender 
                     , 'Rostered' as status
@@ -314,7 +314,7 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
                     left join users as u on ut.userId=u.ID
                     where ut.teamId = @teamId
                     and ut.seasonId = @seasonId
-                    and ut.leagueId = @leagueId
+                    
                     
 
                     union all
@@ -325,7 +325,7 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
                     left join users as u on lt.userId=u.ID
                     where lt.teamId = @teamId
                     and lt.seasonId = @seasonId
-                    and lt.leagueId = @leagueId
+                    
                     and not lt.userId in (
                         select userId from user_team as ut
                         where ut.teamId = @teamId and ut.seasonId = @seasonId
