@@ -20,33 +20,7 @@ const upload = multer({
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const stripe1Gol = Stripe(process.env.STRIPE_1GOL_SECRET_KEY)
 
-// async function createCheckoutSession({ email, hours, date, origin, referer, priceId, userId }) {
-//   try {
-      
-//       // Create Stripe Checkout session
-//       const session = await stripe.checkout.sessions.create({
-//           line_items: [
-//               {
-//                   price: priceId,
-//                   quantity: 1,
-//               },
-//           ],
-//           customer_email: email,
-//           mode: 'payment',
-//           metadata: {
-//               hours: `${hours}`,
-//               userId: `${userId}`,
-//               date: `${date}`,
-//           },
-//           success_url: `${origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
-//           cancel_url: `${origin}/api/payments/cancel?sessionId={CHECKOUT_SESSION_ID}&url=${referer}`,
-//       });
 
-//       return session;
-//   } catch (error) {
-//       throw new Error(error.message);
-//   }
-// }
 
 
 router.get('/checkout', async (req, res) => {
@@ -894,6 +868,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
     const prices = await stripe.prices.list({
       product: product.id,
       active: true, // Only get active prices
+      limit: 100
   });
 
   // console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
@@ -917,8 +892,9 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
     nickname = 'Regular';
     productName = 'Individual'
   }
-
+// console.log(nickname)
 const teamPrice = prices.data.find(price => price.nickname === nickname);
+console.log(prices.data.length)
   // const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
   const lineItems = [{
     price_data: {
@@ -1110,18 +1086,32 @@ const teamPrice = prices.data.find(price => price.nickname === nickname);
       // ,[{
       //   coupon: 'SENIORCREW100', 
       // }]
-      const session = await functions.createCheckoutSession({
-          metadata,
-        
-        }
-        
-      );
       functions.updateUserInfo({
         userId: req.user.id,
         ...transformedBody,
         waiverDate: Date.now()
       })
+
+      if(totalPrice > 0){
+        const isSeniorCrew = req.user.roles?.some(role => role.name === 'Senior Staff')
+      const session = isSeniorCrew
+        ? await functions.createCheckoutSession({ metadata }, [{ coupon: 'SENIORCREW100' }])
+        : await functions.createCheckoutSession({ metadata });
+    
       res.json({ url: session.url });
+    }else{
+      res.json({message: `You are all paid up for registered teams and annual waiver fee. 
+        If you meant to register for another team please select the appropriate league.
+        Thank you.`})
+    }
+      // const session = await functions.createCheckoutSession({
+      //     metadata,
+        
+      //   }
+        
+      // );
+      
+      // res.json({ url: session.url });
   } catch (error) {
     console.log(error)
       res.status(500).json({ error: error.message });
