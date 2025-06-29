@@ -337,6 +337,28 @@ router.get('/success', async (req,res, next)=>{
         if(session.metadata.teamType === 'new'){
           functions.commitTeam(parseInt(session.metadata.teamId))
         }
+        await pool.request()
+            .input('email', sql.VarChar, session.metadata.email)
+            .input('teamId', sql.VarChar, session.metadata.teamId)
+            .input('seasonId', sql.Int, session.metadata.seasonId)
+            .query(`
+            
+            EXECUTE [dbo].[insert_userTeamSeason] 
+               @email
+              ,@teamId
+              ,@seasonId
+            `)
+        await pool.request()
+            .input('teamId', sql.VarChar, session.metadata.teamId)
+            .input('captainId', sql.Int, session.metadata.captainId || req.user.id)
+            .input('keeperId', sql.Int, session.metadata.keeperId || req.user.id)
+            .query(`
+            update teams
+            set captain = @captainId,
+            keeper = @keeperId
+            where teamId = @teamId
+            
+            `)
         functions.assignTeam(parseInt(session.metadata.seasonId),parseInt(session.metadata.leagueId),parseInt(session.metadata.teamId))
         transaction = new sql.Transaction(pool);
         
@@ -402,7 +424,7 @@ router.get('/success', async (req,res, next)=>{
                       , @type
                     )
                 `);
-
+            
             const registrationId = result.recordset[0].registrationId;
             console.log('Registration inserted, registrationId:', registrationId);
 
@@ -465,6 +487,7 @@ router.get('/success', async (req,res, next)=>{
             
 
             await transaction.commit()
+            
             isTransactionActive = false
             functions.newRegistrationEmail(session.id)
       }else if (session.metadata.type === 'teamTournamentCheckout') {
