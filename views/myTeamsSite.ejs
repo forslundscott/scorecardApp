@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 
     <title>My Teams</title>
     <style>
@@ -85,36 +86,51 @@
 </head>
 <body>
     <br>
-    
+    <% console.log(data.user) %>
     <% data.teams.forEach((team, index) => { %>
         <div class="date-header"> <%= team.teamFullName %> - <%= team.leagueShortName %> - <%= team.seasonName %></div>
         <table>
             <thead>
                 <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Gender</th>
-                    <th>Notes</th>
+                    <th>Name</th>
+                    <% if (data.user.id == team.captainId) { %>
+                        <th>Gender</th>
+                        <th>Shirt</th>
+                    <% } %>
+                    
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
-                <% console.log(team) %>
+                <%# console.log(data.user.ID) %>
+                <%# console.log(team) %>
                 <% team.roster.forEach(player => { %>
                     <tr>
-                        <td><%= player.firstName %></td>
-                        <td><%= player.lastName %></td>
-                        <td><%= player.gender %></td>
-                        <%# console.log(player) %>
+                        <td><%= player.firstName %> <%= player.lastName %></td>
+                        <% if (data.user.id == team.captainId) { %>
+                            <td><%= player.gender %></td>
+                            <td><%= player.shirtSize %></td>
+                        <% } %>
+                        <%# console.log(data.user.ID) %>
                         
-                        <td><%= 
+                        <td><% if (data.user.id == team.captainId && player.status == 'Registered') { %>
+                            
+                            <!-- <i class="bi bi-check-circle-fill" style="color: green; font-size: 4vh;"></i>
+                            <i class="bi bi-x-circle-fill" style="color: red; font-size: 4vh;"></i> -->
+
+                            <% } else { %>
+                                <%= 
                             player.userId == team.captainId && player.userId == team.keeperId
-                                ? 'Captain, Keeper' + (player.status !== '' ? ', ' + player.status : '')
+                                ? 'Captain, Keeper'
                                 : player.userId == team.captainId
-                                ? 'Captain' + (player.status !== '' ? ', ' + player.status : '')
+                                ? 'Captain'
                                 : player.userId == team.keeperId
-                                ? 'Keeper' + (player.status !== '' ? ', ' + player.status : '')
-                                : player.status
+                                ? 'Keeper'
+                                : ''
+                                
                             %>
+                            <% } %>
+                            
                             </td>
                     </tr>
                 <% }) %>

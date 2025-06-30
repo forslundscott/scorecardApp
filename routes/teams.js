@@ -308,7 +308,7 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
             .input('seasonId',sql.Int,team.seasonId)
             // .input('leagueId',sql.Int,team.leagueId)
             .query(`
-                    select u.firstName, u.preferredName, u.lastName, ut.userId, u.gender 
+                    select u.firstName, u.preferredName, u.lastName, ut.userId, u.gender, u.shirtSize
                     , 'Rostered' as status
                     from user_team as ut
                     left join users as u on ut.userId=u.ID
@@ -319,7 +319,7 @@ router.get('/myteams', checkAuthenticated, async (req,res, next)=>{
 
                     union all
 
-                    select u.firstName, u.preferredName, u.lastName, lt.userId, u.gender 
+                    select u.firstName, u.preferredName, u.lastName, lt.userId, u.gender, u.shirtSize
                     , 'Registered' as status
                     from seasonRegistration_leagueTeam as lt
                     left join users as u on lt.userId=u.ID
