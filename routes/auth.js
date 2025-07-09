@@ -85,6 +85,7 @@ router.post(['/createProfile'], async (req,res)=>{
         .input('email', sql.VarChar, req.body.email)
         .input('firstName', sql.VarChar, req.body.firstName)
         .input('lastName', sql.VarChar, req.body.lastName)
+        .input('preferredName', sql.VarChar, req.body.preferredName)
         .input('password', sql.VarChar, hashedpassword)
         .query(`
             DECLARE @tempTable table (
