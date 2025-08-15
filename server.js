@@ -139,7 +139,8 @@ app.post(['/waiver'], async (req,res)=>{
         let data = {
             page: `/season/register`,
             user: req.user,
-            seasonId: req.params.seasonId
+            seasonId: req.params.seasonId,
+            host: req.headers.host
             
         }
         const transformedBody = Object.fromEntries(

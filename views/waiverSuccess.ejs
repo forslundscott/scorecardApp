@@ -15,7 +15,14 @@
     </header>
 <br>
     <main>
-        <img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" style="height: 50vh;">
+        <% if (['app.1gameonelanguage.org'].includes(data.host)) { %>
+            <img style="height: 50vh;" src="/1GOL.png" alt="1GOL Logo" id="mainLogo">
+            
+        <% }else{ %>
+            <img  style="height: 50vh;" src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo">
+            
+        <%} %>
+        <!-- <img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" style="height: 50vh;"> -->
         <br><br>
         <h2>Please Enjoy your Game!</h2>
         <!-- <p>You will receive an email confirmation shortly.</p> -->
@@ -23,7 +30,7 @@
     <br>
     <button class="buttonStyle formButton" onclick="window.location.href = '/';">Return To Site</button>
     <footer>
-        <p>&copy; <%= new Date().getFullYear() %> GLOS</p>
+        <!-- <p>&copy; <%#= new Date().getFullYear() %> GLOS</p> -->
     </footer>
 </body>
 </html>
