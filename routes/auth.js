@@ -11,10 +11,13 @@ const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../midd
 
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
+        let data = {
+            host: req.headers.host
+        }
         console.log(req.get('host'))
         let message = req.session.message || `If this is your first time using the new site, please use Forgot Password to create a password`
         delete req.session.message
-        res.render('login.ejs', {messages: {message: message}})
+        res.render('login.ejs', {messages: {message: message},data: data})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -60,7 +63,10 @@ router.delete('/logout', (req,res) => {
 })
 router.get(['/createProfile'], async (req,res)=>{
     try{
-        res.render('createProfile.ejs')
+        let data = {
+            host: req.headers.host
+        }
+        res.render('createProfile.ejs',{data})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -109,7 +115,10 @@ router.post(['/createProfile'], async (req,res)=>{
 })
 router.get(['/forgotPassword'], async (req,res)=>{
     try{
-        res.render('forgotPassword.ejs')
+        let data = {
+            host: req.headers.host
+        }
+        res.render('forgotPassword.ejs',{data})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -197,7 +206,10 @@ router.get('/admin', checkAuthenticated, authRole('admin'), (req, res) => {
 });
 router.get('/reset/:token', async (req, res, next) => {
     try{
-        res.render('resetPassword.ejs')
+        let data = {
+            host: req.headers.host
+        }
+        res.render('resetPassword.ejs',{data})
     }catch(err){
         console.error('Error:', err)
     }
