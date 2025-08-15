@@ -168,8 +168,8 @@ app.get(['/waiver'],checkAuthenticated, async (req,res)=>{
         let data = {
             page: `/season/register`,
             user: req.user,
-            seasonId: req.params.seasonId
-            
+            seasonId: req.params.seasonId,
+            host: req.headers.host
         }
         let result = await pool.request()
         .input('userId', sql.Int, data.user.id)
