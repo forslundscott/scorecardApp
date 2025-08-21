@@ -143,7 +143,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
     // Generate and save reset token
     const token = crypto.randomBytes(32).toString('hex');
-
+    const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
     await pool.request()
     .input('id', sql.Int, user.id)
     .input('token', sql.NVarChar(255), token)
@@ -152,27 +152,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
       INSERT INTO ResetTokens (userId, token) VALUES (@id, @token)
     `
     );
-
-    // Send reset email
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        service: 'gmail',
-        secure: true,
-        auth: {
-           user: process.env.ORG_EMAIL,
-           pass: process.env.ORG_EMAIL_PASSWORD
-        },
-        debug: false,
-        logger: true
-    });
-
-    const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
-    const mailOptions = {
-      from: `No Reply - GLOS <${process.env.ORG_EMAIL}>`,
-      to: user.email,
-      subject: 'GLOS Account Password Reset',
-      text: `Hello,
+    let body = `Hello,
 
   We received a request to reset your password for your GLOS account. You can reset your password by clicking the link below:
 
@@ -182,19 +162,51 @@ router.post(['/forgotPassword'], async (req,res)=>{
 
   Regards,
   The GLOS Team
-      `,
-    };
+      `
+    functions.sendEmail(body,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'GLOS Account Password Reset')
+    // Send reset email
+    // const transporter = nodemailer.createTransport({
+    //     host: 'smtp.titan.email',
+    //     port: 587,
+    //     // service: 'gmail',
+    //     secure: false,
+    //     auth: {
+    //        user: process.env.ORG_EMAIL,
+    //        pass: process.env.ORG_EMAIL_PASSWORD
+    //     },
+    //     // debug: false,
+    //     // logger: true
+    // });
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        return console.error('Error sending reset email:', error);
-      }
-      console.log('Reset email sent:', info.response);
-      req.session.message = `You should receive a reset link to your specified email shortly. 
-      If you do not receive one, please check your spam folder.`
-      return res.redirect('/auth/login')
+//     const resetLink = `${req.protocol}://${req.headers.host}/auth/reset/${token}`;
+//     const mailOptions = {
+//       from: `No Reply - GLOS <${process.env.ORG_EMAIL}>`,
+//       to: user.email,
+//       subject: 'GLOS Account Password Reset',
+//       text: `Hello,
 
-    });
+//   We received a request to reset your password for your GLOS account. You can reset your password by clicking the link below:
+
+//   ${resetLink}
+
+//   If you didn’t request a password reset, please let us know.
+
+//   Regards,
+//   The GLOS Team
+//       `,
+//     };
+
+    // transporter.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //     return console.error('Error sending reset email:', error);
+    //   }
+    //   console.log('Reset email sent:', info.response);
+    //   req.session.message = `You should receive a reset link to your specified email shortly. 
+    //   If you do not receive one, please check your spam folder.`
+    //   return res.redirect('/auth/login')
+
+    // });
+    res.redirect('/auth/login')
   } catch (error) {
     console.error('Error finding user:', error);
   } 

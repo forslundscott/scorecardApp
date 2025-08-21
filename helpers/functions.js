@@ -413,10 +413,10 @@ async function sendEmail(body, toEmail , fromText, subject){
       try {    
         // Send reset email
         const transporter = nodemailer.createTransport({
-            // host: 'smtp.gmail.com',
-            // port: 587,
-            service: 'gmail',
-            // secure: true,
+            host: 'smtp.titan.email',
+            port: 587,
+            // service: 'gmail',
+            secure: false,
             auth: {
                user: process.env.ORG_EMAIL,
                pass: process.env.ORG_EMAIL_PASSWORD
@@ -436,7 +436,7 @@ async function sendEmail(body, toEmail , fromText, subject){
           if (error) {
             return console.error('Error sending reset email:', error);
           }
-          return res.redirect('/')
+        //   return res.redirect('/') //I don't think this does anything yet
     
         });
       } catch (error) {
@@ -556,7 +556,7 @@ async function newRegistrationEmail(sessionId){
                 </tbody>
             </table>
             `
-            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'noReplyGlos', 'New Registration')
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'New Registration')
     } catch (error) {
       console.error('Error sending email:', error);
     } 
@@ -672,7 +672,7 @@ async function newTournamentRegistrationEmail(sessionId,organizationId){
             </table>
             
             `
-            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'noReplyGlos', 'New Registration')
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'New Registration')
     } catch (error) {
       console.error('Error sending email:', error);
     } 
@@ -685,7 +685,7 @@ async function waiverSignedEmail(user){
             <h2>Waiver Signed By:</h2>
             <p>${user.firstName} ${user.lastName} ${user.email}</p>
             `
-            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'noReplyGlos', 'Waiver Signed')
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'Waiver Signed')
     } catch (error) {
       console.error('Error sending email:', error);
     } 
