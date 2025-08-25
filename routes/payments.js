@@ -1162,6 +1162,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
     const prices = await stripe.prices.list({
       product: product.id,
       active: true, // Only get active prices
+      limit: 100
   });
   let nickname;
   let productName;
@@ -1180,7 +1181,7 @@ router.post('/individualSeasonCheckoutSession', async (req, res) => {
     nickname = 'Regular';
     productName = 'Individual'
   }
-
+console.log(prices.data)
 const price = prices.data.find(price => price.nickname === nickname);
     // const price = await stripe.prices.retrieve(product.data[0].default_price);
     console.log(price)
