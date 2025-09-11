@@ -46,6 +46,10 @@ const Session = defineSession(sequelize);
 const sessionStore = new SessionStore({
     db: sequelize,
     table: 'Session',
+    // keep sessions for 7 days (ms)
+  expiration: 7*24*60*60*1000,
+  // how often to check for expired sessions (ms)
+  checkExpirationInterval: 15 * 60 * 1000, // 15 minutes
 });
 initializePassport(
     passport, 
@@ -87,7 +91,14 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    maxAge: 24*60*60*1000
+    rolling: true,
+    cookie: {
+        maxAge: 7*24*60*60*1000,
+        httpOnly: true,
+        // secure: true,
+        // sameSite: true
+    },
+    
 }))
 app.use(passport.initialize())
 app.use(passport.session())
