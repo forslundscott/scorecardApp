@@ -446,17 +446,27 @@ async function sendEmail(body, toEmail , fromText, subject){
 }
 async function newRegistrationEmail(sessionId){
     try {    
-      // Send reset email
+      
       let result = await pool.request()
             .input('testMode', sql.Bit, stripe._authenticator._apiKey.startsWith('sk_test_')?1:0)
             .input('transactionId', sql.VarChar, sessionId)
             .query(`select top 1 u.firstName + ' ' + u.lastName as fullName,
                  u.email
                  , sr.type
+                 , sr.teamSkill
+                 , sr.teamColor1
+                 , sr.teamColor2
+                 , sr.teamColor3
+                 , sr.keeperColor
+                 , l.shortName as league
+                 , t.shortName as team
                  , sr.registrationId
                  , sr.transactionId
                  , sr.gateway from seasonRegistrations as sr
                 left join users as u on sr.userId=u.ID
+                left join teams as t on sr.teamId=t.teamId
+                left join leagues as l on sr.leagueId=l.leagueId
+                left join seasons as s on sr.seasonId=s.seasonId
                 where sr.test = @testMode
                 and transactionId = @transactionId
                 `)
@@ -465,7 +475,10 @@ async function newRegistrationEmail(sessionId){
         let htmlString = ''
         let htmlString2 = ''
         let totalPrice = 0
+        
         let registration = result.recordset[0]
+        let keeperColorNeeded = registration.keeperColor !== ''
+        let registrationType = registration.type
         // for(let registration of result.recordset){
             session = await stripe.checkout.sessions.retrieve(registration.transactionId)
             let registrationPrice = new Intl.NumberFormat('en-US', { 
@@ -477,6 +490,18 @@ async function newRegistrationEmail(sessionId){
                 <td>${registration.fullName}</td>
                 <td>${registration.email}</td>
                 <td>${registration.type}</td>
+                ${registrationType === 'team' ? `
+                    <td>${registration.teamSkill}</td>
+                    <td>${registration.teamColor1}</td>
+                    <td>${registration.teamColor2}</td>
+                    <td>${registration.teamColor3}</td>
+                    <td>${registration.league}</td>
+                    <td>${registration.team}</td>
+                    ` : ''}
+                
+                ${keeperColorNeeded ? `<td>${registration.keeperColor}</td>` : ''}
+                
+                
                 <td>${registrationPrice}</td>
                 <td>${registration.registrationId}</td>
             </tr>`
@@ -493,6 +518,7 @@ async function newRegistrationEmail(sessionId){
                     , sr.keeper
                     , sr.shirtSize
                     , sr.registrationId
+                    , u.skill
                      from seasonRegistration_leagueTeam as sr
                     left join users as u on sr.userId=u.ID
                     LEFT join leagues as l on sr.leagueId=l.leagueId
@@ -510,6 +536,7 @@ async function newRegistrationEmail(sessionId){
                         <td>${registration.division}</td>
                         <td>${registration.keeper}</td>
                         <td>${registration.shirtSize}</td>
+                        <td>${registration.skill}</td>
                         <td>${registration.registrationId}</td>
                     </tr>`
                 }
@@ -520,6 +547,15 @@ async function newRegistrationEmail(sessionId){
                     <td>Name</td>
                     <td>Email</td>
                     <td>Registration Type</td>
+                    ${registrationType === 'team' ? `
+                        <td>Team Experience</td>
+                        <td>Color 1</td>
+                        <td>Color 2</td>
+                        <td>Color 3</td>
+                        <td>League</td>
+                        <td>Team</td>
+                    ` : ''}
+                    ${keeperColorNeeded ? `<td>Keeper Color</td>` : ''}
                     <td>Amount</td>
                     <td>Registration Id</td>
                 </thead>
@@ -549,6 +585,7 @@ async function newRegistrationEmail(sessionId){
                     <td>Division</td>
                     <td>Keeper?</td>
                     <td>Shirt Size</td>
+                    <td>Experience</td>
                     <td>Registration Id</td>
                 </thead>
                 <tbody>
