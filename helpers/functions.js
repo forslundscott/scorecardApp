@@ -490,7 +490,7 @@ async function newRegistrationEmail(sessionId){
                 <td>${registration.fullName}</td>
                 <td>${registration.email}</td>
                 <td>${registration.type}</td>
-                ${registrationType === 'team' ? `
+                ${registrationType !== 'individual' ? `
                     <td>${registration.teamSkill}</td>
                     <td>${registration.teamColor1}</td>
                     <td>${registration.teamColor2}</td>
@@ -547,7 +547,7 @@ async function newRegistrationEmail(sessionId){
                     <td>Name</td>
                     <td>Email</td>
                     <td>Registration Type</td>
-                    ${registrationType === 'team' ? `
+                    ${registrationType !== 'individual' ? `
                         <td>Team Experience</td>
                         <td>Color 1</td>
                         <td>Color 2</td>
@@ -565,6 +565,13 @@ async function newRegistrationEmail(sessionId){
                 <tfoot>
                     <tr>
                         <td><strong>Total</strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
+                        <td><strong></strong></td>
                         <td><strong></strong></td>
                         <td><strong></strong></td>
                         <td id="total"><strong>${new Intl.NumberFormat('en-US', { 
