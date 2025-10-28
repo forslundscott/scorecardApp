@@ -142,12 +142,19 @@ router.get(['/:seasonId/registrations'],checkAuthenticated, async (req, res, nex
             select * from seasons
             where seasonId = @seasonId;
             
-            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName, u.firstName, u.lastName
+            select srl.registrationId, srl.leagueId, srl.teamId, l.shortName as leagueShortName, t.shortName as teamShortName, t.fullName as teamFullName, u.firstName, u.lastName, u.gender, srl.shirtSize, sr.keeperColor
+            ,CASE 
+                WHEN srl.keeper = 1 THEN 'Yes'
+                WHEN srl.keeper = 0 THEN 'No'
+                ELSE NULL
+            END AS keeper
             from seasonRegistration_leagueTeam as srl
+            left join seasonRegistrations as sr on srl.registrationId=sr.registrationId
             left join leagues as l on srl.leagueId = l.leagueId
             left join teams as t on srl.teamId = t.teamId
             left join users as u on srl.userId = u.id
             where srl.seasonId = @seasonId
+            and srl.test = 0
             `)
             data.leagues = result.recordsets[0]
             data.season = result.recordsets[1][0]

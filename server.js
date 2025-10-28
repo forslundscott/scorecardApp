@@ -206,8 +206,56 @@ app.get(['/waiver'],checkAuthenticated, async (req,res)=>{
 app.get(['/test'], async (req,res)=>{
     try{
         // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test')
-        const session = await stripe.checkout.sessions.retrieve('cs_live_b1PuOqKuzaZnJkwxztlGtMJw5lXCxnm1WKJ4NEuseU3dt2zGBl4WK81dfk')
+        const session = await stripe.checkout.sessions.retrieve('cs_live_b1UJPNpDBVP05Lo5SM1GpPGKIloKd46jUdVDBfqczLmDAWTFjvD0Hys1NW')
         console.log(session)
+        // (async () => {
+//   try {
+//     const afterDate = new Date('2025-09-28'); // adjust your date
+//     const unixTimestamp = Math.floor(afterDate.getTime() / 1000);
+
+//     // Emails you want to exclude
+//     const excludedEmails = [
+//       
+
+//     ].map(e => e.toLowerCase()); // normalize case
+
+//     let allSessions = [];
+//     let hasMore = true;
+//     let lastId = null;
+
+//     while (hasMore) {
+//       const response = await stripe.checkout.sessions.list({
+//         limit: 100,
+//         created: { gte: unixTimestamp },
+//         status: 'complete',
+//         ...(lastId && { starting_after: lastId }),
+//       });
+
+//       allSessions.push(...response.data);
+//       hasMore = response.has_more;
+//       lastId = response.data.length ? response.data[response.data.length - 1].id : null;
+//     }
+
+//     // Filter for:
+//     // 1. seasonId === '100000016'
+//     // 2. metadata.email not in excludedEmails
+//     const filtered = allSessions.filter(s => {
+//       const seasonId = s.metadata?.seasonId;
+//       const email = s.metadata?.email?.toLowerCase() || '';
+//       return seasonId === '100000016' && !excludedEmails.includes(email);
+//     });
+
+//     console.log(`✅ Found ${filtered.length} matching sessions`);
+//     console.log(filtered.map(s => ({
+//       id: s.id,
+//       email: s.metadata.email,
+//       amount_total: s.amount_total,
+//       created: new Date(s.created * 1000),
+//     })));
+//   } catch (err) {
+//     console.error('❌ Error fetching sessions:', err);
+//   }
+// })();
         // let result = await pool.request()
         // // .input('userId', sql.Int, data.user.id)
         // .query(`

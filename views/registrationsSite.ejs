@@ -54,15 +54,23 @@
 
     </style>
 </head>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
 <body>
-    <table>
+    
+    <table id="individualRegistrationsTable">
         <thead>
             <tr>
                 <th class="tooltip" data-tooltip="Full Name">Name</th>
                 <!-- <th class="tooltip" data-tooltip="Last Name">Last Name</th> -->
                 <th class="tooltip" data-tooltip="League Name">League</th>
-                <th class="tooltip" data-tooltip="First Name">Team</th>
-                <th class="tooltip" data-tooltip="First Name"><button>Roster All</button></th>
+                <th class="tooltip" data-tooltip="Team Name">Team</th>
+                <th>Gender</th>
+                <th>Shirt Size</th>
+                <th>Keeper?</th>
+                <th>Keeper Color</th>
+                <!-- <th class="tooltip" data-tooltip="First Name"><button>Roster All</button></th> -->
             </tr>
         </thead>
         <tbody>
@@ -80,26 +88,37 @@
                         <!-- </select> -->
                         </td>
                     <td>
-                        <select name="" id="">
-                            <!-- <option value=""> -->
-                                <%#= item.teamShortName %>
-                            <!-- </option> -->
-                            <% console.log(item.leagueId) %>
-                            <% console.log(data.leagues.find(league => league.leagueId === item.leagueId)) %>
-                            <%  data.leagues.find(league => parseInt(league.leagueId) === parseInt(item.leagueId)).teams.forEach(team => {%>
+                        <%= item.teamFullName%>
+                        <!-- <select name="" id=""> -->
+                            
+                            <%# console.log(item.leagueId) %>
+                            <%# console.log(data.leagues.find(league => league.leagueId === item.leagueId)) %>
+                            <%#  data.leagues.find(league => parseInt(league.leagueId) === parseInt(item.leagueId)).teams.forEach(team => {%>
                                 
-                                <option value="<%= team.teamId %>" <%= parseInt(team.teamId) === parseInt(item.teamId) ? 'selected' : '' %> ><%= team.shortName%></option>
-                            <% }) %>
-                        </select>
+                                <!-- <option value="<%#= team.teamId %>" <%#= parseInt(team.teamId) === parseInt(item.teamId) ? 'selected' : '' %> ><%#= team.shortName%></option> -->
+                            <%# }) %>
+                        <!-- </select> -->
                     </td>
                     <td>
-                        <button>Add player to roster</button>
+                        <%= item.gender%>
                     </td>
+                    <td>
+                        <%= item.shirtSize%>
+                    </td>
+                    <td>
+                        <%= item.keeper%>
+                    </td>
+                    <td>
+                        <%= item.keeperColor%>
+                    </td>
+                    <!-- <td>
+                        <button>Add player to roster</button>
+                    </td> -->
                 </tr>
             <% }) %>
         </tbody>
     </table>
-    <script>
+    <!-- <script>
         function leagueChange(ele){
             let td = ele.closest("td"); // Get the closest <td>
             let tr = td.closest("tr"); // Get the parent <tr>
@@ -109,6 +128,13 @@
             let columnIndex = Array.from(tr.children).indexOf(td); // Get the index of the <td> in the row
             let th = thead.querySelectorAll("th")[columnIndex]; // Get the corresponding <th>
         }
+    </script> -->
+    <script> document.addEventListener("DOMContentLoaded", function() {
+        new DataTable('#individualRegistrationsTable',{
+          pageLength: 100 // 👈 default to 100 rows per page
+        });
+    });
+        
     </script>
 </body>
 </html>
