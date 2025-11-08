@@ -510,14 +510,14 @@
         }
     }
   
-document.querySelectorAll('input[type="tel"]').forEach(input => {
-  input.addEventListener('input', function (e) {
-    let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
-    if (value.length > 3) value = value.replace(/^(\d{3})/, "$1-");
-    if (value.length > 6) value = value.replace(/^(\d{3})-(\d{3})/, "$1-$2-");
-    e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
-  });
-});
+// document.querySelectorAll('input[type="tel"]').forEach(input => {
+//   input.addEventListener('input', function (e) {
+//     let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+//     if (value.length > 3) value = value.replace(/^(\d{3})/, "$1-");
+//     if (value.length > 6) value = value.replace(/^(\d{3})-(\d{3})/, "$1-$2-");
+//     e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
+//   });
+// });
 document.getElementById('teamSeasonRegistrationForm').addEventListener('submit', function(event) {
     // Check if at least one checkbox is selected
     // const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
