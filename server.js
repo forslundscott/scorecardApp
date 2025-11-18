@@ -5,7 +5,7 @@ if(process.env.NODE_ENV !== 'production'){
 const express = require("express")
 const app = express()
 const passport = require('passport')
-const flash = require('express-flash')
+const flash = require('connect-flash')
 const session = require('express-session')
 const Sequelize = require('sequelize');
 const SessionStore = require('express-session-sequelize')(session.Store)
@@ -85,7 +85,7 @@ initializePassport(
 const staticOptions = require('./config/staticOptions');
 app.use(express.static('public', staticOptions));
 app.set('view-engine','ejs')
-app.use(flash())
+
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -100,6 +100,8 @@ app.use(session({
     },
     
 }))
+app.use(flash())
+
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))

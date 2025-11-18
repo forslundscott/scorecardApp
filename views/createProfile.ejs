@@ -50,11 +50,11 @@
                     <%} %>
                     <!-- <div class="textCenter" style="height: 15vh;"><img src="/GLOS-Emblem-Black.png" alt="GLOS Logo" id="mainLogo" style="height: 100%;"></div> -->
                     <br>
-                    <% if (messages.error) { %>
+                    <h2 style="color: red;"><p><% if (messages.error) { %>
                         <%= messages.error %>
                     <% } else if (messages.message) { %>
                         <%= messages.message %>
-                    <% } %>
+                    <% } %></p></h2>
                     <br>
                     <input type="text" name="firstName" value="" placeholder="First Name" style="margin-bottom: .75vh; font-size: 250%;" required>
                     <br>

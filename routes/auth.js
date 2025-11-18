@@ -14,10 +14,11 @@ router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
         let data = {
             host: req.headers.host
         }
-        console.log(req.get('host'))
-        let message = req.session.message || `If this is your first time using the new site, please use Forgot Password to create a password`
+        // console.log(req.get('host'))
+        let message = req.flash().message
         delete req.session.message
-        res.render('login.ejs', {messages: {message: message},data: data})
+        // console.log(req.flash())
+        res.render('login.ejs', {messages: {message},data: data})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -25,11 +26,18 @@ router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
 router.post(['/login'], function(req, res, next) { passport.authenticate('local', function(err, user, info, status) {
     if (err) { return next(err) }
     try{
-
-        if (!user) { return res.render('login.ejs', {messages: info}) }
+        let data = {
+            host: req.headers.host
+        }
+        console.log(!user)
+        if (!user) { 
+            req.flash('message', info.message)
+            return res.redirect(info.redirect || '/auth/login')
+            // return res.render(info.redirect || 'login.ejs', {messages: info, data}) 
+        }
         req.session.passport = {}
         req.session.passport.user = user.id
-        
+        console.log(user.id)
         let redirectUrl 
             if (req.session.returnTo) {
                 redirectUrl = req.session.returnTo;
@@ -66,14 +74,16 @@ router.get(['/createProfile'], async (req,res)=>{
         let data = {
             host: req.headers.host
         }
-        res.render('createProfile.ejs',{data})
+        res.render('createProfile.ejs',{data, messages: {message: req.flash().message}})
     }catch(err){
         console.error('Error:', err)
     }    
 })
 
 router.post(['/createProfile'], async (req,res)=>{
-
+    let data = {
+            host: req.headers.host
+        }
     try {
         const emailExistsResult = await pool.request()
             .input('email', sql.VarChar, req.body.email)
@@ -84,10 +94,12 @@ router.post(['/createProfile'], async (req,res)=>{
         // If email already exists, respond with a message
 
         if (emailExistsResult.recordset[0].count > 0) {
-            return res.render('createProfile.ejs', {messages: {message: 'User with specified email already exists, Please use reset Password link.'}})
+            req.flash('message', 'User with specified email already exists. If you do not remember your password, please use Forgot Password link.')
+            return res.redirect('/auth/login')
+            // return res.render('createProfile.ejs', {data, messages: {message: 'User with specified email already exists. If you do not remember your password, please use Forgot Password link.'}})
         }
         const hashedpassword = await bcrypt.hash(req.body.password, 10)
-        await pool.request()
+        const insertResult = await pool.request()
         .input('email', sql.VarChar, req.body.email)
         .input('firstName', sql.VarChar, req.body.firstName)
         .input('lastName', sql.VarChar, req.body.lastName)
@@ -97,7 +109,7 @@ router.post(['/createProfile'], async (req,res)=>{
             DECLARE @tempTable table (
                 id int
             )
-            BEGIN TRANSACTION
+            
             insert into users (firstName, lastName, email, preferredName)
             OUTPUT inserted.id
             into @tempTable
@@ -105,8 +117,35 @@ router.post(['/createProfile'], async (req,res)=>{
             
             insert into credentials (userID,[password])
             select id, @password from @tempTable
-            COMMIT`)        
-        res.redirect('/auth/login')
+            
+            SELECT id FROM @tempTable
+            `)        
+
+        const newUserId = insertResult.recordset[0].id;
+            console.log(insertResult)
+        // 3. Fetch full user record (passport needs full user object)
+        const userResult = await pool.request()
+                    .input('id', sql.Int, newUserId)
+                    .query(`select firstName, id, email, banned
+                    from users
+                    where id = @id`);
+
+        const newUser = userResult.recordset[0];
+        const userRoles = await pool.request()
+                    .input('id', sql.Int, newUserId)
+                    .query(`select r.id, r.name
+                        from user_role as ur
+                        left join roles as r on ur.roleId=r.id
+                        where ur.userId = @id`)
+                    newUser.roles = userRoles.recordset
+        // 4. AUTO LOGIN using passport
+        req.login(newUser, function(err) {
+            if (err) return next(err);
+
+            // Redirect to home or wherever
+            res.redirect('/');
+        });
+        // res.redirect('/auth/login')
     }catch(err){
         console.log(err)
         res.redirect('/auth/createProfile')
@@ -118,7 +157,7 @@ router.get(['/forgotPassword'], async (req,res)=>{
         let data = {
             host: req.headers.host
         }
-        res.render('forgotPassword.ejs',{data})
+        res.render('forgotPassword.ejs',{data, messages: {message: req.flash().message}})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -289,7 +328,7 @@ router.post('/reset/:token', async (req, res, next) => {
             DELETE FROM ResetTokens 
             WHERE token = @token
             `);
-        res.redirect('/')
+        res.redirect('/auth/login')
     } catch (error) {
         console.error('Error resetting password:', error);
     }
