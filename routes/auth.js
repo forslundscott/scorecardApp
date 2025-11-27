@@ -16,7 +16,7 @@ router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
         }
         // console.log(req.get('host'))
         let message = req.flash().message
-        delete req.session.message
+        
         // console.log(req.flash())
         res.render('login.ejs', {messages: {message},data: data})
     }catch(err){
@@ -261,7 +261,8 @@ router.get('/reset/:token', async (req, res, next) => {
         let data = {
             host: req.headers.host
         }
-        res.render('resetPassword.ejs',{data})
+        let message = req.flash().message
+        res.render('resetPassword.ejs',{messages:{message},data})
     }catch(err){
         console.error('Error:', err)
     }
@@ -271,7 +272,9 @@ router.post('/reset/:token', async (req, res, next) => {
     try {
         const { token } = req.params;
         const { password, confirmPassword } = req.body;
-
+        let data = {
+            host: req.headers.host
+        }
         if (password !== confirmPassword) {
             return res.render('resetPassword.ejs', { messages: {error: 'Passwords do not match'} })
         }
@@ -284,7 +287,7 @@ router.post('/reset/:token', async (req, res, next) => {
         const resetToken = result.recordset[0];
     
         if (!resetToken) {
-            return res.status(404).json({ message: 'Invalid token' });
+            return res.status(404).json({messages: { message: 'Invalid token' },data});
         }
     
         // Update user password and remove reset token
@@ -329,7 +332,9 @@ router.post('/reset/:token', async (req, res, next) => {
             DELETE FROM ResetTokens 
             WHERE token = @token
             `);
-        res.redirect('/auth/login')
+            console.log('returnTo')
+            console.log(resetToken.returnTo)
+        res.redirect(resetToken.returnTo||'/')
     } catch (error) {
         console.error('Error resetting password:', error);
     }
