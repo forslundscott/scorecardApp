@@ -186,9 +186,10 @@ router.post(['/forgotPassword'], async (req,res)=>{
     await pool.request()
     .input('id', sql.Int, user.id)
     .input('token', sql.NVarChar(255), token)
+    .input('returnTo', sql.VarChar(sql.MAX),req.session.returnTo)
     .query(
         `
-      INSERT INTO ResetTokens (userId, token) VALUES (@id, @token)
+      INSERT INTO ResetTokens (userId, token, returnTo, createdAt) VALUES (@id, @token, @returnTo, DATEDIFF_BIG(MILLISECOND, '1970-01-01', SYSUTCDATETIME()))
     `
     );
     let body = `Hello,
