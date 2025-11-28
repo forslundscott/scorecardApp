@@ -127,6 +127,7 @@ input:focus, textarea:focus, select:focus {
                         <td><%= item.goalDifferential %></td>
                     <% } %>
                     <% if (data.type === 'individual') { %>
+                        <% console.log(data.user) %>
                         <td <%= data.user ? '' : 'class=blur-text' %>><%= data.user ? item.Player : item.Player.replace(/[^ ]/g, "*") %></td>
                         <td class="tooltip" data-tooltip="<%= item.teamShortName %>"><%= item.teamAbbreviation %></td>
                         <td><%= item.points %></td>
