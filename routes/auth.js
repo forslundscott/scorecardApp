@@ -190,7 +190,7 @@ router.post(['/forgotPassword'], async (req,res)=>{
   Regards,
   The GLOS Team
       `
-    functions.sendEmail(body,user.email,'No Reply - GLOS', 'GLOS Account Password Reset')
+    functions.sendEmail(body,user.email,'No Reply - GLOS', 'GLOS Account Password Reset',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)
     // Send reset email
     // const transporter = nodemailer.createTransport({
     //     host: 'smtp.titan.email',

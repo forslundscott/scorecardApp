@@ -1411,8 +1411,8 @@ async function fullEmail(recordset){
             service: 'gmail',
             secure: false,
             auth: {
-               user: process.env.ORG_EMAIL,
-               pass: process.env.ORG_EMAIL_PASSWORD
+               user: process.env.NO_REPLY_EMAIL,
+               pass: process.env.NO_REPLY_EMAIL_PASSWORD
             },
             debug: false,
             logger: true

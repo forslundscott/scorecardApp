@@ -207,7 +207,7 @@ app.get(['/waiver'],checkAuthenticated, async (req,res)=>{
 
 app.get(['/test'], async (req,res)=>{
     try{
-        // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test')
+        // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)
         const session = await stripe.checkout.sessions.retrieve('cs_live_b1UJPNpDBVP05Lo5SM1GpPGKIloKd46jUdVDBfqczLmDAWTFjvD0Hys1NW')
         console.log(session)
         // (async () => {
