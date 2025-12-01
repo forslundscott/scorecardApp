@@ -44,7 +44,7 @@ router.post('/add', async (req, res, next) => {
             `)
         }
         // res.redirect(302,'/pickup')
-        res.redirect('back')
+        res.redirect(req.get('Referer') || '/');
     }catch(err){
         next(err)
     }

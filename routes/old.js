@@ -32,7 +32,7 @@ router.post(['/paidChanges'], async (req,res,next)=>{
 
     // Send a JSON response with the error message
         // res.json({ error: 'An error occurred while processing your request.' });
-        res.redirect('back')
+        res.redirect(req.get('Referer') || '/');
     }catch(err){
         console.log(err)
 

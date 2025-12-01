@@ -7,7 +7,8 @@ const nodemailer = require('nodemailer');
 const pool = require(`../db`)
 const sql = require('mssql'); 
 const functions = require('../helpers/functions')
-const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
+const { checkAuthenticated, checkNotAuthenticated, authRole, loginUser } = require('../middleware/authMiddleware');
+
 
 router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
     try{
@@ -35,22 +36,23 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
             return res.redirect(info.redirect || '/auth/login')
             // return res.render(info.redirect || 'login.ejs', {messages: info, data}) 
         }
-        req.session.passport = {}
-        req.session.passport.user = user.id
-        console.log(user.id)
-        let redirectUrl 
-            if (req.session.returnTo) {
-                redirectUrl = req.session.returnTo;
-            // } else if (req.hostname.startsWith('app.')) {
-            //     redirectUrl = 'https://envoroot.com/';
-            // } else if (['forslundhome.duckdns.org', 'glosoccer.org', 'www.glosoccer.org'].includes(req.headers.host)) {
-            //     redirectUrl = `https://${req.headers.host}/comingsoon`;
-            } else {
-                redirectUrl = '/';
-            }
-        delete req.session.returnTo;
-        // res.json({ url: redirectUrl })
-        res.redirect(redirectUrl);
+
+        req.logIn(user, (err) => {
+            if (err) return next(err);
+
+            const redirectUrl = req.session.returnTo || '/';
+            delete req.session.returnTo;
+            return res.redirect(redirectUrl);
+        });
+        // req.session.passport = {}
+        // req.session.passport.user = user.id
+        // console.log(user.id)
+        
+        // let redirectUrl = req.session.returnTo || '/';
+
+        // delete req.session.returnTo;
+
+        // res.redirect(redirectUrl);
     }catch(err){
         console.error('Error:', err)
     }
@@ -59,12 +61,17 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
 
 router.delete('/logout', (req,res) => {
     try{
-        if(req.session){
-            if(req.session.passport){
-                delete req.session.passport
-                res.redirect('back')
-            }
-        }
+        req.logout(function(err) {
+            if (err) { return next(err); }
+            res.redirect(req.get('Referer') || '/');
+        });
+        // if(req.session){
+        //     if(req.session.passport){
+        //         delete req.session.passport
+        //         res.redirect(req.get('Referer') || '/');
+
+        //     }
+        // }
     }catch(err){
         console.error('Error:', err)
     }    
@@ -80,7 +87,7 @@ router.get(['/createProfile'], async (req,res)=>{
     }    
 })
 
-router.post(['/createProfile'], async (req,res)=>{
+router.post(['/createProfile'], async (req,res,next)=>{
     let data = {
             host: req.headers.host
         }
@@ -122,30 +129,10 @@ router.post(['/createProfile'], async (req,res)=>{
             `)        
 
         const newUserId = insertResult.recordset[0].id;
-            console.log(insertResult)
-        // 3. Fetch full user record (passport needs full user object)
-        const userResult = await pool.request()
-                    .input('id', sql.Int, newUserId)
-                    .query(`select firstName, id, email, banned
-                    from users
-                    where id = @id`);
-
-        const newUser = userResult.recordset[0];
-        const userRoles = await pool.request()
-                    .input('id', sql.Int, newUserId)
-                    .query(`select r.id, r.name
-                        from user_role as ur
-                        left join roles as r on ur.roleId=r.id
-                        where ur.userId = @id`)
-                    newUser.roles = userRoles.recordset
-        // 4. AUTO LOGIN using passport
-        req.login(newUser, function(err) {
-            if (err) return next(err);
-
-            // Redirect to home or wherever
-            res.redirect('/');
-        });
-        // res.redirect('/auth/login')
+            
+        loginUser(req,res,pool,newUserId)
+            
+        
     }catch(err){
         console.log(err)
         res.redirect('/auth/createProfile')
@@ -332,9 +319,11 @@ router.post('/reset/:token', async (req, res, next) => {
             DELETE FROM ResetTokens 
             WHERE token = @token
             `);
-            console.log('returnTo')
-            console.log(resetToken.returnTo)
-        res.redirect(resetToken.returnTo||'/')
+
+            req.session.returnTo = resetToken.returnTo
+
+            loginUser(req,res,pool,user.ID)
+        // res.redirect(resetToken.returnTo||'/')
     } catch (error) {
         console.error('Error resetting password:', error);
     }

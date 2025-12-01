@@ -137,7 +137,7 @@ router.post(['/addPlayer'], async (req,res,next)=>{
             `)
         }
     
-        res.redirect('back')
+        res.redirect(req.get('Referer') || '/');
     }catch(err){
         next(err)
     }

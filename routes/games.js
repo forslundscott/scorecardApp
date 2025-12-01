@@ -307,11 +307,11 @@ router.get(['/timer'], async (req,res,next)=>{
                 [timerStartTime] = @timerStartTime, 
                 [timerState] = @timerState
                 WHERE event_Id = @eventId`)
-            res.redirect('back')
+            res.redirect(req.get('Referer') || '/');
         }
     }catch(err){
         console.log(err)
-        res.redirect('back')
+        res.redirect(req.get('Referer') || '/');
     }
 })
 router.post(['/eventLog'], async (req,res,next)=>{
@@ -918,7 +918,7 @@ router.get('/', async (req,res, next)=>{
             page: 'games',
             user: req.user
         }
-        console.log(req.user)
+        
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
         // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
         let sqlStr

@@ -1,11 +1,10 @@
 const errorHandler = (err, req, res, next) => {
-    console.error(err.stack);
+    
+    const now = Date.now(); // single point in time
+    const timestamp = new Date(now).toISOString();
+    const errorId = now.toString(36); // same exact time used
 
-  // Optionally generate a reference ID for debugging
-  const errorId = Date.now().toString(36); // Or use a UUID
-
-  // You could log the error and errorId together
-  console.error(`Error ID: ${errorId}`, err);
+    console.error(`[${timestamp}] Error ID: ${errorId}`, err);
     res.status(500).render('serverError.ejs', { errorId });
 };
 
