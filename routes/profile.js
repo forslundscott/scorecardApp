@@ -1,7 +1,7 @@
 // routes/users.js
 const express = require('express');
 const router = express.Router();
-const pool = require(`../db`)
+const {pool} = require(`../db`)
 const functions = require('../helpers/functions')
 router.get('/', async (req,res, next)=>{
     try{

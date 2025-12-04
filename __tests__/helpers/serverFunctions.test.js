@@ -3,7 +3,7 @@
  */
 const {titleCase,getOrdinalNumber,exportToCSV,getHexColor,millisecondsToTimeString,addUserToDatabase,getUser,formatDate} = require('../../helpers/functions')
 const { Parser } = require('json2csv');
-const pool = require('../../db');
+const {pool} = require('../../db');
 
 jest.mock('../../db'); // Mock the entire pool module
 jest.mock('json2csv');

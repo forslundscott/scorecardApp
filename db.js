@@ -1,4 +1,5 @@
 const sql = require('mssql');
+let pool
 const config = {
     server: process.env.DB_SERVER,
     database: process.env.DB_NAME,
@@ -15,32 +16,13 @@ const config = {
         },
       },
 };
-const ROLES = {}
-const pool = new sql.ConnectionPool(config)
-pool.connect().then(async () => {
-    console.log('Connected to MSSQL with global connection pool');
-    try{
-        await roleSetter()
-        console.log(ROLES.admin)
-    }catch(err){
-        console.error('Error:', err)
-    }
-  })
-  .catch((err) => {
-    console.error('Error connecting to MSSQL:', err);
-  });
-  async function roleSetter() {
-    try{
-        const result = await pool.request()
-        .query(`
-        SELECT name, id
-        FROM roles
-        `);
-        result.recordset.forEach(row => {
-            ROLES[row.name] = row.id;
-        });
-    }catch(err){
-        console.error('Error:', err)
-    }  
-};
-  module.exports = pool;
+async function getPool() {
+  if (pool) return pool;
+  pool = new sql.ConnectionPool(config);
+  await pool.connect();
+  console.log("MSSQL connected");
+
+  return pool;
+}
+getPool()
+module.exports = { getPool, pool };

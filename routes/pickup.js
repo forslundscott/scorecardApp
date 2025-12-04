@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
-const pool = require(`../db`)
+const {pool} = require(`../db`)
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 const processingStatus = {};

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require(`../db`)
+const {pool} = require(`../db`)
 const sql = require('mssql'); 
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')

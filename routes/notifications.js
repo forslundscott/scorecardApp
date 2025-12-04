@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require(`../db`)
+const {pool} = require(`../db`)
 const functions = require('../helpers/functions')
 const mailchimp = require('../helpers/mailChimp')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
