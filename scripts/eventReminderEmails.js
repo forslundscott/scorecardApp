@@ -48,7 +48,7 @@ async function sendGameReminders({
   const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysOut, 0, 0, 0, 0); // midnight two days out (server tz)
   const startMs = target.getTime();
   const endMs = new Date(target.getFullYear(), target.getMonth(), target.getDate() + 1).getTime();
-
+  
   // If you want to debug:
   // console.log('Target day start (ms):', startMs, new Date(startMs).toString());
 
@@ -75,7 +75,9 @@ async function sendGameReminders({
        ON (ut.teamId = g.Team1_ID OR ut.teamId = g.Team2_ID)
        AND ut.seasonId = g.season
     INNER JOIN users u ON ut.userId = u.ID
-    WHERE g.startUnixTime >= @startMs AND g.startUnixTime < @endMs
+    WHERE g.startUnixTime >= @startMs
+      AND g.startUnixTime < @endMs
+      AND u.validEmail = 1
     ORDER BY u.ID, g.startUnixTime;
   `;
 
@@ -109,6 +111,7 @@ async function sendGameReminders({
 
     if (!rows.length) {
       console.log('No games found for target day.');
+      await pool.close();
       return { sent: 0, found: 0 };
     }
 
