@@ -754,7 +754,7 @@ router.get('/site/mygames', checkAuthenticated, async (req,res, next)=>{
         next(err)
     }
 });
-router.get('/site/:leagueId', async (req,res, next)=>{
+router.get('/site/:seasonId', async (req,res, next)=>{
     try{
         if (req.isAuthenticated()) {
             // console.log(req.user)
@@ -768,7 +768,7 @@ router.get('/site/:leagueId', async (req,res, next)=>{
         // where convert(date,DATEADD(s, startunixtime/1000, '1970-01-01') AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,'01-07-2024')
         // const result = await request.query(`Select * from gamesList() where convert(date,DATEADD(s, startunixtime/1000, '19700101')AT TIME ZONE 'UTC' AT TIME ZONE 'Eastern Standard Time') = CONVERT(date,getdate()) order by startUnixTime, location `)
         const result = await pool.request()
-        .input('leagueId',sql.Int, req.params.leagueId)
+        .input('seasonId',sql.Int, req.params.seasonId)
         .query(`Select g.*,
                 t1.abbreviation as t1Abbreviation,
                 t2.abbreviation as t2Abbreviation,
@@ -780,7 +780,7 @@ router.get('/site/:leagueId', async (req,res, next)=>{
             left join teams as t1 on g.Team1_ID=t1.teamId
             left join teams as t2 on g.Team2_ID=t2.teamId
             left join leagues as l on g.leagueId=l.leagueId
-            where g.leagueId = @leagueId
+            where g.season = @seasonId
             order by startUnixTime, location `)
             console.log(result.recordset)
             
