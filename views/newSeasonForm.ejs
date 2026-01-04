@@ -11,6 +11,70 @@
     <input type="text" id="minutesPerPeriod" name="minutesPerPeriod" inputmode="numeric" maxlength="3" pattern="[0-9]*" value="15" oninput="this.value = this.value.replace(/\D/g, '')">
 
     <br><br>
+    <label for="playerRegularPrice">Player Regular Price</label>
+        <input
+        type="text"
+        id="playerRegularPrice"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="75.00"
+        />
+        <br>
+        <label for="crewDiscount">Crew Discount</label>
+        <input
+        type="text"
+        id="crewDiscount"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="15.00"
+        />
+        <br>
+        <label for="playerEarlyBirdDiscount">Player Earlybird Discount</label>
+        <input
+        type="text"
+        id="playerEarlyBirdDiscount"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="10.00"
+        />
+        <br>
+        <label for="playerLateFee">Player Late Fee</label>
+        <input
+        type="text"
+        id="playerLateFee"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="10.00"
+        />
+        <br>
+        <label for="teamRegularPrice">Team Regular Price</label>
+        <input
+        type="text"
+        id="teamRegularPrice"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="750.00"
+        />
+        <br>
+        <label for="teamEarlyBirdDiscount">Team Earlybird Discount</label>
+        <input
+        type="text"
+        id="teamEarlyBirdDiscount"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="100.00"
+        />
+        <br>
+        <label for="teamLateFee">Team Late Fee</label>
+        <input
+        type="text"
+        id="teamLateFee"
+        inputmode="decimal"
+        placeholder="0.00"
+        value="100.00"
+        />
+        <br>
+<br><br>
     <label for="active" class="primaryStyle">Active Season?</label> <input type="checkbox" name="active" id="active" checked>
     <br><br>
     <label for="registrationOpen" class="primaryStyle">Registration Open?</label> <input type="checkbox" name="registrationOpen" id="registrationOpen" checked>

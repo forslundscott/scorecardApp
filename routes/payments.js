@@ -739,21 +739,7 @@ router.post('/teamTournamentCheckoutSession', async (req, res) => {
     
     
 
-    // const product = await stripe.products.search({
-    //     query: `name:'Dragon Cup Tournament'`,
-    // })
-  //   const prices = await stripe.prices.list({
-  //     product: product.id,
-  //     active: true, // Only get active prices
-  // });
-
-  // console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
-  // let nickname = 'Standard';
-  // let productName = '2025';
-  
-
-// const teamPrice = prices.data.find(price => price.nickname === nickname);
-  // const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
+ 
   const lineItems = [{
     price_data: {
       currency: 'usd',
@@ -836,12 +822,18 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
   try {
     let result = await pool.request()
     .input('seasonId',sql.Int,req.body.seasonId)
+    .input('leagueId',sql.Int,req.body.leagueId)
     .query(`
-      select *
-      from seasons as s
-      where s.seasonId = @seasonId
+      select s.seasonName, ls.*, l.shortName from league_season as ls
+      left join seasons as s on ls.seasonId=s.seasonId
+      left join leagues as l on ls.leagueId=l.leagueId
+      where ls.seasonId = @seasonId
+      and ls.leagueId = @leagueId
       `)
+      
+      // console.log(req.body.leagueId)
   let season = result.recordset[0]
+  console.log(season)
     const consolidatedBody = Object.entries(req.body).reduce((acc, [key, value]) => {
       if (Array.isArray(value)) {
         value = value.join(", ");
@@ -885,51 +877,57 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
     //   ])
     // );
 
-    const product = await stripe.products.search({
-        query: `name:'8 Game Season'`,
-    })
-    const prices = await stripe.prices.list({
-      product: product.id,
-      active: true, // Only get active prices
-      limit: 100
-  });
+    // const product = await stripe.products.search({
+    //     query: `name:'8 Game Season'`,
+    // })
+  //   const prices = await stripe.prices.list({
+  //     product: product.id,
+  //     active: true, // Only get active prices
+  //     limit: 100
+  // });
 
-  // console.log(req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular'))
+
   let nickname;
   let productName;
+  let Price
   const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
-  console.log(req.user)
+  // console.log(req.user)
   if (req.body.teamPayType === 'team') {
     nickname = 'Team';
     productName = 'Team'
+    Price = season.teamRegularPrice
   } else if (req.user.roles.some(role => crewRoles.includes(role.name))) {
     nickname = 'Crew';
     productName = 'Crew'
+    Price = season.individualRegularPrice-season.crewDiscount
   } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
     nickname = 'Crew';
     productName = 'Friends & Family'
+    Price = season.individualRegularPrice-season.firstResponderDiscount
   } else if (req.body.discounted === 'true') {
     nickname = 'Student, Teacher, First Responder, Military';
     productName = 'Student, Teacher, First Responder, Military'
+    Price = season.individualRegularPrice-season.firstResponderDiscount
   } else {
     nickname = 'Regular';
     productName = 'Individual'
+    Price = season.individualRegularPrice
   }
 // console.log(nickname)
-const teamPrice = prices.data.find(price => price.nickname === nickname);
-console.log(prices.data.length)
-  // const teamPrice = prices.data.find(price => price.nickname === (req.body.teamPayType === 'team' ? 'Team' : (req.body.discounted === 'true' ? 'Student, Teacher, First Responder, Military' : 'Regular')))
+// const teamPrice = prices.data.find(price => price.nickname === nickname);
+// console.log(prices.data.length)
+
   const lineItems = [{
     price_data: {
       currency: 'usd',
       product_data: {
         name: `${season.seasonName} - ${productName}`,
       },
-      unit_amount: teamPrice.unit_amount, // amount in cents
+      unit_amount: Price, // amount in cents
     },
     quantity: 1,
   }]
-  let totalPrice = teamPrice.unit_amount
+  let totalPrice = Price
   result = await pool.request()
     .input('leagueId',sql.Int,req.body.leagueId)
     .query(`
@@ -938,65 +936,37 @@ console.log(prices.data.length)
       where l.leagueId = @leagueId
       `)
       // console.log(req.body.teamPayType)
-      if(result.recordset[0].refFeesIndividual > 50 && req.body.teamPayType !== 'team'){
-        totalPrice = totalPrice + result.recordset[0].refFeesIndividual
+      if(season.refFeesIndividual > 50 && req.body.teamPayType !== 'team'){
+        totalPrice = totalPrice + season.refFeesIndividual
         lineItems.push(
           {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
+                name: `Referee Fees - ${season.shortName} - Individual`,
               },
-              unit_amount: result.recordset[0].refFeesIndividual, // amount in cents
+              unit_amount: season.refFeesIndividual, // amount in cents
             },
             quantity: 1,
           }
         )
       }
-      if(result.recordset[0].refFeesTeam > 50 && req.body.teamPayType === 'team'){
-        totalPrice = totalPrice + result.recordset[0].refFeesTeam
+      if(season.refFeesTeam > 50 && req.body.teamPayType === 'team'){
+        totalPrice = totalPrice + season.refFeesTeam
         lineItems.push(
           {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `Referee Fees - ${result.recordset[0].shortName} - Team`,
+                name: `Referee Fees - ${season.shortName} - Team`,
               },
-              unit_amount: result.recordset[0].refFeesTeam, // amount in cents
+              unit_amount: season.refFeesTeam, // amount in cents
             },
             quantity: 1,
           }
         )
       }
-      // if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
-      //   totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 15000 : 1500)
-      //   lineItems.push(
-      //     {
-      //       price_data: {
-      //         currency: 'usd',
-      //         product_data: {
-      //           name: `Referee Fees - Premier - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
-      //         },
-      //         unit_amount: req.body.teamPayType === 'team' ? 15000 : 1500, // amount in cents
-      //       },
-      //       quantity: 1,
-      //     }
-      //   )
-      // }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
-      //   totalPrice = totalPrice + (req.body.teamPayType === 'team' ? 30000 : 3000)
-      //   lineItems.push(
-      //     {
-      //       price_data: {
-      //         currency: 'usd',
-      //         product_data: {
-      //           name: `Referee Fees - Men's - ${req.body.teamPayType === 'team' ? 'Team' : 'Individual'}`,
-      //         },
-      //         unit_amount: req.body.teamPayType === 'team' ? 30000 : 3000, // amount in cents
-      //       },
-      //       quantity: 1,
-      //     }
-      //   )
-      // }
+      
       let waiverPay = await functions.checkWaiverFeeDue(req.user.id)
       if(req.body.teamPayType === 'self'){
         // console.log('test')
@@ -1093,7 +1063,7 @@ console.log(prices.data.length)
       const metadata = {
         type: 'teamSeasonCheckout',
         lineItems: lineItems,
-        priceId: teamPrice.id,
+        // priceId: teamPrice.id,
         success_url: `${req.headers.origin}/api/payments/success?sessionId={CHECKOUT_SESSION_ID}`,
         cancel_url: `${req.get('Referer') || 'https://glosoccer.com'}`,
         metadata: {type: 'teamSeasonCheckout'

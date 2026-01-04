@@ -281,13 +281,13 @@
                 <br><br>
             </div>
             <!-- <br><br><br>   -->
-            <label for=""> Are you registering...</label>
-            <label for=""><input type="radio" name="teamPayType" value="self" onclick="payChange(this)"> Self Only</label>
-            <label for=""><input type="radio" name="teamPayType" value="team" onclick="payChange(this)" checked> Whole Team</label>
+            <label for="" hidden> Are you registering...</label>
+            <label for="" hidden><input type="radio" name="teamPayType" value="self" onclick="payChange(this)"> Self Only</label>
+            <label for="" hidden><input type="radio" name="teamPayType" value="team" onclick="payChange(this)" checked> Whole Team</label>
             <div id="rosterContainer">
                 <label for=""><h2><b>Team Roster: </b></h2></label>
-                <b>(Max 14) </b>
-                <br><br>
+                <!-- <b>(Max 14) </b> -->
+                <!-- <br><br> -->
                 <button 
                     type="button" 
                     class="buttonStyle" 
@@ -712,10 +712,10 @@ document.getElementById('teamSeasonRegistrationForm').addEventListener('submit',
             let tbody = document.querySelector("#rosterTable tbody");
             let rowCount = tbody.querySelectorAll("tr").length;
 
-            if (rowCount === 14) {
-                alert("You are at the Roster Maximum.");
-                return false
-            }
+            // if (rowCount === 14) {
+            //     alert("You are at the Roster Maximum.");
+            //     return false
+            // }
             return true
         }
         // document.addEventListener("DOMContentLoaded", function () {
