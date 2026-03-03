@@ -824,7 +824,8 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
     .input('seasonId',sql.Int,req.body.seasonId)
     .input('leagueId',sql.Int,req.body.leagueId)
     .query(`
-      select s.seasonName, ls.*, l.shortName from league_season as ls
+      select s.seasonName, ls.*, l.shortName
+      from league_season as ls
       left join seasons as s on ls.seasonId=s.seasonId
       left join leagues as l on ls.leagueId=l.leagueId
       where ls.seasonId = @seasonId
@@ -1179,19 +1180,33 @@ const price = prices.data.find(price => price.nickname === nickname);
     });
     for(const league of leaguesTeams){
       result = await pool.request()
-            .input('leagueId',sql.Int,league.leagueId)
-            .query(`
-              select *
-              from leagues as l
-              where l.leagueId = @leagueId
-              `)
-            console.log(result.recordset[0])
+      .input('seasonId',sql.Int,req.body.seasonId)
+      .input('leagueId',sql.Int,league.leagueId)
+      .query(`
+        select s.seasonName, ls.*, l.shortName
+        from league_season as ls
+        left join seasons as s on ls.seasonId=s.seasonId
+        left join leagues as l on ls.leagueId=l.leagueId
+        where ls.seasonId = @seasonId
+        and ls.leagueId = @leagueId
+        `)
+        
+        // console.log(req.body.leagueId)
+    season = result.recordset[0]
+      // result = await pool.request()
+      //       .input('leagueId',sql.Int,league.leagueId)
+      //       .query(`
+      //         select *
+      //         from leagues as l
+      //         where l.leagueId = @leagueId
+      //         `)
+      //       console.log(result.recordset[0])
         lineItems.push(
           {
             price_data: {
               currency: 'usd',
               product_data: {
-                name: `${season.seasonName} - ${result.recordset[0].shortName} - ${productName}`,
+                name: `${season.seasonName} - ${season.shortName} - ${productName}`,
               },
               unit_amount: price.unit_amount, // amount in cents
             },
@@ -1200,8 +1215,8 @@ const price = prices.data.find(price => price.nickname === nickname);
         )
         totalPrice = totalPrice + price.unit_amount
         // console.log(`Referee Fees - ${result.recordset[0].shortName} - Individual`)
-        if(result.recordset[0].refFeesIndividual > 50){
-          totalPrice = totalPrice + result.recordset[0].refFeesIndividual
+        if(season.refFeesIndividual > 50){
+          totalPrice = totalPrice + season.refFeesIndividual
           lineItems.push(
             {
               price_data: {
