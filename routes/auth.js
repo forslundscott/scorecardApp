@@ -30,29 +30,21 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
         let data = {
             host: req.headers.host
         }
-        console.log(!user)
+
         if (!user) { 
             req.flash('message', info.message)
             return res.redirect(info.redirect || '/auth/login')
             // return res.render(info.redirect || 'login.ejs', {messages: info, data}) 
         }
 
+        const redirectUrl = req.session.returnTo || '/';
         req.logIn(user, (err) => {
             if (err) return next(err);
-
-            const redirectUrl = req.session.returnTo || '/';
+            
             delete req.session.returnTo;
             return res.redirect(redirectUrl);
         });
-        // req.session.passport = {}
-        // req.session.passport.user = user.id
-        // console.log(user.id)
         
-        // let redirectUrl = req.session.returnTo || '/';
-
-        // delete req.session.returnTo;
-
-        // res.redirect(redirectUrl);
     }catch(err){
         console.error('Error:', err)
     }
