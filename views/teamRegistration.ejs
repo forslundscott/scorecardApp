@@ -281,9 +281,12 @@
                 <br><br>
             </div>
             <!-- <br><br><br>   -->
-            <label for="" > Are you registering...</label>
-            <label for="" ><input type="radio" name="teamPayType" value="self" onclick="payChange(this)"> Self Only</label>
-            <label for="" ><input type="radio" name="teamPayType" value="team" onclick="payChange(this)" checked> Whole Team</label>
+             <% if (data.seasonId != 100000022) { %>
+                <label for="" > Are you registering...</label>
+                <label for="" ><input type="radio" name="teamPayType" value="self" onclick="payChange(this)"> Self Only</label>
+                <label for="" ><input type="radio" name="teamPayType" value="team" onclick="payChange(this)" checked> Whole Team</label>
+             <% } %>
+            
             <div id="rosterContainer">
                 <label for=""><h2><b>Team Roster: </b></h2></label>
                 <!-- <b>(Max 14) </b> -->
