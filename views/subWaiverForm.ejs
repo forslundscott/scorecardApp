@@ -116,7 +116,7 @@
     </div>
    
     
-    <form id="waiverForm" action="/api/payments/waiverCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
+    <form id="waiverForm" action="" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
         
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
@@ -219,16 +219,6 @@
         <button class="buttonStyle formButton">Sign Waiver</button>
     </form>
     <script>
-        document.getElementById('waiverForm').addEventListener('submit', function(event) {
-            
-            handleSubmit(this,event)
-        });
-  function handleSubmit(form,event) {
-            // if (!validateCheckboxes(form)) {
-            //     return false; 
-            // }
-            paymentSubmit(form,event, 'waiverCheckoutSession')
-        }
         document.addEventListener("input", function(event) {
         if (event.target.classList.contains("allergy-input")) {
             handleDynamicInputs("allergy-list", "allergy-input", "allergies[]", "Enter an allergy");

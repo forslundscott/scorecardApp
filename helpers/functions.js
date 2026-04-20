@@ -405,7 +405,8 @@ async function checkWaiverFeeDue(userId) {
         where ID = @userId
         `
     )
-    // console.log(result.recordset)
+    console.log(result.recordset[0].waiverPayDate)
+    console.log(getWaiverResetDate())
     // return true
     return result.recordset[0].waiverPayDate < getWaiverResetDate()
 }
@@ -735,6 +736,19 @@ async function waiverSignedEmail(user){
     } 
  
 }
+async function waiverPaidEmail(user){
+    try {    
+          
+            let htmlBody = `
+            <h2>Waiver Signed and Paid By:</h2>
+            <p>${user.firstName} ${user.lastName} ${user.email}</p>
+            `
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'Waiver Signed and Paid',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)
+    } catch (error) {
+      console.error('Error sending email:', error);
+    } 
+ 
+}
 function getDayName(dayNumber) {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[dayNumber % 7];
@@ -765,4 +779,5 @@ module.exports = {
     ,newTournamentRegistrationEmail
     ,waiverSignedEmail
     ,getDayName
+    ,waiverPaidEmail
 }

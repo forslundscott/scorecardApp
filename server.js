@@ -204,7 +204,63 @@ app.get(['/waiver'],checkAuthenticated, async (req,res)=>{
         console.error('Error:', err)
     }    
 })
-
+app.post(['/subwaiver'], async (req,res)=>{
+    try{
+        let data = {
+            page: `/season/register`,
+            user: req.user,
+            seasonId: req.params.seasonId,
+            host: req.headers.host
+            
+        }
+        const transformedBody = Object.fromEntries(
+            Object.entries(req.body).map(([key, value]) => [
+              key,
+              Array.isArray(value) ? value.join(", ") : value,
+            ])
+          );
+        //   console.log(transformedBody)
+              await functions.addUserToDatabase(req.body);
+              const user = await functions.getUser(req.body)
+                
+              functions.updateUserInfo({
+              userId: user.id,
+              ...transformedBody,
+              waiverDate: Date.now()
+            })
+            functions.waiverSignedEmail(user)
+        res.render('waiverSuccess.ejs', {data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
+app.get(['/subwaiver'],checkAuthenticated, async (req,res)=>{
+    try{
+        let data = {
+            page: `/season/register`,
+            user: req.user,
+            seasonId: req.params.seasonId,
+            host: req.headers.host
+        }
+        let result = await pool.request()
+        .input('userId', sql.Int, data.user.id)
+        .query(`
+            SELECT * from users
+            WHERE ID = @userId;
+            `)
+            data.userAttributes = result.recordsets[0][0]
+            data.userAttributes.dob = Number(data.userAttributes.dob)
+            data.userAttributes.allergies = data.userAttributes.allergies
+            ? data.userAttributes.allergies.split(',').map(allergy => allergy.trim())
+            : [];
+            data.userAttributes.medicalConditions = data.userAttributes.medicalConditions
+            ? data.userAttributes.medicalConditions.split(',').map(medical => medical.trim())
+            : [];
+        res.render('subWaiverForm.ejs', {data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
 app.get(['/test'], async (req,res)=>{
     try{
         // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)

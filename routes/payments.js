@@ -246,6 +246,48 @@ router.post('/successVenmo', async (req,res, next)=>{
       next(err)
   }
 });
+router.get('/waiver/success', async (req,res, next)=>{
+    let data = {
+            body: req.body,
+            path: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+            user: req.user
+        }
+    let transaction
+    let isTransactionActive = false
+  try{
+        // console.log(req.query.organizationId)
+        // console.log(req.query.organizationId == 1000000001)
+        
+        if(req.query.organizationId == 1000000001){
+            session = await stripe1Gol.checkout.sessions.retrieve(req.query.sessionId)
+        }else{
+            session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
+        }
+        console.log(session.metadata)
+      if(session.metadata.waiverPaid){
+                    await pool.request()
+                          .input('waiverPayDate', sql.BigInt, Date.now())
+                          .input('userId', sql.Int, req.user.id)
+                          .query(`
+                            update users
+                            set waiverPayDate = @waiverPayDate
+                            where ID = @userId
+                            `)
+                  }
+                  const user = await functions.getUser(session.metadata)
+                  functions.waiverPaidEmail(user)
+        res.render('paymentSuccess.ejs');
+        
+    }catch(err){
+      console.log(isTransactionActive)
+      if (isTransactionActive) {
+        await transaction.rollback();
+      }
+      functions.rollBackTeam()
+        console.log(err)
+        res.render('paymentSuccess.ejs');
+    }
+});
 router.get('/success', async (req,res, next)=>{
     let data = {
             body: req.body,
@@ -1309,6 +1351,110 @@ const price = prices.data.find(price => price.nickname === nickname);
       
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
+      metadata.userId = user.ID
+      const isSeniorCrew = req.user.roles?.some(role => role.name === 'Senior Staff');
+
+      functions.updateUserInfo({
+      userId: req.user.id,
+      ...transformedBody,
+      waiverDate: Date.now()
+    })
+    if(totalPrice > 0){
+      const session = isSeniorCrew
+        ? await functions.createCheckoutSession({ metadata }, [{ coupon: 'SENIORCREW100' }])
+        : await functions.createCheckoutSession({ metadata });
+    
+      res.json({ url: session.url });
+    }else{
+      res.json({message: `You are all paid up for registered teams and annual waiver fee. 
+        If you meant to register for another team please select the appropriate league.
+        Thank you.`})
+    }
+
+  } catch (error) {
+    console.log(error)
+      res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/waiverCheckoutSession', async (req, res) => {
+
+ 
+  try {
+    
+            const transformedBody = Object.fromEntries(
+                Object.entries(req.body).map(([key, value]) => [
+                  key,
+                  Array.isArray(value) ? value.join(", ") : value,
+                ])
+              );
+
+                  await functions.addUserToDatabase(req.body);
+                  const user = await functions.getUser(req.body)
+                    
+                  functions.updateUserInfo({
+                  userId: user.id,
+                  ...transformedBody,
+                  waiverDate: Date.now()
+                })
+                
+
+  
+
+
+    let lineItems = []
+    let totalPrice = 0
+
+    
+    
+    let waiverPay = await functions.checkWaiverFeeDue(req.user.id)
+    if(waiverPay){
+      lineItems.push(
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Annual GLOS Waiver Fee',
+            },
+            unit_amount: req.body.discounted === 'true' ? 1000 : 2000, // amount in cents
+          },
+          quantity: 1,
+        }
+      )
+      totalPrice = totalPrice + (req.body.discounted === 'true' ? 1000 : 2000)
+    }
+    
+    lineItems.push(
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Stripe Processing Fee',
+          },
+          unit_amount: (totalPrice*.03)+30, // amount in cents
+        },
+        quantity: 1,
+      }
+    )
+    const metadata = {
+      type: 'waiverCheckout',
+      lineItems: lineItems
+      ,
+      // priceId: product.data[0].default_price,
+      success_url: `${req.headers.origin}/api/payments/waiver/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.get('Referer') || 'https://glosoccer.com'}`,
+
+      metadata: {type: 'waiverCheckout'
+        , ...transformedBody
+        // ,leaguesTeams: JSON.stringify(leaguesTeams)
+        ,waiverPaid: waiverPay
+      }
+    }
+// console.log(metadata.metadata.waiverPaid)
+
+      
+      // await functions.addUserToDatabase(req.body);
+      
       metadata.userId = user.ID
       const isSeniorCrew = req.user.roles?.some(role => role.name === 'Senior Staff');
 
