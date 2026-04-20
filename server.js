@@ -204,6 +204,36 @@ app.get(['/waiver'],checkAuthenticated, async (req,res)=>{
         console.error('Error:', err)
     }    
 })
+app.get(['/waiverSuccess'], async (req,res)=>{
+    try{
+        let data = {
+            page: `/season/register`,
+            user: req.user,
+            seasonId: req.params.seasonId,
+            host: req.headers.host
+            
+        }
+        // const transformedBody = Object.fromEntries(
+        //     Object.entries(req.body).map(([key, value]) => [
+        //       key,
+        //       Array.isArray(value) ? value.join(", ") : value,
+        //     ])
+        //   );
+        //   console.log(transformedBody)
+            //   await functions.addUserToDatabase(req.body);
+            //   const user = await functions.getUser(req.body)
+                
+            //   functions.updateUserInfo({
+            //   userId: user.id,
+            //   ...transformedBody,
+            //   waiverDate: Date.now()
+            // })
+            // functions.waiverSignedEmail(user)
+        res.render('waiverSuccess.ejs', {data: data})
+    }catch(err){
+        console.error('Error:', err)
+    }    
+})
 app.post(['/subwaiver'], async (req,res)=>{
     try{
         let data = {

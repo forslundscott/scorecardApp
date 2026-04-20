@@ -1378,7 +1378,13 @@ const price = prices.data.find(price => price.nickname === nickname);
 });
 
 router.post('/waiverCheckoutSession', async (req, res) => {
-
+let data = {
+            page: `/season/register`,
+            user: req.user,
+            seasonId: req.params.seasonId,
+            host: req.headers.host
+            
+        }
  
   try {
     
@@ -1470,9 +1476,8 @@ router.post('/waiverCheckoutSession', async (req, res) => {
     
       res.json({ url: session.url });
     }else{
-      res.json({message: `You are all paid up for registered teams and annual waiver fee. 
-        If you meant to register for another team please select the appropriate league.
-        Thank you.`})
+      functions.waiverSignedEmail(user)
+      res.json({ url: `${req.headers.origin}/waiverSuccess`})
     }
 
   } catch (error) {
