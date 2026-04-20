@@ -13,14 +13,14 @@ const functions = require('../helpers/functions')
 const gateway = require('../config/braintreeConfig');
 const { Readable } = require('stream');
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 2 * 1024 * 1024 },
-});
+// const upload = multer({
+//   storage: multer.memoryStorage(),
+//   limits: { fileSize: 2 * 1024 * 1024 },
+// });
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const stripe1Gol = Stripe(process.env.STRIPE_1GOL_SECRET_KEY)
 
-
+const upload = require('../middleware/upload');
 
 
 router.get('/checkout', async (req, res) => {
@@ -1153,7 +1153,19 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       res.status(500).json({ error: error.message });
   }
 });
-router.post('/individualSeasonCheckoutSession', async (req, res) => {
+router.post('/individualSeasonCheckoutSession', upload.single('guardianId'), async (req, res) => {
+  if (req.file) {
+      console.log('file saved:', req.file.path);
+
+      await pool.request()
+        .input('userId', sql.Int, req.user.id)
+        .input('guardianIdPath', sql.VarChar, req.file.path)
+        .query(`
+          update users
+          set guardianIdPath = @guardianIdPath
+          where ID = @userId
+        `);
+    }
   let result = await pool.request()
     .input('seasonId',sql.Int,req.body.seasonId)
     .query(`
@@ -1250,12 +1262,12 @@ const price = prices.data.find(price => price.nickname === nickname);
               product_data: {
                 name: `${season.seasonName} - ${season.shortName} - ${productName}`,
               },
-              unit_amount: price.unit_amount, // amount in cents
+              unit_amount: season.individualRegularPrice + season.individualLateFee, // amount in cents
             },
             quantity: 1,
           }
         )
-        totalPrice = totalPrice + price.unit_amount
+        totalPrice = totalPrice + season.individualRegularPrice + season.individualLateFee
         // console.log(`Referee Fees - ${result.recordset[0].shortName} - Individual`)
         if(season.refFeesIndividual > 50){
           totalPrice = totalPrice + season.refFeesIndividual
@@ -1266,7 +1278,7 @@ const price = prices.data.find(price => price.nickname === nickname);
                 product_data: {
                   name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
                 },
-                unit_amount: result.recordset[0].refFeesIndividual, // amount in cents
+                unit_amount: season.refFeesIndividual, // amount in cents
               },
               quantity: 1,
             }

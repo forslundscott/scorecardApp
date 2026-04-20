@@ -960,28 +960,26 @@ async function getLeagues(xform){
         console.error('Error fetching results:', error);
     }
 }
-async function paymentSubmit(form,event,path) {
-            event.preventDefault();
-            let formData = new FormData(form)
-            console.log('check')
-            const response = await fetch(`/api/payments/${path}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 
-                new URLSearchParams(
-                    formData
-                ).toString(),
-            })
-            const data = await response.json();
+async function paymentSubmit(form, event, path) {
+    event.preventDefault();
 
-            if (data.url) {
-              window.location.href = data.url;
-            } else if (data.message) {
-              alert(data.message);
-            }
-            
+    const formData = new FormData(form);
+
+    console.log('check');
+
+    const response = await fetch(`/api/payments/${path}`, {
+        method: 'POST',
+        body: formData
+        // ❌ DO NOT set Content-Type
+    });
+
+    const data = await response.json();
+
+    if (data.url) {
+        window.location.href = data.url;
+    } else if (data.message) {
+        alert(data.message);
+    }
 }
 function hasDuplicate(values) {
     console.log(values)

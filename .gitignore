@@ -3,7 +3,7 @@
 node_modules
 images/profile-images/*
 failed_inserts.json
-
+uploads
 
 #keeps
 !images/profile-images/.gitkeep

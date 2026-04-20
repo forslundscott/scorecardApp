@@ -11,7 +11,7 @@ const nodemailer = require('nodemailer');
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const stripe1Gol = Stripe(process.env.STRIPE_1GOL_SECRET_KEY)
-
+const mime = require('mime-types');
 let teamTransaction
 let isTeamTransactionActive = false
 // import { flatten } from 'flat'
@@ -410,7 +410,7 @@ async function checkWaiverFeeDue(userId) {
     // return true
     return result.recordset[0].waiverPayDate < getWaiverResetDate()
 }
-async function sendEmail(body, toEmail , fromText, subject, user, pass){
+async function sendEmail(body, toEmail , fromText, subject, user, pass, attachments){
       try {    
         // Send reset email
         const transporter = nodemailer.createTransport({
@@ -431,6 +431,7 @@ async function sendEmail(body, toEmail , fromText, subject, user, pass){
           to: toEmail,
           subject: subject,
           ...(isHTML ? { html: body } : { text: body }),
+          attachments: attachments || []
         };
     
         transporter.sendMail(mailOptions, (error, info) => {
@@ -472,11 +473,31 @@ async function newRegistrationEmail(sessionId){
                 and transactionId = @transactionId
                 `)
         let session
-        console.log(result.recordset)
+        // console.log(result.recordset)
+        let user = await getUser(result.recordset[0]);
+
+        let guardianIdPath = user.guardianIdPath;
+        let discountIdPath = user.discountIdPath;
         let htmlString = ''
         let htmlString2 = ''
         let totalPrice = 0
-        
+        let attachments = [];
+
+        if (guardianIdPath) {
+        attachments.push({
+            filename: `${result.recordset[0].fullName}_guardianId`,
+            path: guardianIdPath,
+            contentType: mime.lookup(user.guardianIdPath) || 'application/octet-stream'
+        });
+        }
+
+        if (discountIdPath) {
+        attachments.push({
+            filename: `${result.recordset[0].fullName}_discountId`,
+            path: discountIdPath,
+            contentType: mime.lookup(discountIdPath) || 'application/octet-stream'
+        });
+        }
         let registration = result.recordset[0]
         let keeperColorNeeded = registration.keeperColor !== ''
         let registrationType = registration.type
@@ -601,7 +622,8 @@ async function newRegistrationEmail(sessionId){
                 </tbody>
             </table>
             `
-            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'New Registration',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)
+            console.log(attachments)
+            sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'New Registration',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD,attachments)
     } catch (error) {
       console.error('Error sending email:', error);
     } 

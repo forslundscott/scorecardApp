@@ -114,7 +114,7 @@
     </div>
    
     
-    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off">
+    <form id="individualSeasonRegistrationForm" action="/api/payments/individualSeasonCheckoutSession" method="post" style="padding: 24px 0 24px 0;" autocomplete="off" enctype="multipart/form-data">
         <input type="hidden" name="seasonId" id="" value="<%= data.seasonId%>">
         <input type="text" name="firstName" placeholder="First Name" value="<%= data.userAttributes.firstName ? data.userAttributes.firstName : ''  %>" required>
         <input type="text" name="lastName" placeholder="Last Name" value="<%= data.userAttributes.lastName ? data.userAttributes.lastName : ''  %>" required>
@@ -254,9 +254,15 @@
             <br><br><br>  
           </div>
         
-        <label for=""><b>Emergency Contact:</b></label>
+        <label id="emergencyLabel" for=""><b>Emergency Contact:</b></label>
         <br>
         <br>
+        <div id="guardianSection" style="display:none;">
+            <label><b>Parent / Guardian ID (Required for minors):</b></label>
+            <br><br>
+            <input type="file" name="guardianId" id="guardianId" accept="image/*,.pdf">
+            <br><br>
+        </div>
         <input type="text" name="emergencyContactFirstName" placeholder="First Name" value="<%= data.userAttributes.emergencyContactFirstName ? data.userAttributes.emergencyContactFirstName : ''  %>" required>
         <input type="text" name="emergencyContactLastName" placeholder="Last Name" value="<%= data.userAttributes.emergencyContactLastName ? data.userAttributes.emergencyContactLastName : ''  %>" required>
         <br>
@@ -315,6 +321,49 @@
         <button class="buttonStyle formButton" id="registerButton">Continue To Payment</button>
     </form>
     <script>
+        function isMinor(dobValue) {
+            if (!dobValue) return false;
+
+            const dob = new Date(dobValue);
+            const today = new Date();
+
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+
+            return age < 18;
+        }
+
+        function updateMinorFields() {
+            const dobInput = document.querySelector('input[name="dob"]');
+            const guardianSection = document.getElementById('guardianSection');
+            const emergencyLabel = document.getElementById('emergencyLabel');
+            const guardianId = document.getElementById('guardianId');
+
+            const minor = isMinor(dobInput.value);
+
+            if (minor) {
+                guardianSection.style.display = 'block';
+                emergencyLabel.innerHTML = "<b>Guardian Contact:</b>";
+                guardianId.setAttribute("required", "required");
+            } else {
+                guardianSection.style.display = 'none';
+                emergencyLabel.innerHTML = "<b>Emergency Contact:</b>";
+                guardianId.removeAttribute("required");
+                guardianId.value = "";
+            }
+        }
+
+        // run on load + when DOB changes
+        document.addEventListener("DOMContentLoaded", function () {
+            const dobInput = document.querySelector('input[name="dob"]');
+            dobInput.addEventListener("change", updateMinorFields);
+
+            updateMinorFields(); // initial load (important for prefilled users)
+        });
         document.addEventListener("input", function(event) {
         if (event.target.classList.contains("allergy-input")) {
             handleDynamicInputs("allergy-list", "allergy-input", "allergies[]", "Enter an allergy");
