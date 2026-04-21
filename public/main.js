@@ -965,13 +965,28 @@ async function paymentSubmit(form, event, path) {
 
     const formData = new FormData(form);
 
-    console.log('check');
+    // detect if any file inputs actually have a file
+    const hasFile = [...form.querySelectorAll('input[type="file"]')]
+        .some(input => input.files.length > 0);
 
-    const response = await fetch(`/api/payments/${path}`, {
-        method: 'POST',
-        body: formData
-        // ❌ DO NOT set Content-Type
-    });
+    let response;
+
+    if (hasFile) {
+        // ✅ Use multipart (multer route)
+        response = await fetch(`/api/payments/${path}`, {
+            method: 'POST',
+            body: formData
+        });
+    } else {
+        // ✅ Use urlencoded (standard route)
+        response = await fetch(`/api/payments/${path}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(formData).toString(),
+        });
+    }
 
     const data = await response.json();
 
