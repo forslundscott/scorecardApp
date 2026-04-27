@@ -206,9 +206,13 @@ router.get(['/completedGames'], async (req,res, next)=>{
         }
         const result = await pool.request()
         .query(`
-            Select * from gamesList(1)
+            Select gl.* from gamesList(1) as gl
+            left join seasons as s on gl.season=s.seasonId
+            where s.active=1
             union all 
-            Select * from gamesList(2)
+            Select gl.* from gamesList(2)as gl
+            left join seasons as s on gl.season=s.seasonId
+            where s.active=1
             order by startUnixTime, location 
             `)
         data.games = result.recordsets[0]

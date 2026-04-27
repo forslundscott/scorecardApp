@@ -935,27 +935,46 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
   let Price
   const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
   // console.log(req.user)
-  if (req.body.teamPayType === 'team') {
-    nickname = 'Team';
-    productName = 'Team'
-    Price = season.teamRegularPrice
-  } else if (req.user.roles.some(role => crewRoles.includes(role.name))) {
-    nickname = 'Crew';
-    productName = 'Crew'
-    Price = season.individualRegularPrice-season.crewDiscount
-  } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
-    nickname = 'Crew';
-    productName = 'Friends & Family'
-    Price = season.individualRegularPrice-season.firstResponderDiscount
-  } else if (req.body.discounted === 'true') {
-    nickname = 'Student, Teacher, First Responder, Military';
-    productName = 'Student, Teacher, First Responder, Military'
-    Price = season.individualRegularPrice-season.firstResponderDiscount
-  } else {
-    nickname = 'Regular';
-    productName = 'Individual'
-    Price = season.individualRegularPrice
-  }
+  if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+      nickname = 'Crew';
+      productName = 'Crew';
+      Price = season.individualRegularPrice - season.crewDiscount;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: false,
+        applyLateFee: false
+      });
+
+    } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
+      nickname = 'Crew';
+      productName = 'Friends & Family';
+      Price = season.individualRegularPrice - season.firstResponderDiscount;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: false,
+        applyLateFee: false
+      });
+
+    } else if (req.body.discounted === 'true') {
+      nickname = 'Student, Teacher, First Responder, Military';
+      productName = 'Student, Teacher, First Responder, Military';
+      Price = season.individualRegularPrice - season.firstResponderDiscount;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: false,
+        applyLateFee: true
+      });
+
+    } else {
+      nickname = 'Regular';
+      productName = 'Individual';
+      Price = season.individualRegularPrice;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: true,
+        applyLateFee: true
+      });
+    }
 // console.log(nickname)
 // const teamPrice = prices.data.find(price => price.nickname === nickname);
 // console.log(prices.data.length)
@@ -1192,25 +1211,7 @@ router.post('/individualSeasonCheckoutSession', upload.single('guardianId'), asy
   let nickname;
   let productName;
   const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
-  console.log(req.user)
-  if (req.user.roles.some(role => crewRoles.includes(role.name))) {
-    nickname = 'Crew';
-    productName = 'Crew'
-  } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
-    nickname = 'Crew';
-    productName = 'Friends & Family'
-  } else if (req.body.discounted === 'true') {
-    nickname = 'Student, Teacher, First Responder, Military';
-    productName = 'Student, Teacher, First Responder, Military'
-  } else {
-    nickname = 'Regular';
-    productName = 'Individual'
-  }
-console.log(prices.data)
-const price = prices.data.find(price => price.nickname === nickname);
-    // const price = await stripe.prices.retrieve(product.data[0].default_price);
-    console.log(price)
-    // console.log(product.data[0].default_price)
+  
     let leaguesTeams = [];
     let result 
     let lineItems = []
@@ -1232,6 +1233,7 @@ const price = prices.data.find(price => price.nickname === nickname);
             }
         }
     });
+    let Price
     for(const league of leaguesTeams){
       result = await pool.request()
       .input('seasonId',sql.Int,req.body.seasonId)
@@ -1245,16 +1247,50 @@ const price = prices.data.find(price => price.nickname === nickname);
         and ls.leagueId = @leagueId
         `)
         
-        // console.log(req.body.leagueId)
+        
     season = result.recordset[0]
-      // result = await pool.request()
-      //       .input('leagueId',sql.Int,league.leagueId)
-      //       .query(`
-      //         select *
-      //         from leagues as l
-      //         where l.leagueId = @leagueId
-      //         `)
-      //       console.log(result.recordset[0])
+    if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+      nickname = 'Crew';
+      productName = 'Crew';
+      Price = season.individualRegularPrice - season.crewDiscount;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: false,
+        applyLateFee: false
+      });
+
+    } else if (req.user.roles.some(role => ['Friend', 'Family'].includes(role.name))) {
+      nickname = 'Crew';
+      productName = 'Friends & Family';
+      Price = season.individualRegularPrice - season.firstResponderDiscount;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: false,
+        applyLateFee: false
+      });
+
+    } else if (req.body.discounted === 'true') {
+      nickname = 'Student, Teacher, First Responder, Military';
+      productName = 'Student, Teacher, First Responder, Military';
+      Price = season.individualRegularPrice - season.firstResponderDiscount;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: false,
+        applyLateFee: true
+      });
+
+    } else {
+      nickname = 'Regular';
+      productName = 'Individual';
+      Price = season.individualRegularPrice;
+
+      Price = functions.calculateSeasonPrice(Price, season, {
+        applyEarlyBird: true,
+        applyLateFee: true
+      });
+    }
+      
+      
         lineItems.push(
           {
             price_data: {
@@ -1262,12 +1298,12 @@ const price = prices.data.find(price => price.nickname === nickname);
               product_data: {
                 name: `${season.seasonName} - ${season.shortName} - ${productName}`,
               },
-              unit_amount: season.individualRegularPrice + season.individualLateFee, // amount in cents
+              unit_amount: Price, // amount in cents
             },
             quantity: 1,
           }
         )
-        totalPrice = totalPrice + season.individualRegularPrice + season.individualLateFee
+        totalPrice = totalPrice + Price
         // console.log(`Referee Fees - ${result.recordset[0].shortName} - Individual`)
         if(season.refFeesIndividual > 50){
           totalPrice = totalPrice + season.refFeesIndividual
@@ -1284,35 +1320,7 @@ const price = prices.data.find(price => price.nickname === nickname);
             }
           )
         }
-        // if(result.recordset[0].abbreviation == 'PCI' || result.recordset[0].abbreviation == 'PCO'){
-        //   totalPrice = totalPrice + 1500
-        //   lineItems.push(
-        //     {
-        //       price_data: {
-        //         currency: 'usd',
-        //         product_data: {
-        //           name: `Referee Fees - ${result.recordset[0].shortName} - Individual`,
-        //         },
-        //         unit_amount: 1500, // amount in cents
-        //       },
-        //       quantity: 1,
-        //     }
-        //   )
-        // }else if(result.recordset[0].abbreviation == 'MOI' || result.recordset[0].abbreviation == 'MOO'){
-        //   totalPrice = totalPrice + 3000
-        //   lineItems.push(
-        //     {
-        //       price_data: {
-        //         currency: 'usd',
-        //         product_data: {
-        //           name: `Referee Fees - Men's - Individual`,
-        //         },
-        //         unit_amount: 3000, // amount in cents
-        //       },
-        //       quantity: 1,
-        //     }
-        //   )
-        // }
+        
     }
     let waiverPay = await functions.checkWaiverFeeDue(req.user.id)
     if(waiverPay){

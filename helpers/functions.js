@@ -775,6 +775,52 @@ function getDayName(dayNumber) {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[dayNumber % 7];
 }
+// Add this helper function somewhere above your route (or in a utilities file)
+function calculateSeasonPrice(basePrice, season, options = {}) {
+  let adjustedPrice = basePrice;
+  const now = Date.now();
+
+  const {
+    applyEarlyBird = true,
+    applyLateFee = true
+  } = options;
+
+  // Early bird discount
+  if (
+    applyEarlyBird &&
+    season.regularDate &&
+    now < Number(season.regularDate)
+  ) {
+    adjustedPrice -= Number(season.earlyBirdDiscount || 0);
+  }
+
+  // Late fee
+  else if (
+    applyLateFee &&
+    season.lateDate &&
+    season.seasonStartDate &&
+    now >= Number(season.lateDate) &&
+    now < Number(season.seasonStartDate)
+  ) {
+    adjustedPrice += Number(season.individualLateFee || 0);
+  }
+
+  // After season start: reduce by 10% per full week
+  if (
+    season.seasonStartDate &&
+    now >= Number(season.seasonStartDate)
+  ) {
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const weeksPassed = Math.floor(
+      (now - Number(season.seasonStartDate)) / msPerWeek
+    );
+
+    const reductionRate = Math.min(weeksPassed * 0.1, 1);
+    adjustedPrice = adjustedPrice * (1 - reductionRate);
+  }
+
+  return Math.max(Math.round(adjustedPrice), 0);
+}
 module.exports = {
     titleCase
     ,getOrdinalNumber
@@ -802,4 +848,5 @@ module.exports = {
     ,waiverSignedEmail
     ,getDayName
     ,waiverPaidEmail
+    ,calculateSeasonPrice
 }
