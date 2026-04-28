@@ -103,36 +103,43 @@ router.post('/gameInfo', async (req, res, next) => {
         let result = await pool.request()
         .input('eventId', sql.Int, formData.Event_ID)
         .query(`
-        select * 
-        from games 
-        where Event_ID = @eventId
+            DECLARE @seasonId INT
 
-        SELECT t.teamId, t.abbreviation  
-        from teams as t
-        left join seasonleagueteam as slt on t.teamId=slt.teamId
-        where slt.leagueId in (
-            select leagueId 
-            from games
+            SELECT @seasonId = season
+            FROM games
+            WHERE Event_ID = @eventId;
+
+            select * 
+            from games 
             where Event_ID = @eventId
-            )
 
-        SELECT userId,roleId,firstName,lastName, preferredName
-        FROM [user_role]
-        left join users on user_role.userId=users.ID
-        where roleId in (select id from roles where name in ('scorekeeper'))
-        order by preferredName
+            SELECT t.teamId, t.abbreviation  
+            from teams as t
+            left join seasonleagueteam as slt on t.teamId=slt.teamId
+            where slt.leagueId in (
+                select leagueId 
+                from games
+                where Event_ID = @eventId
+                )
+            AND slt.seasonId = @seasonId;
 
-        SELECT userId,roleId,firstName,lastName, preferredName
-        FROM [user_role]
-        left join users on user_role.userId=users.ID
-        where roleId in (select id from roles where name in ('monitor'))
-        order by preferredName
+            SELECT userId,roleId,firstName,lastName, preferredName
+            FROM [user_role]
+            left join users on user_role.userId=users.ID
+            where roleId in (select id from roles where name in ('scorekeeper'))
+            order by preferredName
 
-        SELECT userId,roleId,firstName,lastName, preferredName
-        FROM [user_role]
-        left join users on user_role.userId=users.ID
-        where roleId in (select id from roles where name in ('referee'))
-        order by preferredName
+            SELECT userId,roleId,firstName,lastName, preferredName
+            FROM [user_role]
+            left join users on user_role.userId=users.ID
+            where roleId in (select id from roles where name in ('monitor'))
+            order by preferredName
+
+            SELECT userId,roleId,firstName,lastName, preferredName
+            FROM [user_role]
+            left join users on user_role.userId=users.ID
+            where roleId in (select id from roles where name in ('referee'))
+            order by preferredName
         
         `)
         data.game = result.recordsets[0][0]
