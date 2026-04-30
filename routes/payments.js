@@ -876,7 +876,18 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       
       // console.log(req.body.leagueId)
   let season = result.recordset[0]
-  console.log(season)
+  result = await pool.request()
+    .input('seasonId',sql.Int,req.body.seasonId)
+    .input('userId',sql.Int,req.user.id)
+    .query(`
+      select r.id, r.name
+            from userSeasonRole as usr
+            left join roles as r on usr.roleId=r.id
+            where usr.userId = @userId
+            and usr.seasonId = @seasonId
+      `)
+  let seasonRoles = result.recordset
+  console.log(seasonRoles)
     const consolidatedBody = Object.entries(req.body).reduce((acc, [key, value]) => {
       if (Array.isArray(value)) {
         value = value.join(", ");
@@ -935,7 +946,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
   let Price
   const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
   // console.log(req.user)
-  if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+  if (req.user.roles.some(role => crewRoles.includes(role.name))||seasonRoles.some(role => crewRoles.includes(role.name))) {
       nickname = 'Crew';
       productName = 'Crew';
       Price = season.individualRegularPrice - season.crewDiscount;
@@ -1193,6 +1204,17 @@ router.post('/individualSeasonCheckoutSession', upload.single('guardianId'), asy
       where s.seasonId = @seasonId
       `)
   let season = result.recordset[0]
+  result = await pool.request()
+    .input('seasonId',sql.Int,req.body.seasonId)
+    .input('userId',sql.Int,req.user.id)
+    .query(`
+      select r.id, r.name
+            from userSeasonRole as usr
+            left join roles as r on usr.roleId=r.id
+            where usr.userId = @userId
+            and usr.seasonId = @seasonId
+      `)
+  let seasonRoles = result.recordset
   try {
     const transformedBody = Object.fromEntries(
       Object.entries(req.body).map(([key, value]) => [
@@ -1249,7 +1271,7 @@ router.post('/individualSeasonCheckoutSession', upload.single('guardianId'), asy
         
         
     season = result.recordset[0]
-    if (req.user.roles.some(role => crewRoles.includes(role.name))) {
+    if (req.user.roles.some(role => crewRoles.includes(role.name))||seasonRoles.some(role => crewRoles.includes(role.name))) {
       nickname = 'Crew';
       productName = 'Crew';
       Price = season.individualRegularPrice - season.crewDiscount;
