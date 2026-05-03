@@ -26,12 +26,13 @@ router.post('/userSearch', async (req, res) => {
         .input('query', sql.VarChar, `%${query}%`)
         .query(`
             SELECT * FROM users 
-            WHERE firstName LIKE @query
+            WHERE (firstName LIKE @query
             OR lastName LIKE @query 
             OR preferredName LIKE @query 
             OR email LIKE @query
             OR firstName + ' ' + lastName LIKE @query
-            OR preferredName + ' ' + lastName LIKE @query
+            OR preferredName + ' ' + lastName LIKE @query)
+            and validEmail = 1
         `);
         res.json(result.recordset);
     } catch (err) {
