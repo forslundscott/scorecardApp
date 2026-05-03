@@ -38,7 +38,7 @@ function htmlEscape(s) {
 async function sendGameReminders({
   fromText = 'No Reply - GLOS',
   subjectPrefix = 'Games Reminder',
-  timeZone = undefined, // if you want explicit timezone like 'America/Detroit', set it. See notes below.
+  timeZone = 'America/Detroit', // if you want explicit timezone like 'America/Detroit', set it. See notes below.
   daysOut = 2,
 } = {}) {
   // Compute start and end milliseconds for the target day (two days from today).
@@ -183,6 +183,7 @@ async function sendGameReminders({
       const subject = `${subjectPrefix} — ${targetDateStr}`;
 
       try {
+        // console.log(body)
         await functions.sendEmail(body, userInfo.email, fromText, subject, process.env.NO_REPLY_EMAIL, process.env.NO_REPLY_EMAIL_PASSWORD);
         sentCount++;
       } catch (e) {
