@@ -427,7 +427,7 @@ async function sendEmail(body, toEmail , fromText, subject, user, pass, attachme
         });
         const isHTML = /<\/?[a-z][\s\S]*>/i.test(body);
         const mailOptions = {
-          from: `${fromText} <${process.env.ORG_EMAIL}>`,
+          from: `${fromText} <${user}>`,
           to: toEmail,
           subject: subject,
           ...(isHTML ? { html: body } : { text: body }),
