@@ -8,13 +8,33 @@ if (!fs.existsSync(dir)) {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        let dir = 'uploads/';
+
+        if (file.fieldname === 'guardianId') {
+            dir += 'guardianIds/';
+        } else if (file.fieldname === 'discountId') {
+            dir += 'discountIds/';
+        } else {
+            dir += 'misc/';
+        }
+
+        fs.mkdirSync(dir, { recursive: true });
         cb(null, dir);
     },
+
     filename: function (req, file, cb) {
-        const userId = req.user?.id; // or req.user.userId depending on your setup
+        const userId = req.user?.id;
         const ext = file.originalname.split('.').pop();
 
-        const filename = `${userId}-guardianId-${Date.now()}.${ext}`;
+        const prefix =
+            file.fieldname === 'guardianId'
+                ? 'guardianId'
+                : file.fieldname === 'discountId'
+                ? 'discountId'
+                : file.fieldname;
+
+        const filename = `${userId}-${prefix}-${Date.now()}.${ext}`;
+
         cb(null, filename);
     }
 });

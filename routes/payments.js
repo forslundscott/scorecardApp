@@ -1183,8 +1183,13 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
       res.status(500).json({ error: error.message });
   }
 });
-router.post('/individualSeasonCheckoutSession', upload.single('guardianId'), async (req, res) => {
-  if (req.file) {
+router.post('/individualSeasonCheckoutSession', upload.fields([
+  { name: 'guardianId', maxCount: 1 },
+  { name: 'discountId', maxCount: 1 }
+]), async (req, res) => {
+  const guardianFile = req.files?.guardianId?.[0];
+  const discountFile = req.files?.discountId?.[0];
+  if (guardianFile) {
       console.log('file saved:', req.file.path);
 
       await pool.request()
@@ -1196,6 +1201,18 @@ router.post('/individualSeasonCheckoutSession', upload.single('guardianId'), asy
           where ID = @userId
         `);
     }
+  if (discountFile) {
+      console.log('discount file saved:', discountFile.path);
+
+      await pool.request()
+        .input('userId', sql.Int, req.user.id)
+        .input('discountIdPath', sql.VarChar, discountFile.path)
+        .query(`
+          update users
+          set discountIdPath = @discountIdPath
+          where ID = @userId
+        `);
+    }  
   let result = await pool.request()
     .input('seasonId',sql.Int,req.body.seasonId)
     .query(`

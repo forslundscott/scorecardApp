@@ -156,7 +156,12 @@
         <%# console.log(data.userAttributes.discounted) %><input type="radio" name="discounted" id="discounted_yes" value="true" <%= data.userAttributes.discounted && ['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %> required><label for="discounted_yes">Yes</label>
         <br>
         <input type="radio" name="discounted" id="discounted_no" value="false" <%= !data.userAttributes.discounted || !['true', true, 1].includes(data.userAttributes.discounted) ? 'checked' : ''  %>><label for="discounted_no">No</label>
-        
+        <div id="discountIdSection" style="display:none;">
+            <br><br>
+            <label><b>Student, Teacher, First Responder, or Military ID (Required for discounted registration):</b></label>
+            <br><br>
+            <input type="file" name="discountId" id="discountId" accept="image/*,.pdf">
+        </div>
         <br><br><br>
         <label for=""><b>Leagues & Teams:</b></label>
         <br>
@@ -325,6 +330,20 @@
         <button class="buttonStyle formButton" id="registerButton">Continue To Payment</button>
     </form>
     <script>
+        function updateDiscountFields() {
+            const discountedYes = document.getElementById("discounted_yes");
+            const discountSection = document.getElementById("discountIdSection");
+            const discountId = document.getElementById("discountId");
+
+            if (discountedYes.checked) {
+                discountSection.style.display = "block";
+                discountId.setAttribute("required", "required");
+            } else {
+                discountSection.style.display = "none";
+                discountId.removeAttribute("required");
+                discountId.value = "";
+            }
+        }
         function isMinor(dobValue) {
             if (!dobValue) return false;
 
@@ -364,9 +383,16 @@
         // run on load + when DOB changes
         document.addEventListener("DOMContentLoaded", function () {
             const dobInput = document.querySelector('input[name="dob"]');
+            const discountedInputs = document.querySelectorAll('input[name="discounted"]');
+
             dobInput.addEventListener("change", updateMinorFields);
 
-            updateMinorFields(); // initial load (important for prefilled users)
+            discountedInputs.forEach(input => {
+                input.addEventListener("change", updateDiscountFields);
+            });
+
+            updateMinorFields();      // initial load
+            updateDiscountFields();   // initial load
         });
         document.addEventListener("input", function(event) {
         if (event.target.classList.contains("allergy-input")) {
