@@ -45,7 +45,8 @@ async function sendGameReminders({
   // NOTE: This implementation uses the server's local timezone to determine "today".
   // If you need strict America/Detroit handling regardless of server timezone, see Luxon example below.
   const now = new Date();
-  const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysOut, 0, 0, 0, 0); // midnight two days out (server tz)
+  const detroitNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Detroit' }));
+  const target = new Date(detroitNow.getFullYear(), detroitNow.getMonth(), detroitNow.getDate() + daysOut, 0, 0, 0, 0); // midnight two days out (server tz)
   const startMs = target.getTime();
   const endMs = new Date(target.getFullYear(), target.getMonth(), target.getDate() + 1).getTime();
   
