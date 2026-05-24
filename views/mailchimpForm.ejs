@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mailchimp Sender</title>
+</head>
+<body>
+
+<h1>Send Mailchimp Email</h1>
+
+<form action="/mailchimp/send" method="POST">
+
+    <!-- LIST -->
+    <div>
+
+        <label>Audience/List</label>
+
+        <select
+            id="listId"
+            name="listId"
+            required
+        >
+
+            <% lists.forEach(list => { %>
+
+                <option value="<%= list.id %>">
+                    <%= list.name %>
+                </option>
+
+            <% }) %>
+
+        </select>
+
+    </div>
+
+    <br>
+
+    <!-- SEND TYPE -->
+    <div>
+
+        <label>
+            <input
+                type="radio"
+                name="sendType"
+                value="all"
+                checked
+            >
+            Entire List
+        </label>
+
+        <br>
+
+        <label>
+            <input
+                type="radio"
+                name="sendType"
+                value="tags"
+            >
+            Specific Tags
+        </label>
+
+    </div>
+
+    <br>
+
+    <!-- TAGS -->
+    <div id="tagContainer"></div>
+
+    <br>
+
+    <!-- SUBJECT -->
+    <div>
+
+        <label>Subject</label>
+
+        <input
+            type="text"
+            name="subject"
+            required
+        >
+
+    </div>
+
+    <br>
+
+    <!-- FROM -->
+    <div>
+
+        <label>From Name</label>
+
+        <input
+            type="text"
+            name="fromName"
+            required
+        >
+
+    </div>
+
+    <br>
+
+    <!-- REPLY -->
+    <div>
+
+        <label>Reply To</label>
+
+        <input
+            type="email"
+            name="replyTo"
+            required
+        >
+
+    </div>
+
+    <br>
+
+    <!-- HTML -->
+    <div>
+
+        <label>Email HTML</label>
+
+        <textarea
+            name="html"
+            rows="20"
+            cols="80"
+            required
+        ></textarea>
+
+    </div>
+
+    <br>
+
+    <button type="submit">
+        Send Email
+    </button>
+
+</form>
+
+<script>
+
+async function loadTags() {
+
+    const listId =
+        document.getElementById("listId").value;
+
+    const response =
+        await fetch(
+            `/mailchimp/list/${listId}/tags`
+        );
+
+    const tags = await response.json();
+
+    const container =
+        document.getElementById("tagContainer");
+
+    container.innerHTML =
+        "<h3>Tags</h3>";
+
+    tags.forEach(tag => {
+
+        container.innerHTML += `
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    name="tags"
+                    value="${tag.name}"
+                >
+
+                ${tag.name}
+
+            </label>
+
+            <br>
+
+        `;
+
+    });
+
+}
+
+document
+    .getElementById("listId")
+    .addEventListener(
+        "change",
+        loadTags
+    );
+
+loadTags();
+
+</script>
+
+</body>
+</html>

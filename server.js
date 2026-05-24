@@ -124,6 +124,9 @@ app.use('/notifications', require(`./routes/notifications`))
 app.use('/api/payments', require(`./routes/payments`))
 app.use('/schedules', require(`./routes/schedules`))
 app.use('/old', require(`./routes/old`))
+
+
+app.use("/mailchimp", require("./routes/mailchimp"));
 const functions = require('./helpers/functions');
 
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('./middleware/authMiddleware')
