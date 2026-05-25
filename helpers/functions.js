@@ -411,39 +411,54 @@ async function checkWaiverFeeDue(userId) {
     return result.recordset[0].waiverPayDate < getWaiverResetDate()
 }
 async function sendEmail(body, toEmail , fromText, subject, user, pass, attachments){
-      try {    
-        // Send reset email
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.titan.email',
-            port: 587,
-            // service: 'gmail',
-            secure: false,
-            auth: {
-               user,
-               pass
-            },
-            debug: false,
-            logger: true
-        });
-        const isHTML = /<\/?[a-z][\s\S]*>/i.test(body);
-        const mailOptions = {
-          from: `${fromText} <${user}>`,
-          to: toEmail,
-          subject: subject,
-          ...(isHTML ? { html: body } : { text: body }),
-          attachments: attachments || []
-        };
-    
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            return console.error('Error sending reset email:', error);
-          }
-        //   return res.redirect('/') //I don't think this does anything yet
-    
-        });
-      } catch (error) {
-        console.error('Error sending email:', error);
-      } 
+      try {
+
+    // Remove attachments whose files do not exist
+    const validAttachments = (attachments || []).filter(att => {
+      if (!att.path) return true;
+
+      const exists = fs.existsSync(att.path);
+
+      if (!exists) {
+        console.error('Attachment file missing:', att.path);
+      }
+
+      return exists;
+    });
+
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.titan.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user,
+        pass
+      },
+      debug: false,
+      logger: true
+    });
+
+    const isHTML = /<\/?[a-z][\s\S]*>/i.test(body);
+
+    const mailOptions = {
+      from: `${fromText} <${user}>`,
+      to: toEmail,
+      subject,
+      ...(isHTML ? { html: body } : { text: body }),
+      attachments: validAttachments
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.error('Error sending email:', error);
+      }
+
+      console.log('Email sent:', info.response);
+    });
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
    
 }
 async function newRegistrationEmail(sessionId){
@@ -622,7 +637,7 @@ async function newRegistrationEmail(sessionId){
                 </tbody>
             </table>
             `
-            console.log(attachments)
+            // console.log(attachments)
             sendEmail(htmlBody,process.env.PICKUP_ALERT_EMAIL,'No Reply - GLOS', 'New Registration',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD,attachments)
     } catch (error) {
       console.error('Error sending email:', error);
