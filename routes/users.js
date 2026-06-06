@@ -245,12 +245,14 @@ router.post('/:userId/editUser', async (req,res, next)=>{
         .input('preferredName', sql.VarChar, req.body.preferredName)
         .input('email', sql.VarChar, req.body.email)
         .input('userId', sql.Int, req.params.userId)
+        .input('banned',sql.Bit, req.body.banned?1:0)
         .query(`
             UPDATE users
             set firstName = @firstName,
             lastName = @lastName,
             preferredName = @preferredName,
-            email = @email
+            email = @email,
+            banned = @banned
             where ID = @userId
             `)
         res.redirect(302,`/users/${req.params.userId}`)
