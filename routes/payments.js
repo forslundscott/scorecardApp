@@ -1190,11 +1190,11 @@ router.post('/individualSeasonCheckoutSession', upload.fields([
   const guardianFile = req.files?.guardianId?.[0];
   const discountFile = req.files?.discountId?.[0];
   if (guardianFile) {
-      console.log('file saved:', req.file.path);
+      // console.log('file saved:', req.file.path);
 
       await pool.request()
         .input('userId', sql.Int, req.user.id)
-        .input('guardianIdPath', sql.VarChar, req.file.path)
+        .input('guardianIdPath', sql.VarChar, guardianFile.path)
         .query(`
           update users
           set guardianIdPath = @guardianIdPath
