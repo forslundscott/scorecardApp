@@ -329,7 +329,25 @@
 
         <button class="buttonStyle formButton" id="registerButton">Continue To Payment</button>
     </form>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script>
+        async function compressImageFile(file) {
+            const options = {
+                maxWidthOrHeight: 1500,     // ✅ resize max width/height
+                initialQuality: 0.75,       // ✅ 70–80% quality
+                fileType: "image/jpeg",     // force JPEG for consistency
+                maxSizeMB: 5,               // soft cap (tries to stay under)
+                useWebWorker: true
+            };
+
+            try {
+                const compressedFile = await imageCompression(file, options);
+                return compressedFile;
+            } catch (err) {
+                console.error("Compression failed:", err);
+                return file; // fallback to original
+            }
+        }
         function updateDiscountFields() {
             const discountedYes = document.getElementById("discounted_yes");
             const discountSection = document.getElementById("discountIdSection");
@@ -439,17 +457,52 @@
 //     e.target.value = value.slice(0, 12); // Max: XXX-XXX-XXXX
 //   });
 // });
-document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', function(event) {
-    // Check if at least one checkbox is selected
-    const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
-    console.log(checkboxes)
-    if (checkboxes.length === 0 && document.getElementsByClassName('alreadyRegistered').length === 0) {
-      alert('Please select at least one league!');
-      event.preventDefault(); // Prevent form submission
-      return false
+document.getElementById('individualSeasonRegistrationForm').addEventListener('submit', async function(event) {
+    event.preventDefault(); // stop immediate submit
+
+    const discountInput = document.getElementById("discountId");
+    const guardianInput = document.getElementById("guardianId");
+
+    const fileInputs = [discountInput, guardianInput].filter(i => i && i.files && i.files[0]);
+
+    // compress all uploaded files
+    for (let input of fileInputs) {
+        const file = input.files[0];
+
+        if (file && file.type.startsWith("image/")) {
+            const compressedBlob = await compressImageFile(file);
+
+// Convert Blob → real File (Safari-safe)
+            const compressedFile = new File(
+                [compressedBlob],
+                file.name.replace(/\.\w+$/, ".jpg"),
+                {
+                    type: "image/jpeg",
+                    lastModified: Date.now()
+                }
+            );
+
+            // Debug size (optional but helpful)
+            console.log("Original MB:", file.size / 1024 / 1024);
+            console.log("Compressed MB:", compressedFile.size / 1024 / 1024);
+
+            // Put back into input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(compressedFile);
+            input.files = dataTransfer.files;
+        }
     }
-    handleSubmit(this,event)
-  });
+
+    // now continue your existing logic
+    const checkboxes = document.querySelectorAll('input[name^="leagueId"]:checked');
+
+    if (checkboxes.length === 0 && document.getElementsByClassName('alreadyRegistered').length === 0) {
+        alert('Please select at least one league!');
+        return false;
+    }
+
+    handleSubmit(this, event);
+});
   function handleSubmit(form,event) {
             // if (!validateCheckboxes(form)) {
             //     return false; 
