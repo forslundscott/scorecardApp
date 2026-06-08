@@ -887,7 +887,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
             and usr.seasonId = @seasonId
       `)
   let seasonRoles = result.recordset
-  console.log(seasonRoles)
+  // console.log(seasonRoles)
     const consolidatedBody = Object.entries(req.body).reduce((acc, [key, value]) => {
       if (Array.isArray(value)) {
         value = value.join(", ");
@@ -946,7 +946,15 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
   let Price
   const crewRoles = ['scorekeeper', 'Referee', 'Monitor']
   // console.log(req.user)
-  if (req.user.roles.some(role => crewRoles.includes(role.name))||seasonRoles.some(role => crewRoles.includes(role.name))) {
+  // req.body.teamPayType === 'team'
+  if (req.body.teamPayType === 'team') {
+      nickname = 'Team';
+      productName = 'Team';
+      Price = season.teamRegularPrice;
+
+      
+
+    } else if (req.user.roles.some(role => crewRoles.includes(role.name))||seasonRoles.some(role => crewRoles.includes(role.name))) {
       nickname = 'Crew';
       productName = 'Crew';
       Price = season.individualRegularPrice - season.crewDiscount;
@@ -986,7 +994,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
         applyLateFee: true
       });
     }
-// console.log(nickname)
+console.log(season.seasonName)
 // const teamPrice = prices.data.find(price => price.nickname === nickname);
 // console.log(prices.data.length)
 
