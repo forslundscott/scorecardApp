@@ -11,7 +11,7 @@ router.post(['/getLeagues'], async (req,res,next)=>{
         let result = await pool.request()
         .input('seasonId', sql.Int, req.body.seasonId)
         .query(`
-            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+            select l.leagueId, ls.seasonId,  l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
             from leagues as l
             LEFT join league_season as ls on l.leagueId=ls.leagueId
             where ls.seasonId = @seasonId
@@ -84,7 +84,7 @@ router.get('/', async (req,res, next)=>{
         }
         const result = await pool.request()
         .query(`
-            select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+            select l.leagueId, ls.seasonId,  l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
              from leagues as l
             left join league_season as ls on l.leagueId=ls.leagueId
             where seasonId in (select seasonId from seasons where active = 1)

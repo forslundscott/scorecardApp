@@ -590,8 +590,7 @@ router.get('/:seasonId/leagues/:leagueId', async (req,res, next)=>{
         // .query(`
         //     select l.leagueId
         //     , ls.seasonId
-        //     , ls.seasonName
-        //     , ls.leagueAbbreviation
+
         //     , l.name as leagueName
         //     , l.gender
         //     , l.color as leagueColor

@@ -162,7 +162,7 @@ router.get(['/newTeam'], async (req, res, next) => {
         data.seasons = result.recordset
         result = await request
         .input('seasonId', sql.Int, data.season.seasonId)
-        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+        .query(`SELECT l.leagueId, ls.seasonId,  l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
             from league_season ls
             LEFT join leagues l on ls.leagueId=l.leagueId
             where seasonId = @seasonId
@@ -496,7 +496,7 @@ router.get('/:teamId/editTeam', async (req,res, next)=>{
         data.seasons = result.recordset
         result = await pool.request()
         .input('seasonId', sql.Int, data.data.seasonId)
-        .query(`SELECT l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
+        .query(`SELECT l.leagueId, ls.seasonId,  l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards
             from league_season ls
             LEFT join leagues l on ls.leagueId=l.leagueId
             where seasonId = @seasonId

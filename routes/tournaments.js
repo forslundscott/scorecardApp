@@ -25,7 +25,7 @@ router.post(['/:tournamentId/registration/team'],checkAuthenticated, async (req,
         //     SELECT * from users
         //     WHERE ID = @userId;
 
-        //     select l.leagueId, ls.seasonId, ls.seasonName, ls.leagueAbbreviation, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
+        //     select l.leagueId, ls.seasonId, l.name as leagueName, l.gender, l.color as leagueColor, l.shortName as leagueShortName, l.sport, l.dayOfWeek, l.giftCards 
         //     from league_season as ls 
         //     left join leagues as l 
         //         on ls.leagueId = l.leagueId
