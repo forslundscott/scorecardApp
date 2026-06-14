@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fieldsRouter = require('./fields');
 const {pool} = require(`../db`)
 const sql = require('mssql');
 const functions = require('../helpers/functions')
@@ -12,7 +13,7 @@ router.get(['/new'], async (req, res, next) => {
             user: req.user
             
         }
-        res.render('index.ejs',{data: data})
+        res.render('newFacilityForm.ejs',{data: data})
     }catch(err){
         console.error('Error:', err)
     }
@@ -22,19 +23,106 @@ router.post('/add', async (req, res, next) => {
     try{
         const request = pool.request()
         await request
-        .input('name', sql.VarChar, req.body.name)
-        .input('address', sql.VarChar, req.body.address)
+        .input('facilityName', sql.VarChar, req.body.facilityName)
+        .input('facilityAddress', sql.VarChar, req.body.facilityAddress)
+        .input('facilityAbbreviation', sql.VarChar, req.body.facilityAbbreviation)
         .query(`
-            IF NOT EXISTS (SELECT 1 FROM facilities WHERE name = @name)
+            IF NOT EXISTS (SELECT 1 FROM facilities WHERE facilityName = @facilityName)
             BEGIN
-                insert into facilities (name, address)
-                values (@name,@address)
+                insert into facilities (facilityName, facilityAddress, facilityAbbreviation)
+                values (@facilityName,@facilityAddress, @facilityAbbreviation)
             END
             `)
         res.redirect(302,'/facilities')
     }catch(err){
         next(err)
     }
+  });
+  router.post('/:facilityId/editFacility', async (req,res, next)=>{
+      try{
+          let data = {
+              user: req.user,
+
+          }     
+          await pool.request()
+          .input('facilityId', sql.VarChar, req.params.facilityId)
+          .input('facilityName', sql.VarChar, req.body.facilityName)
+          .input('facilityAddress', sql.VarChar, req.body.facilityAddress)
+          .input('facilityAbbreviation', sql.VarChar, req.body.facilityAbbreviation)
+          .query(`
+              UPDATE facilities
+              set facilityName = @facilityName,
+              facilityAddress = @facilityAddress,
+              facilityAbbreviation = @facilityAbbreviation
+              where facilityId = @facilityId
+              `)
+          res.redirect(302,`/facilities/${req.params.facilityId}`)
+      }catch(err){
+          next(err)
+      }
+  });
+  router.get('/:facilityId/editFacility', async (req,res, next)=>{
+      try{
+          let data = {
+              user: req.user,
+              page: '/editFacility'
+          }
+  
+          let result = await pool.request()
+          .input('facilityId', sql.VarChar, req.params.facilityId)
+          .query(`
+              SELECT * 
+              from dbo.facilities
+              where facilityId = @facilityId
+              `)        
+          data.data = result.recordset[0]
+          
+          res.render('editFacility.ejs',{data: data})
+      }catch(err){
+          next(err)
+      }
+  });
+  router.use('/:facilityId/fields', fieldsRouter);
+//   router.get('/:facilityId/fields', async (req,res, next)=>{
+//       try{
+//           let data = {
+//               user: req.user,
+//               page: 'teams/details',
+//               list: []
+//           }
+//         //   const result = await pool.request()
+//         //   .input('facilityId', sql.VarChar, req.params.facilityId)
+//         //   .query(`
+//         //       SELECT * 
+//         //       from dbo.facilities
+//         //       where facilityId = @facilityId
+//         //       `)        
+//         //   data.data = result.recordset[0]
+          
+//           res.render('fields.ejs',{data: data})
+//       }catch(err){
+//           next(err)
+//       }
+//   });
+  router.get('/:facilityId', async (req,res, next)=>{
+      try{
+          let data = {
+              user: req.user,
+              page: 'teams/details'
+          }
+          const result = await pool.request()
+          .input('facilityId', sql.VarChar, req.params.facilityId)
+          .query(`
+              SELECT * 
+              from dbo.facilities
+              where facilityId = @facilityId
+              `)        
+          data.data = result.recordset[0]
+          
+          res.render('facilityDetails.ejs',{data: data})
+      }catch(err){
+          next(err)
+      }
   });
 router.get('/', async (req,res, next)=>{
     try{
@@ -46,10 +134,10 @@ router.get('/', async (req,res, next)=>{
         const request = pool.request()
         const result = await request.query(`
             select * from facilities
-            order by name
+            order by facilityName
         `)
         data.list = result.recordset
-        res.render('index.ejs',{data: data}) 
+        res.render('facilities.ejs',{data: data}) 
     }catch(err){
         next(err)
     }

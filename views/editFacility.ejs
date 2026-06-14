@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <link rel="preload" href="/styles.css" as="style" />
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/GLOSLogo.png">
+    <title>Edit Facility</title>
+    <script>
+        function confirmSubmit(event) {
+            const isConfirmed = confirm("Are you sure you want to submit the changes?");
+            if (!isConfirmed) {
+                event.preventDefault(); // Cancel the form submission
+            }
+        }
+    </script>
+</head>
+<body>     
+        <%#- include('header', {data: data}); %>
+    <header class="header" >
+        <div id="pageName" class="headerText">
+            Edit Facility
+            <br>
+            <br>
+            <button style="font-size: 100%; width: 20vw;" class="itemFormat primaryStyle primaryBorder" onclick="window.location.href = '/facilities/new';" >New Facility</button>
+        </div>
+    </header>
+        <div id="innerBody"  style= "<%= data.page.includes('activeGame') ? "background-image: linear-gradient(90deg, black 48%, silver 50%, black 52%)": ""%>">
+            <div id="content">
+                <%#- include('bodyColumns',{data: data}); %>
+                <div id="<%= %>" class="singleColumn">
+                    <form id="editFacilityForm" class="textCenter" action="editFacility" onsubmit="confirmSubmit(event)" method="post" style="display: ''; text-align: center;">
+                        
+                        
+                        <br>
+                        <input type="text" name="facilityName" value="<%= data.data.facilityName %>" placeholder="Facility Name" required>
+                            <br>
+                            <input type="text" name="facilityAddress" value="<%= data.data.facilityAddress %>" placeholder="Facility Address" required>
+                            <br>
+                            <input type="text" name="facilityAbbreviation" value="<%= data.data.facilityAbbreviation %>" placeholder="Facility Abbreviation" required>
+                            
+                            
+                            <br>
+                            <br>
+                            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Update Facility</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <%- include('footer', {data: data}); %>
+        <div id="formBackground" style="display: none; touch-action: none;" onclick="closeForm()"></div>
+        
+        <script src="/main.js" ></script>
+        
+</body>
+</html>

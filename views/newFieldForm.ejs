@@ -7,7 +7,7 @@
     <link rel="preload" href="/styles.css" as="style" />
     <link rel="stylesheet" href="/styles.css">
     <link rel="icon" href="/GLOSLogo.png">
-    <title>New Facility</title>
+    <title>New Field</title>
     
 </head>
 <body>
@@ -16,7 +16,7 @@
         <header class="header" >
         <div id="pageName" class="headerText">
                 <br>
-            New Facility
+            New Field
             <br>
             <br>
             
@@ -26,20 +26,24 @@
             <div id="content">
                 <%#- include('bodyColumns',{data: data}); %>
                 <div id="<%= %>" class="singleColumn">
-                    <form id="newFacilityForm" class="textCenter" action="add" onsubmit="confirmSubmit(event)" method="post" style="display: ''; text-align: center;">
+                    <form id="newFieldForm" class="textCenter" action="add" onsubmit="confirmSubmit(event)" method="post" style="display: ''; text-align: center;">
                         
                         
                         <br>
-                        <input type="text" name="facilityName" value="" placeholder="Facility Name" required>
+                        <input type="text" name="fieldName" value="" placeholder="Field Name" required>
                             <br>
-                            <input type="text" name="facilityAddress" value="" placeholder="Facility Address" required>
+                            <input type="" name="fieldType" value="" placeholder="Field Type" required>
+                            <select name="fieldType" id="">
+                                <option value="Court">Court</option>
+                                <option value="Field">Field</option>
+                            </select>
                             <br>
-                            <input type="text" name="facilityAbbreviation" value="" placeholder="Facility Abbreviation" required>
                             
                             
+                            
                             <br>
                             <br>
-                            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Facility</button>
+                            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Field</button>
                     </form>
                 </div>
             </div>
@@ -55,13 +59,4 @@
     
     
     
-    
-    <!-- <form id="newFacilityForm" class="textCenter" action="/facilities/add" method="post" style="display: ''; text-align: center;">
-            <input type="text" name="name" value="" placeholder="Facility Name" required>
-            <br>
-            <br>
-            <input type="text" name="address" value="" placeholder="Address" required>
-            <br>
-            <br>
-            <button type="submit" class="primaryStyle primaryBorder" style="font-weight: bold; width: auto; height: 5vh;">Add Facility</button>
-    </form> -->
+
