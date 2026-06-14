@@ -25,21 +25,24 @@
                 <%#- include('bodyColumns',{data: data}); %>
                 <div id="<%= %>" class="singleColumn">
                     <%#- include('list', {data: data}); %>
-                    <% for(let i=0; i< data.list.length; i++) {%>
-                        <form class="listItem" action="" method="get">
-                            <button type="button" class="playerButton"  style="height: 100%;" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/<%= data.list[i].facilityId %>';">
-                                <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick;">
-                                    <div style="width: 100%;">
-                                        <div class="playerName" style="text-align: center;">
-                                            <%= data.list[i].facilityName %>
-                                            <br>
-                                            <%= data.list[i].facilityAddress %>
+                    <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? 'height: calc(100% - 10vh)' : '' %>">
+
+                        <% for(let i=0; i< data.list.length; i++) {%>
+                            <form class="listItem" action="" method="get">
+                                <button type="button" class="playerButton"  style="height: 100%;" onclick="window.location.href = window.location.href.replace(/\?/g, '') + '/<%= data.list[i].facilityId %>';">
+                                    <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick;">
+                                        <div style="width: 100%;">
+                                            <div class="playerName" style="text-align: center;">
+                                                <%= data.list[i].facilityName %>
+                                                <br>
+                                                <%= data.list[i].facilityAddress %>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </button>
-                        </form>
-                    <% } %>
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
                 </div>
             </div>
         </div>

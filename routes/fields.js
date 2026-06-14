@@ -24,7 +24,7 @@ router.post('/add', async (req, res, next) => {
         const request = pool.request()
         await request
         .input('fieldName', sql.VarChar, req.body.fieldName)
-        .input('facilityId', sql.Int, req.body.facilityId)
+        .input('facilityId', sql.Int, req.params.facilityId)
         .input('fieldType', sql.VarChar, req.body.fieldType)
         .query(`
 
@@ -90,15 +90,15 @@ router.get('/', async (req,res, next)=>{
               page: 'teams/details',
               list: []
           }
-        //   const result = await pool.request()
-        //   .input('facilityId', sql.VarChar, req.params.facilityId)
-        //   .query(`
-        //       SELECT * 
-        //       from dbo.facilities
-        //       where facilityId = @facilityId
-        //       `)        
-        //   data.data = result.recordset[0]
-          
+          const result = await pool.request()
+          .input('facilityId', sql.VarChar, req.params.facilityId)
+          .query(`
+              SELECT * 
+              from dbo.fields
+              where facilityId = @facilityId
+              `)        
+          data.list = result.recordset
+          console.log(data.list)
           res.render('fields.ejs',{data: data})
       }catch(err){
           next(err)

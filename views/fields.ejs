@@ -25,9 +25,21 @@
                 <%#- include('bodyColumns',{data: data}); %>
                 <div id="<%= %>" class="singleColumn">
                     <%#- include('list', {data: data}); %>
-                    <% for(let i=0; i< data.list.length; i++) {%>
-                        <%- include('field_item',{item: data.list[i]}); %>
-                    <% } %>
+                    <div class="fielderColumn dragColumn" style="<%= data.page.includes('activeGame') ? 'height: calc(100% - 10vh)' : '' %>">
+                        <% for(let i=0; i< data.list.length; i++) {%>
+                            <form class="listItem" action="" method="get">
+                                <button class="playerButton"  style="height: 100%;">
+                                    <div class="itemFormat primaryStyle" style="height: 100%; border-style:solid; border-width: thick;">
+                                        <div style="width: 100%;">
+                                            <div class="playerName" style="text-align: center;">
+                                                <%= data.list[i].fieldType %> <%= data.list[i].fieldName %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
                 </div>
             </div>
         </div>
