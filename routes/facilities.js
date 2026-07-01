@@ -1,6 +1,6 @@
 const express = require('express');
-const router = express.Router();
-const fieldsRouter = require('./fields');
+const router = express.Router({ mergeParams: true });
+// const fieldsRouter = require('./fields');
 const {pool} = require(`../db`)
 const sql = require('mssql');
 const functions = require('../helpers/functions')
@@ -82,28 +82,8 @@ router.post('/add', async (req, res, next) => {
           next(err)
       }
   });
-  router.use('/:facilityId/fields', fieldsRouter);
-//   router.get('/:facilityId/fields', async (req,res, next)=>{
-//       try{
-//           let data = {
-//               user: req.user,
-//               page: 'teams/details',
-//               list: []
-//           }
-//         //   const result = await pool.request()
-//         //   .input('facilityId', sql.VarChar, req.params.facilityId)
-//         //   .query(`
-//         //       SELECT * 
-//         //       from dbo.facilities
-//         //       where facilityId = @facilityId
-//         //       `)        
-//         //   data.data = result.recordset[0]
-          
-//           res.render('fields.ejs',{data: data})
-//       }catch(err){
-//           next(err)
-//       }
-//   });
+  router.use('/:facilityId/fields', require('./fields'));
+
   router.get('/:facilityId', async (req,res, next)=>{
       try{
           let data = {

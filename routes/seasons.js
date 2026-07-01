@@ -40,6 +40,7 @@ router.post('/addSeason', async (req, res, next) => {
         next(err)
     }
   });
+router.use('/:seasonId/facilities', require('./fields'));
 router.post(['/:seasonId/registration'], async (req, res, next) => {
     let data = {
             body: req.body,
