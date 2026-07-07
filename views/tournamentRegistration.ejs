@@ -174,9 +174,16 @@
         <label for=""><b>Division:</b></label>
         <select name="division" id="" required>
             <option value="" disabled selected>Division</option>
-            <option value="upper">Upper</option>
-            <option value="lower">Lower</option>
-            <option value="either">Either</option>
+            <% if (data.tournament.organizationId == 1000000001) { %>
+                <option value="mens">Men's</option>
+                <option value="womens">Women's</option>
+
+            <% }else{ %>
+                <option value="upper">Upper</option>
+                <option value="lower">Lower</option>
+                <option value="either">Either</option>
+            <%} %>
+            
         </select>
 
         <br><br>
