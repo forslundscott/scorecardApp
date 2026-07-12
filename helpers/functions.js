@@ -559,6 +559,7 @@ async function newRegistrationEmail(sessionId){
                     , u.skill
                     , s.seasonName
                     , sr.teamPreference
+                    ,u.gender
                      from seasonRegistration_leagueTeam as sr
                     left join seasons as s on sr.seasonId=s.seasonId
                     left join users as u on sr.userId=u.ID
@@ -577,6 +578,7 @@ async function newRegistrationEmail(sessionId){
                         <td>${registration.teamShortName}</td>
                         <td>${registration.division}</td>
                         <td>${registration.keeper}</td>
+                        <td>${registration.gender}</td>
                         <td>${registration.shirtSize}</td>
                         <td>${registration.skill}</td>
                         <td>${registration.teamPreference}</td>
@@ -636,6 +638,7 @@ async function newRegistrationEmail(sessionId){
                     <td>Team</td>
                     <td>Division</td>
                     <td>Keeper?</td>
+                    <td>Gender</td>
                     <td>Shirt Size</td>
                     <td>Experience</td>
                     <td>Team Preferences</td>
