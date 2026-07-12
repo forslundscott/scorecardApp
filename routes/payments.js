@@ -348,11 +348,13 @@ router.get('/success', async (req,res, next)=>{
                     .input('test', sql.Bit, !session.livemode)
                     .input('paid', sql.Bit, 1)
                     .input('shirtSize', sql.VarChar(10), String(session.metadata.shirtSize))
+                    .input('teamPreference', sql.VarChar, session.metadata.teamPreference)
                     .query(`
-                        INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize)
-                        VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
+                        INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize,teamPreference)
+                        VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize,@teamPreference)
                     `);
-                if (item.teamId !== 1000000069){
+                    console.log(item.teamId)
+                if (item.teamId != 1000000069){
                     console.log('should have worked')
                     await pool.request()
                         

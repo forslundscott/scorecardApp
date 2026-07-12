@@ -479,7 +479,8 @@ async function newRegistrationEmail(sessionId){
                  , t.shortName as team
                  , sr.registrationId
                  , sr.transactionId
-                 , sr.gateway from seasonRegistrations as sr
+                 , sr.gateway 
+                 from seasonRegistrations as sr
                 left join users as u on sr.userId=u.ID
                 left join teams as t on sr.teamId=t.teamId
                 left join leagues as l on sr.leagueId=l.leagueId
@@ -557,6 +558,7 @@ async function newRegistrationEmail(sessionId){
                     , sr.registrationId
                     , u.skill
                     , s.seasonName
+                    , sr.teamPreference
                      from seasonRegistration_leagueTeam as sr
                     left join seasons as s on sr.seasonId=s.seasonId
                     left join users as u on sr.userId=u.ID
@@ -577,7 +579,9 @@ async function newRegistrationEmail(sessionId){
                         <td>${registration.keeper}</td>
                         <td>${registration.shirtSize}</td>
                         <td>${registration.skill}</td>
+                        <td>${registration.teamPreference}</td>
                         <td>${registration.registrationId}</td>
+                        
                     </tr>`
                 }
             let htmlBody = `
@@ -634,6 +638,7 @@ async function newRegistrationEmail(sessionId){
                     <td>Keeper?</td>
                     <td>Shirt Size</td>
                     <td>Experience</td>
+                    <td>Team Preferences</td>
                     <td>Registration Id</td>
                 </thead>
                 <tbody>

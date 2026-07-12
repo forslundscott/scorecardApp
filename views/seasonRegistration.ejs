@@ -189,6 +189,11 @@
             </select>
         <br>
         <% } %>
+        <br>
+        <label for="teamPreference"><b>Preferred Teammate Names (optional): </b></label>
+            <br><br>
+            <textarea style="resize: vertical;" cols="40" rows="4" name="teamPreference" id="teamPreference" placeholder="Free Agents please indicate preferred teammate names or team names if not listed in leagues above."></textarea>
+            <br>
         <% if (data.leaguesAlreadyRegistered.length !== 0) { %>
             <br>
             <label for=""><b>Already Registered:</b></label>

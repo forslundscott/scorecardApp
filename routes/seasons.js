@@ -370,6 +370,13 @@ router.get(['/:seasonId/registration'],checkAuthenticated, async (req, res, next
             left join leagues as l 
                 on ls.leagueId = l.leagueId
             where ls.seasonId = @seasonId
+            AND NOT EXISTS (
+                SELECT 1
+                FROM user_team ut
+                WHERE ut.userId = @userId
+                  AND ut.seasonId = ls.seasonId
+                  AND ut.leagueId = ls.leagueId
+          )
             order by l.dayOfWeek
             
             select * from seasons
