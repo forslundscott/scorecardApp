@@ -294,8 +294,7 @@ router.get('/success', async (req,res, next)=>{
             path: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
             user: req.user
         }
-    let transaction
-    let isTransactionActive = false
+    
   try{
         // console.log(req.query.organizationId)
         // console.log(req.query.organizationId == 1000000001)
@@ -308,20 +307,16 @@ router.get('/success', async (req,res, next)=>{
       // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId)
       // console.log(session)
       if (session.metadata.type === 'individualSeasonCheckout') {
-              console.log('indiv')
+
 
             data.metadata = session.metadata
 
             let leaguesTeams = JSON.parse(session.metadata.leaguesTeams);
-        console.log('session')
-        transaction = new sql.Transaction(pool);
-        console.log('trans')
+
         data.leaguesTeams = leaguesTeams
-            // Begin the transaction
-            await transaction.begin();
-          console.log(session.id)
-            isTransactionActive = true
-        const result = await new sql.Request(transaction)
+            
+
+        const result = await pool.request()
                 .input('seasonId', sql.Int, session.metadata.seasonId)
                 .input('userId', sql.Int, req.user.id)
                 .input('registrationTime', sql.BigInt, Date.now())
@@ -342,7 +337,7 @@ router.get('/success', async (req,res, next)=>{
                   console.log('first')
 
             for (const item of leaguesTeams) {
-                await new sql.Request(transaction)
+                await pool.request()
                     .input('registrationId', sql.Int, registrationId)
                     .input('userId', sql.Int, req.user.id)
                     .input('leagueId', sql.VarChar, item.leagueId)
@@ -357,10 +352,24 @@ router.get('/success', async (req,res, next)=>{
                         INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize)
                         VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
                     `);
+                if (item.teamId !== 1000000069){
+                    console.log('should have worked')
+                    await pool.request()
+                        
+                        .input('userId', sql.Int, req.user.id)
+                        .input('leagueId', sql.VarChar, item.leagueId)
+                        .input('teamId', sql.VarChar, item.teamId)
+                        .input('seasonId', sql.Int, session.metadata.seasonId)
+                        .input('test', sql.Bit, !session.livemode)
+                        .query(`
+                            INSERT INTO user_team (leagueId, teamId, userId, seasonId, test)
+                            VALUES (@leagueId, @teamId, @userId, @seasonId, @test)
+                        `)
+                }
             }
             console.log('second')
             if(session.metadata.waiverPaid){
-              await new sql.Request(transaction)
+              await pool.request()
                     .input('waiverPayDate', sql.BigInt, Date.now())
                     .input('userId', sql.Int, req.user.id)
                     .query(`
@@ -370,8 +379,7 @@ router.get('/success', async (req,res, next)=>{
                       `)
             }
 
-            await transaction.commit()
-            isTransactionActive = false
+            
             functions.newRegistrationEmail(session.id)
       }else if (session.metadata.type === 'teamSeasonCheckout') {
         console.log('team')
@@ -402,12 +410,8 @@ router.get('/success', async (req,res, next)=>{
             
             `)
         functions.assignTeam(parseInt(session.metadata.seasonId),parseInt(session.metadata.leagueId),parseInt(session.metadata.teamId))
-        transaction = new sql.Transaction(pool);
-        
-            // Begin the transaction
-            await transaction.begin();
-            isTransactionActive = true
-        const result = await new sql.Request(transaction)
+
+        const result = await pool.request()
                 .input('seasonId', sql.Int, session.metadata.seasonId)
                 .input('userId', sql.Int, req.user.id)
                 .input('registrationTime', sql.BigInt, Date.now())
@@ -473,7 +477,7 @@ router.get('/success', async (req,res, next)=>{
           if(session.metadata.teamPayType === 'team'){
               for (const item of session.metadata.rosterUserId.split(', ')) {
                 console.log(item)
-                  await new sql.Request(transaction)
+                  await pool.request()
                       .input('registrationId', sql.Int, registrationId)
                       .input('userId', sql.Int, item)
                       .input('leagueId', sql.VarChar, session.metadata.leagueId)
@@ -489,7 +493,7 @@ router.get('/success', async (req,res, next)=>{
                           VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
                       `);
                   if(session.metadata.waiverPaid){
-                    await new sql.Request(transaction)
+                    await pool.request()
                           .input('waiverPayDate', sql.BigInt, Date.now())
                           .input('userId', sql.Int, item)
                           .query(`
@@ -500,7 +504,7 @@ router.get('/success', async (req,res, next)=>{
                   }
               }
           }else{
-            await new sql.Request(transaction)
+            await pool.request()
                       .input('registrationId', sql.Int, registrationId)
                       .input('userId', sql.Int, req.user.id)
                       .input('leagueId', sql.VarChar, session.metadata.leagueId)
@@ -516,7 +520,7 @@ router.get('/success', async (req,res, next)=>{
                           VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
                       `);
               if(session.metadata.waiverPaid){
-                await new sql.Request(transaction)
+                await pool.request()
                       .input('waiverPayDate', sql.BigInt, Date.now())
                       .input('userId', sql.Int, req.user.id)
                       .query(`
@@ -528,20 +532,13 @@ router.get('/success', async (req,res, next)=>{
           }
             
 
-            await transaction.commit()
             
-            isTransactionActive = false
             functions.newRegistrationEmail(session.id)
       }else if (session.metadata.type === 'teamTournamentCheckout') {
-        console.log('team')
-        console.log(session.metadata)
+
         
 
-        // transaction = new sql.Transaction(pool);
-        
-            // Begin the transaction
-            // await transaction.begin();
-            // isTransactionActive = true
+
         const result = await pool.request()
                 .input('tournamentId', sql.Int, session.metadata.tournamentId)
                 .input('userId', sql.Int, req.user.id)
@@ -607,64 +604,11 @@ router.get('/success', async (req,res, next)=>{
 
          functions.newTournamentRegistrationEmail(session.id,req.query.organizationId)
       }
-        // fetch(`${req.protocol}://${req.get('host')}/seasons/${session.metadata.seasonId}/registration`, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        //   body: new URLSearchParams({ sessionId: req.query.sessionId }).toString(),
-        // })
-        //   .then(response => response.json())
-        //   .then(data => {
-        //     console.log('Payment processed successfully:', data);
-        //   })
-        //   .catch(error => {
-        //     console.error('Error processing payment:', error);
-        //   });
 
-
-
-
-        // this is all for pickup. Move to another route
-        // const session = await stripe.checkout.sessions.retrieve(req.query.sessionId);
-        // console.log(session)
-        // const hoursArray = Array.isArray(session.metadata.hours) ? session.metadata.hours : [session.metadata.hours];
-        // const hoursString = hoursArray.join(',');
-        // const request = pool.request()        
-        // let result = await request.query(`
-        //     INSERT into pickupAttendees (userId,pickupId,transactionId)
-        //     select '${session.metadata.userId}' as userId,
-        //     id as pickupId,
-        //     '${session.payment_intent}' as transactionId
-        //     from pickupEvents
-        //     where date = ${session.metadata.date} and time in (${hoursString})
-        //     AND NOT EXISTS (
-        //         SELECT 1
-        //         FROM pickupAttendees
-        //         WHERE userId = '${session.metadata.userId}' AND pickupId = pickupEvents.id
-        //     )
-        //     `)
-        //     result = await request.query(`
-        //         select e.*, (select count(a.userId) 
-        //         from pickupAttendees as a
-        //         where e.id=a.pickupId) attendeeCount 
-        //         from pickupEvents as e
-        //         where [date] = ${session.metadata.date}
-        //         and time in (${hoursString})
-        //         and (select count(a.userId) 
-        //         from pickupAttendees as a
-        //         where e.id=a.pickupId) = totalSlots
-        //     `)
-        //     await fullEmail(result.recordset)
-            
-        // console.log(result.recordset)
-        // functions.newRegistrationEmail(session.id)
         res.render('paymentSuccess.ejs');
         
     }catch(err){
-      console.log(isTransactionActive)
-      if (isTransactionActive) {
-        await transaction.rollback();
-      }
-      functions.rollBackTeam()
+      
         console.log(err)
         res.render('paymentSuccess.ejs');
     }

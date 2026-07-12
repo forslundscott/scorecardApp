@@ -76,11 +76,10 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
             }
         }
     });
-    const transaction = new sql.Transaction(pool);
+
     data.leaguesTeams = leaguesTeams
-        // Begin the transaction
-        await transaction.begin();
-    const result = await new sql.Request(transaction)
+
+    const result = await pool.request()
             .input('seasonId', sql.Int, req.params.seasonId)
             .input('userId', sql.Int, req.user.id)
             .input('registrationTime', sql.BigInt, Date.now())
@@ -99,7 +98,7 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
 
 
         for (const item of leaguesTeams) {
-            await new sql.Request(transaction)
+            await pool.request()
                 .input('registrationId', sql.Int, registrationId)
                 .input('userId', sql.Int, req.user.id)
                 .input('leagueId', sql.VarChar, item.leagueId)
@@ -110,10 +109,12 @@ router.post(['/:seasonId/registration'], async (req, res, next) => {
                     INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test)
                     VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test)
                 `);
+               
+            
         }
 
 
-        await transaction.commit()
+
         
         res.redirect(`/seasons/${req.params.seasonId}/registration`);
     }catch(err){
