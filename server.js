@@ -130,6 +130,7 @@ app.use("/mailchimp", require("./routes/mailchimp"));
 const functions = require('./helpers/functions');
 
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('./middleware/authMiddleware')
+const { render } = require('ejs')
 app.locals.functions = functions
 
 app.post('/log-client-error', express.json(), (req, res) => {
@@ -296,9 +297,12 @@ app.get(['/subwaiver'],checkAuthenticated, async (req,res)=>{
 })
 app.get(['/test'], async (req,res)=>{
     try{
-        // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)
-        const session = await stripe.checkout.sessions.retrieve('cs_live_b1UJPNpDBVP05Lo5SM1GpPGKIloKd46jUdVDBfqczLmDAWTFjvD0Hys1NW')
-        console.log(session)
+
+        res.render('testPage.ejs')
+
+        // // functions.sendEmail('test','', 'Glos No Reply', 'Password Reset Test',process.env.NO_REPLY_EMAIL,process.env.NO_REPLY_EMAIL_PASSWORD)
+        // const session = await stripe.checkout.sessions.retrieve('cs_live_b1UJPNpDBVP05Lo5SM1GpPGKIloKd46jUdVDBfqczLmDAWTFjvD0Hys1NW')
+        // console.log(session)
         // (async () => {
 //   try {
 //     const afterDate = new Date('2025-09-28'); // adjust your date
@@ -377,7 +381,7 @@ app.get(['/test'], async (req,res)=>{
         //     }
         //     console.log(lineItems)
         // console.log(req.user)
-        res.send('<p>test</p>');      
+        // res.send('<p>test</p>');      
         
     }catch(err){
         console.error('Error:', err)

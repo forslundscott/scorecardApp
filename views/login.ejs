@@ -36,6 +36,7 @@
     </head>    
         <body>
             <form id="loginForm" class=" primaryStyle" action="/auth/login" method="post" style="text-align: center; ">
+                <input type="hidden" name="return" value="<%= returnUrl %>">
                     <div class="playerName" style="font-size: 350%; margin-top: 1vh; margin-bottom: 1vh;">
                         Login
                     </div>

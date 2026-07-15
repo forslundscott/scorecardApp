@@ -15,11 +15,11 @@ router.get(['/login'], checkNotAuthenticated, async (req,res)=>{
         let data = {
             host: req.headers.host
         }
-        req.session.returnTo = req.query.return || req.originalUrl || '/'
+        const returnUrl = req.query.return || req.originalUrl || '/'
         let message = req.flash().message
         
-        // console.log(req.flash())
-        res.render('login.ejs', {messages: {message},data: data})
+        console.log(req.session.returnTo)
+        res.render('login.ejs', {messages: {message},data: data,returnUrl})
     }catch(err){
         console.error('Error:', err)
     }    
@@ -36,11 +36,11 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
             return res.redirect(info.redirect || '/auth/login')
             // return res.render(info.redirect || 'login.ejs', {messages: info, data}) 
         }
-
+        console.log(req.session.returnTo)
         // const redirectUrl = req.session.returnTo || '/';
         req.logIn(user, (err) => {
             if (err) return next(err);
-            const redirectUrl = req.session.returnTo || '/';
+            const redirectUrl = req.body.return || req.session.returnTo || '/';
             delete req.session.returnTo;
             return res.redirect(redirectUrl);
         });
