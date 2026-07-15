@@ -13,7 +13,7 @@ router.get('/site/playerportal', checkAuthenticated, async (req,res, next)=>{
         next(err)
     }
 });
-router.get('/site/playerportalnew', checkAuthenticated, async (req,res, next)=>{
+router.get('/site/playerportalnew', async (req,res, next)=>{
     if (!req.isAuthenticated()) {
         return res.status(401).json({ authenticated: false });
     }
