@@ -5,7 +5,6 @@ const sql = require('mssql');
 const functions = require('../helpers/functions')
 const { checkAuthenticated, checkNotAuthenticated, authRole } = require('../middleware/authMiddleware')
 
-
 router.get('/site/playerportal', checkAuthenticated, async (req,res, next)=>{
     try{
         
@@ -13,6 +12,23 @@ router.get('/site/playerportal', checkAuthenticated, async (req,res, next)=>{
     }catch(err){
         next(err)
     }
+});
+router.get('/site/playerportalnew', checkAuthenticated, async (req,res, next)=>{
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ authenticated: false });
+    }
+
+    res.json({
+        user: req.user
+    });
+    // try{
+
+
+    //     // req.session.returnTo = req.query.return
+    //     // res.redirect('https://glosoccer.com/playerportal')
+    // }catch(err){
+    //     next(err)
+    // }
 });
 router.post('/userSearch', async (req, res) => {
     const query  = req.body.userSearchValue;
