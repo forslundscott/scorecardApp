@@ -22,12 +22,27 @@
           <button type="submit" class="navButton">Log In</button>
         </form>
       <% } else { %>
-        <form action="/auth/logout?_method=DELETE" method="POST" class="navButton">
-          <button type="submit" class="navButton">Log Out</button>
+        <form action="/auth/logout" method="POST" class="navButton">
+          <button id="logoutBtn" type="button" class="navButton">Log Out</button>
         </form>
       <% } %>
           
       </div>
-    
+    <script>
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+
+          const response = await fetch(
+              '/auth/logout',
+              {
+                  method: 'POST',
+                  credentials: 'include'
+              }
+          );
+
+          if (response.ok) {
+              window.location.reload();
+          }
+      });
+    </script>
   </footer>
 </html>

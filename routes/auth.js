@@ -51,22 +51,24 @@ router.post(['/login'], function(req, res, next) { passport.authenticate('local'
 })(req, res, next)
 })
 
-router.delete('/logout', (req,res) => {
-    try{
-        req.logout(function(err) {
-            if (err) { return next(err); }
-            res.redirect(req.get('Referer') || '/');
-        });
-        // if(req.session){
-        //     if(req.session.passport){
-        //         delete req.session.passport
-        //         res.redirect(req.get('Referer') || '/');
+router.post('/logout', (req,res) => {
+    req.logout(function(err) {
+        if (err) {
+            return next(err);
+        }
 
-        //     }
-        // }
-    }catch(err){
-        console.error('Error:', err)
-    }    
+        req.session.destroy(function(err) {
+            if (err) {
+                return next(err);
+            }
+
+            res.clearCookie('connect.sid');
+
+            res.json({
+                success: true
+            });
+        });
+    });
 })
 router.get(['/createProfile'], async (req,res)=>{
     try{

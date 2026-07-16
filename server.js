@@ -20,7 +20,7 @@ app.set('trust proxy', 'loopback');
 
 
 const corsOptions = {
-  origin: ['http://app.localhost.com:3000','http://localhost.com:3000', 'https://forslundhome.duckdns.org','https://glosoccer.com'], // Allow the app subdomain
+  origin: ['http://app.localhost.com:3000','http://localhost.com:3000', 'https://forslundhome.duckdns.org','https://glosoccer.com','https://app.glosoccer.com'], // Allow the app subdomain
   methods: ['GET', 'POST', 'OPTIONS'], // List allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
   credentials: true, // Allow credentials if needed
