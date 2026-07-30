@@ -349,6 +349,43 @@ router.post(['/eventLog'], async (req,res,next)=>{
              .input('teamName',sql.VarChar, req.body.teamName)
              .query(`update scorecard.dbo.teams set keeper = @playerId where teamId = @teamName`)            
              res.json({ message: 'Reload', data: data })
+        }else if(req.body.type == 'removeplayer'){
+             result = await pool.request()
+             .input('eventId', sql.Int, req.body.Event_ID)
+             .query(`
+                select * 
+                from games
+                where Event_ID = @eventId
+                `)
+            await pool.request()
+             .input('seasonId', sql.Int, result.recordset[0].season)
+            //  .input('leagueId', sql.Int, result.recordset[0].leagueId) // add later after leagueId issue is fixed in user_team
+             .input('teamId', sql.Int, req.body.teamName)
+             .input('userId', sql.Int, req.body.playerId)
+             .query(`
+                DELETE FROM user_team
+                    WHERE seasonId = @seasonId
+                    AND teamId = @teamId
+                    AND userId = @userId;
+
+                    INSERT INTO subTeamGame (userId, teamId, eventId)
+                    SELECT DISTINCT
+                        e.playerId,
+                        e.teamName,
+                        e.Event_ID
+                    FROM eventLog e
+                    WHERE e.playerId = @userId
+                    AND e.teamName = @teamId
+                    AND e.season = @seasonId
+                    AND NOT EXISTS (
+                            SELECT 1
+                            FROM subTeamGame s
+                            WHERE s.userId = e.playerId
+                            AND s.teamId = e.teamName
+                            AND s.eventId = e.Event_ID
+                    );
+                `)
+             res.json({ message: 'Reload', data: data })
          }else{
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
