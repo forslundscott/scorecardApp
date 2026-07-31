@@ -362,12 +362,16 @@ router.post(['/eventLog'], async (req,res,next)=>{
             //  .input('leagueId', sql.Int, result.recordset[0].leagueId) // add later after leagueId issue is fixed in user_team
              .input('teamId', sql.Int, req.body.teamName)
              .input('userId', sql.Int, req.body.playerId)
+             .input('eventId', sql.Int, req.body.Event_ID)
              .query(`
                 DELETE FROM user_team
                     WHERE seasonId = @seasonId
                     AND teamId = @teamId
                     AND userId = @userId;
-
+                DELETE FROM subTeamGame
+                    WHERE eventId = @eventId
+                    AND teamId = @teamId
+                    AND userId = @userId;
                     INSERT INTO subTeamGame (userId, teamId, eventId)
                     SELECT DISTINCT
                         e.playerId,
