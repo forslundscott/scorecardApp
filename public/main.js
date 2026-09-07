@@ -471,6 +471,7 @@ async function toggleGameInfoForm(xform){
                 let monitorSelect = document.getElementById('gameInfoForm').querySelector('[name="monitorId"]')
                 let ref1Select = document.getElementById('gameInfoForm').querySelector('[name="ref1Id"]')
                 let ref2Select = document.getElementById('gameInfoForm').querySelector('[name="ref2Id"]')
+                let forfeitSelect = document.getElementById('gameInfoForm').querySelector('[name="forfeitTeamId"]')
                 document.getElementById('gameInfoForm').querySelector('[name="period"]').value=responseData.data.game.period
                 console.log(responseData.data.game.startUnixTime)
                 const dateObj = new Date(Number(responseData.data.game.startUnixTime))
@@ -506,7 +507,11 @@ async function toggleGameInfoForm(xform){
                 while (ref2Select.options.length > 1) {
                     ref2Select.remove(1);
                 }
-                // console.log(responseData.data)
+                console.log(forfeitSelect.options.length)
+                while (forfeitSelect.options.length > 1) {
+                    forfeitSelect.remove(1);
+                }
+                console.log('test 1')
                 responseData.data.teams.forEach(function(xoption) {
                     console.log(xoption.teamId)
                     let option = document.createElement("option");
@@ -517,6 +522,12 @@ async function toggleGameInfoForm(xform){
                     option.text = xoption.abbreviation;
                     option.value = xoption.teamId;
                     team2Select.add(option);
+                    if(xoption.teamId == responseData.data.game.Team1_ID || xoption.teamId == responseData.data.game.Team2_ID){
+                        option = document.createElement("option");
+                        option.text = xoption.abbreviation;
+                        option.value = xoption.teamId;
+                        forfeitSelect.add(option);
+                    }
                   })
                   responseData.data.scoreKeepers.forEach(function(xoption) {
                     let option = document.createElement("option");
@@ -540,14 +551,11 @@ async function toggleGameInfoForm(xform){
                     option.value = xoption.userId;
                     ref2Select.add(option);
                   })
-                //   responseData.data.referees.forEach(function(xoption) {
-                //     let option = document.createElement("option");
-                //     option.text = `${xoption.firstName} ${xoption.lastName} ${xoption.preferredName !== xoption.firstName ? '(' + xoption.preferredName + ')': ''}`;
-                //     option.value = xoption.userId;
-                //     ref2Select.add(option);
-                //   })
+                  
                   team1Select.value = responseData.data.game.Team1_ID
                   team2Select.value = responseData.data.game.Team2_ID
+                //   console.log(responseData.data.game.forfeitTeamId)
+                  forfeitSelect.value = responseData.data.game.forfeitTeamId
                   if(responseData.data.game.scoreKeeperId !== null){
                     scoreKeeperSelect.value = responseData.data.game.scoreKeeperId
                   }
@@ -567,6 +575,7 @@ async function toggleGameInfoForm(xform){
              }else{
                 document.getElementById('gameInfoForm').style.display = 'none'
             }
+            console.log(document.getElementById('formBackground').style.display)
             if(document.getElementById('formBackground').style.display == 'none'){
                 document.getElementById('formBackground').style.display = ''
             }else{

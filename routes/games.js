@@ -24,6 +24,7 @@ router.post('/updateGameInfo', async (req, res, next) => {
             .input('startTime',sql.VarChar,formData.startTime)
             .input('court',sql.VarChar,formData.court)
             .input('eventId', sql.Int, formData.Event_ID)
+            .input('forfeitTeamId', sql.Int, formData.forfeitTeamId)
             .query(`
             update games
             set Team1_ID = @team1Id,
@@ -34,10 +35,42 @@ router.post('/updateGameInfo', async (req, res, next) => {
             referee2Id = @referee2Id,
             period = @period,
             Location = @court,
-            startUnixTime = cast(datediff(second, '1/1/1970',convert(datetime, @startDate + ' ' + @startTime) at time zone + 'Eastern Standard Time') as bigint)*1000
+            startUnixTime = cast(datediff(second, '1/1/1970',convert(datetime, @startDate + ' ' + @startTime) at time zone + 'Eastern Standard Time') as bigint)*1000,
+            forfeitTeamId = @forfeitTeamId
             where Event_ID = @eventId
             `)
-            if(formData.gameCancel){
+            if(formData.gameSubmit){
+                await pool.request()
+                .input('eventId', sql.Int, formData.Event_ID)
+                .query(`
+                DECLARE @teamName NVARCHAR(255)
+                UPDATE games
+                SET status = 1
+                WHERE event_id = @eventId
+                AND status = 0;
+                IF EXISTS (
+                    SELECT 1
+                    FROM games
+                    WHERE event_id = @eventId
+                    AND status in (1,2)
+                )
+                BEGIN
+                    EXEC recordTeamResults @eventId
+                    EXEC updateGameResults @eventId
+                    IF EXISTS (
+                        SELECT 1 FROM winningTeam(@eventId)
+                    )
+                    BEGIN
+                        SELECT @teamName = teamName FROM winningTeam(@eventId)
+                        INSERT INTO winners (TeamId, fullName, shortName, color, captain, player, email, Event_ID, paid)
+                        SELECT TOP 1 Teamid, fullName, shortName, color, captain, player, email, @eventId, 'false'
+                        FROM winningTeamContact(@teamName)
+                        WHERE giftCards = 1
+                    END
+                END
+                `)
+                res.redirect(302,'/games')
+            }else if(formData.gameCancel){
                 await pool.request()
                 .input('eventId', sql.Int, formData.Event_ID)
                 .query(`
