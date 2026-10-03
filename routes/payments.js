@@ -349,9 +349,10 @@ router.get('/success', async (req,res, next)=>{
                     .input('paid', sql.Bit, 1)
                     .input('shirtSize', sql.VarChar(10), String(session.metadata.shirtSize))
                     .input('teamPreference', sql.VarChar, session.metadata.teamPreference)
+                    .input('amountPaid', sql.Int, item.amountPaid)
                     .query(`
-                        INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize,teamPreference)
-                        VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize,@teamPreference)
+                        INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize,teamPreference,amountPaid)
+                        VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize,@teamPreference,@amountPaid)
                     `);
                     console.log(item.teamId)
                 if (item.teamId != 1000000069){
@@ -477,8 +478,9 @@ router.get('/success', async (req,res, next)=>{
             console.log('Registration inserted, registrationId:', registrationId);
 
           if(session.metadata.teamPayType === 'team'){
+            console.log(session.metadata.amountPaid)
               for (const item of session.metadata.rosterUserId.split(', ')) {
-                console.log(item)
+                console.log(Number(session.metadata.captainId) == Number(item))
                   await pool.request()
                       .input('registrationId', sql.Int, registrationId)
                       .input('userId', sql.Int, item)
@@ -490,9 +492,10 @@ router.get('/success', async (req,res, next)=>{
                       .input('test', sql.Bit, !session.livemode)
                       .input('paid', sql.Bit, 1)
                       .input('shirtSize', sql.VarChar(10), JSON.parse(session.metadata.shirtSizes)[String(item)])
+                      .input('amountPaid', sql.Int, Number(session.metadata.captainId) == Number(item) ? session.metadata.amountPaid: 0)
                       .query(`
-                          INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize)
-                          VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
+                          INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize, amountPaid)
+                          VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize, @amountPaid)
                       `);
                   if(session.metadata.waiverPaid){
                     await pool.request()
@@ -517,9 +520,10 @@ router.get('/success', async (req,res, next)=>{
                       .input('test', sql.Bit, !session.livemode)
                       .input('paid', sql.Bit, 1)
                       .input('shirtSize', sql.VarChar(10), String(session.metadata.shirtSize))
+                      .input('amountPaid', sql.Int, session.metadata.amountPaid)
                       .query(`
-                          INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize)
-                          VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize)
+                          INSERT INTO seasonRegistration_leagueTeam (registrationId, leagueId, teamId, userId, seasonId, test, division, keeper, paid, shirtSize, amountPaid)
+                          VALUES (@registrationId, @leagueId, @teamId, @userId, @seasonId, @test, @division, @keeper, @paid, @shirtSize, @amountPaid)
                       `);
               if(session.metadata.waiverPaid){
                 await pool.request()
@@ -954,7 +958,10 @@ console.log(season.seasonName)
     },
     quantity: 1,
   }]
+
+
   let totalPrice = Price
+  transformedBody.amountPaid = Price
   result = await pool.request()
     .input('leagueId',sql.Int,req.body.leagueId)
     .query(`
@@ -1297,6 +1304,7 @@ router.post('/individualSeasonCheckoutSession', upload.fields([
           }
         )
         totalPrice = totalPrice + Price
+        league.amountPaid = Price
         // console.log(`Referee Fees - ${result.recordset[0].shortName} - Individual`)
         if(season.refFeesIndividual > 50){
           totalPrice = totalPrice + season.refFeesIndividual
@@ -1360,7 +1368,7 @@ router.post('/individualSeasonCheckoutSession', upload.fields([
     }
     metadata.quantity = leaguesTeams.length
     metadata.leaguesTeams = JSON.stringify(leaguesTeams)
-    console.log(req.get('Referer'))
+    console.log(metadata)
       
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)
