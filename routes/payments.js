@@ -900,7 +900,7 @@ router.post('/teamSeasonCheckoutSession', upload.single('teamLogo'), async (req,
   if (req.body.teamPayType === 'team') {
       nickname = 'Team';
       productName = 'Team';
-      Price = season.teamRegularPrice;
+      Price = req.body.deposit === 'true'? season.teamDeposit : season.teamRegularPrice;
 
       
 
@@ -1105,6 +1105,7 @@ console.log(season.seasonName)
           ,waiverPaid: waiverPay
         }
       }
+      metadata.deposit = req.body.deposit
       metadata.quantity = 1
       await functions.addUserToDatabase(req.body);
       const user = await functions.getUser(req.body)

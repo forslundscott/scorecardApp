@@ -184,34 +184,74 @@ async function pngUpload (fileBuffer, filename, outputDir) {
     fs.writeFileSync(outputPath, processedImage, { mode: 0o644 });
     return outputPath //for debugging
 }
-async function createCheckoutSession({ metadata },discount) {
+async function getOrCreateStripeCustomer(stripeClient, email, userId = null) {
+    // Look for an existing Stripe customer
+    const customers = await stripeClient.customers.list({
+        email: email,
+        limit: 1
+    });
+
+    // Customer already exists
+    if (customers.data.length > 0) {
+        return customers.data[0].id;
+    }
+
+    // No customer exists, create one
+    const customer = await stripeClient.customers.create({
+        email: email,
+        metadata: userId ? {
+            userId: String(userId)
+        } : {}
+    });
+
+    return customer.id;
+}
+async function createCheckoutSession({ metadata }, discount) {
     try {
+        // Determine which Stripe account/client to use
+        // console.log(metadata)
+        const stripeClient =
+            metadata.metadata.organizationId == 1000000001
+                ? stripe1Gol
+                : stripe;
+        
+        // Get or create the Stripe Customer
+        const stripeCustomerId = await getOrCreateStripeCustomer(
+            stripeClient,
+            metadata.metadata.email,
+            metadata.metadata.userId
+        );
+        // console.log(stripeCustomerId)
         const sessionData = {
             line_items: metadata.lineItems,
-            customer_email: metadata.metadata.email,
+            customer: stripeCustomerId,
             mode: 'payment',
             metadata: metadata.metadata,
             success_url: metadata.success_url,
             cancel_url: metadata.cancel_url,
+
+            
         };
-    
+        console.log('sessionData')
+        if (metadata.deposit === 'true') {
+            sessionData.payment_intent_data = {
+                setup_future_usage: 'off_session'
+            };
+        }
+        console.log(sessionData)
         // Only add discounts if there's a valid value
         if (discount && discount.length > 0) {
             sessionData.discounts = [...discount];
         }
-        let session
-        if(metadata.metadata.organizationId == 1000000001){
-            session = await stripe1Gol.checkout.sessions.create(sessionData)
-        }else{
-            session = await stripe.checkout.sessions.create(sessionData);
-        }
-        
+
+        const session = await stripeClient.checkout.sessions.create(sessionData);
+
         return session;
+
     } catch (error) {
-        // failedQuery(metadata,error)
         throw new Error(error.message);
     }
-  }
+}
 async function failedQuery(data,errorMessage) {
     console.log('test')
     const filePath = path.join(process.cwd(), "failed_inserts.json");
@@ -876,4 +916,5 @@ module.exports = {
     ,getDayName
     ,waiverPaidEmail
     ,calculateSeasonPrice
+    ,getOrCreateStripeCustomer
 }
