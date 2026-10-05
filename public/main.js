@@ -462,6 +462,7 @@ async function toggleGameInfoForm(xform){
               },
             body: new URLSearchParams(formData).toString(),
           });
+          
           if (response.ok) {
             const responseData = await response.json();
             if(document.getElementById('gameInfoForm').style.display == 'none'){
