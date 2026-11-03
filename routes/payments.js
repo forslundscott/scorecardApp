@@ -394,12 +394,14 @@ router.get('/success', async (req,res, next)=>{
             .input('email', sql.VarChar, session.metadata.email)
             .input('teamId', sql.VarChar, session.metadata.teamId)
             .input('seasonId', sql.Int, session.metadata.seasonId)
+            .input('leagueId', sql.Int, session.metadata.leagueId)
             .query(`
             
             EXECUTE [dbo].[insert_userTeamSeason] 
                @email
               ,@teamId
               ,@seasonId
+              ,@leagueId
             `)
         await pool.request()
             .input('teamId', sql.VarChar, session.metadata.teamId)

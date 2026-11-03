@@ -111,12 +111,14 @@ router.post(['/addPlayer'], async (req,res,next)=>{
             .input('email', sql.VarChar, req.body.email)
             .input('teamId', sql.VarChar, req.body.teamId)
             .input('seasonId', sql.Int, req.body.seasonId)
+            .input('leagueId', sql.Int, req.body.leagueId)
             .query(`
             
             EXECUTE [dbo].[insert_userTeamSeason] 
                @email
               ,@teamId
               ,@seasonId
+              ,@leagueId
             `)
         }else{
              await pool.request()
@@ -374,11 +376,13 @@ router.post('/:teamId/roster/addPlayer', async (req,res, next)=>{
         .input('email', sql.VarChar, req.body.email)
         .input('teamId', sql.VarChar, req.body.teamId)
         .input('seasonId', sql.Int, req.body.seasonId)
+        .input('leagueId', sql.Int, req.body.leagueId)
         .query(`        
         EXECUTE [dbo].[insert_userTeamSeason] 
             @email
             ,@teamId
             ,@seasonId
+            ,@leagueId
         `)
         res.redirect(`/teams/${req.params.teamId}/roster`)
     }catch(err){
