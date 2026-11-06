@@ -16,6 +16,7 @@
             <input type="hidden" name="keeper" value="<%= team.keeper %>">
             <input type="hidden" name="opponentKeeper" value="<%= opponent.keeper %>">
             <input type="hidden" name="season" value="<%= data.game.season %>">
+            <input type="hidden" name="leagueId" value="<%= data.game.leagueId %>">
             <input type="hidden" name="subseason" value="<%= data.game.subseason %>">
             <input type="hidden" name="waiverSignNeeded" value="<%= Number(player.waiverDate) < functions.getWaiverResetDate() %>">
             <input type="hidden" name="waiverPayNeeded" value="<%= Number(player.waiverPayDate) < functions.getWaiverResetDate() %>">

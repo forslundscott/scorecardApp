@@ -641,6 +641,7 @@ function toggleEventForm(ele){
         document.getElementById('eventForm').querySelector('[name="opponentKeeper"]').value = xform.querySelector('[name="opponentKeeper"]').value
         document.getElementById('eventForm').querySelector('[name="keeper"]').value = xform.querySelector('[name="keeper"]').value
         document.getElementById('eventForm').querySelector('[name="season"]').value = xform.querySelector('[name="season"]').value
+        document.getElementById('eventForm').querySelector('[name="leagueId"]').value = xform.querySelector('[name="leagueId"]').value
         document.getElementById('eventForm').querySelector('[name="subseason"]').value = xform.querySelector('[name="subseason"]').value
     }else{
         document.getElementById('eventForm').style.display = 'none'

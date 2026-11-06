@@ -360,6 +360,7 @@ router.get(['/timer'], async (req,res,next)=>{
 })
 router.post(['/eventLog'], async (req,res,next)=>{
     try{ 
+        console.log('test1')
          let data = {
              page: req.route.path[0].replace('/',''),
              team1: {
@@ -424,6 +425,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
                 `)
              res.json({ message: 'Reload', data: data })
          }else{
+            console.log('test')
              await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
@@ -446,12 +448,16 @@ router.post(['/eventLog'], async (req,res,next)=>{
              @periodTime,@period,@value,
              @type,@eventId,@opponentKeeper,
              @season,@subseason)`)
-             
+             console.log(req.body.season)
+             console.log(req.body.Event_ID)
+             console.log(req.body.teamName)
+             console.log(req.body.playerId)
              result = await pool.request()
              .input('playerId', sql.Int, req.body.playerId)
              .input('teamName',sql.VarChar, req.body.teamName)
              .input('eventId', sql.Int, req.body.Event_ID)
              .input('seasonId',sql.VarChar,req.body.season)
+             .input('leagueId',sql.VarChar,req.body.leagueId)
              .query(`
              DECLARE @Team1_ID VARCHAR(255);
              DECLARE @Team2_ID VARCHAR(255)
@@ -465,7 +471,8 @@ router.post(['/eventLog'], async (req,res,next)=>{
              from scorecard.dbo.rosterGameStats(
                  @teamName,
                  @eventId,
-                 @seasonId
+                 @seasonId,
+                 @leagueId
                  ) 
              where userId = @playerId
              UNION ALL
@@ -476,8 +483,9 @@ router.post(['/eventLog'], async (req,res,next)=>{
              SELECT score,@Team2_ID as teamName from scorecard.dbo.teamScore(@Team2_ID,@eventId,@Team1_ID)
              `)
              try{
+                console.log('test')
                  data.player = result.recordsets[0][0]
-                 console.log(data.player)
+                 console.log(data.team1.team)
                  data.team1.team = result.recordsets[1][0].teamName
                  data.team2.team = result.recordsets[2][0].teamName
                  if(result.recordsets[1].length == 0){
@@ -491,6 +499,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
                      data.team2.score = result.recordsets[2][0].score
                  }
                  data.type = req.body.type
+                 console.log(data.type)
                  res.json({ message: 'Success', data: data })
              }catch(err){
                  console.log(err)
@@ -500,6 +509,7 @@ router.post(['/eventLog'], async (req,res,next)=>{
              }
          }
      }catch(err){
+        console.log('test')
          console.log(err)
          // next(err)
      }
